@@ -1,0 +1,40 @@
+{% load i18n pharma_tags %}
+
+<div class="col-7"> {{treatment.name}} </div>
+
+{%if pillbox|have_treatment:treatment%}
+    <div class="col-3"> <div class="form-check form-switch"> 
+        <input class="form-check-input ark_change" type="checkbox" id="treatment_{{treatment.id}}" data-url="{%url "spd-toggle-treatment"%}" 
+            data-target="row-{{treatment.id}}" data-pillbox_id="{{pillbox.id}}" data-treatment_id="{{treatment.id}}" checked/> 
+    </div> </div>
+    <div class="col-2"> <div class="form-check form-switch"> 
+        <input class="form-check-input ark_change" type="checkbox" id="treatment_blister_{{treatment.id}}" 
+            data-url="{%url "spd-toggle-treatment-blister"%}" data-target="row-{{treatment.id}}" data-pillbox_id="{{pillbox.id}}" 
+            data-treatment_id="{{treatment.id}}" {%if pillbox|have_treatment_in_blister:treatment%}checked{%endif%}/> 
+    </div> </div>
+{% else %}
+    <div class="col-2"> <div class="form-check form-switch"> 
+        <input class="form-check-input ark_change" type="checkbox" id="treatment_{{treatment.id}}" data-url="{%url "spd-toggle-treatment"%}" 
+            data-target="row-{{treatment.id}}" data-pillbox_id="{{pillbox.id}}" data-treatment_id="{{treatment.id}}"/> 
+    </div> </div>
+{% endif %}
+
+{%comment%}
+<div class="col-2"> 
+    <div class="form-check form-switch"> 
+        <input class="form-check-input ark_change" type="checkbox" id="treatment_{{treatment.id}}" data-url="{%url "spd-toggle-treatment"%}" 
+            data-target="row-{{treatment.id}}" data-pillbox_id="{{pillbox.id}}" data-treatment_id="{{treatment.id}}"
+            {%if pillbox|have_treatment:treatment%}checked{%endif%}/> 
+    </div>
+</div>
+<div class="col-2"> 
+    <div class="form-check form-switch"> 
+        {%if pillbox|have_treatment:treatment%}
+            <input class="form-check-input ark_change" type="checkbox" id="treatment_blister_{{treatment.id}}" 
+                data-url="{%url "spd-toggle-treatment-blister"%}" data-target="row-{{treatment.id}}" data-pillbox_id="{{pillbox.id}}" 
+                data-treatment_id="{{treatment.id}}" {%if pillbox|have_treatment_in_blister:treatment%}checked{%endif%}/> 
+        {% endif %}
+    </div>
+</div>
+{%endcomment%}
+

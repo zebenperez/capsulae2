@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{%comment%}
+{% block custom_menu %} {% include "patient/patient-menu.html" %} {% endblock custom_menu %}
+{% block central_content %} <div class="content"> {% include "patient/patient-form.html" %} </div> {% endblock central_content %}
+{%endcomment%}
+
+{% block central_content %} 
+    <div class="content"> {% include "patient/patient-form.html" %} </div>
+    <div class="tabs mt-3">
+        <div class="tab-item active ark" data-url="{% url "patient-treatment" %}" data-target="div-container" data-obj_id="{{obj.id}}"> 
+            <i class="fa fa-barcode"></i> <span class="hide-mobile"> {% trans "Tratamientos" %}</span></div>
+        <div class="tab-item ark" data-url="{% url "patient-allergy" %}" data-target="div-container" data-obj_id="{{obj.id}}">
+            <i class="fas fa-allergies"></i><span class="hide-mobile"> {% trans "Alergias" %}</span></div>
+        <div class="tab-item ark" data-url="{% url "patient-spd" %}" data-target="div-container" data-obj_id="{{obj.id}}">
+            <i class="fa fa-pills"></i><span class="hide-mobile"> {% trans "Pastilleros" %}</span></div>
+        <div class="tab-item ark" data-url="{% url "patient-lopd" %}" data-target="div-container" data-obj_id="{{obj.id}}">
+            <i class="fa fa-gavel"></i><span class="hide-mobile"> {% trans "LOPD" %}</span></div>
+    </div>
+
+    <div id="div-container">{% include "patient/treatments/treatment-list.html" %}</div>
+    
+    <script>
+        $(".tab-item").click(function(){
+            $(".tab-item").removeClass("active");
+            $(this).addClass("active");
+        });
+    </script>
+
+    <script>
+        function myFunction() {
+            var x = document.getElementById("hamb-menu");
+            if (x.style.display === "block") {
+                x.style.display = "none";
+            } else {
+                x.style.display = "block";
+            }
+        }
+    </script>
+
+{% endblock central_content %}

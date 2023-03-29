@@ -1,0 +1,47 @@
+{% load i18n %}
+
+{% comment %} nuevo  {% endcomment %}
+
+<div class="patient-form-container">
+
+    <div class="patient-profile-left">
+        <div class="img mb-2">
+            <img src="/static/imgs/no-avatar.png" class="patient-profile-img">
+        </div>
+        <span class="badge badge-success status-badge">Activo</span>                                                                                            
+    </div>
+
+    <div class="patient-profile-center">
+        {% block central_content %} <div class="content"> {% include "patient/patient-form.html" %} </div> {% endblock central_content %}
+    </div>
+
+</div>
+
+<div class="tabs mt-1">
+    <ul>
+        {% comment %} 
+        <li class="tab-item active ark" data-url="" data-target="manager-tabs-container">
+            <a href="{% url "patient-view" obj.id %}" class=""><i class="far fa-user"></i> <span class="hide-mv">{% trans "Personal info" %}</span></a></li>
+        {% endcomment %} 
+        <li class="tab-item active ark" data-url="" data-target="manager-tabs-container">
+            <a href="{% url "patient-treatment" obj.id %}"><i class="fa fa-barcode"></i><span class="hide-mv"> {% trans "Tratamientos" %}</span></a></li>
+        <li class="tab-item ark" data-url="" data-target="managier-tabs-container">
+            <a href="" class=""><i class="fas fa-allergies"></i><span class="hide-mv"> {% trans "Alergias" %}</span></a></li>
+        <li class="tab-item ark" data-url="" data-target="managier-tabs-container">
+            <a href="" class=""><i class="fa fa-pills"></i><span class="hide-mv"> {% trans "Pastilleros" %}</span></a></li>
+        <li class="tab-item ark" data-url="" data-target="managier-tabs-container">
+            <a href="" class=""><i class="fa fa-gavel"></i><span class="hide-mv"> {% trans "LOPD" %}</span></a></li>
+    </ul>
+</div>
+
+{% comment %} nuevo  {% endcomment %}
+
+<div class="top-menu">
+        <div class="btn menu-item"><a class="menu-link" href="{% url "patient-view" obj.id %}"><i class="far fa-user"></i> {% trans "Personal info" %} </a></div>
+        <div class="btn menu-item"><a class="menu-link" href="{% url "patient-treatment" obj.id %}">
+            <i class="fa fa-barcode"></i> {% trans "Tratamientos" %} </a> </div>
+        <div class="btn menu-item"><a class="menu-link" href=""><i class="fas fa-allergies"></i> {% trans "Alergias" %} </a> </div> 
+        <div class="btn menu-item"><a class="menu-link" href=""><i class="fa fa-pills"></i> {% trans "Pastilleros" %} </a> </div>
+        <div class="btn menu-item"><a class="menu-link" href=""><i class="fa fa-gavel"></i> {% trans "LOPD" %} </a> </div>
+</div>
+

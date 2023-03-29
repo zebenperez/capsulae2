@@ -1,0 +1,19 @@
+{% load i18n %}
+
+<span id="div-notification"></span>
+
+<div id="patient-container">
+    <div class="row w-100 patient-data-body-2 p-1" style="margin:0;">
+        <div class="col-11 patient-data">
+            {% include "patient/patient-form-personal.html" %}
+            {% include "patient/patient-form-contact.html" %}
+            {% include "patient/patient-form-social.html" %}
+        </div>    
+        <div class="col-1 text-end">
+            <button id="btn-edit" class="btn btn-sm toggle-edit new" data-class-name="input" data-text="{%trans "Edit"%}" 
+                data-text-alt="{%trans "Hecho"%}">{%trans "Edit"%} </button>
+        </div>
+    </div>
+
+</div>
+

@@ -1,0 +1,38 @@
+{% if request.user.is_authenticated %}
+    <div id="main" class="" style="margin:0;padding:0;">
+        <div class="row header sticky-top" style="margin:0;">
+            <div class="col-lg-1 col-1 divbars-menu pt-3"><a href="#" class="menu-btn"><i class="fas fa-bars"></i></a></div>
+	    <div class="col-lg-2 col-4 divLogo text-left"><a href="{% url "pharma-index" %}"><img src="/static/imgs/logo-capsulae.png" width="100px"></a></div>
+            <div class="col-lg-9 col-7 divIcons justify-content-end">
+                <div class="pt-2">
+                {%comment%}
+                    <a data-bs-toggle="collapse" class="" href="#collapseNotifications" role="button" aria-expanded="false" aria-controls="collapseNotifications"><i class="far fa-bell"></i></a>	
+                    <div class="collapse" id="collapseNotifications">
+                        <div class="user-dropdown card card-body">
+                            <ul>
+                                <li>Notificacion 1</li>
+                                <li>Notificacion 1</li>
+                            </ul>
+                        </div>
+                    </div>
+                {%endcomment%}
+                </div>
+
+                <div class="pt-2">{#<a href="#"><i class="far fa-envelope"></i></a>#}</div>
+
+                <div class="pt-2">
+                    <div class="dropdown">
+                        <a class="dropdown-toggle" type="button" id="dropdownProfile" data-bs-toggle="dropdown" aria-expanded="false"></a>
+                        <div class="dropdown-menu user-dropdown" aria-labelledby="dropdownProfile">
+                        <ul>
+                            <li><a href="#"><i class="fas fa-user"></i> Mi perfil</a></li>
+                            <div class="dropdown-divider"></div>
+                            <li><a href="{% url 'auth_logout' %}"><i class="fas fa-power-off"></i> Salir</a></li>
+                        </ul>
+                        </div>
+                    </div>
+                </div>
+        </div>
+    </div>
+{% endif %}
+

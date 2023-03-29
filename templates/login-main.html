@@ -1,0 +1,92 @@
+{% load i18n static %}
+
+<div id="divLoginMain">
+    <div class="row">
+        <div class="col-12 text-center big-title mt-3">
+            Programa de gestión, formación y aprendizaje colaborativo <br>para la adecuación terapéutica y la seguridad del paciente 
+            con el uso del medicamento.
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-10 col-lg-5 offset-1">
+            <div class="leftSide p-3 mt-3">
+                <span style="font-size:18;font-weight:600;">¿Qué es Capsulae?</span><br><br>
+                Capsulae es una herramienta digital que ayuda a garantizar la seguridad del paciente con los medicamentos y la adecuación 
+                terapéutica, evitando interacciones con otros medicamentos y eventos adversos debidos a las diversas situaciones clínicas 
+                del paciente.<br><br>
+                Capsulae es un software de gestión clínica integral y de ayuda al profesional sanitario en la gestión de pacientes 
+                aumentando la seguridad mediante el estudio de alertas, de interacciones medicamento-medicamento, medicamento-situación 
+                clínica y mediante valoración de la adecuación terapéutica del tratamiento farmacológico. Todo ello basado en la última 
+                evidencia científica, producto del conocimiento colaborativo y compartido de los usuarios de la herramienta.<br><br>
+                Capsulae es una herramienta gratuita, abierta y colaborativa utilizada en hospitales, centros de salud, farmacias y 
+                centros socio sanitarios que ofrece una ayuda imprescindible en el día a día para la mejora de la seguridad del paciente, 
+                fruto de más de 15 años de trabajo y de la colaboración de multitud de profesionales de todas las ramas sanitarias y no 
+                sanitarias.
+                <br><br>
+                Esta herramienta está destinada y accesible exclusivamente para profesionales sanitarios.
+            </div>
+        </div>
+
+        <div class="col-sm-10 offset-sm-1 col-lg-5 offset-lg-0">
+            <div class="rightSide p-3 mt-3">
+                <div id="divRegister_form">
+                    <h1 class="login">Regístrate ahora</h1>
+                    {#<form action="/pharma/signup/" method="post" enctype="multipart/form-data" name="frmRegister" id="frmRegister">#}
+                    <form action="" method="post" enctype="multipart/form-data" name="frmRegister" id="frmRegister" class="p-3">
+                        {% csrf_token %}
+                        <div class="form-group col-12">
+                            <label for="name">Nombre AUX</label>
+                            <input name="name" type="text" required value="" id="name" class="form-control"/>
+                        </div>
+                        <div class="form-group col-sm-6 col-lg-12">
+                            <label for="cif">CIF/NIF</label>
+                            <input name="cif" type="text" value="" id="cif" class="form-control"/>
+                        </div>
+                        <div class="form-group col-sm-12 col-lg-6">
+                            <label for="phone">Tel&eacute;fono</label>
+                            <input name="phone" type="text" value="" id="phone" class="form-control"/>
+                        </div>
+                        <input name="address" type="hidden" value="" id="address" class="form-control"/>
+                        <div class="form-group col-12">
+                            <label for="email">
+                                Email&nbsp;
+                                <span class="email_error text-danger" style="display:none"><i class="glyphicon glyphicon-warning-sign"></i> 
+                                    {% trans "Email obligatorio" %} </span>
+                            </label>
+                            <input name="email" type="text" value="" id="email" class="form-control" required/>
+                        </div>
+                        <div class="form-group col-12">
+                            <label for="confirmedemail">
+                                Confirma email &nbsp;
+                                <span class="email_error text-danger" style="display:none"><i class="glyphicon glyphicon-warning-sign"></i> 
+                                    {% trans "Verifique los emails" %} </span>
+                            </label>
+                            <input name="confirmedemail" type="text" value="" id="confirmedemail" class="form-control" required/>
+                        </div>
+                        <div class="acceptCheck col-12 small">
+                            <input type="checkbox" name="acceptconditions"/> <label> Acepto las 
+                                <a class="ark pointer" data-url="{% url "privacy-policy" %}" data-target-modal="common-modal">
+                                condiciones de uso</a></label><br/>
+                            <label><span class="accept_error text-danger strong" style="display:none">
+                                <i class="glyphicon glyphicon-warning-sign"></i>&nbsp;{%trans "Debe aceptar las condiciones"%}</span></label>
+                        </div>
+                        <div class="col-12">
+                            <script src='https://www.google.com/recaptcha/api.js'></script>
+                            <div class="g-recaptcha" data-sitekey="6Lex26gUAAAAAAz2BSZPNuHpj5-84MYnkIzvsTy4"></div>
+                            
+                        </div>
+                        <div class="col-12 text-right">
+                            <a href="#" onClick="javascript:if (checkRegisterCondition('frmRegister')) document.frmRegister.submit();" 
+                                class="btn btn-sm btn-primary ">Reg&iacute;strame</a> 
+                            <a class="btn btn-success btn-sm" href="{#{% url 'password_reset' %}#}">
+                                <i class="fa fa-question-circle"></i>Recordar contrase&ntilde;a</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+

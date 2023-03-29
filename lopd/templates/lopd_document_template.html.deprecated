@@ -1,0 +1,134 @@
+{% load pharmatags  %}
+<html>
+	<head>
+		<title>Consentimiento Informado  </title>
+ 		<meta charset="utf-8" />
+     	<meta http-equiv="x-ua-compatible" content="ie=edge" />
+	    <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+		<link rel="stylesheet" href="/pharma/assets/lopd_consent.css" media="screen"/>
+	    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+		<script src="/pharma/js/wgssSigCaptX.js"></script>
+		<script src="/pharma/js/SigCaptX-Globals.js"></script>
+		<script src="/pharma/js/base64.js"></script>
+
+		{% comment %}
+		{% with path="/pharma/js/jsignature/"%}
+		<!--[if lt IE 9]>
+			<script type="text/javascript" src="{{path}}flashcanvas.js"></script>
+		<![endif]-->
+		{#	<script src="{{path}}jSignature.min.js"></script>#}
+		{% endwith%}
+		{% endcomment %}
+<style>
+    @media print{
+        form {
+            display:none;
+        }
+        #patient_signature_field
+        {
+            border:none !important;
+        }
+    }
+</style>
+		</head>
+		<body>
+			<div class="content" style="font-size:12pt">
+				<div class="page" >
+                {% include "lopd_consent_content.html"%}
+				<div style="display:inline-block; width:35% text-align:center; background-color: white;">
+						
+					<canvas id="patient_signature_field" style="border: 1px solid lightgray; min-height:3em;"></canvas>
+					<br>
+					<a class="btn btn-link sign-capture-btn" id="sign_patient_btn" data-target="#patient_signature_field" data-name="{{ patient.nombre }} {{ patient.apellido }}" data-input="#id_patient_signature">Firmar </a>
+				</div>
+				
+				<div>				
+					<form action="{% url 'lopd_generate_signed_document' patient.pk %}" class="form text-center" method="post" id="signature_form">
+						{% csrf_token %}
+						<input type="hidden" value="{{company.id}}" name="company"/>
+						<input type="hidden" value="" name="patient_signature" id="id_patient_signature"/>
+						{#<input type="hidden" value="" name="professional_signature" id="id_professional_signature"/>#}
+						<input type="hidden" value="True" name="check1" id="check1"/>
+						<input type="hidden" value="True" name="check2" id="check2"/>
+						<input type="hidden" value="True" name="check3" id="check3"/>
+
+
+
+						<br/>
+						<button id="guardar" type="submit" class="submit_btn btn btn-primary"> Firmar Documento </button>
+					</form>
+				</div>
+
+
+			</div>
+		</div>
+	</body>
+	<script src="/pharma/js/capsulaeSignature.js">
+
+	</script>
+	<script>
+		$(document).ready(function() {
+			$('#guardar').on('click', function(e){
+				e.preventDefault();
+				e.stopPropagation();
+				console.log("sending");
+
+
+				console.log($('#id_professional_signature').val());
+				console.log("sended");
+				$('#signature_form').submit();
+			});
+
+			$('.check-btn').on('click', function(e){
+				e.stopPropagation();
+				let checked = ($(this).is(":checked")) ? "True": "False"
+				$($(this).data("target")).val(checked);
+				console.log(checked);
+			
+			});
+		});
+	</script>
+		{% comment %}
+		<script>
+	    	$(document).ready(function() {
+	        	var sigdiv = $("#patient_signature_field").jSignature();
+				sigdiv.attr("heigth",120);
+
+				var sigdivPro= $('#professional_signature_field').jSignature();
+				sigdivPro.attr("height",120);
+	
+				$('#guardar').on('click', function(e){
+						e.preventDefault();
+						e.stopPropagation();
+						var datapair = sigdiv.jSignature("getData", "svgbase64") 
+						img_data=datapair[0] + "," + datapair[1];
+						
+						var datapairpro = sigdivPro.jSignature("getData", "svgbase64")
+						img_data_pro = datapairpro[0]+","+datapairpro[1];
+
+						$('#id_patient_signature').val(img_data);
+						$('#id_professional_signature').val(img_data_pro);
+						$('#signature_form').submit();
+				});
+				$('#clean_patient').on('click', function(e){
+					e.stopPropagation();
+					e.preventDefault();
+					sigdiv.jSignature("reset");	
+
+				});
+				$('#clean_professional').on('click', function(e){
+					e.stopPropagation();
+					e.preventDefault();
+					sigdivPro.jSignature("reset");	
+
+				})
+
+
+
+	    	});
+		</script>
+		{% endcomment %}
+
+</html>

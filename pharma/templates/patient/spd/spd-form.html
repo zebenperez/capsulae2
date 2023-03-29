@@ -1,0 +1,40 @@
+{% load i18n %}
+
+
+<div class="row">
+    <div class="col-11"> <h2><i class="fa fa-history"></i>&nbsp; {% trans 'Modificar SPD' %}</h2> </div>
+    <div class="col-1">
+        <div class="d-flex justify-content-end"> <button type="button" class="btn btn-lg" data-bs-dismiss="modal" title="{% trans "Close" %}">
+            <i class="fas fa-times"></i></button> </div>
+    </div>
+</div>
+
+{% comment %} <span id="div-notification"></span><br/> {% endcomment %}
+
+<div class="row justify-center">
+    <div class="col-12">
+        <input type="text" class="form-control autosave blister-description" id="description" name="description" value="{{obj.description}}" 
+            title="{{obj.description}}" data-model-name="pharma.pillbox" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+            data-target="div-notification" placeholder="Escriba aquí la descripción..." /> <span id="description__msg"></span>
+    </div>
+</div>
+
+<div class="row m-0"> 
+	<div class="col-7"> <strong>{% trans "Medicamento" %}</strong> </div>
+	<div class="col-3"> <strong>{% trans "No mostrar en etiqueta" %}</strong> </div>
+	<div class="col-2"> <strong>{% trans "Dentro del SPD" %}</strong> </div>
+</div>
+<hr/>
+{% for treatment in treatment_list %}
+    <div class="row treat-line p-2" id="row-{{treatment.id}}"> {% include "patient/spd/spd-form-row.html" with pillbox=obj %} </div>
+{% endfor %}
+
+<div class="d-flex justify-content-end">
+    <button type="button" class="btn btn-sm ark save" data-bs-dismiss="modal" data-url="{% url "patient-spd" %}"
+        data-target="div-container" data-obj_id="{{obj.patient.id}}">{% trans "Guardar" %}</button>
+    {%comment%}
+    <button type="button" class="btn btn-sm ark cancel" data-bs-dismiss="modal" data-url="{% url "guest-remove" %}" data-target="guest-list"
+        data-obj_id="{{obj.id}}" data-confirm="{% trans "Are you sure to remove this element?" %}">{% trans "Remove" %}</button>
+    {%endcomment%}
+</div>
+

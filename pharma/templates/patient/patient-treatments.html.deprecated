@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block custom_menu %} {% include "patient/patient-menu.html" %} {% endblock custom_menu %}
+{% block central_content %}
+    <div class="content mt-4">
+        <div class="toolbar-content">
+			<h2 class="pathway b-right">{% trans 'Tratamientos' %} <span id="items-counter" class="badge badge-secondary">{{items|length}}</span></h2>
+            {#<a class="btn btn-primary ark" data-url="{% url "patient-form" %}" data-target-modal="common-modal">{% trans "New patient"%}</a> #}
+        </div>
+        <div id="patient-list">{% include "patient/patient-treatment-list.html" %}</div>
+    </div>
+    {% include "common-modal.html" %}
+{% endblock central_content %}

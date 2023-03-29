@@ -1,0 +1,127 @@
+body
+{
+	background-color:gray;
+	font-size: 8.5pt;
+	font-family:sans!important;
+	
+}
+
+
+
+table 
+{
+	border-collapse: collapse;
+}
+
+.button_print{
+ margin-left: 1em;
+border:1px solid #999999; -webkit-border-radius: 3px; -moz-border-radius: 3px;border-radius: 3px;font-size:12px;font-family:arial, helvetica, sans-serif; padding: 5px 15px 5px 15px; text-decoration:none; display:inline-block;text-shadow: 1px 1px 0 rgba(255,255,255,0.3);font-weight:bold; color: #787878;
+ background-color: #FFFFFF; background-image: -webkit-gradient(linear, left top, left bottom, from(#FFFFFF), to(#C2C2C2));
+ background-image: -webkit-linear-gradient(top, #FFFFFF, #C2C2C2);
+ background-image: -moz-linear-gradient(top, #FFFFFF, #C2C2C2);
+ background-image: -ms-linear-gradient(top, #FFFFFF, #C2C2C2);
+ background-image: -o-linear-gradient(top, #FFFFFF, #C2C2C2);
+ background-image: linear-gradient(to bottom, #FFFFFF, #C2C2C2);filter:progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr=#FFFFFF, endColorstr=#C2C2C2);
+}
+
+.button_print:hover{
+ border:1px solid #7A7A7A;
+ background-color: #EEEEEE; background-image: -webkit-gradient(linear, left top, left bottom, from(#EEEEEE), to(#C7C7C7));
+ background-image: -webkit-linear-gradient(top, #EEEEEE, #C7C7C7);
+ background-image: -moz-linear-gradient(top, #EEEEEE, #C7C7C7);
+ background-image: -ms-linear-gradient(top, #EEEEEE, #C7C7C7);
+ background-image: -o-linear-gradient(top, #EEEEEE, #C7C7C7);
+ background-image: linear-gradient(to bottom, #EEEEEE, #C7C7C7);filter:progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr=#EEEEEE, endColorstr=#C7C7C7);
+}
+
+#tools
+{
+	position: fixed; 
+	top:0 ;
+	left:0;
+}
+
+h5 
+{
+	text-align:center;
+	font-weight: bolder;
+	
+}
+
+
+
+ul li{
+	list-style:none;
+	margin:0;
+	padding:0;
+}
+
+
+.page
+{
+	 margin-top: 1em!important;
+     width: 21cm;
+	 height: 29.7cm;
+	 background-color: white;
+	 webkit-box-shadow: -1px 6px 19px -6px rgba(87,87,87,1);
+	-moz-box-shadow: -1px 6px 19px -6px rgba(87,87,87,1);
+	box-shadow: -1px 6px 19px -6px rgba(87,87,87,1);
+
+    padding: 1.9cm 1.9cm 1.9cm 1.9cm !important; /* change the margins as you want them to be. */
+	 margin: auto;
+    font-size: 8.5pt;
+	font-family: serif!important;
+}
+
+.page *{
+	font-family: sans;
+}
+
+ul li, 
+p, 
+span{
+	margin-top: 1em;
+	font-family: sans;
+	font-size: 8.5pt;
+}
+
+table *{
+	margin:0;
+	padding:0;
+}
+
+table{
+	margin-top: 1.5em;
+	width: 90%;
+	margin: auto;
+}
+
+table tr{
+	border: 1px solid #ccc;
+}
+
+
+td {
+	padding: .5em;
+}
+td li{
+	margin-top: 0;
+}
+td h4{
+	font-size: 10pt;
+}
+
+canvas.jSignature 
+{
+	width:100%!important;
+	height:15% !important;
+	
+}
+
+input{
+	margin-right: 1em!important;
+}
+
+
+
+

@@ -1,0 +1,61 @@
+{% load i18n %}
+
+<div class="row mt-3">
+    <div class="col-12 text-end">
+        <button type="button" class="btn btn-sm ark new p-2" data-url="{% url "spd-blister-form" %}" data-target-modal="common-modal" data-pillbox_id="{{obj.id}}"> 
+            <i class="fas fa-plus"></i> {% trans 'Crear pastillero' %}</a> 
+    </div>
+</div>
+
+
+<span id="div-notification"></span><br/>
+
+<div class="row">
+    {% for item in deliveries %}
+        <div class="col-3">
+            <div class="row blister-box mb-3">
+                <div class="col-4 left-blue p-2">{% trans "Código" %}:</div><div class="col-8 p-2"> {{ item.code }}</div>
+                <div class="col-4 left-blue p-2">{% trans "Preparación" %}:</div><div class="col-8 p-2"><span class="text text-warning"> {{ item.creation_date|date:"d-m-Y"|default_if_none:"--"}}</span></div>
+                <div class="col-4 left-blue p-2">{% trans "Entrega" %}:</div><div class="col-8 p-2"> {{ item.deliver_date|date:"d-m-Y"|default_if_none:"--" }}</div>
+                <div class="col-4 left-blue p-2">{% trans "Finalización" %}:</div><div class="col-8 p-2"> {{ item.finish_date|date:"d-m-Y"|default_if_none:"--"}}</div>
+                <div class="col-12 icons-bot text-center p-2">
+                    <a class="btn btn-xs w-25" title="{% trans "Imprimir blister" %}" href="{% url "spd-blister-print" item.id %}" target="_blank">
+                        <i class="fas fa-print"></i></a>
+                    <a class="btn btn-xs w-25 ark" title="{% trans "Editar blister" %}" data-url="{% url "spd-blister-form" %}" 
+                        data-target-modal="common-modal" data-obj_id="{{item.id}}" data-pillbox_id="{{item.pillbox.id}}">
+                        <i class="fas fa-edit"></i></a>
+                    <a class="btn btn-xs w-25 ark" title="{% trans "Eliminar blister" %}" data-url="{% url "spd-blister-remove" %}" 
+                        data-target="blister-list-{{item.pillbox.id}}" data-obj_id="{{item.id}}"
+                        data-confirm="{% trans "Esta seguro/a de que desea eliminar este elemento?" %}"><i class="fas fa-trash"></i></a>
+                </div>
+        </div>
+
+        {%comment%}
+            <a class="btn btn-default btn-sm" target="_blank" title="Imprimir etiqueta SPD para este pastillero"
+                href="{% url "imprimir_hoja_spd" item.pk %}"><i class="fas fa-print"></i></a>
+            <a class="btn btn-danger btn-sm ga-ajax-load-confirm" href="{% url 'entrega_pastillero_eliminar' item.pk  %}" 
+                title="Eliminar pastillero" data-ga-confirm-message="¿Seguro que desea eliminar el elemento {{ item.code }}? <br/> Los cambios no podran deshacerse"
+                data-ga-target="#cap-panel-form-container"><i class="fas fa-trash"></i> </a>
+        {%endcomment%}
+        </div>
+    {% endfor %}
+</div>
+
+<div class="d-flex justify-content-end mt-1"> 
+    <button type="button" class="btn btn-sm new p-2" onclick="$('#blister-list-{{obj.id}}').hide()">{% trans "Cerrar" %}</button>
+    {%comment%}
+    <button type="button" class="btn btn-sm ark cancel" data-bs-dismiss="modal" data-url="{% url "guest-remove" %}" data-target="guest-list"
+        data-obj_id="{{obj.id}}" data-confirm="{% trans "Are you sure to remove this element?" %}">{% trans "Remove" %}</button>
+    {%endcomment%}
+</div>
+
+    {%comment%}
+<script>
+    $('tr.activo_False').hide();
+    $('.btn_filter').on('click', function(e){
+        $('.btn_filter.active').removeClass('active').removeClass('btn-default').addClass('btn-info');
+        $(this).removeClass('btn-info').addClass('btn-default active');
+    });
+</script>
+    {%endcomment%}
+

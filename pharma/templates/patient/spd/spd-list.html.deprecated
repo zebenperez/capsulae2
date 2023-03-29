@@ -1,0 +1,112 @@
+{% load i18n pharmatags %}
+
+<div class="panel panel-primary">
+    <div class="panel-heading">
+    	<div class="row">
+		    <div class="col-xs-6"><i class="fa fa-medkit"></i>&nbsp; {% trans 'Blisters ' %}. {{paciente.n_historial}}</div>
+			<div class="col-xs-6 text-right">
+                      <a onclick="$('tr.activo_True').show(); $('tr.activo_False').hide()" class="btn btn-default btn-sm btn_filter active"><i class="glyphicon glyphicon-eye-open"></i> {% trans 'Activos' %}</a> 
+				      <a onclick="$('tr.activo_True').hide(); $('tr.activo_False').show()" class="btn btn-info btn-sm btn_filter"><i class="glyphicon glyphicon-eye-open"></i> {% trans 'No Activos' %}</a> 
+				      <a onclick="$('tr.activo_True').show(); $('tr.activo_False').show()" class="btn btn-info btn-sm btn_filter"><i class="glyphicon glyphicon-eye-open"></i> {% trans 'Todos' %}</a> 
+
+
+			</div>
+		</div>
+    </div>
+    <div class="panel-body cap-panel">
+             <div class="row text-right">
+                <div class="col-xs-12">
+			      <a class="btn btn-default btn-sm ga-ajax-load"  href="{% url 'pastilleros_nuevo' paciente.pk %}" data-ga-target="#cap-panel-form-container" 
+				  	title="Definir una configuración de medicamentos para un blister"
+					data-ga-scroll-to="#cap-panel-form-container"> <i class="fas fa-plus"></i> Crear Blister</a>
+                </div>
+             </div>
+             <br>
+             <div class="row">
+                <div class="col-xs-12">
+            {% if pastilleros|length > 0 %} 
+                <table class="table table-striped">
+                    <thead>
+                        <tr class="info text-center">
+                            <th>
+                            <div class="col-xs-3">Descripción</div>
+                            <div class="col-xs-3">Período</div>
+                            <div class="col-xs-2">Preparación</div>
+                            
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in pastilleros %}
+                        <tr class="activo_{{item.active}}">
+                            <td>
+                                <div class="col-xs-3" id="desc-pillbox-{{item.pk}}">{{ item.description }}</div>
+                            {% with deliver=item.last_deliver %}
+                            <div class="col-xs-3">
+                                {{ deliver.deliver_date|date:"d-m-Y"|default_if_none:"--" }} &nbsp;
+                                {{ deliver.finish_date|date:"d-m-Y"|default_if_none:"--" }}
+                            </div>
+                            <div class="col-xs-2"><span class="text text-warning">{{ deliver.finish_date|sub_days:advice_days|date:"d-m-Y"}}</span></div>
+                            {% endwith %}
+                            <div class="col-xs-4 text-right">
+								{% if item.patient.patient_telegram.all.count > 0 %}
+									<a class="btn btn-default btn-sm ga-ajax-load-confirm ga-close-modal" 
+										href="{% url 'assistant_deliver_notification' item.patient.pk %}" title="Enviar notificación de recogida" data-ga-target="modal" 
+										data-ga-modal-title="Detalles del envío a {{ item.patient.full_name|default:""}}" > <i class="fas fa-send"></i>
+									</a>
+								{% endif %}
+                                <a class="btn btn-success btn-sm ga-ajax-load" data-ga-target="#cap-panel-form-container" href="{% url 'pastilleros_editar' item.pk %}" data-ga-loading="true"
+                                    title="{% trans "Editar Blister" %}">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+
+                                {%if item.active %} 
+								<a class="btn btn-danger btn-sm ga-ajax-load" href="{% url 'pastillero_active_toggle' item.pk  %}" data-ga-target="#cap-panel-view-content"
+                                    title="{% trans "Desactivar Blister" %}" data-ga-loading="true" data-ga-scroll-to="#cap-panel-form-container"> <i class="fa fa-hand-stop-o"></i></a>
+                                        
+							    {% else %} 
+								<a class="btn btn-success btn-sm ga-ajax-load" href="{% url 'pastillero_active_toggle' item.pk  %}" data-ga-target="#cap-panel-view-content"
+                                    title="{% trans "Activar Blister" %}" data-ga-loading="true" data-ga-scroll-to="#cap-panel-form-container"> <i class="fa fa-repeat"></i></a>
+                                 
+								{%endif%}
+                                <a class="btn btn-default btn-sm ga-ajax-load" href="{% url "entregas_pastillero_all" item.pk %}" 
+									title="Ver Histórico"
+									data-ga-target="#cap-panel-form-container" data-ga-loading="true">
+                                        <i class="fas fa-history"></i>
+                                    </a>
+                                    
+                                <a class="btn btn-default btn-sm ga-ajax-load" href="{% url 'entrega_pastillero_nueva' item.pk %}" 
+                                    title="{% trans "Nuevo Pastillero" %}" data-ga-target="#cap-panel-form-container" data-ga-scroll-to="#cap-panel-form-container" data-ga-loading="True">
+                                    <i class="fas fa-hand-holding-medical"></i>
+                                 </a>
+
+                                
+                                <a class="btn btn-danger btn-sm ga-ajax-load-confirm" href="{% url 'pastillero_delete' item.pk %}" 
+                                    data-ga-confirm-message="¿Seguro que desea eliminar el Blister {{ item.description }}? </br> Los cambios no podrán deshacerse" data-ga-scroll-to="#cap-panel-form-container"
+                                    data-ga-target="#cap-panel-view-content" title="Eliminar blister"><i class="fas fa-trash"></i></a>
+
+                            </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+            <div class="well"><span class="text-info">Sin elementos en el pastillero </span> </div>
+            {% endif %}
+             </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+	$('tr.activo_False').hide();
+    $('.btn_filter').on('click', function(e){
+                    $('.btn_filter.active').removeClass('active').removeClass('btn-default').addClass('btn-info');
+                    $(this).removeClass('btn-info').addClass('btn-default active');
+
+                });
+
+
+</script>
+{% endblock %}

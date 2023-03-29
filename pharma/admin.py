@@ -1,3 +1,8 @@
 from django.contrib import admin
+from .models import *
 
-# Register your models here.
+
+class ConfigAdmin(admin.ModelAdmin):
+    list_display = ('key', 'value')
+
+admin.site.register(Config, ConfigAdmin)

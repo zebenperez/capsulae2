@@ -1,0 +1,91 @@
+{% load i18n common_tags %}
+
+<table>
+    <tr style="border: none">
+        <td >
+            <img src="{% userqr_code request patient %}" style="display:block; width:1.5cm; height:1.5cm; margin-right:-1.2cm;"/>
+            <small style="font-size: 6pt; margin-top: 0; display: block; text-align:center">{{ patient.n_historial}}</small>
+        </td>
+        <td> <h5>CONSENTIMIENTO INFORMADO PROTECCI&Oacute;N DATOS  </h5> </td>
+    </tr>
+</table>
+
+<p><span style="">Conforme a la normativa vigente en materia de protecci&oacute;n de datos, le informamos que los datos de car&aacute;cter personal por usted aportados u obtenidos a trav&eacute;s de la aportaci&oacute;n de la tarjeta sanitaria, ser&aacute;n tratados de forma leal, transparente, adecuada, pertinente, limitada, exacta y actualizada. Es por ello que solicitamos su consentimiento expreso, para tratar sus datos, con los siguientes fines:</span></p>
+
+<ul class="accept-terms">
+	{% if not signing %}
+	    <li style=""><input type="checkbox" class="check-btn" checked data-target="#check1">
+            Tratar y conservar sus datos para una mejor asistencia integral en su salud (farmac&eacute;utica, social y comunitaria).</span></li>
+	    <li style=""><input type="checkbox" class="check-btn" checked data-target="#check2">
+            Comunicaciones relacionadas con sus pedidos o encargos, v&iacute;a sms o whatsapp.</span></li>
+	    <li style=""><input type="checkbox" class="check-btn" checked data-target="#check3">
+            Fidelizaci&oacute;n de clientes, acciones formativas o comerciales que puedan ser de su inter&eacute;s, v&iacute;a sms, whatsapp o email.
+            </span></li>
+	{% else %}
+	    <li style=""><img src="{{host}}/pharma/assets/{{check1_img}}" style="width: 1em; height:1em;"/>
+            &nbsp;Tratar y conservar sus datos para una mejor asistencia integral en su salud (farmac&eacute;utica, social y comunitaria).</span></li>
+	    <li style=""><img src="{{host}}/pharma/assets/{{check2_img}}" style="width: 1em; height:1em;"/>
+            &nbsp;Comunicaciones relacionadas con sus pedidos o encargos, v&iacute;a sms o whatsapp.</span></li>
+	    <li style=""><img src="{{host}}/pharma/assets/{{check3_img}}" style="width: 1em; height:1em;"/>
+            &nbsp;Fidelizaci&oacute;n de clientes, acciones formativas o comerciales que puedan ser de su inter&eacute;s, v&iacute;a sms, whatsapp 
+            o email. </span></li>
+	{% endif %}
+</ul>
+
+<table style="">
+	<tbody>
+		<tr>
+			<td> <p><strong>Responsable</strong></p> </td>
+			<td> <h4><strong>{{ company.manager.first_name }} {{ company.manager.last_name}}<strong></h4> </td>
+		</tr>
+		<tr>
+			<td> <p><strong>Direcci&oacute;n</strong></p> </td>
+			<td> <p>{{ company.main_address}} {{ company.postal_code }}, {{company.locality}} </p> </td>
+		</tr>
+		<tr>
+			<td> <p><strong>Finalidad</strong></p> </td>
+			<td>
+				<ul>
+					<li>Asistencia Farmac&eacute;utica, social y comunitaria.</li>
+					<li>Seguimiento Farmacol&oacute;gico, social, y comunitario.</li>
+					<li>Otros servicios de su inter&eacute;s.</li>
+				</ul>
+			</td>
+		</tr>
+		<tr>
+			<td> <p><strong>Legitimaci&oacute;n</strong></p> </td>
+			<td> <p>Consentimiento informado</p> </td>
+		</tr>
+		<tr>
+			<td> <p><strong>Destinatarios</strong></p> </td>
+			<td>
+				<ul>
+					<li>Corporaci&oacute;n de derecho p&uacute;blico y administraciones con competencias en la materia.</li>
+					<li>Cesiones legalmente establecidas.</li>
+				</ul>
+			</td>
+		</tr>
+		<tr>
+			<td> <p><strong>Derechos</strong></p> </td>
+			<td>
+				<ul>
+					<li>De acceso, rectificaci&oacute;n y supresi&oacute;n</li>
+					<li>A reclamar ante AGPD (agpd.es)</li>
+					<li>A retirar el consentimiento dado</li>
+				</ul>
+			</td>
+		</tr>
+	</tbody>
+</table>
+
+<p><span style="">Conservaremos sus datos personales, mientras exista un inter&eacute;s leg&iacute;timo y mutuo. El responsable garantiza tener implantadas las medidas de seguridad de &iacute;ndole t&eacute;cnica y organizativa necesarias, que garanticen la seguridad de los datos personales aportados, con el fin de evitar su alteraci&oacute;n, p&eacute;rdida, tratamiento y/o acceso no autorizado.</span></p>
+
+<p><span style="">En caso de efectuar la dispensaci&oacute;n de medicamento a un tercero autorizado por el titular de los datos, &eacute;ste velar&aacute; para que el tercero autorizado trate los datos con la debida diligencia y respeto a la normativa vigente en protecci&oacute;n de datos. La Oficina de Farmacia, no ser&aacute; responsable, en ning&uacute;n caso, del uso indebido de los datos personales que pueda llevar a cabo el tercero abajo indicado.</span></p>
+
+<p><span style="">El abajo firmante, consiente en el tratamiento de sus datos personales, en los t&eacute;rminos relacionados:</span></p>
+
+{#<p><strong>En San Isidro &ndash; Granadilla de Abona, a {% now "d \d\e F \d\e Y" %}. --{{company.town}}-{{company.province}}</strong></p>#}
+<p><strong>En {{company.main_address}} &ndash; {{company.town}}, a {% now "d \d\e F \d\e Y" %}.</strong></p>
+
+<p>Fdo: <strong>{{patient.nombre}} {{patient.apellido}} </strong>DNI: <strong>{{patient.nif}} </strong> CIP: <strong>{{patient.cip}}</strong></p>
+

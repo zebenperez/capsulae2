@@ -1,0 +1,37 @@
+{% load i18n static %}
+
+
+<table>
+    <tr class="center"> 
+        <td colspan="6" > 
+            <p class="title"> {{ medicamento.principles }} </p>
+			<p></p>
+        </td>
+    </tr>
+    <tr>
+        <td style="text-aling:center; padding-top:5px; border-right:1px solid silver"> 
+            <div>
+                <table style="width:98%;!important; margin:auto;" class="med_table">
+                    <thead>
+                        <th style="width:5em;text-align:center;"><img src="{% static "imgs/desayuno.jpg" %}"/></th>
+				        <th style="width:5em;text-align:center;"><img src="{% static "imgs/comida.jpg" %}" /></th>
+				        <th style="width:5em;text-align:center;"><img src="{% static "imgs/cena.jpg" %}" /></th>
+				        <th style="width:5em;text-align:center;"><img src="{% static "imgs/noche.jpg" %}" /></th>
+                    </thead>
+                    <tbody>
+                        <tr style="text-align:center; font-weight:bolder;font-size:8pt; border: 1px solid #eee">
+                            <td>{{ tratamiento.m|default:"&nbsp;<br/><br/>"|safe }}</td>
+                            <td>{{ tratamiento.t|default:"&nbsp;<br/><br/>"|safe }}</td>
+                            <td>{{ tratamiento.n|default:"&nbsp;<br/><br/>"|safe }}</td>
+                            <td>{{ tratamiento.o|default:"&nbsp;<br/><br/>"|safe }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div style="padding-top:5px;">
+                <p> {{ ficha.consejos|upper|truncatechars:155 }}</p>
+            </div>
+        </td>
+    </tr>
+</table>
+

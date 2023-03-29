@@ -1,0 +1,18 @@
+{% load i18n %}
+
+{% if user.is_authenticated %}
+    <ul class="left-menu">
+    {% if menu == "admins" %}
+        <li class="nav-item"><a class="nav-link " href="{% url "pharma-index" %}"><i class="fa fa-home"></i> {% trans "Home" %} </a> </li>
+        <hr/>
+        <li class="nav-item"><a class="nav-link " href="{% url "patients" %}"><i class="fa fa-user"></i> {% trans "Pacientes" %} </a> </li>
+        <hr/>
+        <li class="nav-item"><a class="nav-link " href="{% url "medication" %}"><i class="fa fa-vial"></i> {% trans "Medicamentos" %} </a> </li>
+        <hr/>
+        <li class="nav-item"><a class="nav-link " href="{% url "projects" %}"><i class="fa fa-list"></i> {% trans "Proyectos" %} </a> </li>
+        <hr/>
+    {% endif %}
+    </ul>
+{% else %}
+{% endif %}
+

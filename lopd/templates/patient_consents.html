@@ -1,0 +1,67 @@
+{% load i18n pharmatags %}
+
+<div class="row">
+	<div class="col-xs-12">
+	<div class="panel panel-primary">
+		<div class="panel-heading">
+			<div class="row">
+				<div class="col-xs-8"> {% trans 'Autorizaciones LOPD' %} </div>
+				<div class="col-xs-4 text-right"> 
+					{% if patient.id_user == request.user %}
+                    <a href="{% url 'lopd_generate_consent' patient.pk %}" class="btn btn-default " target="_blank" title="{% trans "Firmar Documento" %}" ><i class="fa fa-file-signature"></i></a> 
+					<a href="{% url 'lopd_consent_upload' patient.pk %}" class="btn btn-default ga-ajax-load" data-ga-target="#cap-panel-form-lopd" 
+						title="{% trans "Subir documento firmado" %}"><i class="fa fa-upload"></i></a>
+                     {% endif %}   
+					<a class="btn btn-danger btn-sm ga-clean" data-ga-target="#cap-panel-form-lopd"><i class="fa fa-times"></i></a>
+				</div>
+			</div>
+		</div>
+		<div class="panel-body">
+			<div class="col-xs-12">
+				{% if success %}
+					<div class="alert alert-success"> <i class="fa fa-check"></i> La operación se ha realizado con éxito </div>
+				{% endif %}
+				{% if error %}
+					<div class="alert alert-danger"><i class="fa fa-times"></i> {{ error }} </div>
+				{% endif %}
+				<br/>
+				{% if consents|length > 0 %}
+				    {% if patient.id_user == request.user %}
+                    <table class="table table-bordered">
+					<thead >
+					<tr class="info">
+						<th>Archivo</th>
+						<th>Fecha</th>
+						<th></th>
+					</tr>
+					</thead>
+					<tbody>
+						{% for item in consents %}
+						<tr class="" id="lopd_{{ item.pk }}">
+							<td><a href="/media/media/lopd_files/{{item.filename}}" class="btn btn-link">{{ item.filename }}</a></td>
+							<td>{{ item.date|date:"d-m-Y H:i"}}</td>
+							<td><a href="{% url 'lopd_delete_document' patient.pk item.pk %}" class="btn btn-danger ga-ajax-load-confirm btn-sm" 
+								data-ga-show-errors="true" data-ga-confirm-message="¿ Seguro que desea eliminar el documento ?"
+								data-ga-target="#cap-panel-view-content"><i class="fa fa-trash"></i></a></td>
+						</tr>
+						{% endfor %}
+					</tbody>
+				    </table>	
+				    {% else %}
+				    <div class="alert alert-success">LODP firmada</div>
+				    {% endif %}
+				{% else %}
+
+				<div class="alert alert-info">No hay autorizaciones</div>
+				{% endif %}
+			</div>
+		</div>
+	</div>
+	</div>
+	<script>
+		$('#add_consnet_btn').on('click', function(e){
+			return true;	
+		});
+	</script>
+</div>
+

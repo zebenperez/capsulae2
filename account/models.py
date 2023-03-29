@@ -1,0 +1,117 @@
+from django.contrib.auth.models import User
+from django.db import models
+
+from datetime import date, timedelta
+
+class UserActivate(models.Model):
+    activate_key = models.CharField(max_length=255)
+    activation_date = models.DateField(default = date.max)
+    valid_date = models.DateField(default=date.today() + timedelta(days=7))
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name = "Activación de usuarios"
+
+class CompanyOptions(models.Model):
+    code = models.SlugField(verbose_name="Codigo", max_length=50, unique="True")
+    name = models.CharField(verbose_name="Nombre", max_length=150, blank=True, null=True)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        db_table = 'companies_companyoptions'
+        verbose_name="Opciones Empresa"
+        verbose_name_plural="Opciones Empresa"
+
+class Company(models.Model):
+    image = models.ImageField(upload_to="images/", verbose_name=('Image'), null=True, blank=True)
+    code = models.SlugField(verbose_name="CIF", max_length=200)
+    name = models.CharField(verbose_name="Nombre", max_length=200)
+    main_address = models.CharField(verbose_name="Dirección principal", max_length=200, default="", blank=True)
+    town = models.CharField(verbose_name="Localidad", max_length=200, default="", blank=True)
+    province = models.CharField(verbose_name="Provincia", max_length=200, default="", blank=True)
+    phone = models.CharField(verbose_name="Teléfono", max_length=200, default="", blank=True)
+    postal_code = models.CharField(verbose_name="Código Postal", max_length=12, default="", blank=True)
+    email = models.EmailField(verbose_name="Correo electrónico", max_length=200, default="", blank=True)
+
+    manager = models.OneToOneField(User, verbose_name="Manager", on_delete=models.SET_NULL, related_name="company", blank=True, null=True)
+    users = models.ManyToManyField(User, verbose_name="Empleados", related_name="user_companies", blank=True)
+    company_options = models.ManyToManyField(CompanyOptions, verbose_name="Opciones", related_name="options_company")
+
+    class Meta:
+        db_table = 'companies_company'
+        verbose_name="Empresa"
+        verbose_name_plural = "Empresas"
+
+    def __str__(self):
+        return "%s"%(self.name)
+
+class EmployeeType(models.Model):
+    code = models.SlugField(verbose_name="code", max_length=100)
+    name = models.CharField(verbose_name="nombre", max_length=100)
+    weight = models.IntegerField(verbose_name="Peso", default=0)
+    alone = models.BooleanField(verbose_name="Puede estar solo", default=False)
+    guards = models.BooleanField(verbose_name="Hace Guardias", default=False)
+
+
+    def __str__(self):
+        return "%s"%(self.code)
+
+    class Meta:
+        verbose_name="Tipo de perfil"
+        verbose_name_plural ="Tipos de perfil"
+
+class EmployeeProfile(models.Model):
+    active = models.BooleanField(verbose_name="Activo", default=False)
+    nights = models.BooleanField(verbose_name="Hace Noches", default=False)
+    shifts = models.BooleanField(verbose_name="Usuario de turnos", default=False)
+    hours_per_week = models.IntegerField(verbose_name="Horas Semana", null=True, blank=True, default=0)
+    min_hours_per_shift = models.IntegerField(verbose_name="Minimo de Horas por turno", null= True, blank=True, default=1)#deprecated
+    max_hours_per_shift = models.IntegerField(verbose_name="Máximo de horas por turno", null= True, blank=True, default=8)
+    holiday_days = models.IntegerField(verbose_name="Dias Vacaciones", null=True, blank=True, default=30)
+    pin = models.CharField(verbose_name="PIN", max_length=10, default=None, null=True, unique=True)
+
+    user = models.OneToOneField(User, verbose_name="Usuario", on_delete=models.CASCADE, related_name="employee_profile")
+    user_type = models.ForeignKey(EmployeeType, verbose_name="Tipo de usuario", on_delete=models.SET_NULL, related_name="usertype", null=True)
+
+    def __str__(self):
+        return "[%s] %s %s"%(self.user.username, self.user.first_name, self.user.last_name)
+
+    @property
+    def first_name(self):
+        return self.user.first_name
+
+    @property
+    def last_name(self):
+        return self.user.last_name
+
+    @property
+    def email(self):
+        return self.user.email
+
+    @property
+    def name(self):
+        return "%s %s"%(self.first_name, self.last_name)
+
+    @property
+    def username(self):
+        return self.user.username
+
+    @property
+    def is_pharma(self):
+        return (self.user_type.code == "pharma")
+
+    @property
+    def company(self):
+        company = None
+        try:
+            company = Company.objects.filter(users = self.user).first()
+        except Exception as e:
+            print(str(e))
+        return company
+
+    class Meta:
+        verbose_name="Perfil Empleado"
+        verbose_name_plural ="Perfiles Empleados"
+
