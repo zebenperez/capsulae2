@@ -206,6 +206,41 @@ function submitForm(frm, target)
     });
 }
 
+function uploadMulti(obj, url, target, obj_id, field, folder, token)
+{
+    var data = new FormData();
+    $.each(obj[0].files, function(i, file) {
+        data.append("file", file);
+    });
+    data.append('obj_id', obj_id);
+    data.append('field', field);
+    data.append('folder', folder);
+    data.append("csrfmiddlewaretoken", token);
+
+    $.ajax({
+        url: url,
+        data: data,
+        cache: false,
+        contentType: false,
+        processData: false,
+        type: 'post',
+        success: function (data) {
+            if (target.indexOf("alert") >= 0)
+            {
+                $("#"+target).html(data).fadeTo(5000, 500).slideUp(500, function(){
+                    $("#"+target).slideUp(500);
+                });
+            }
+            else
+            {
+                $('#'+target).html(data);
+				$('#'+target).trigger('create');
+            }
+        },
+        error : function(e){alert("Error: "+e.responseText);},
+    });
+}
+
 function closeWin(divName)
 {
     setTimeout(function(){
@@ -572,6 +607,18 @@ $(document).ready(()=>{
                 $("#"+obj.data("update")).html($("#"+obj.data("update-val")).val())
             e.preventDefault();
         }
+    });
+
+    $("body").on("change", ".multiupload", function(e){
+        var obj = $(this);
+        var url = obj.data("url");
+        var target = obj.data("target");
+        var obj_id = obj.data("obj-id");
+        var field = obj.data("field");
+        var folder = obj.data("folder");
+        var token = obj.data("csrf-token");
+        uploadMulti(obj, url, target, obj_id, field, folder, token);
+        e.preventDefault();
     });
 
     $("body").on("keyup", ".autocomplete", function(e){

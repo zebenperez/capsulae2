@@ -1,0 +1,48 @@
+{% load i18n %}
+
+<h2>{% trans "Ficheros" %}</h2>
+
+<div class="row spd-tab">
+    <div class="col-12 text-end">
+        <label for ="id_client_files_{{ obj.id }}" class="btn-tools tools-primary btn-labeled btn-sm async-load">
+            <i class="fas fa-upload"></i><span class="d-none d-sm-block">{% trans "Elegir" %}&nbsp;{% trans "Archivos" %}</span></label>
+        <input type="file" class="multiupload d-none" name="client_file" id="id_client_files_{{ obj.id }}" data-url="{% url 'project-file-add' %}"
+            data-target="div-files" data-obj-id="{{obj.id}}" data-field="file" data-folder="{{folder.id|safe}}" data-csrf-token="{{ csrf_token }}" 
+            multiple/>
+
+        {%comment%}
+        <button type="button" class="btn btn-sm ark new" data-url="{% url "project-file-form" %}" data-target-modal="common-modal" 
+            data-project_id="{{obj.id}}" data-parent_id="{{folder.id}}"> <i class="fas fa-plus"></i> {% trans 'Nueva carpeta' %}</button> 
+        {%endcomment%}
+    </div>
+</div>
+
+
+<div class="row">
+    {% for item in file_list %}
+        <div class="files-list-item col-lg-12 col-md-12">
+            <span style="width:90%">
+            <div class="row">
+                {#<div class="col-1"> <input type="checkbox" class="file_row mr-4" value="{{item.id}}" /> </div>#}
+                <div class="col-11"> {{item.name}} </div>
+            </div>
+            </span>
+            <div class="tools flex space-between">
+                <a class="btn btn-xs ark" title="{%trans 'Edit file'%}" data-url="{%url "project-file-form" %}"
+                    data-target-modal="common-modal" data-obj_id="{{item.id}}" data-project_id="{{obj.id}}"> <i class="fas fa-edit"></i></a>
+
+                <a href="{% url "project-file-get" item.id %}" title="{% trans "Descargar fichero" %}" download class="download-btn"> 
+                    <i class="fas fa-download"></i> </a>
+
+                <a class="btn btn-xs btn-move" data-bs-toggle="modal" data-bs-target="#folder-modal" data-id="{{item.id|safe}}" 
+                    title="{%trans "Mover fichero"%}"> <i class="fas fa-random"></i> </a>
+
+                <a class="btn btn-xs ark delete-btn" id="btn-photo-{{item.pk}}" title="{% trans "Borrar fichero" %}" 
+                    data-confirm="{% trans "Esta seguro/a de que desea borrar este fichero?" %}" data-url="{% url "project-file-remove" %}" 
+                    data-target="div-files" data-obj_id="{{item.id}}" data-field="file"> <i class="fas fa-times"></i></a>
+            </div>
+        </div>
+    {% endfor %}
+    {% include "project/drive/folder-modal.html" %}
+    {% include "common-modal.html" %}
+</div>

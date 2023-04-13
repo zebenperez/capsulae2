@@ -1,0 +1,42 @@
+{% load i18n %}
+
+<!-- Modal -->
+<div class="modal" id="folder-modal" tabindex="-1" role="dialog" aria-labelledby="folderModalLabel" aria-hidden="true">
+	<div class="modal-dialog  modal-dialog-centered modal-lg" role="document">
+		<div class="modal-content p-3">
+			<div class="modal-header">
+				<h5 class="modal-title" id="exampleModalLabel">{% trans "Mover a" %}</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"> <span aria-hidden="true">&times;</span> </button>
+			</div>
+			<div class="modal-body">	
+                <div class="data-row move-popup">
+                    <div style="display:flex;"><span>/</span></div>
+                    <div class="tools pt-2" style=display:flex;">
+                        {%comment%}
+                        <a class="btn-tools tools-primary btn-labeled btn-sm folder-to-move ark" data-dismiss="modal" 
+                            data-url="{% url "drive-move-file"%}" data-target="div-files" data-file_id="" data-folder_id="-1" 
+                            data-client_id="{{client.id}}" title="{% trans "Mover fichero" %}"> 
+                            <i class="fas fa-random"></i><span class="d-none d-sm-block">{% trans "Mover aquí" %}</span></a>
+                        {%endcomment%}
+                        <a class="btn-tools tools-primary btn-labeled btn-sm" id="btn-show-childs-0" data-toggle="collapse" href="#div-child-0" 
+                            title="{% trans "Ver subcarpetas" %}">
+                            <i class="fas fa-eye"></i><span class="d-none d-sm-block">{% trans "Ver subcarpetas" %}</span></a>
+                    </div>
+                </div>
+                <hr/>
+
+                <div class="collapse" id="div-child-0" style="padding-left: 2%;">
+                    {% include "project/drive/folder-modal-childs.html" with item_list=client.get_first_level_folders %}
+                </div>
+			</div>
+			<div class="modal-footer"> 
+				<a class="publish btn btn-tools tools-success btn-labeled ark" id="modal-btn-publish" style="display:none" data-dismiss="modal" 
+                    data-url="" data-target="div-list" data-obj_id=""> <i class="fas fa-check-circle"></i> {% trans "Mover" %}</a> 
+				<a class="cancel btn btn-tools tools-danger btn-labeled" data-bs-dismiss="modal"> 
+                    <i class="fas fa-window-close"></i> {% trans "Cerrar" %}</a> 
+			</div>
+		</div>
+	</div>
+</div>
+
+

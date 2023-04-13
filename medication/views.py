@@ -24,7 +24,6 @@ def get_update_params():
     dic["is_running"] = aup.get_is_running()
     dic["total_pages"] = aup.get_total_pages()
     dic["current_page"] = aup.get_current_page()
-    print(dic)
     return dic
 
 @group_required("admins",)

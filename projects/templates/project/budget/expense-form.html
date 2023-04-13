@@ -1,0 +1,32 @@
+{% load i18n %}
+
+
+<div class="d-flex justify-content-end"> <button type="button" class="btn btn-lg" data-bs-dismiss="modal" title="{% trans "Close" %}">
+    <i class="fas fa-times"></i></button> </div>
+
+<h2>{% trans 'Editar Gasto' %}</h2>
+
+<div class="row justify-center">
+    <div class="col-12 mt-3 p-2">
+        <div class="greybox-xlg p-2">
+            {% trans "Descripción" %}
+            <input type="text" class="form-control autosave" id="desc" name="desc" value="{{obj.desc}}" title="{{obj.desc}}" 
+                data-model-name="projects.expense" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" data-target="div-notification"/> 
+                <span id="desc__msg"></span>
+        </div>
+    </div>
+    <div class="col-12 mt-3 p-2">
+        <div class="greybox-xlg p-2">
+            {% trans "Cantidad" %}
+            <input type="text" class="form-control autosave" id="amount" name="amount" value="{{obj.amount}}" title="{{obj.amount}}" 
+                data-model-name="projects.expense" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" data-target="div-notification"/> 
+                <span id="amount__msg"></span>
+        </div>
+    </div>
+</div>
+
+<div class="d-flex justify-content-end">
+    <button type="button" class="btn btn-sm ark save" data-bs-dismiss="modal" data-url="{% url "project-budget" %}"
+        data-target="div-container" data-obj_id="{{obj.project.id}}">{% trans "Save" %}</button>
+</div>
+

@@ -1,9 +1,10 @@
 from django.db.models import Q
+from django.http import HttpResponse
 from django.shortcuts import render, redirect, reverse
 
 from capsulae2.decorators import group_required
 from capsulae2.commons import get_or_none, get_param, show_exc
-from .models import Activity, Project
+from .models import Activity, Expense, Income, File, Folder, Project
 
 
 '''
@@ -67,31 +68,218 @@ def project_activities(request):
     project = get_or_none(Project, get_param(request.GET, "obj_id"))
     return render(request, "project/activities/activity-list.html", {'obj': project})
 
+@group_required("admins","managers")
+def project_budget(request):
+    project = get_or_none(Project, get_param(request.GET, "obj_id"))
+    return render(request, "project/budget/budget-list.html", {'obj': project})
+
+@group_required("admins","managers")
+def project_drive(request):
+    project = get_or_none(Project, get_param(request.GET, "obj_id"))
+    folder_list = project.folders.filter(parent__isnull=True)
+    file_list = project.files.filter(folder__isnull=True)
+    print(file_list)
+    return render(request, "project/drive/drive.html", {'obj': project, 'folder_list': folder_list, 'file_list': file_list})
+
 '''
     Activities
 '''
 @group_required("admins","managers")
 def project_activity_form(request):
     try:
-        print("--a--")
         project = get_or_none(Project, get_param(request.GET, "project_id"))
         if project == None:
             return render(request, 'error_exception.html', {'exc':'Proyecto no encontrado!'})
 
         obj = get_or_none(Activity, request.GET["obj_id"]) if "obj_id" in request.GET else Activity.objects.create(project=project)
-
-        print("--b--")
         return render(request, "project/activities/activity-form.html", {'obj': obj})
     except Exception as e:
         return render(request, 'error_exception.html', {'exc':show_exc(e)})
 
-@group_required("admins",)
+@group_required("admins","managers")
 def project_activity_remove(request):
     try:
         obj = get_or_none(Activity, request.GET["obj_id"])
         project = obj.project
         obj.delete()
-        return render(request, "project/activities/activity-list.html", {'obj': patient})
+        return render(request, "project/activities/activity-list.html", {'obj': project})
     except Exception as e:
         return render(request, 'error_exception.html', {'exc':show_exc(e)})
+
+'''
+    Budget
+'''
+@group_required("admins","managers")
+def project_income_form(request):
+    try:
+        project = get_or_none(Project, get_param(request.GET, "project_id"))
+        if project == None:
+            return render(request, 'error_exception.html', {'exc':'Proyecto no encontrado!'})
+
+        obj = get_or_none(Income, request.GET["obj_id"]) if "obj_id" in request.GET else Income.objects.create(project=project)
+
+        return render(request, "project/budget/income-form.html", {'obj': obj})
+    except Exception as e:
+        return render(request, 'error_exception.html', {'exc':show_exc(e)})
+
+@group_required("admins","managers")
+def project_income_remove(request):
+    try:
+        obj = get_or_none(Income, request.GET["obj_id"])
+        project = obj.project
+        obj.delete()
+        return render(request, "project/budget/budget-list.html", {'obj': project})
+    except Exception as e:
+        return render(request, 'error_exception.html', {'exc':show_exc(e)})
+
+@group_required("admins","managers")
+def project_expense_form(request):
+    try:
+        project = get_or_none(Project, get_param(request.GET, "project_id"))
+        if project == None:
+            return render(request, 'error_exception.html', {'exc':'Proyecto no encontrado!'})
+
+        obj = get_or_none(Expense, request.GET["obj_id"]) if "obj_id" in request.GET else Expense.objects.create(project=project)
+
+        return render(request, "project/budget/expense-form.html", {'obj': obj})
+    except Exception as e:
+        return render(request, 'error_exception.html', {'exc':show_exc(e)})
+
+@group_required("admins","managers")
+def project_expense_remove(request):
+    try:
+        obj = get_or_none(Expense, request.GET["obj_id"])
+        project = obj.project
+        obj.delete()
+        return render(request, "project/budget/budget-list.html", {'obj': project})
+    except Exception as e:
+        return render(request, 'error_exception.html', {'exc':show_exc(e)})
+
+'''
+    Drive
+'''
+@group_required("admins","managers")
+def project_folder_form(request):
+    try:
+        project = get_or_none(Project, get_param(request.GET, "project_id"))
+        if project == None:
+            return render(request, 'error_exception.html', {'exc':'Proyecto no encontrado!'})
+
+        if "obj_id" in request.GET:
+            obj = get_or_none(Folder, request.GET["obj_id"])  
+        else:
+            parent = get_or_none(Folder, request.GET["parent_id"]) if request.GET["parent_id"]  != "" else None 
+            obj = Folder.objects.create(project=project, parent=parent)
+        return render(request, "project/drive/folder-form.html", {'obj': obj})
+    except Exception as e:
+        return render(request, 'error_exception.html', {'exc':show_exc(e)})
+
+
+@group_required("admins","managers")
+def project_folder_change(request):
+    try:
+        obj_id = request.GET["obj_id"]
+        #enter = request.GET["enter"]
+
+        obj = get_or_none(Folder, obj_id)
+        #folder = obj if enter == "True" else obj.parent
+        
+        folder_list = obj.childs.all()
+        file_list = obj.files.all()
+        return render(request, "project/drive/drive.html", {"obj": obj.project, 'folder': obj,'folder_list': folder_list, 'file_list': file_list})
+        #return render(request, "project/drive/drive.html", {"obj": obj.project, 'folder': folder,'folder_list': folder.childs.all()})
+        #perms = get_perms(request, folder)
+        #return render(request, "project/drive/index.html", {"obj": obj.client, 'folder': folder, 'perms': perms})
+    except Exception as e:
+        return render(request, 'error_exception.html', {'exc':show_exc(e)})
+
+@group_required("admins","managers")
+def project_folder_remove(request):
+    try:
+        obj_id = request.GET["obj_id"]
+        folder_id = request.GET["folder_id"]
+
+        obj = get_or_none(Folder, obj_id)
+        if obj != None:
+            project = obj.project
+            obj.delete()
+        folder = get_or_none(Folder, folder_id)
+        folder_list = folder.childs.all() if folder != None else project.folders.filter(parent__isnull=True)
+        file_list = folder.files.all() if folder != None else project.files.filter(folder__isnull=True)
+
+        return render(request, "project/drive/drive.html", {"obj": project, 'folder': folder,'folder_list': folder_list, 'file_list': file_list})
+    except Exception as e:
+        return render(request, 'error_exception.html', {'exc':show_exc(e)})
+
+@group_required("admins","managers")
+def project_file_list(request):
+    try:
+        obj_id = request.GET["obj_id"]
+        obj = get_or_none(File, obj_id)
+        file_list = obj.folder.files.all() if obj.folder != None else obj.project.files.filter(folder__isnull=True)
+        for f in file_list:
+            print(f.name)
+        return render(request, "project/drive/file-list.html", {"obj": obj.project, 'folder': obj.folder, 'file_list': file_list})
+    except Exception as e:
+        return render(request, 'error_exception.html', {'exc':show_exc(e)})
+
+@group_required("admins","managers")
+def project_file_add(request):
+    try:
+        obj_id = request.POST["obj_id"]
+        field = request.POST["field"]
+        folder_id = request.POST["folder"]
+        file_list = request.FILES.getlist('file')
+
+        obj = get_or_none(Project, obj_id)
+        folder = get_or_none(Folder, folder_id)
+        for f in file_list:
+            #f_encrypt = encrypt(f, request.user.username)
+            #obj_file = File(project=obj, proj_file=f_encrypt, name=f_encrypt.name, folder=folder)
+            obj_file = File(project=obj, proj_file=f, name=f.name, folder=folder)
+            obj_file.save()
+
+        file_list = folder.files.all() if folder != None else obj.files.filter(folder__isnull=True)
+        return render(request, "project/drive/file-list.html", {"obj": obj, 'folder': folder, 'file_list': file_list})
+    except Exception as e:
+        print(e)
+        return (render(request, "error_exception.html", {'exc':show_exc(e)}))
+
+@group_required("admins","managers")
+def project_file_form(request):
+    try:
+        obj = get_or_none(File, request.GET["obj_id"])  
+        return render(request, "project/drive/file-form.html", {'obj': obj})
+    except Exception as e:
+        return render(request, 'error_exception.html', {'exc':show_exc(e)})
+
+@group_required("admins","managers")
+def project_file_remove(request):
+    try:
+        obj_id = request.GET["obj_id"]
+
+        obj = get_or_none(File, obj_id)
+        if obj != None:
+            project = obj.project
+            folder = obj.folder
+            obj.delete()
+        file_list = folder.files.all() if folder != None else project.files.filter(folder__isnull=True)
+
+        return render(request, "project/drive/file-list.html", {"obj": project, 'folder': folder, 'file_list': file_list})
+    except Exception as e:
+        return render(request, 'error_exception.html', {'exc':show_exc(e)})
+
+@group_required("admins","managers")
+def project_file_get(request, obj_id):
+    try:
+        f = get_or_none(File, obj_id) 
+        #f_out = decrypt(f.client_file, f.client.password)
+        #response = HttpResponse(f_out, 'application/force-download')
+        #response['Content-Disposition'] = 'attachment; filename="%s"' % (f_out.name)
+        response = HttpResponse(f, 'application/force-download')
+        response['Content-Disposition'] = 'attachment; filename="%s"' % (f.name)
+        return response 
+    except Exception as e:
+        return (render(request, "error_exception.html", {'exc':show_exc(e)}))
+
 
