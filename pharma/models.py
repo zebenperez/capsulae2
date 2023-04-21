@@ -33,8 +33,8 @@ class Pacientes(models.Model):
     apellido = models.CharField(max_length=255, blank=True, null=True, default="")                                  # ***
     sexo = models.CharField(max_length=1)                                                                           # ***
     borrado = models.BooleanField(default=False)
-    created_at = models.DateTimeField(default=datetime.now())
-    updated_at = models.DateTimeField(default=datetime.now())
+    created_at = models.DateTimeField(default=datetime.now)
+    updated_at = models.DateTimeField(default=datetime.now)
 
     cod_postal = models.IntegerField(verbose_name="Cod. postal", blank=True, null=True, default=0)                  # ***
     domicilio = models.CharField(max_length=100, blank=True, null=True, default="")                                 # ***
