@@ -43,7 +43,7 @@ INSTALLED_APPS = [
     'medication',
     'lopd',
     'projects',
-    'mylogin',
+    #'mylogin',
 ]
 
 MIDDLEWARE = [
