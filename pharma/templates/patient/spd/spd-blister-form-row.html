@@ -3,13 +3,13 @@
 <div class="col-8"> {{dm.name}} </div>
 
 <div class="col-2 text-left p-2">
-    <input type="text" class="form-control autosave" id="lote" name="lote" value="{{obj.lote}}" 
+    <input type="text" class="form-control autosave input" id="lote" name="lote" value="{{obj.lote}}" 
         data-model-name="pharma.pillboxdelivermed" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" data-target="div-notification"/> 
         <span id="lote__msg"></span>
 </div> 
 
 <div class="col-2 text-left p-2">
-    <input type="date" class="form-control autosave" id="expiration_date" name="expiration_date" 
+    <input type="date" class="form-control autosave input" id="expiration_date" name="expiration_date" 
         value="{{obj.expiration_date|date:"Y-m-d"}}" data-model-name="pharma.pillboxdelivermed" data-obj-id="{{obj.id}}" 
         data-url="{%url "autosave_field"%}" data-target="div-notification"/> <span id="expiration_date__msg"></span>
 </div>
