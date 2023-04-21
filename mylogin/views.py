@@ -76,7 +76,7 @@ def remote_auth(request):
                     auth.login(request, user)
                     #LogManager(user=user, app=CAT_LOGIN).save_action(request.path, "Inicio Sesión")
 
-                    return redirect(reverse('index'))
+                    return redirect(reverse('pharma-index'))
         return HttpResponse("Sorry. You are not authorized")
     except Exception as e:
         print (show_exc(e))
