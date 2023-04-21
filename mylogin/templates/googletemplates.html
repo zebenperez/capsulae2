@@ -1,0 +1,32 @@
+
+{% load i18n pharmatags %}
+<html>
+    <head>
+        <title>CAPSULAE</title>
+        <script src="https://apis.google.com/js/platform.js" async defer></script>
+        <meta name="google-signin-client_id" content="632813346892-kh88rl6q05g4vdb4pqp7dpn69tkf1rkj.apps.googleusercontent.com">
+    </head>
+    <html>
+         <div class="g-signin2" data-onsuccess="onSignIn"></div>
+            <script>
+                function onSignIn(googleUser)
+                {
+                    var profile = googleUser.getBasicProfile();
+                    id_token = googleUser.getAuthResponse().id_token;
+                    name = profile.getName();
+                    email = profile.getEmail();
+                    csrfmiddlewaretoken=document.getElementsByName('csrfmiddlewaretoken')[0].value;
+                    var xhr = new XMLHttpRequest();
+                    xhr.open('POST', 'http://capsulae.org/mylogin/tokensignin/');
+                    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                    xhr.onload = function (){ location.reload();};
+                    xhr.send('idtoken='+id_token+'&service=google&email='+email+'&name='+name+'&csrfmiddlewaretoken='+csrfmiddlewaretoken);
+
+                }
+                function signOut()
+                {
+                    var auth2=gapi.auth2.getAuthInstance();
+                    auth2.signOut().then(function(){console.log('user signed out');});
+                }
+            </script>
+    </html>
