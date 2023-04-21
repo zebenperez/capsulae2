@@ -328,6 +328,12 @@ function showAlert(body, close) {
     $('#common-modal').modal('show');
 }
 
+function activeEditor(obj) {
+    var id = obj.attr("id");
+    var ref = obj.data("ref");
+    CKEDITOR.replace(id).on('change', function(){$("#"+ref).html(this.getData()).change();});
+}
+
 $(document).ready(()=>{
     $("body").on("keyup", ".autosearch", function(e){
         var obj = $(this);

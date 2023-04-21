@@ -15,7 +15,7 @@
         <div class="col-10">
             <div class="row pointer" onclick="window.location='{%url "project-view" item.id%}'">
                 <div class="col-5">{{ item.name|default:"---" }}</div>
-                <div class="col-5">{{ item.desc }}</div>
+                <div class="col-5">{{ item.desc|safe }}</div>
             </div>
         </div>
         <div class="col-2 text-right">

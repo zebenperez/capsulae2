@@ -11,7 +11,12 @@ urlpatterns = [
 
     #------------------------- PROJECT --------------------
     path('projects/view/<int:project_id>', views.project_view, name='project-view'),
+    path('projects/details/', views.project_details, name='project-details'),
     path('projects/form/', views.project_form, name='project-form'),
+
+    path('projects/texts/', views.project_texts, name='project-texts'),
+    path('projects/text-form/', views.project_text_form, name='project-text-form'),
+    path('projects/text-remove/', views.project_text_remove, name='project-text-remove'),
 
     path('projects/activities/', views.project_activities, name='project-activities'),
     path('projects/activity-form/', views.project_activity_form, name='project-activity-form'),

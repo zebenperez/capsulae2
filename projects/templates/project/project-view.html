@@ -11,8 +11,10 @@
         </div>
     </div>
     <div class="tabs mt-3">
-        <div class="tab-item active ark" data-url="{% url "patient-form" %}" data-target="div-container" data-obj_id="{{obj.id}}"> 
-            <i class="fa fa-user"></i> <span class="hide-mobile">&nbsp; {% trans "Personal" %}</span></div>
+        <div class="tab-item active ark" data-url="{% url "project-details" %}" data-target="div-container" data-obj_id="{{obj.id}}"> 
+            <i class="fa fa-user"></i> <span class="hide-mobile">&nbsp; {% trans "Datos principales" %}</span></div>
+        <div class="tab-item ark" data-url="{% url "project-texts" %}" data-target="div-container" data-obj_id="{{obj.id}}"> 
+            <i class="fa fa-sticky-note"></i> <span class="hide-mobile">&nbsp; {% trans "Anexos" %} ({{obj.texts.all.count}})</span></div>
         <div class="tab-item ark" data-url="{% url "project-activities" %}" data-target="div-container" data-obj_id="{{obj.id}}"> 
             <i class="fa fa-barcode"></i> <span class="hide-mobile">&nbsp; {% trans "Actividades" %} ({{obj.activities.all.count}})</span></div>
         <div class="tab-item ark" data-url="{% url "project-budget" %}" data-target="div-container" data-obj_id="{{obj.id}}"> 
@@ -22,7 +24,7 @@
             <i class="fa fa-database"></i> <span class="hide-mobile">&nbsp; {% trans "Drive" %} </span></div>
     </div>
 
-    <div id="div-container">{% include "project/project-form.html" %}</div>
+    <div id="div-container">{% include "project/project-details.html" %}</div>
     
     {% include "common-modal.html" %} 
 

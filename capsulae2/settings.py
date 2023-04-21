@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'medication',
     'lopd',
     'projects',
+    'mylogin',
 ]
 
 MIDDLEWARE = [
@@ -139,3 +140,4 @@ try:
     from .local_settings import *
 except Exception as e:
     print(str(e))
+

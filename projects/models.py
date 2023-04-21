@@ -6,6 +6,7 @@ import datetime
 
 class Project(models.Model):
     name = models.CharField(max_length=255, verbose_name="Name", default="")
+    end_date = models.CharField(max_length=255, verbose_name="Fecha de ejecución", default="")
     desc = models.TextField(verbose_name="Descripción", default="")
     manager = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, null=True) 
 
@@ -15,6 +16,18 @@ class Project(models.Model):
     class Meta:
         verbose_name="Proyecto"
         verbose_name_plural = "Proyectos"
+
+class Text(models.Model):
+    name = models.CharField(max_length=255, verbose_name="Name", default="")
+    desc = models.TextField(verbose_name="Descripción", default="")
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, blank=True, null=True, related_name="texts")  
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name="Texto alternativo"
+        verbose_name_plural = "Textos alternativos"
 
 class Activity(models.Model):
     name = models.CharField(max_length=255, verbose_name="Name", default="")

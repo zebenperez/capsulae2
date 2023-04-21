@@ -4,7 +4,7 @@ from django.shortcuts import render, redirect, reverse
 
 from capsulae2.decorators import group_required
 from capsulae2.commons import get_or_none, get_param, show_exc
-from .models import Activity, Expense, Income, File, Folder, Project
+from .models import Activity, Expense, Income, File, Folder, Project, Text
 
 
 '''
@@ -59,9 +59,19 @@ def project_view(request, project_id):
     return render(request, "project/project-view.html", {'obj': project})
 
 @group_required("admins","managers")
+def project_details(request):
+    project = get_or_none(Project, get_param(request.GET, "obj_id"))
+    return render(request, "project/project-details.html", {'obj': project})
+
+@group_required("admins","managers")
 def project_form(request):
     project = get_or_none(Project, get_param(request.GET, "obj_id"))
     return render(request, "project/project-form.html", {'obj': project})
+
+@group_required("admins","managers")
+def project_texts(request):
+    project = get_or_none(Project, get_param(request.GET, "obj_id"))
+    return render(request, "project/texts/text-list.html", {'obj': project})
 
 @group_required("admins","managers")
 def project_activities(request):
@@ -80,6 +90,32 @@ def project_drive(request):
     file_list = project.files.filter(folder__isnull=True)
     print(file_list)
     return render(request, "project/drive/drive.html", {'obj': project, 'folder_list': folder_list, 'file_list': file_list})
+
+'''
+    Texts
+'''
+@group_required("admins","managers")
+def project_text_form(request):
+    try:
+        project = get_or_none(Project, get_param(request.GET, "project_id"))
+        if project == None:
+            return render(request, 'error_exception.html', {'exc':'Proyecto no encontrado!'})
+
+        obj = get_or_none(Text, request.GET["obj_id"]) if "obj_id" in request.GET else Text.objects.create(project=project)
+        return render(request, "project/texts/text-form.html", {'obj': obj})
+    except Exception as e:
+        return render(request, 'error_exception.html', {'exc':show_exc(e)})
+
+@group_required("admins","managers")
+def project_text_remove(request):
+    try:
+        obj = get_or_none(Text, request.GET["obj_id"])
+        project = obj.project
+        obj.delete()
+        return render(request, "project/texts/text-list.html", {'obj': project})
+    except Exception as e:
+        return render(request, 'error_exception.html', {'exc':show_exc(e)})
+
 
 '''
     Activities
