@@ -5,7 +5,7 @@
 
 {% block central_content %}
     <div class="row" style="margin:0px;">
-        <div class="col-lg-6 col-md-12">
+        <div class="col-8">
             <div class="stat-box color-2"> <div class="stat-box-body"> <div class="stat-widget-five">
                 <div class="stat-icon flat-color-2"><i class="fa fa-pills"></i></div>
                 <div class="stat-content">
@@ -16,24 +16,36 @@
             </div> </div> </div>
         </div>
  
-        <div class="col-lg-3 col-md-12">
-            <div class="stat-box color-1"> <div class="stat-box-body" style="padding:0px !important;margin:0px;"> <div class="stat-widget-five">
-                <div class="stat-icon flat-color-1"><i class="fas fa-users"></i></div>
-                <div class="stat-content">
-                    <div class="stat-title"><span class="count-title">{% trans "Pacientes" %}</span></div>
-                    <div class="stat-number">10</div>
-               </div>
-            </div> </div> </div>
+        <div class="col-4">
+            <div class="row">
+                <div class="col-12">
+                    <div class="stat-box color-1"> 
+                        <div class="stat-box-body" style="padding:0px !important;margin:0px;"> 
+                            <div class="stat-widget-five">
+                                <div class="stat-icon flat-color-1"><i class="fas fa-users"></i></div>
+                                <div class="stat-content">
+                                    <div class="stat-title"><span class="count-title">{% trans "Pacientes" %}</span></div>
+                                    <div class="stat-number">10</div>
+                                </div>
+                            </div> 
+                        </div> 
+                    </div>
+                </div>
+                <div class="col-12">
+                    <div class="stat-box color-3"> 
+                        <div class="stat-box-body"> 
+                            <div class="stat-widget-five">
+                                <div class="stat-icon flat-color-4"><i class="fa fa-barcode"></i></div>
+                                <div class="stat-content">
+                                    <div class="stat-title"><span class="count-title">{% trans "Medicamentos" %}</span></div>
+                                    <div class="stat-number">30</div>
+                                </div>
+                            </div> 
+                        </div> 
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="col-lg-3 col-md-12">
-            <div class="stat-box color-3"> <div class="stat-box-body"> <div class="stat-widget-five">
-                <div class="stat-icon flat-color-4"><i class="fa fa-barcode"></i></div>
-                <div class="stat-content">
-                    <div class="stat-title"><span class="count-title">{% trans "Medicamentos" %}</span></div>
-                    <div class="stat-number">30</div>
-                </div>
-            </div> </div> </div>
-        </div>
     </div>
 {% endblock central_content %}

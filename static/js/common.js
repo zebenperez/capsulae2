@@ -725,6 +725,22 @@ $(document).ready(()=>{
         obj.find('i').toggleClass('fa-chevron-down fa-chevron-up')
     });
 
+    $("body").on("click", ".check-row", function(e){
+        var active = $(this).data("active");
+        var row = $(this).data("row");
+        if (active != "")
+        {
+            $("."+row).hide();
+            $("."+row).each(function(){
+                if ($(this).data("active") == active)
+                    $(this).show();
+            });
+        }
+        else
+            $("."+row).show();
+
+    });
+
 });
 
 

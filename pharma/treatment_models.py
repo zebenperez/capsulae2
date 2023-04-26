@@ -70,6 +70,16 @@ class Tratamiento(models.Model):
             print ("[Tratamiento name property error] %s"%str(e))
         return "--"
 
+    @property
+    def atcs_last(self):
+        try:
+            atcs = self.medicamentos.all().first().atcs.split(",")
+            return atcs[len(atcs)-1]
+        except Exception as e:
+            print ("[Tratamiento name property error] %s"%str(e))
+        return "--"
+
+
 #    @property
 #    def edo_alergic(self):
 #        if (self.edo is not None):
@@ -131,6 +141,7 @@ class Tratamiento(models.Model):
         db_table = 'tratamiento'
         verbose_name = 'tratamiento'
         verbose_name_plural = 'tratamientos'
+        ordering = ['medicamentos__atcs','-fecha_inicio']
 
 class MedicamentoTratamiento(models.Model):
     name = models.CharField(max_length=350)
