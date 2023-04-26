@@ -7,6 +7,8 @@ from .treatment_models import Tratamiento
 from account.models import EmployeeProfile
 from capsulae2.commons import get_random_str
 
+PILLBOX_EXPIRATION_DATE = 90
+
 
 class Pillbox(models.Model):
     active = models.BooleanField(verbose_name="Activo", default=True)

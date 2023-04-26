@@ -13,7 +13,7 @@
 <div class="row">
     {% for item in deliveries %}
         <div class="col-3">
-            <div class="row blister-box mb-3">
+            <div class="row blister-box mb-3 {%if forloop.counter == 1%}border border-success border-3{%endif%}">
                 <div class="col-4 left-blue p-2">{% trans "Código" %}:</div><div class="col-8 p-2"> {{ item.code }}</div>
                 <div class="col-4 left-blue p-2">{% trans "Preparación" %}:</div><div class="col-8 p-2"><span class="text text-warning"> {{ item.creation_date|date:"d-m-Y"|default_if_none:"--"}}</span></div>
                 <div class="col-4 left-blue p-2">{% trans "Entrega" %}:</div><div class="col-8 p-2"> {{ item.deliver_date|date:"d-m-Y"|default_if_none:"--" }}</div>

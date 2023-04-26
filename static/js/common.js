@@ -397,6 +397,8 @@ $(document).ready(()=>{
             ajaxGetAppend(url, datas, target, target_modal);
             if (obj.data("show"))
                 $("#" + obj.data("show")).show();
+            if (obj.data("hide"))
+                $("#" + obj.data("hide")).hide();
             e.preventDefault();
         }
     });

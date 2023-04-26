@@ -1,22 +1,6 @@
 {% load i18n %}
 
-<div class="small-info p-2">* Sin LOPD en los últimos 15 días</div>
 
-<div class="row patient-list-head" style="margin:0;">
-	<div class="col-12">
-		<div class="row main-th small small pt-3 pb-3">
-		    <div class="col-11">
-                <div class="row">
-                    <div class="col-2"> {% trans 'Historial' %} </div>
-                    <div class="col-6"> {% trans 'Nombre' %} </div>
-                    <div class="col-3"> {% trans 'CIP' %} </div>
-                    <div class="col-1"> {% trans 'Edad' %} </div>
-		        </div>
-		    </div>
-		</div>
-	</div>
-</div>
-{#<div class="row patient-list-line" style="margin:0;">#}
 {% for item in items %}
     <div class="row line small pt-2 pb-2" id="row_{{item.id}}" style="margin:0;">
         <div class="col-11">
@@ -43,5 +27,11 @@
         </div>
     </div>
 {% endfor %}
-{#</div>#}
+
+{% if start %}
+    <div class="text-center" id="btn-more-{{start}}">
+        <a class="btn btn-sm new ark-append" id="load-patient-list" data-url="{% url "patient-list" %}" data-target="patient-list"
+            data-start="{{start}}" data-end="{{end}}" data-hide="btn-more-{{start}}">{% trans "Ver mas" %}</a>
+    </div>
+{% endif %}
 

@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n static %}
 
 <div class="row toolbar-search pt-2 pb-2 m-0">
     <div class="col-lg-1 col-1"><i class="fas fa-search"></i></div>
@@ -17,12 +17,12 @@
     <thead>
         <tr class="small small">
             <th class="row main-th">
-                <div class="col-4"> {% trans 'Nombre' %} </div>
-                <div class="col-3"> {% trans 'ATC' %} </div>
-                <div class="col-1"> {% trans 'M' %} </div>
-                <div class="col-1"> {% trans 'T' %} </div>
-                <div class="col-1"> {% trans 'N' %} </div>
-                <div class="col-1"> {% trans 'O' %} </div>
+                <div class="col-7"> {% trans 'Nombre' %} </div>
+                {#<div class="col-3"> {% trans 'ATC' %} </div>#}
+                <div class="col-1"> <img src="{% static "imgs/desayuno.jpg" %}" style="width:20px"/> </div>
+                <div class="col-1"> <img src="{% static "imgs/comida.jpg" %}" style="width:20px"/> </div>
+                <div class="col-1"> <img src="{% static "imgs/cena.jpg" %}" style="width:20px"/> </div>
+                <div class="col-1"> <img src="{% static "imgs/noche.jpg" %}" style="width:20px"/> </div>
                 <div class="col-1"></div>
             </th>
         </tr>
@@ -31,8 +31,8 @@
         {% for item in obj.tratamientos.all %}
             <tr class="small" id="row_{{item.id}}">
                 <td class="row">
-                    <div class="col-4">{{ item.name }}</div>
-                    <div class="col-3">{{ item.atcs }}</div>
+                    <div class="col-7">{{ item.name }}</div>
+                    {#<div class="col-3">{{ item.atcs }}</div>#}
                     <div class="col-1">{{ item.m }}</div>
                     <div class="col-1">{{ item.t }}</div>
                     <div class="col-1">{{ item.n }}</div>

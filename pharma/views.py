@@ -29,7 +29,7 @@ def index(request):
 '''
     Patients
 '''
-def get_patients(user, search_value=""):
+def get_patients(user, search_value="", start=0, end=50):
     filters_to_search = ["n_historial__icontains", "nombre__icontains", "apellido__icontains", "cip__icontains"]
 
     full_query = Q()
@@ -40,7 +40,7 @@ def get_patients(user, search_value=""):
 
     # Pacientes con lopd firmada
     lopd_patient_ids = LOPDConsents.objects.all().distinct().values_list('paciente', flat=True)
-    lopd_list = list(Pacientes.objects.filter(full_query).filter(id__in=lopd_patient_ids))
+    lopd_list = list(Pacientes.objects.filter(full_query).filter(id__in=lopd_patient_ids)[start:end])
 
     # Pacientes sin lopd firmada pero creados en los últimos 15 días
     limit = datetime.today() - timedelta(days=15)
@@ -48,8 +48,10 @@ def get_patients(user, search_value=""):
 
     return date_list + lopd_list
 
-def get_patient_context(user, search_value=""):
-    return {'items': get_patients(user, search_value)}
+def get_patient_context(user, search_value="", start=0, end=50):
+    if (search_value == ""):
+        return {'items': get_patients(user, search_value, start, end), 'start': (start+end), 'end': (end+end)}
+    return {'items': get_patients(user, search_value, start, end),}
 
 @group_required("admins",)
 def patients(request):
@@ -58,7 +60,9 @@ def patients(request):
 
 @group_required("admins",)
 def patient_list(request):
-    return render(request, "patients/patient-list.html", get_patient_context(request.user))
+    start = int(request.GET["start"]) if "start" in request.GET else 0
+    end = int(request.GET["end"]) if "end" in request.GET else 50
+    return render(request, "patients/patient-list.html", get_patient_context(request.user, "", start, end))
 
 @group_required("admins",)
 def patient_search(request):

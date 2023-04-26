@@ -1,7 +1,9 @@
 from django import template
 from django.utils.safestring import mark_safe
+from datetime import datetime, timedelta
 
 from capsulae2.settings import BASE_DIR
+from pharma.spd_models import Pillbox
 
 import os
 
@@ -43,3 +45,16 @@ def userqr_code(request, paciente):
     out="{}://{}{}{}".format(request.scheme, request.get_host(), rpath, filename)
     return out
 
+'''
+    Inclusion Tags
+'''
+@register.inclusion_tag('pillbox-list.html')
+def get_pillbox_list(user):
+    now = datetime.now().date() - timedelta(days=365)
+    pillboxes = Pillbox.objects.filter(patient__id_user=user, active=True, pillbox_delivers__finish_date__gte=now).distinct()
+
+    delivers = [pillbox.last_deliver for pillbox in pillboxes]
+    delivers = sorted(delivers, key=lambda d: d.finish_date)
+
+    return {'delivers': delivers}
+ 

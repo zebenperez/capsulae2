@@ -1,0 +1,53 @@
+{% load i18n %}
+
+
+{% if delivers|length > 0 %}
+     <table class="table table-striped table-hover table-condensed col-xs-12" style="">
+        <thead>
+            <tr class="info">
+                <th>Paciente </th>
+                <th> Descripción</th>
+                <th> Praparación</th>
+                <th> Entrega </th>
+                <th> Finalización </th>
+                {#<th></th>#}
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for deliver in delivers %} {% with item=deliver.pillbox %}
+                <tr class="small">
+                    <td><a href="{% url "patient-view" item.patient.id %}#cap-panel-view-content">{{ item.patient }}</a></td>
+                    <td>
+                        {%if item.is_expired%}<i class="fas fa-ban text-danger" title="Pastillero caducado"></i>{%endif%} {{item.description}}
+                    </td>
+                    <td class="text-warning">{{deliver.creation_date|date:"d-m-Y"|default:"--"}}</td>
+                    <td>{{deliver.deliver_date|date:"d-m-Y"|default:"--"}}</td>
+                    <td>{{deliver.finish_date|date:"d-m-Y"|default:"--"}}</td>
+                    {%comment%}
+                    <td class="text-right">
+                        <a class="btn btn-default btn-sm ga-ajax-load" href="{% url 'entrega_pastillero_ver' deliver.pk %}"
+                            title="Ver último pastillero"
+                            data-ga-target="modal" data-ga-modal-title="Detalles del Pastillero" > <i class="fas fa-eye"></i></a>
+                        <a class="btn btn-default btn-sm" href="{% url "pillbox_create_file" deliver.pk %}"
+                            title="Generar fichero"> <i class="fas fa-file"></i></a>
+                        <a class="btn btn-default btn-sm" target="_blank" href="{% url "imprimir_hoja_spd" deliver.pk %}"
+                            title="Imprimir último pastillero preparado"><i class="fas fa-print"></i></a>
+
+                        <a class="btn btn-default btn-sm" target="_blank" href="{% url "pillbox_print_group_spd" deliver.pk %}"
+                            title="Imprimir por grupo de dirección"><i class="fas fa-users"></i></a>
+
+                        <a id="a_{{ item.pk }}" class="btn btn-success ga-ajax-load btn-sm" data-ga-target="modal"
+                            data-ga-modal-title="Nuevo pastillero" data-ga-modal-id="pillbox_deliver_modal"
+                            title="Nuevo pastillero"
+                             href="{% url 'entrega_pastillero_nueva_modal' item.pk %}">
+                            <i class="fas fa-hand-holding-medical"></i>
+                        </a>
+                    </td>
+                    {%endcomment%}
+                </tr>
+            {% endwith %} {% endfor %}
+        </tbody>
+    </table>
+{% endif %}
+
