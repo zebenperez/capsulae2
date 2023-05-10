@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'lopd',
     'projects',
     'mylogin',
+    'community',
 ]
 
 MIDDLEWARE = [

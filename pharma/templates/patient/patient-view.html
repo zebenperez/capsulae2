@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load i18n %}
+{% load i18n common_tags %}
 
 {% block central_content %} 
     <div class="content"> 
@@ -14,14 +14,26 @@
     <div class="tabs mt-3">
         <div class="tab-item active ark" data-url="{% url "patient-form" %}" data-target="div-container" data-obj_id="{{obj.id}}"> 
             <i class="fa fa-user"></i> <span class="hide-mobile">&nbsp; {% trans "Personal" %}</span></div>
-        <div class="tab-item ark" data-url="{% url "patient-treatment" %}" data-target="div-container" data-obj_id="{{obj.id}}"> 
-            <i class="fa fa-barcode"></i> <span class="hide-mobile">&nbsp; {% trans "Tratamientos" %} ({{obj.tratamientos.all.count}})</span></div>
-        <div class="tab-item ark" data-url="{% url "patient-allergy" %}" data-target="div-container" data-obj_id="{{obj.id}}">
-            <i class="fas fa-allergies"></i><span class="hide-mobile">&nbsp; {% trans "Alergias" %} (0)</span></div>
-        <div class="tab-item ark" data-url="{% url "patient-spd" %}" data-target="div-container" data-obj_id="{{obj.id}}">
-            <i class="fa fa-pills"></i><span class="hide-mobile">&nbsp; {% trans "Pastilleros" %} ({{obj.pillboxes.all.count}})</span></div>
-        <div class="tab-item ark" data-url="{% url "patient-lopd" %}" data-target="div-container" data-obj_id="{{obj.id}}">
-            <i class="fa fa-gavel"></i><span class="hide-mobile">&nbsp; {% trans "LOPD" %} ({{obj.lopd.all.count}})</span></div>
+        {% if user|have_menu:"TRA"%}
+            <div class="tab-item ark" data-url="{% url "patient-treatment" %}" data-target="div-container" data-obj_id="{{obj.id}}"> 
+                <i class="fa fa-barcode"></i> <span class="hide-mobile">&nbsp; {% trans "Tratamientos" %} ({{obj.get_active_treatments}})</span></div>
+        {% endif %}
+        {% if user|have_menu:"ALE"%}
+            <div class="tab-item ark" data-url="{% url "patient-allergy" %}" data-target="div-container" data-obj_id="{{obj.id}}">
+                <i class="fas fa-allergies"></i><span class="hide-mobile">&nbsp; {% trans "Alergias" %} (0)</span></div>
+        {% endif %}
+        {% if user|have_menu:"SPD"%}
+            <div class="tab-item ark" data-url="{% url "patient-spd" %}" data-target="div-container" data-obj_id="{{obj.id}}">
+                <i class="fa fa-pills"></i><span class="hide-mobile">&nbsp; {% trans "Pastilleros" %} ({{obj.pillboxes.all.count}})</span></div>
+        {% endif %}
+        {% if user|have_menu:"LOPD"%}
+            <div class="tab-item ark" data-url="{% url "patient-lopd" %}" data-target="div-container" data-obj_id="{{obj.id}}">
+                <i class="fa fa-gavel"></i><span class="hide-mobile">&nbsp; {% trans "LOPD" %} ({{obj.lopd.all.count}})</span></div>
+        {% endif %}
+        {% if user|have_menu:"EVO"%}
+            <div class="tab-item ark" data-url="{% url "patient-evolutionary" %}" data-target="div-container" data-obj_id="{{obj.id}}">
+                <i class="fa fa-history"></i><span class="hide-mobile">&nbsp; {% trans "Evolutivo" %} ({{obj.evolutionary.all.count}})</span></div>
+        {% endif %}
     </div>
 
     <div id="div-container">{% include "patient/patient-form.html" %}</div>

@@ -91,6 +91,9 @@ class Pacientes(models.Model):
         except Exception:
             return "--"
 
+    def get_active_treatments(self):
+        return self.tratamientos.filter(activo=True).count()
+
     def __str__(self):
         return self.n_historial if self.n_historial != None else self.nombre
         # return self.__unicode__()

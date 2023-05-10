@@ -3,8 +3,8 @@ from django.http import HttpResponse
 from django.shortcuts import render, redirect, reverse
 
 from capsulae2.decorators import group_required
-from capsulae2.commons import get_or_none, get_param, show_exc
-from .models import Activity, Expense, Income, File, Folder, Project, Text
+from capsulae2.commons import get_or_none, get_param, show_exc, validate_captcha
+from .models import Activity, ActivityUser, Expense, Income, File, Folder, Project, Text
 
 
 '''
@@ -141,6 +141,45 @@ def project_activity_remove(request):
         return render(request, "project/activities/activity-list.html", {'obj': project})
     except Exception as e:
         return render(request, 'error_exception.html', {'exc':show_exc(e)})
+
+#@group_required("admins","managers")
+def project_activity_register(request, activity_id):
+    try:
+        obj = get_or_none(Activity, activity_id)
+        return render(request, "project/activities/register-form.html", {'obj': obj, 'end': False})
+    except Exception as e:
+        return render(request, 'error_exception.html', {'exc':show_exc(e)})
+
+def project_activity_set_register(request):
+    try:
+        activity_id = request.POST["activity_id"]
+        name = request.POST["name"]
+        email = request.POST["email"]
+
+        obj = get_or_none(Activity, activity_id)
+        end = False
+        msg = ""
+        if validate_captcha(request) or True:
+            au = ActivityUser.objects.filter(activity=obj, name=name, email=email).first()
+            if au == None:
+                au = ActivityUser.objects.create(activity=obj, name=name, email=email)
+                end = True
+            else:
+                msg = "Este usuario ya se ha registrado!"
+        else:
+            msg = "Debe indicar que no es un robot!"
+        return render(request, "project/activities/register-form.html", {'obj': obj, "end": end, "msg": msg})
+    except Exception as e:
+        return render(request, 'error_exception.html', {'exc':show_exc(e)})
+
+@group_required("admins","managers")
+def project_activity_register_list(request):
+    try:
+        obj = get_or_none(Activity, request.GET["obj_id"])
+        return render(request, "project/activities/register-list.html", {'obj': obj,})
+    except Exception as e:
+        return render(request, 'error_exception.html', {'exc':show_exc(e)})
+
 
 '''
     Budget

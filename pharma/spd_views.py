@@ -19,7 +19,7 @@ from .common_lib import PILLBOX_ADVISE
 '''
     SPD
 '''
-@group_required("admins",)
+@group_required("admins","managers")
 def spd_form(request):
     try:
         patient = get_or_none(Pacientes, request.GET["patient_id"])
@@ -36,7 +36,7 @@ def spd_form(request):
         print(e)
         return render(request, 'error_exception.html', {'exc':show_exc(e)})
 
-@group_required("admins",)
+@group_required("admins","managers")
 def spd_remove(request):
     try:
         pillbox = get_or_none(Pillbox, request.GET["obj_id"])
@@ -46,7 +46,7 @@ def spd_remove(request):
     except Exception as e:
         return render(request, 'error_exception.html', {'exc':show_exc(e)})
 
-@group_required("admins",)
+@group_required("admins","managers")
 def spd_toggle_treatment(request):
     try:
         treatment = get_or_none(Tratamiento, request.GET["treatment_id"])
@@ -62,7 +62,7 @@ def spd_toggle_treatment(request):
         print(e)
         return render(request, 'error_exception.html', {'exc':show_exc(e)})
 
-@group_required("admins",)
+@group_required("admins","managers")
 def spd_toggle_treatment_blister(request):
     try:
         treatment = get_or_none(Tratamiento, request.GET["treatment_id"])
@@ -76,7 +76,7 @@ def spd_toggle_treatment_blister(request):
         print(e)
         return render(request, 'error_exception.html', {'exc':show_exc(e)})
 
-@group_required("admins",)
+@group_required("admins","managers")
 def spd_active_toggle(request):
     try:
         obj = get_or_none(Pillbox, request.GET["obj_id"])
@@ -89,7 +89,7 @@ def spd_active_toggle(request):
 '''
     Blisters
 '''
-@group_required("admins",)
+@group_required("admins","managers")
 def spd_blisters(request):
     try:
         obj = get_or_none(Pillbox, request.GET["obj_id"])
@@ -98,7 +98,7 @@ def spd_blisters(request):
     except Exception as e:
         return render(request, 'error_exception.html', {'exc':show_exc(e)})
 
-@group_required("admins",)
+@group_required("admins","managers")
 def spd_blister_form(request):
     try:
         pillbox = get_or_none(Pillbox, request.GET["pillbox_id"])
@@ -122,7 +122,7 @@ def spd_blister_form(request):
         print(e)
         return render(request, 'error_exception.html', {'exc':show_exc(e)})
 
-@group_required("admins",)
+@group_required("admins","managers")
 def spd_blister_remove(request):
     try:
         obj = get_or_none(PillboxDeliver, request.GET['obj_id'])  
@@ -135,7 +135,7 @@ def spd_blister_remove(request):
         print(e)
         return render(request, 'error_exception.html', {'exc':show_exc(e)})
 
-@group_required("admins",)
+@group_required("admins","managers")
 def spd_blister_print(request, pd_id):
     try:
         obj = get_or_none(PillboxDeliver, pd_id)  

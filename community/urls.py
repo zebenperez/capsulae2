@@ -1,0 +1,35 @@
+from django.urls import path
+from community import views
+
+urlpatterns = [
+    #------------------------- ORGANIZATIONS --------------------
+    path('organizations/', views.organizations, name='organizations'),
+    path('organizations/list/', views.organization_list, name='organization-list'),
+    path('organizations/search/', views.organization_search, name='organization-search'),
+    path('organizations/form/', views.organization_form, name='organization-form'),
+    path('organizations/remove/', views.organization_remove, name='organization-remove'),
+
+
+#    url(r'^patient/(?P<patient_id>\d+)/$', views.patient_community, name="patient_community"),
+#    url(r'^patient/activities/(?P<patient_id>\d+)$', views.patient_activities, name="patient_activities"),
+#
+#    url(r'^patient/fci/form/(?P<patient_id>\d+)$', views.remote_fci_form, name="remote_fci_form"),
+#
+#    url(r'^referral_form/(?P<history_num>\w+)/$', views.referral_form, name="referral_form"),
+#    url(r'^referral_form/(?P<history_num>\w+)/(?P<evolutionary_id>\w+)/$', views.referral_form, name="referral_form"),
+#    url(r'^referral_form/(?P<history_num>\w+)/(?P<evolutionary_id>\w+)/(?P<view>\w+)/$', views.referral_form, name="referral_form"),
+#    url(r'^send_form/$', views.send_form, name="send_form"),
+#
+#    url(r'^organizations/$', views.organizations, name='organizations'),
+#    url(r'^organizations/search_remote/$', views.organizations_search_remote, name='organizations_search_remote'),
+#    url(r'^organizations/add/$', views.organizations_add, name='organizations_add'),
+#    url(r'^organizations/save/$', views.organizations_save, name='organizations_save'),
+#    url(r'^organizations/edit/(?P<item_id>\d+)/$', views.organization_edit, name='organization_edit'),
+#    url(r'^organizations/delete/(?P<item_id>\d+)/$', views.organization_delete, name='organization_delete'),
+#
+#
+#    url(r'^patientorg/add/(?P<patient_id>\d+)$', views.patientorg_add, name="patientorg_add"),
+#    url(r'^patientorg/edit/(?P<patientorg_id>\d+)$', views.patientorg_edit, name="patientorg_edit"),
+#    url(r'^patientorg/save/$', views.patientorg_save, name="patientorg_save"),
+#    url(r'^patientorg/delete/(?P<patientorg_id>\d+)$', views.patientorg_delete, name="patientorg_delete"),
+]

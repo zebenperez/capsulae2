@@ -1,0 +1,40 @@
+{% load i18n %}
+
+
+<div class="row">
+    <div class="col-11"> <h2><i class="fa fa-history"></i>&nbsp; {% trans 'Modificar Organización' %}</h2> </div>
+    <div class="col-1">
+        <div class="d-flex justify-content-end"> <button type="button" class="btn btn-lg" data-bs-dismiss="modal" title="{% trans "Close" %}">
+            <i class="fas fa-times"></i></button> </div>
+    </div>
+</div>
+
+<span id="div-notification-org"></span><br/>
+
+<div class="row justify-center">
+    <div class="col-4">
+        <input type="text" class="form-control autosave blister-description" id="rol" name="rol" value="{{obj.rol}}" 
+            title="{{obj.rol}}" data-model-name="community.patientorg" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+            data-target="div-notification-org" placeholder="Rol..." /> <span id="rol__msg"></span>
+    </div>
+    <div class="col-8">
+        <select class="form-control autosave" id="organization" name="organization" data-model-name="community.patientorg" data-obj-id="{{obj.id}}" 
+            data-url="{%url "autosave_field"%}" data-target="div-notification-org">
+            <option value="">-- {% trans "Seleccione una organización" %} --</option>
+            {% for org in org_list %}
+                <option value="{{org.id}}" {%if org == obj.organization%}selected{%endif%}>{{org.name}}</option>
+            {% endfor%}
+        </select>
+    </div>
+    <div class="col-12">
+        <textarea class="form-control autosave blister-description" id="obs" name="obs" title="{{obj.obs}}" data-model-name="community.patientorg" 
+            data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" data-target="div-notification-org" placeholder="Observations..."> 
+            {{obj.obs|safe}}</textarea> <span id="rol__msg"></span>
+    </div>
+</div>
+
+<div class="d-flex justify-content-end">
+    <button type="button" class="btn btn-sm ark save" data-bs-dismiss="modal" data-url="{% url "patient-orgs" %}"
+        data-target="patient-org-container" data-obj_id="{{obj.patient.id}}">{% trans "Guardar" %}</button>
+</div>
+

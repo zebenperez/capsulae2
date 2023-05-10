@@ -21,6 +21,9 @@ urlpatterns = [
     path('projects/activities/', views.project_activities, name='project-activities'),
     path('projects/activity-form/', views.project_activity_form, name='project-activity-form'),
     path('projects/activity-remove/', views.project_activity_remove, name='project-activity-remove'),
+    path('projects/activity-register/<int:activity_id>/', views.project_activity_register, name='project-activity-register'),
+    path('projects/activity-set-register/', views.project_activity_set_register, name='project-activity-set-register'),
+    path('projects/activity-register-list/', views.project_activity_register_list, name='project-activity-register-list'),
 
     path('projects/budget/', views.project_budget, name='project-budget'),
     path('projects/income-form/', views.project_income_form, name='project-income-form'),

@@ -115,3 +115,24 @@ class EmployeeProfile(models.Model):
         verbose_name="Perfil Empleado"
         verbose_name_plural ="Perfiles Empleados"
 
+
+class Menu(models.Model):
+    code = models.SlugField(verbose_name="Codigo", max_length=50, unique="True")
+    name = models.CharField(verbose_name="Nombre", max_length=150, blank=True, null=True)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name="Menu"
+        verbose_name_plural="Menus"
+        ordering = ["code"]
+
+class UserMenu(models.Model):
+    menus = models.ManyToManyField(Menu, verbose_name="Menus", related_name="users", blank=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="menus")
+
+    class Meta:
+        verbose_name = "Menu de usuario"
+
+

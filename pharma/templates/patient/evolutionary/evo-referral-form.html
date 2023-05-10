@@ -1,0 +1,203 @@
+{% load i18n static %}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="UTF-8">
+	<title>{% trans "Formulario de derivación para "%} {{ patient.history_number }}</title>
+	<link rel="stylesheet" href="{% static 'community/css/colors.css' %}">
+	<link rel="stylesheet" href="{% static 'community/css/documents.css' %}">
+	<link rel="stylesheet" href="{% static 'community/css/referral-form.css' %}">
+	<script src="{% static 'community/js/referral-form.js' %}"></script>
+</head>
+<body>
+    <form action="{% url "evolutionary-send-form" %}" method="POST"/>
+    {%csrf_token%}
+    <input type="hidden" name="patient" value="{{patient.id}}"/>
+    <input type="hidden" name="company" value="{{company.id}}"/>
+    <div class="print-btn-container"> 
+        <button type="submit" class="print-btn" id="print-btn"> &#9993; {% trans "Enviar por email" %}</button>
+        <a class="print-btn" id="print-btn" onclick="window.print()"> &#128424; {% trans "Imprimir" %}</a> 
+    </div>
+	<div class="page">
+		<div class="page-wrapper">
+            <div class="header"> 
+                <div class="fundec-logo"> <img src="{% static 'community/images/fundec-logo.png' %}" alt="Fundec"/> </div> 
+                <div class="company-logo"> 
+                    {% if company.image %}
+                        <img src="{{company.image.url}}" alt="{{company.name}}" style="height:60px"/> 
+                    {% else %}
+                        <img src="{% static 'community/images/capsulae-logo.png' %}" alt="Capsulae"/> 
+                    {% endif %}
+                </div>
+            </div>
+			<div class="content">
+				<h2 class="main-title"> {% trans "Hoja de derivación por riesgo sociosanitario" %}</h2>
+				<div class="patient-data">
+					<strong> {% trans "Datos del Paciente" %} </strong>
+					<input type="text" value="{{ patient.full_name }} {{ patient.nif }}" class="print-input print-input-lg" 
+                        {% if view %}disabled{% endif %}>
+				</div>
+				<div class="entity-data">
+					<strong> {% trans "Datos de la entidad a la que se deriva" %} </strong>
+					{#<input type="text" value="" class="print-input print-input-lg">#}
+                    <select class="print-input print-input-lg" name="organization" {% if view %}disabled{% endif %}>
+                        {% for org in org_list %}
+                            <option value="{{org.name}}|{{org.email}}">{{org.name}}</option>
+                        {% endfor %}
+                    </select>
+				</div>
+
+				<div class="risk-table">
+					<div class="risk-table-row">
+						<div class="title"></div>
+						<div class="title">{% trans "Factores de riesgo sociosanitario" %}</div>
+						<div class="title">{% trans "Si" %}</div>
+						<div class="title">{% trans "No" %}</div>
+					</div>
+					<div class="risk-table-row" data-index="0">
+						<div> 1 </div>
+						<div>{% trans "¿La persona vive sola?" %}</div>
+						<div> <input type="radio" name="field1" class="print-input yes-input" value="1" onclick="checkScale(this)"
+                            {%if evolutionary and "¿La persona vive sola?: Si" in evolutionary.observations %}checked{%endif%} 
+                            {% if view %}disabled{% endif %}> </div>
+						<div> <input type="radio" name="field1" class="print-input no-input"  value="0" onclick="checkScale(this)"
+                            {%if evolutionary and "¿La persona vive sola?: No" in evolutionary.observations %}checked{%endif%} 
+                            {% if view %}disabled{% endif %}> </div>
+					</div>
+					<div class="risk-table-row" data-index="1">
+						<div> 2 </div>
+						<div> {% trans "¿Vive con alguna persona cuidadora de similar edad y/o personas con discapacidad,con problemas de salud mental, menores de edad?" %} </div>
+						<div> <input type="radio" name="field2" class="print-input yes-input" value="1" onclick="checkScale(this)" {%if evolutionary and "¿Vive con alguna persona cuidadora de similar edad y/o personas con discapacidad,con problemas de salud mental, menores de edad?: Si" in evolutionary.observations %}checked{%endif%} {% if view %}disabled{% endif %}> </div>
+						<div> <input type="radio" name="field2" class="print-input no-input" value="0" onclick="checkScale(this)" {%if evolutionary and "¿Vive con alguna persona cuidadora de similar edad y/o personas con discapacidad,con problemas de salud mental, menores de edad?: No" in evolutionary.observations %}checked{%endif%} {% if view %}disabled{% endif %}> </div>
+					</div>
+					<div class="risk-table-row" data-index="2">
+						<div> 3 </div>
+						<div>{% trans "¿Cuenta con una red social en la que poder apoyarse?" %}</div>
+						<div> <input type="radio" name="field3" class="print-input yes-input" value="0" onclick="checkScale(this)" {%if evolutionary and "¿Cuenta con una red social en la que poder apoyarse?: Si" in evolutionary.observations %}checked{%endif%} {% if view %}disabled{% endif %}> </div>
+						<div> <input type="radio" name="field3" class="print-input no-input" value="1" onclick="checkScale(this)" {%if evolutionary and "¿Cuenta con una red social en la que poder apoyarse?: No" in evolutionary.observations %}checked{%endif%} {% if view %}disabled{% endif %}> </div>
+					</div>
+					<div class="risk-table-row" data-index="3">
+						<div> 4 </div>
+						<div>{% trans "¿Existe barrera idiomática?" %}</div>
+						<div> <input type="radio" name="field4" class="print-input yes-input" value="1" onclick="checkScale(this)"
+                            {%if evolutionary and "¿Existe barrera idiomática?: Si" in evolutionary.observations %}checked{%endif%} 
+                            {% if view %}disabled{% endif %}> </div>
+						<div> <input type="radio" name="field4" class="print-input no-input" value="0" onclick="checkScale(this)"
+                            {%if evolutionary and "¿Existe barrera idiomática?: No" in evolutionary.observations %}checked{%endif%} 
+                            {% if view %}disabled{% endif %}> </div>
+					</div>
+					<div class="risk-table-row" data-index="4">
+						<div> 5 </div>
+						<div>{% trans "¿Migrante?" %}</div>
+						<div> <input type="radio" name="field5" class="print-input yes-input" value="1" onclick="checkScale(this)"
+                            {%if evolutionary and "¿Migrante?: Si" in evolutionary.observations %}checked{%endif%} 
+                            {% if view %}disabled{% endif %}> </div>
+						<div> <input type="radio" name="field5" class="print-input no-input" value="0" onclick="checkScale(this)"
+                            {%if evolutionary and "¿Migrante?: No" in evolutionary.observations %}checked{%endif%} 
+                            {% if view %}disabled{% endif %}> </div>
+					</div>
+					<div class="risk-table-row" data-index="5">
+						<div> 6 </div>
+						<div>{% trans "¿Está en situación de dependencia?" %}</div>
+						<div> <input type="radio" name="field6" class="print-input yes-input" value="1" onclick="checkScale(this)" {%if evolutionary and "¿Está en situación de dependencia?: Si" in evolutionary.observations %}checked{%endif%} {% if view %}disabled{% endif %}> </div>
+						<div> <input type="radio" name="field6" class="print-input no-input" value="0" onclick="checkScale(this)" {%if evolutionary and "¿Está en situación de dependencia?: No" in evolutionary.observations %}checked{%endif%} {% if view %}disabled{% endif %}> </div>
+					</div>
+					<div class="risk-table-row" data-index="6">
+						<div> 7 </div>
+						<div>{% trans "¿Población excluida de Tarjeta Sanitaria?" %}</div>
+						<div> <input type="radio" name="field7" class="print-input yes-input" value="1" onclick="checkScale(this)" {%if evolutionary and "¿Población excluida de Tarjeta Sanitaria?: Si" in evolutionary.observations %}checked{%endif%} {% if view %}disabled{% endif %}> </div>
+						<div> <input type="radio" name="field7" class="print-input no-input" value="0" onclick="checkScale(this)" {%if evolutionary and "¿Población excluida de Tarjeta Sanitaria?: No" in evolutionary.observations %}checked{%endif%} {% if view %}disabled{% endif %}> </div>
+					</div>
+					<div class="risk-table-row" data-index="7">
+						<div> 8 </div>
+						<div>{% trans "¿Recibe algún tipo de ayuda?" %}</div>
+						<div> <input type="radio" name="field8" class="print-input yes-input" value="0" onclick="checkScale(this)"
+                            {%if evolutionary and "¿Recibe algún tipo de ayuda?: Si" in evolutionary.observations %}checked{%endif%} 
+                            {% if view %}disabled{% endif %}> </div>
+						<div> <input type="radio" name="field8" class="print-input no-input" value="1" onclick="checkScale(this)"
+                            {%if evolutionary and "¿Recibe algún tipo de ayuda?: No" in evolutionary.observations %}checked{%endif%} 
+                            {% if view %}disabled{% endif %}> </div>
+					</div>
+					<div class="risk-table-row" data-index="8">
+						<div> 9 </div>
+						<div>{% trans "¿Discapacidad reconocida?" %}</div>
+						<div> <input type="radio" name="field9" class="print-input yes-input" value="1" onclick="checkScale(this)"
+                            {%if evolutionary and "¿Discapacidad reconocida?: Si" in evolutionary.observations %}checked{%endif%}
+                            {% if view %}disabled{% endif %}> </div>
+						<div> <input type="radio" name="field9" class="print-input no-input" value="0" onclick="checkScale(this)"
+                            {%if evolutionary and "¿Discapacidad reconocida?: No" in evolutionary.observations %}checked{%endif%}
+                            {% if view %}disabled{% endif %}> </div>
+					</div>
+					<div class="risk-table-row" data-index="9">
+						<div> 10 </div>
+						<div>{% trans "¿Cuenta con una vivienda que reúna las condiciones de habitabilidad?" %}</div>
+						<div> <input type="radio" name="field10" class="print-input yes-input" value="0" onclick="checkScale(this)" {%if evolutionary and "¿Cuenta con una vivienda que reúna las condiciones de habitabilidad?: Si" in evolutionary.observations %}checked{%endif%} {% if view %}disabled{% endif %}> </div>
+						<div> <input type="radio" name="field10" class="print-input no-input" value="1" onclick="checkScale(this)" {%if evolutionary and "¿Cuenta con una vivienda que reúna las condiciones de habitabilidad?: No" in evolutionary.observations %}checked{%endif%} {% if view %}disabled{% endif %}> </div>
+					</div>
+				</div>
+
+				<div class="risk-meter">
+					<div class="label"> Escala de riesgo </div>
+					<div class="meter-row">
+						<div class="metric metric-1" id="metric-1"></div>
+						<div class="metric metric-2" id="metric-2"></div>
+						<div class="metric metric-3" id="metric-3"></div>
+						<div class="metric metric-4" id="metric-4"></div>
+						<div class="metric metric-5" id="metric-5"></div>
+						<div class="metric metric-6" id="metric-6"></div>
+						<div class="metric metric-7 icon-white" id="metric-7"></div>
+						<div class="metric metric-8 icon-white" id="metric-8"></div>
+						<div class="metric metric-9 icon-white" id="metric-9"></div>
+						<div class="metric metric-10 icon-white" id="metric-10"></div>
+					</div>
+				</div>
+
+				<div class="observations">
+                    <div class="label">
+                        {% trans "Observaciones (consigne datos de la situación sociofamiliar, económica… que se consideren de interés)" %} </div>
+					<textarea name="obs" class="observations-textarea print-textarea" {%if view%}disabled{%endif%}>{{observations|safe}}</textarea>
+				</div>
+
+				<div class="signature">
+                    <div class="label">  {% trans "Firma a " %} {% now "d/m/Y"%}</div>
+					<div> <input type="text" name="prof" class="professional print-input no-input" value="{{professional}}" 
+                        placeholder="Nombre del profesional" {%if view%}disabled{%endif%}/></div>
+					<div class="signature-container"> <div class="signature-canvas"> </div> </div>
+					{#<div class="professional"> {{ request.user.employee_profile.full_name }}<br> {% now "d/m/Y"%} </div>#}
+				</div>
+			</div>
+
+            <div class="footer">
+	            <div class="data">
+		            <p class="company"> {{ company.name|default:"" }} </p>
+		            <address>
+			            {{ company.main_address|default:"" }} {{company.town|default:"" }},
+			            {{ company.postal_code|default:"" }} {{ company.province|default:"" }}
+		            </address>
+		            <div class="contact-info">
+                        {% if company.phone != "" %} <div class="phone"> tel: {{ company.phone }} </div> {% endif %}
+			            <div class="website"> {{ company.email }} </div>
+		            </div>
+	            </div>
+            </div>
+		</div>
+	</div>
+    </form>
+    <script>
+        function checkScale(obj)
+        {
+            var val = 0;
+            for (i=1; i < 11; i++)
+            {
+                try{
+                    if (document.querySelector('input[name="field'+i+'"]:checked').value == 1)
+                        val += 1;
+                }catch(error){}
+                document.getElementById("metric-"+i).innerHTML = '';
+            }
+            document.getElementById("metric-"+val).innerHTML = '<div class="check-icon" id="check-icon">&#10004;</div>';
+        }
+    </script>
+</body>
+</html>

@@ -18,9 +18,9 @@
     <div class="col-12 mt-3 p-2">
         <div class="greybox-xlg p-2">
             {% trans "Descripción" %}
-            <input type="text" class="form-control autosave" id="desc" name="desc" value="{{obj.desc}}" title="{{obj.desc}}" 
-                data-model-name="projects.activity" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" data-target="div-notification"/> 
-                <span id="desc__msg"></span>
+            <textarea class="hide autosave" id="desc" name="desc" title="{{obj.desc}}" data-model-name="projects.activity" data-obj-id="{{obj.id}}" 
+                data-url="{% url "autosave_field" %}" data-target="div-notification" disabled>{{obj.desc}}</textarea> <span id="desc__msg"></span>
+            <textarea id="desc-editor" class="active-editor" data-ref="desc">{{obj.desc}}</textarea>
         </div>
     </div>
 </div>
@@ -29,4 +29,6 @@
     <button type="button" class="btn btn-sm ark save" data-bs-dismiss="modal" data-url="{% url "project-activities" %}"
         data-target="div-container" data-obj_id="{{obj.project.id}}">{% trans "Save" %}</button>
 </div>
+
+<script> $(".active-editor").each(function(){activeEditor($(this))}); </script>
 

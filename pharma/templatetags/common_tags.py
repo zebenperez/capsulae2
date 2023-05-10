@@ -3,6 +3,7 @@ from django import template
 
 from capsulae2.settings import BASE_DIR
 from capsulae2.commons import show_exc, user_in_group
+from account.models import UserMenu
 
 from datetime import datetime, timedelta
 
@@ -29,12 +30,17 @@ def random_str(nchars='128'):
     return (''.join(random.choice(string.ascii_letters) for i in range(n)))
 
 @register.filter
-def have_menu(user_project, menu):
-    up = user_project.split("|")
-    pu = ProjectUser.objects.filter(username=up[0], project_uuid=up[1]).first()
-    if pu == None:
-        return False
-    return menu in pu.menus
+def have_menu(user, code):
+    total = UserMenu.objects.filter(user=user, menus__code = code).count()
+    return (total > 0)
+
+#@register.filter
+#def have_menu(user_project, menu):
+#    up = user_project.split("|")
+#    pu = ProjectUser.objects.filter(username=up[0], project_uuid=up[1]).first()
+#    if pu == None:
+#        return False
+#    return menu in pu.menus
 
 @register.filter
 def addstr(arg1,arg2):

@@ -23,8 +23,12 @@
             <tr class="small" id="row_{{item.id}}">
                 <td class="row">
                     <div class="col-5">{{ item.name }}</div>
-                    <div class="col-5">{{ item.desc }}</div>
+                    <div class="col-5">{{ item.desc|safe }}</div>
                     <div class="col-2 text-right">
+                        <a class="btn btn-xs" title="{%trans 'Register user'%}" href="{% url "project-activity-register" item.id %}" target="_blank"> 
+                            <i class="fas fa-share-square"></i></a>
+                        <a class="btn btn-xs ark" title="{%trans 'Registers'%}" data-url="{%url "project-activity-register-list" %}"
+                            data-target-modal="common-modal" data-obj_id="{{item.id}}" data-project_id="{{obj.id}}"> <i class="fas fa-users"></i></a>
                         <a class="btn btn-xs ark" title="{%trans 'Edit activity'%}" data-url="{%url "project-activity-form" %}"
                             data-target-modal="common-modal" data-obj_id="{{item.id}}" data-project_id="{{obj.id}}"> <i class="fas fa-edit"></i></a>
                         <a class="btn btn-sm ark" data-url="{%url "project-activity-remove"%}" data-obj_id="{{item.id}}" data-target="div-container" 

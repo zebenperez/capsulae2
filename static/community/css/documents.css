@@ -1,0 +1,248 @@
+body{
+	display: flex;
+	width: 100%;
+	flex-direction: column;
+	align-items: center;
+	justify-content_:center;
+	background-color: dimgrey;
+	font-family: sans-serif;
+	font-size: 90%;
+	-webkit-print-color-adjust: exact;
+	color-adjust: exact;
+}
+
+
+/* ------------------------------
+ *  GENERAL STRUCTURE
+ *  ------------------------------*/
+
+.page-wrapper{
+	margin-left: 10mm;
+	margin-right: 10mm;
+}
+
+.page{
+	width: 210mm;
+	height: 297mm;
+	background-color: white;
+	border: 1px solid dimgrey;
+}
+
+
+
+/* ------------------------------
+ *  HEADER
+ *  ------------------------------*/
+
+.header{
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 15pt;
+}
+
+.header .fundec-logo{
+	max-width:  4cm;
+	max-height: 3cm;
+}
+
+.header .fundec-logo img{
+	max-width:  100%;
+	max-height: 100%;
+	object-fit: contain;
+}
+
+.header .company-logo{
+	max-width: 4cm;
+	max-height: 3cm;
+}
+
+.header .company-logo img{
+	max-width:  100%;
+	max-height: 100%;
+	object-fit: contain;
+}
+
+/* ------------------------------
+ *  TOOLS
+ *  ------------------------------*/
+.print-btn-container{
+	position: absolute;
+	top:10px;
+	right: 10px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	padding: 10px;
+
+}
+
+.print-btn{
+	padding: 5px 10px;
+	border-radius: 5px;
+	display: flex;
+	justify-content: flex-start;
+	align-items: center;
+	background-color: var(--light-color);
+	transition: background-color 200ms ease-out;
+}
+
+.print-btn:hover{
+	background-color: var(--main-color);
+	color: white;
+	cursor:pointer;
+}
+
+
+
+
+
+/* ------------------------------
+ *  GENERAL ELEMENTS
+ *  ------------------------------*/
+
+h2.main-title{
+	font-size: 12pt;
+	font-weight: light;
+	text-align: center;
+	text-transform:uppercase;
+	margin-bottom: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+.label{
+   font-weight: bold;
+   font-size: 10pt;
+   margin-top: 10pt;
+}
+
+.print-input{
+	border: none;
+	background-color: var(--light-color);
+	padding: 4px 8px;
+	box-sizing: border-box;
+}
+
+
+.print-input-lg{
+	padding: 10px;
+	margin-top: 5px;
+	margin-bottom: 5px;
+
+}
+
+.print-textarea{
+	border: 1px solid silver;
+	width: 100%;
+ 	/*min-height: 3rem;*/
+    min-height: 2cm;
+	resize: none;
+	font-family: sans-serif;
+	background-color: var(--light-color);
+}
+
+.print-input:focus,
+.print-textarea:focus{
+	outline: 1px solid var(--main-color);
+}
+
+
+/* ------------------------------
+ *  SIGNATRUE
+ *  ------------------------------*/
+.signature-canvas{
+	margin-top: 2pt;
+	width: 6cm;
+	height: 2cm;
+	margin-bottom: 2pt;
+	background-color: var(--light-color);
+
+}
+
+
+/* ------------------------------
+ *  FOOTER
+ *  ------------------------------*/
+
+.footer{
+	display: flex;
+	justify-content: center;
+	flex-direction : column;
+	align-items: center;
+	font-weight: light;
+	color: var(--main-color);
+}
+
+.footer *{
+	font-family: sans-serif;
+	font-weight: light;
+	font-size: 9pt;
+}
+
+
+.footer .data {
+	width: 100%;
+}
+
+.footer .company{
+	font-weight: bolder;
+}
+
+.footer address,
+.footer .company{
+	text-align: center;
+}
+
+.footer .contact-info{
+	display: flex;
+	justify-content: center;
+	align-items: space-evenly;
+	box-sizing: border-box;
+}
+
+.footer .phone{
+	margin-right: 10px;
+}
+
+@media screen{
+	.page-wrapper {
+		margin-top: 1cm;
+		margin-bottom: 1cm;
+		margin-left: 2cm;
+		margin-right: 2cm;
+	}
+
+	.signature-canvas{
+		border: 1px solid silver;
+	}
+
+}
+
+@media print {
+	@page {
+		size: A4 portrait;
+	}
+
+	body, html{
+		-webkit-print-color-adjust: exact;
+		color-adjust: exact;
+		background-color: transparent;
+		min-height: auto;
+
+	}
+
+	.page{
+		width: 210mm;
+		height: 287mm;
+		background-color: white;
+		border: none;
+	}
+
+	.print-input,
+	.print-textarea,
+	.signature-canvas{
+		border: none;
+		background-color: transparent;
+	}
+
+}

@@ -41,6 +41,18 @@ class Activity(models.Model):
         verbose_name="Actividad"
         verbose_name_plural = "Actividades"
 
+class ActivityUser(models.Model):
+    name = models.CharField(max_length=255, verbose_name="Full Name", default="")
+    email = models.CharField(max_length=255, verbose_name="Email", default="")
+    activity = models.ForeignKey(Activity, on_delete=models.CASCADE, blank=True, null=True, related_name="users")  
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name="Usuario de Actividad"
+        verbose_name_plural = "Usuarios de Actividad"
+
 class Income(models.Model):
     desc = models.TextField(verbose_name="Descripción", default="")
     amount = models.TextField(verbose_name="Importe", default=0)
@@ -65,6 +77,9 @@ class Expense(models.Model):
         verbose_name="Gasto"
         verbose_name_plural = "Gastos"
 
+'''
+    Drive
+'''
 class Folder(models.Model):
     read_only = models.BooleanField(verbose_name='Solo lectura', default=False)
     name = models.CharField(max_length=200, verbose_name="Nombre", default="", blank=True)

@@ -2,22 +2,33 @@
 {% load i18n common_tags %}
 
 {% block central_content %}
-{% if request.user|in_group:'admins' or request.user.is_superuser%}
-    <div id="msg-error-exc">
-        <div class="col-xs-12 alert alert-danger">{% trans "Sorry!!!!. We have a problem. Try in a few minutes" %}.{%if err_msg%} {{err_msg}} {%endif%}</div>
-        <span class="separator">&nbsp;</span>
-        <div class="card">
-            <div class="card-header bg-danger text-white">
-                <div class="row">
-                    <div class="col-md-11">{% trans 'Problem Description' %}</div>
-                    <div class="col-md-1 text-right"><a class="btn btn-sm btn-dark text-white" onclick="$('#msg-error-exc').empty();"><i class="fas fa-times text-white"></i></a></div>
+
+    {#{% if request.user|in_group:'admins' or request.user.is_superuser%}#}
+        <div id="msg-error-exc">
+            <div class="col-xs-12 alert alert-danger">{% trans "Sorry!!!!. We have a problem. Try in a few minutes" %}.{%if err_msg%} {{err_msg}} {%endif%}</div>
+            <span class="separator">&nbsp;</span>
+            <div class="card">
+                <div class="card-header bg-danger text-white">
+                    <div class="row">
+                        <div class="col-md-11">{% trans 'Problem Description' %}</div>
+                        <div class="col-md-1 text-right"><a class="btn btn-sm btn-dark text-white" onclick="$('#msg-error-exc').empty();"><i class="fas fa-times text-white"></i></a></div>
+                    </div>
                 </div>
+                <div class="card-body">{{exc}}</div>
             </div>
-            <div class="card-body">{{exc}}</div>
         </div>
-    </div>
-{% else %}
-    {% include "guest-error-exception.html" %}
-{%endif%}
+        {%comment%}
+    {% else %}
+        <div class="row">
+            <div class="col-lg-6 offset-lg-3 col-10 offset-1 error-content">
+                <h1 class="d-flex justify-content-center mt-4">Oops!</h1>
+                <hr>
+                <p class="d-flex justify-content-center">Lo sentimos, ha habido un error. Ya estamos trabajando en la soluci&oacute;n.</p>
+                <p class="d-flex justify-content-center"> Vuelve a intentarlo en unos minutos.</p>
+                <br>
+            </div>
+        </div>
+    {%endif%}
+        {%endcomment%}
 
 {% endblock %}

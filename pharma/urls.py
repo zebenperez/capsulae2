@@ -1,5 +1,5 @@
 from django.urls import path
-from . import views, views_account, auto_views, spd_views
+from . import views, views_account, auto_views, spd_views, evolutionary_views as evo_views
 
 urlpatterns = [
     path('index/', views.index, name='pharma-index'),
@@ -33,6 +33,13 @@ urlpatterns = [
 
     path('patients/allergy/', views.patient_allergy, name='patient-allergy'),
 
+    path('patients/evolutionary/', views.patient_evolutionary, name='patient-evolutionary'),
+
+    #------------------------- PATIENT ORG --------------------
+    path('patients/orgs/', views.patient_orgs, name='patient-orgs'),
+    path('patients/orgs/form', views.patient_org_form, name='patient-org-form'),
+    path('patients/orgs/remove', views.patient_org_remove, name='patient-org-remove'),
+
     #------------------------- PATIENT SPD --------------------
     path('patients/spd/', views.patient_spd, name='patient-spd'),
     path('patients/spd/form', spd_views.spd_form, name='spd-form'),
@@ -45,6 +52,15 @@ urlpatterns = [
     path('patients/spd/blister-form', spd_views.spd_blister_form, name='spd-blister-form'),
     path('patients/spd/blister-remove', spd_views.spd_blister_remove, name='spd-blister-remove'),
     path('patients/spd/blister-print/<int:pd_id>', spd_views.spd_blister_print, name='spd-blister-print'),
+
+    #------------------------- PATIENT EVOLUTIONARY --------------------
+    path('patients/evolutionary/', views.patient_evolutionary, name='patient-evolutionary'),
+    path('patients/evolutionary/form', evo_views.evolutionary_form, name='evolutionary-form'),
+    path('patients/evolutionary/remove', evo_views.evolutionary_remove, name='evolutionary-remove'),
+    path('patients/evolutionary/referral-form/<slug:history_num>/', evo_views.evolutionary_referral_form, name='evolutionary-referral-form'),
+    path('patients/evolutionary/referral-form/<slug:history_num>/<int:evolutionary_id>/', evo_views.evolutionary_referral_form, name='evolutionary-referral-form'),
+    path('patients/evolutionary/referral-form/<slug:history_num>/<int:evolutionary_id>/<slug:view>/', evo_views.evolutionary_referral_form, name='evolutionary-referral-form'),
+    path('patients/evolutionary/send-form/', evo_views.evolutionary_send_form, name='evolutionary-send-form'),
 
     #---------------------- AUTO -----------------------
     path('autosave_field/', auto_views.autosave_field, name='autosave_field'),

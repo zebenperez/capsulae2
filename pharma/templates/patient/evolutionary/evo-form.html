@@ -1,0 +1,41 @@
+{% load i18n %}
+
+
+<div class="row">
+    <div class="col-11"> <h2><i class="fa fa-history"></i>&nbsp; {% trans 'Modificar Evolutivo' %}</h2> </div>
+    <div class="col-1">
+        <div class="d-flex justify-content-end"> <button type="button" class="btn btn-lg" data-bs-dismiss="modal" title="{% trans "Close" %}">
+            <i class="fas fa-times"></i></button> </div>
+    </div>
+</div>
+
+{% comment %} <span id="div-notification"></span><br/> {% endcomment %}
+
+<div class="row justify-center">
+    <div class="col-8">
+        <input type="text" class="form-control autosave" id="matter" name="matter" value="{{obj.matter}}" 
+            title="{{obj.matter}}" data-model-name="pharma.evolutionary" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+            data-target="div-notification" placeholder="Asunto..." /> <span id="matter__msg"></span>
+    </div>
+    <div class="col-4">
+        <input type="date" class="form-control autosave" id="date" name="date" value="{{obj.date|date:"Y-m-d"}}" 
+            title="{{obj.date}}" data-model-name="pharma.evolutionary" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+            data-target="div-notification" /> <span id="matter__msg"></span>
+    </div>
+    <div class="col-12">
+        <textarea class="form-control autosave" id="observations" name="observations" title="{{obj.observations}}" 
+            data-model-name="pharma.evolutionary" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+            data-target="div-notification" placeholder="Escriba aquí las observaciones...">{{obj.observations}}</textarea>
+            <span id="observations__msg"></span>
+    </div>
+</div>
+
+<div class="d-flex justify-content-end">
+    <button type="button" class="btn btn-sm ark save" data-bs-dismiss="modal" data-url="{% url "patient-evolutionary" %}"
+        data-target="div-container" data-obj_id="{{obj.patient.id}}">{% trans "Guardar" %}</button>
+    {%comment%}
+    <button type="button" class="btn btn-sm ark cancel" data-bs-dismiss="modal" data-url="{% url "guest-remove" %}" data-target="guest-list"
+        data-obj_id="{{obj.id}}" data-confirm="{% trans "Are you sure to remove this element?" %}">{% trans "Remove" %}</button>
+    {%endcomment%}
+</div>
+
