@@ -411,8 +411,17 @@ div.acceptCheck a
 }
 #frmRegister
 {
-	line-height:0.4em;
+	/*line-height: 0.4em;*/
+	line-height: 1.2em;
 }
+.regact p {
+	color: #333;
+	font-family: Roboto,sans-serif !important;
+}	
+.regact img {
+	padding-right: 25px;	
+}
+
 .form-control {
     display: block;
     width: 100%;
