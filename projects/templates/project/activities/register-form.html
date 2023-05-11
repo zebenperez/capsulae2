@@ -18,20 +18,18 @@
                 {% csrf_token %}
                 <input type="hidden" name="activity_id" value="{{obj.id}}" />
 
-                <h2>{% trans 'Registro en la actividad' %} <strong>{{obj.name}}</strong></h2>
+                <h2 class="pt-2 pb-3">{% trans 'Registro en la actividad' %} <strong>{{obj.name}}</strong></h2>
 
                 <p>{{obj.desc|safe}}</p>
 
                 <div class="row justify-center">
                     <div class="col-12 mt-3 p-0">
-                        <div class="greybox-xlg p-2">
-                            {% trans "Nombre completo" %}
+                        <div class="greybox-xlg p-0">
                             <input type="text" class="form-control" id="name" name="name" placeholder="{% trans "Nombre completo" %}"/>
                         </div>
                     </div>
                     <div class="col-12 mt-3 p-0">
-                        <div class="greybox-xlg p-2">
-                            {% trans "Correo electrónico" %}
+                        <div class="greybox-xlg p-0">
                             <input type="text" class="form-control" id="email" name="email" placeholder="{% trans "Correo electrónico" %}"/> 
                         </div>
                     </div>
