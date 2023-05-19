@@ -7,24 +7,24 @@
 
 <span id="div-notification"></span>
 <div class="row justify-center">
-    <div class="col-12 mt-3 p-2">
-        <div class="greybox-xlg p-2">
+    <div class="col-12 mt-3 p-1">
+        <div class="greybox-sm p-1">
             {% trans "Nombre" %}:
             <input type="text" class="form-control autosave" id="name" name="name" value="{{obj.name}}" 
                 title="{{obj.name}}" data-model-name="projects.project" data-obj-id="{{obj.id}}" data-url="{% url "autosave_field" %}" 
                 data-target="div-notification"/> <span id="name__msg"></span>
         </div>
     </div>
-    <div class="col-12 mt-3 p-2">
-        <div class="greybox-xlg p-2">
+    <div class="col-12 mt-3 p-1">
+        <div class="greybox-sm p-1">
             {% trans "Fecha de ejecución" %}:
             <input type="text" class="form-control autosave" id="end_date" name="end_date" value="{{obj.end_date}}" 
                 title="{{obj.end_date}}" data-model-name="projects.project" data-obj-id="{{obj.id}}" data-url="{% url "autosave_field" %}" 
                 data-target="div-notification"/> <span id="end_date__msg"></span>
         </div>
     </div>
-    <div class="col-12 mt-3 p-2">
-        <div class="greybox-xlg p-2">
+    <div class="col-12 mt-3 p-1">
+        <div class="greybox-sm p-1">
             {% trans "Descripción" %}
             <textarea class="hide autosave" id="desc" name="desc"
                 title="{{obj.desc}}" data-model-name="projects.project" data-obj-id="{{obj.id}}" data-url="{% url "autosave_field" %}" 

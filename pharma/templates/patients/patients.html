@@ -14,7 +14,7 @@
         <div class="toolbar-content">
 	    <h2 class="pathway b-right">{% trans 'Pacientes' %} <span id="items-counter" class="badge badge-secondary">{{items|length}}</span></h2>
             {#<a class="btn btn-primary ark" data-url="{% url "patient-form" %}" data-target-modal="common-modal">{% trans "New paciente"%}</a>  #}
-            <a class="btn btn-sm new" href="{% url "patient-new" %}">{% trans "Nuevo paciente"%}</a>
+            <a class="btn btn-sm new" href="{% url "patient-new" %}"><i class="fas fa-plus"></i> {% trans "Nuevo paciente"%}</a>
         </div>
 
         <div class="small-info p-2">* Sin LOPD en los últimos 15 días</div>

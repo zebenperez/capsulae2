@@ -12,7 +12,7 @@
     <div class="content mt-4">
         <div class="toolbar-content">
 	        <h2 class="pathway b-right">{% trans 'Proyectos' %} <span id="items-counter" class="badge badge-secondary">{{items|length}}</span></h2>
-            <a class="btn btn-sm new" href="{% url "project-new" %}">{% trans "Nuevo proyecto"%}</a>
+            <a class="btn btn-sm new" href="{% url "project-new" %}"><i class="fas fa-plus"></i> {% trans "Nuevo proyecto"%}</a>
         </div>
         <div id="project-list"></div>
     </div>

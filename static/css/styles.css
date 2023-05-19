@@ -281,8 +281,8 @@ h2.pathway.b-right  {
 }
 
 .greybox-sm, .greybox-md, .greybox-lg {
-	background: #faf7f7;
-	border:1px solid #dfdfdf; 
+/*	background: #faf7f7;*/
+	/*border:1px solid #dfdfdf; */
 	border-radius:5px;
 	display: grid;
 	align-items: center;
@@ -292,7 +292,7 @@ h2.pathway.b-right  {
 .greybox-sm select, .greybox-md select, .greybox-lg select, .greybox-xlg select { 
 	border: 1px solid #f2e8e8 !important;
 }
-.greybox-sm { grid-template-columns: 70% 30%; }
+/*.greybox-sm { grid-template-columns: 30% 70%; }*/
 .greybox-md { grid-template-columns: 50% 50%; }
 .greybox-lg { grid-template-columns: 30% 70%; }
 
@@ -385,6 +385,11 @@ label.label {
     font-size: 0.85rem;
     color: #777;
 }
+span.view {
+    font-size: 1rem;
+    color: #000;
+}
+
 input.input,
 select.input {
     position: relative;
@@ -394,6 +399,11 @@ select.input {
     border-radius: 0.25rem;
 }
 
+textarea.form-control {
+    border: 1px solid #f2e8e8 !important;
+    border-radius: 0.25rem;
+
+}
 .permanent, .one-use {
     font-size: 0.8rem;
 }
@@ -694,7 +704,6 @@ ul.left-menu  {
 	padding:0;
     width:100%;
 }
-
 .left-menu li {
 	list-style:none;
 	line-height: 30px;
@@ -867,7 +876,7 @@ i.fas.fa-home:hover, i.far.fa-folder-open:hover, i.fas.fa-users:hover, i.fas.fa-
 }
 
 #sidebar.expanded {
-    width: 200px;
+    width: 220px;
 }
 
 #sidebar.closed {
@@ -1205,7 +1214,8 @@ a.btn.btn-green {
 #side_menu .far {
 	color: #727272;
 	font-size: 13px;
-	padding-right: 15px;
+	/*padding-right: 15px;*/
+	padding-right: 10px;
 }
 
 

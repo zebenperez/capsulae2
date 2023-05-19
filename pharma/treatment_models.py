@@ -46,8 +46,11 @@ class Tratamiento(models.Model):
         try:
             return self.medicamentos.all().first().name
         except Exception as e:
-            print ("[Tratamiento name property error] %s"%str(e))
-        return "--"
+            #print ("[Tratamiento name property error] %s"%str(e))
+            try:
+                return self.complementos.all().first().name
+            except Exception as e:
+                return "--"
 
     @property
     def reg_code(self):
@@ -136,6 +139,8 @@ class Tratamiento(models.Model):
 #        except:
 #            return False
 #        return False
+    def is_complement(self):
+        return (self.complementos.all().count() > 0)
 
     class Meta:
         db_table = 'tratamiento'
@@ -179,3 +184,11 @@ class MedicamentoTratamiento(models.Model):
 #            pass
 #        return result
 #
+
+class ComplementoTratamiento(models.Model):
+    name = models.CharField(max_length=350)
+    code = models.CharField(max_length=10)
+    principles = models.TextField(default='')
+
+    tratamiento = models.ForeignKey(Tratamiento, on_delete=models.CASCADE, null=True, related_name='complementos')
+

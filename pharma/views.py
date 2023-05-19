@@ -19,7 +19,7 @@ from medication.medication_lib import get_medication
 from medication.models import PresentationsPrescriptionsAempsCache as AempsCache
 from .models import Pacientes, Paises, Etnia, PatientOrigin
 from .spd_models import Pillbox
-from .treatment_models import Tratamiento, MedicamentoTratamiento
+from .treatment_models import Tratamiento, MedicamentoTratamiento, ComplementoTratamiento
 from .evolutionary_models import Evolutionary
 from .common_lib import PILLBOX_ADVISE
 
@@ -199,12 +199,25 @@ def patient_treatment_remove(request):
     except Exception as e:
         return render(request, 'error_exception.html', {'exc':show_exc(e)})
 
-
 @group_required("admins","managers")
 def patient_treatment_medication_search(request):
     patient_id = get_param(request.GET, "patient_id")
     search_value = get_param(request.GET, "value")
     return render(request, "patient/treatments/medication-list.html", {'patient_id': patient_id, 'items': get_medication(search_value)})
+
+@group_required("admins","managers")
+def patient_complement_form(request):
+    try:
+        patient = get_or_none(Pacientes, get_param(request.GET, "patient_id"))
+        if patient == None:
+            return render(request, 'error_exception.html', {'exc':'Paciente no encontrado!'})
+
+        obj = get_or_none(Tratamiento, request.GET["obj_id"]) if "obj_id" in request.GET else Tratamiento.objects.create(paciente=patient)
+        ct = ComplementoTratamiento.objects.create(tratamiento=obj) if obj.complementos.all().first() == None else obj.complementos.all().first()
+
+        return render(request, "patient/treatments/complement-form.html", {'obj': obj, 'complement': ct})
+    except Exception as e:
+        return render(request, 'error_exception.html', {'exc':show_exc(e)})
 
 
 '''
