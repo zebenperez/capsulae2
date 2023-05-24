@@ -180,6 +180,22 @@ def project_activity_register_list(request):
     except Exception as e:
         return render(request, 'error_exception.html', {'exc':show_exc(e)})
 
+@group_required("admins","managers")
+def project_activity_register_export(request, activity_id):
+    try:
+        response = HttpResponse(
+            content_type='text/csv',
+            headers={'Content-Disposition': 'attachment; filename="{}_{}.csv"'.format(obj.test.name, obj.name)},
+        )
+
+        writer = csv.writer(response)
+        writer.writerow(['Nombre', 'Correo electrónico'])
+        for item in obj.users.all():
+            writer.writerow([item.name, item.email])
+        return response
+    except Exception as e:
+        return render(request, 'error_exception.html', {'exc':show_exc(e)})
+
 
 '''
     Budget
