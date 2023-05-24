@@ -187,7 +187,7 @@ def project_activity_register_export(request, activity_id):
 
         response = HttpResponse(
             content_type='text/csv',
-            headers={'Content-Disposition': 'attachment; filename="{}_{}.csv"'.format(obj.test.name, obj.name)},
+            headers={'Content-Disposition': 'attachment; filename="{}_{}.csv"'.format(obj.project.name, obj.name)},
         )
 
         writer = csv.writer(response)
