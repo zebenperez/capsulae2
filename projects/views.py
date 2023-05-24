@@ -183,6 +183,8 @@ def project_activity_register_list(request):
 @group_required("admins","managers")
 def project_activity_register_export(request, activity_id):
     try:
+        obj = get_or_none(Activity, activity_id)
+
         response = HttpResponse(
             content_type='text/csv',
             headers={'Content-Disposition': 'attachment; filename="{}_{}.csv"'.format(obj.test.name, obj.name)},
