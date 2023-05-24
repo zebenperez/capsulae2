@@ -6,6 +6,8 @@ from capsulae2.decorators import group_required
 from capsulae2.commons import get_or_none, get_param, show_exc, validate_captcha
 from .models import Activity, ActivityUser, Expense, Income, File, Folder, Project, Text
 
+import csv
+
 
 '''
     Projects
