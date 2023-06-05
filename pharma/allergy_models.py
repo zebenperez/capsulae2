@@ -51,7 +51,7 @@ class PrincipiosActivos(models.Model):
         verbose_name_plural = 'Principios Activos'
 
 class AlergiasExcipientes(models.Model):
-    edo = models.ForeignKey(Excipientesedo, on_delete=models.SET_NULL, db_column='codigoedo', to_field='codigoedo')
+    edo = models.ForeignKey(Excipientesedo, on_delete=models.SET_NULL, db_column='codigoedo', to_field='codigoedo', null=True)
     n_orden = models.ForeignKey(Pacientes, on_delete=models.CASCADE, to_field='n_historial', db_column='n_orden', related_name="alergias_excipientes")
 
     def __str__(self):

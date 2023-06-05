@@ -165,7 +165,13 @@ def spd_blister_print(request, pd_id):
 
         patient = obj.pillbox.patient
         spd_treatments = [item.patient_treatment for item in obj.deliver_meds.filter(treatment__include_in_spd=True)]
-        no_spd_treatments = [item.patient_treatment for item in obj.deliver_meds.filter(treatment__include_in_spd=False)]
+        no_spd_treatments = []
+        for item in obj.deliver_meds.filter(treatment__include_in_spd=False):
+            try:
+                no_spd_treatments.append(item.patient_treatment)
+            except Exception as e:
+                print(e)
+        #no_spd_treatments = [item.patient_treatment for item in obj.deliver_meds.filter(treatment__include_in_spd=False)]
 
         #prin_in = AlergiasPrincipios.objects.filter(paciente=patient)
         #excp_in = AlergiasExcipientes.objects.filter(n_orden=patient)
