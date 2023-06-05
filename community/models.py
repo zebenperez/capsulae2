@@ -1,6 +1,7 @@
 from django.db import models
 from pharma.models import Pacientes
-# Create your models here.
+from datetime import datetime
+
 
 class PatientFcoc(models.Model):
     creation_date = models.DateTimeField(verbose_name="Fecha de creación", auto_now_add=True, null=True, blank=True)
@@ -23,7 +24,7 @@ class PatientFci(models.Model):
 
 class PatientActivity(models.Model):
     creation_date = models.DateTimeField(verbose_name="Fecha de creación", auto_now_add=True, null=True, blank=True)
-    remote_pk = models.IntegerField(verbose_name="Id Actividad", max_length=50)
+    remote_pk = models.IntegerField(verbose_name="Id Actividad")
     name = models.CharField(verbose_name="Nombre Actividad", max_length=150, blank=True, null=True)
     patient = models.ForeignKey(Pacientes, verbose_name="Paciente", related_name="patient_activities", on_delete=models.CASCADE, null=True)
 
@@ -53,4 +54,25 @@ class PatientOrg(models.Model):
     class Meta:
         verbose_name = "Paciente Organización"
         verbose_name_plural = "Pacientes Organizaciones"
+
+class Procedure(models.Model):
+    code = models.CharField(verbose_name="Código", max_length=50, blank=True, null=True, default="")
+    name = models.CharField(verbose_name="Nombre", max_length=600, blank=True, null=True, default="")
+    desc = models.TextField(verbose_name="Descripción", blank=True, null=True, default="")
+
+    class Meta:
+        verbose_name = "Trámite"
+        verbose_name_plural = "Tramites"
+
+class PatientProcedure(models.Model):
+    date = models.DateField(verbose_name="Fecha", blank=True, null=True, default=datetime.today)                              
+    done = models.BooleanField(verbose_name="Realizado", default=False)
+    obs = models.TextField(verbose_name="Motivos de derivación", blank=True, null=True, default="")
+    procedure = models.ForeignKey(Procedure, verbose_name="Trámite", on_delete=models.CASCADE, null=True)
+    patient = models.ForeignKey(Pacientes, verbose_name="Paciente", related_name="procedures", on_delete=models.CASCADE, null=True)
+
+    class Meta:
+        verbose_name = "Paciente Tratamiento"
+        verbose_name_plural = "Pacientes Tratamientos"
+
 

@@ -14,7 +14,7 @@ from django.views.decorators.csrf import csrf_exempt
 from capsulae2.decorators import group_required
 from capsulae2.commons import get_or_none, get_param, show_exc
 from pharma.models import Pacientes
-from .models import PatientFcoc, PatientFci, PatientActivity, Organization, PatientOrg
+from .models import PatientFcoc, PatientFci, PatientActivity, Organization, PatientOrg, Procedure
 
 #from .forms import OrganizationForm
 #from generic.views import get_session_feedback
@@ -74,6 +74,51 @@ def organization_remove(request):
         obj.delete()
     return render(request, "organizations/organization-list.html", get_organization_context())
     #return render(request, "organizations/organization-list.html", get_organization_context(request.user))
+
+
+'''
+    Procedures
+'''
+def get_procedures(search_value=""):
+    filters_to_search = ["name__icontains",]
+
+    full_query = Q()
+    if search_value != "":
+        for myfilter in filters_to_search:
+            full_query |= Q(**{myfilter: search_value})
+
+    return Procedure.objects.filter(full_query)
+
+def get_procedure_context(search_value=""):
+    return {'items': get_procedures(search_value)}
+
+@group_required("admins","managers")
+def procedures(request):
+    return render(request, "procedures/procedures.html", get_procedure_context())
+
+@group_required("admins","managers")
+def procedure_list(request):
+    return render(request, "procedures/procedure-list.html", get_procedure_context())
+
+@group_required("admins","managers")
+def procedure_search(request):
+    search_value = get_param(request.GET, "s-name")
+    return render(request, "procedures/procedure-list.html", get_procedure_context(search_value))
+
+@group_required("admins","managers")
+def procedure_form(request):
+    obj_id = get_param(request.GET, "obj_id")
+    obj = get_or_none(Procedure, obj_id)
+    if obj == None:
+        obj = Procedure.objects.create()
+    return render(request, "procedures/procedure-form.html", {'obj': obj})
+
+@group_required("admins","managers")
+def procedure_remove(request):
+    obj = get_or_none(Procedure, request.GET["obj_id"]) if "obj_id" in request.GET else None
+    if obj != None:
+        obj.delete()
+    return render(request, "procedures/procedure-list.html", get_procedure_context())
 
 
 #def patient_community(request, patient_id):

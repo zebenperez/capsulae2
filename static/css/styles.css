@@ -856,7 +856,8 @@ i.fas.fa-home:hover, i.far.fa-folder-open:hover, i.fas.fa-users:hover, i.fas.fa-
 #main-content {
     display: flex;
 	border:1px solid white !important;
-	width: 99%;
+	/*width: 99%;*/
+	width: 100%;
 	margin:0;
 	padding:0;
 }

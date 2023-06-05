@@ -17,6 +17,10 @@
             <li class="nav-item"><a class="nav-link " href="{%url "organizations"%}">
                 <i class="fa fa-users"></i> {%trans "Organizaciones"%}</a></li><hr/>
         {% endif %}
+        {% if user|have_menu:"TRM"%}
+            <li class="nav-item"><a class="nav-link " href="{%url "procedures"%}">
+                <i class="fa fa-project-diagram"></i> {%trans "Trámites"%}</a></li><hr/>
+        {% endif %}
     {% endif %}
     </ul>
 {% else %}

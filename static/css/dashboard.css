@@ -17,8 +17,9 @@
 	background-clip: border-box;
 	border: 1px solid rgba(0,0,0,.125);
 	border-radius: .25rem;
+/*	padding: 15px 0 15px 0;*/
 	padding: 15px;
-    margin-bottom: 5px;
+	margin-bottom: 5px;
 }
 
 .stat-box.color-1 { border-bottom: 4px solid #28a745; }
@@ -127,4 +128,8 @@ span.count-title {
 .stat-box.bottom {
     min-height:300px;
     padding:0px;
+}
+
+.stat-widget-five {
+/*	border:1px solid red;*/
 }

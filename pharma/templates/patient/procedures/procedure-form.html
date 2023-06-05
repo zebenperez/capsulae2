@@ -1,0 +1,56 @@
+{% load i18n %}
+
+
+<div class="d-flex justify-content-end"> <button type="button" class="btn btn-lg" data-bs-dismiss="modal" title="{% trans "Close" %}">
+    <i class="fas fa-times"></i></button> </div>
+
+<h2>{% trans 'Nuevo trámite' %}</h2>
+
+<div class="row justify-center">
+	<div class="col-4 text-left p-1">
+        <div class="greybox-sm p-1">
+            {% trans "Trámite" %}
+		    <div class="select-arrow">
+			    <select class="form-control autosave text-end" id="procedure" name="procedure" data-model-name="community.patientprocedure" 
+                    data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" data-target="div-notification"> 
+	                <option value="">{% trans "-- Seleccione un trámite --" %}</option> 
+                    {% for item in procedure_list %}
+        	            <option value="{{item.id}}" {%if obj.procedure == item %}selected{%endif%}>{{item.name}}</option>
+                    {% endfor %}
+	            </select>
+			    <span style="margin-left: -10px;"><i class='fas fa-caret-down'></i></span>
+		    </div>
+            <span id="procedure__msg"></span>
+        </div>
+    </div>
+    <div class="col-6 text-left p-1">
+        <div class="greybox-sm p-1">
+            {% trans "Nombre" %}
+            <input type="text" class="form-control autosave" id="name" name="name" value="{{obj.name}}" title="{{obj.name}}" 
+                data-model-name="community.patientprocedure" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+                data-target="div-notification"/> <span id="name__msg"></span>
+        </div>
+    </div>
+	<div class="col-2 text-left p-1">
+        <div class="greybox-sm p-1">
+            {% trans "Fecha" %}
+            <input type="date" class="form-control autosave text-end" id="date" name="date" value="{{obj.date|date:"Y-m-d"}}" title="{{obj.date}}" 
+                data-model-name="community.patientprocedure" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+                data-target="div-notification"/> <span id="date__msg"></span>
+        </div>
+    </div>
+    <div class="col-12 mt-3 p-1">
+        <div class="greybox-xlg p-1">
+            {% trans "Observaciones" %}
+            <input type="text" class="form-control autosave b-bottom" id="obs" name="obs" value="{{obj.obs}}" title="{{obj.obs}}" 
+                data-model-name="community.patientprocedure" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+                data-target="div-notification"/> <span id="obs__msg"></span>
+        </div>
+    </div>
+</div>
+
+<div class="d-flex justify-content-end">
+    <button type="button" class="btn btn-sm ark save" data-bs-dismiss="modal" data-url="{% url "patient-procedure" %}"
+        data-target="div-container" data-obj_id="{{obj.patient.id}}">{% trans "Save" %}</button>
+</div>
+

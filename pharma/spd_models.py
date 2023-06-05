@@ -80,7 +80,8 @@ class PillboxTreatment(models.Model):
     @property
     def name(self):
         try:
-            return self.treatment.medicamentos.all().first().name
+            return self.treatment.name
+            #return self.treatment.medicamentos.all().first().name
         except Exception:
             return ""
 
@@ -130,7 +131,7 @@ class PillboxDeliver(models.Model):
         verbose_name_plural ="Entregas pastillero"
 
 class PillboxDeliverMed(models.Model):
-    code = models.SlugField(verbose_name="Lote", max_length=50, blank=True, null=True)
+    code = models.SlugField(verbose_name="Lote", max_length=50, blank=True, null=True, default="")
     expiration_date = models.DateField(verbose_name="Caducidad", blank=True, null=True)
 
     pillbox_deliver = models.ForeignKey(PillboxDeliver, on_delete=models.CASCADE, verbose_name="Entrega", related_name="deliver_meds")

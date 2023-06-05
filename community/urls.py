@@ -9,6 +9,13 @@ urlpatterns = [
     path('organizations/form/', views.organization_form, name='organization-form'),
     path('organizations/remove/', views.organization_remove, name='organization-remove'),
 
+    #------------------------- PROCEDURES --------------------
+    path('procedures/', views.procedures, name='procedures'),
+    path('procedures/list/', views.procedure_list, name='procedure-list'),
+    path('procedures/search/', views.procedure_search, name='procedure-search'),
+    path('procedures/form/', views.procedure_form, name='procedure-form'),
+    path('procedures/remove/', views.procedure_remove, name='procedure-remove'),
+
 
 #    url(r'^patient/(?P<patient_id>\d+)/$', views.patient_community, name="patient_community"),
 #    url(r'^patient/activities/(?P<patient_id>\d+)$', views.patient_activities, name="patient_activities"),

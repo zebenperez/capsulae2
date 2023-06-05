@@ -136,6 +136,29 @@ def spd_blister_remove(request):
         return render(request, 'error_exception.html', {'exc':show_exc(e)})
 
 @group_required("admins","managers")
+def spd_blister_clone(request):
+    try:
+        obj = get_or_none(PillboxDeliver, request.GET['obj_id'])  
+
+        now = datetime.now()
+        expiration_date = now + timedelta(days=90)
+        
+        new_obj = PillboxDeliver.objects.create(pillbox=obj.pillbox)
+        new_obj.code = PillboxDeliver.generate_code(str(obj.pillbox.pk))
+        new_obj.creation_date = now
+        new_obj.deliver_date = now
+        new_obj.finish_date = now + timedelta(days=7)
+        new_obj.save()
+        for dm in obj.deliver_meds.all():
+            PillboxDeliverMed.objects.create(treatment=dm.treatment, pillbox_deliver=new_obj, expiration_date=dm.expiration_date, code=dm.code)
+
+        deliveries = new_obj.pillbox.pillbox_delivers.all().order_by('-deliver_date')
+        return render(request, "patient/spd/spd-blisters.html", {'obj': new_obj.pillbox, 'deliveries': deliveries})
+    except Exception as e:
+        print(e)
+        return render(request, 'error_exception.html', {'exc':show_exc(e)})
+
+@group_required("admins","managers")
 def spd_blister_print(request, pd_id):
     try:
         obj = get_or_none(PillboxDeliver, pd_id)  

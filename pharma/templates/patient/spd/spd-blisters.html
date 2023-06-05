@@ -15,10 +15,16 @@
         <div class="col-3">
             <div class="row blister-box mb-3 {%if forloop.counter == 1%}border border-success border-3{%endif%}">
                 <div class="col-4 left-blue p-2">{% trans "Código" %}:</div><div class="col-8 p-2"> {{ item.code }}</div>
-                <div class="col-4 left-blue p-2">{% trans "Preparación" %}:</div><div class="col-8 p-2"><span class="text text-warning"> {{ item.creation_date|date:"d-m-Y"|default_if_none:"--"}}</span></div>
-                <div class="col-4 left-blue p-2">{% trans "Entrega" %}:</div><div class="col-8 p-2"> {{ item.deliver_date|date:"d-m-Y"|default_if_none:"--" }}</div>
-                <div class="col-4 left-blue p-2">{% trans "Finalización" %}:</div><div class="col-8 p-2"> {{ item.finish_date|date:"d-m-Y"|default_if_none:"--"}}</div>
+                <div class="col-4 left-blue p-2">{% trans "Preparación" %}:</div><div class="col-8 p-2">
+                    <span class="text text-warning"> {{ item.creation_date|date:"d-m-Y"|default_if_none:"--"}}</span></div>
+                <div class="col-4 left-blue p-2">{% trans "Entrega" %}:</div>
+                <div class="col-8 p-2"> {{ item.deliver_date|date:"d-m-Y"|default_if_none:"--" }}</div>
+                <div class="col-4 left-blue p-2">{% trans "Finalización" %}:</div>
+                <div class="col-8 p-2"> {{ item.finish_date|date:"d-m-Y"|default_if_none:"--"}}</div>
                 <div class="col-12 icons-bot text-center p-2">
+                    <a class="btn btn-xs ark p-2" data-url="{%url "spd-blister-clone"%}" data-target="blister-list-{{item.pillbox.id}}" 
+                        data-obj_id="{{item.id}}" data-show="blister-list-{{item.pillbox.id}}" title="{%trans "Clonar"%}">
+                        <i class="fas fa-clone"></i> </a>
                     <a class="btn btn-xs w-25" title="{% trans "Imprimir blister" %}" href="{% url "spd-blister-print" item.id %}" target="_blank">
                         <i class="fas fa-print"></i></a>
                     <a class="btn btn-xs w-25 ark" title="{% trans "Editar blister" %}" data-url="{% url "spd-blister-form" %}" 

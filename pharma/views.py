@@ -14,13 +14,14 @@ from capsulae2.commons import get_or_none, get_param, show_exc
 from capsulae2.settings import MEDIA_ROOT
 from account.models import Company
 from lopd.models import LOPDConsents
-from community.models import Organization, PatientOrg
+from community.models import Organization, PatientOrg, Procedure, PatientProcedure
 from medication.medication_lib import get_medication
 from medication.models import PresentationsPrescriptionsAempsCache as AempsCache
 from .models import Pacientes, Paises, Etnia, PatientOrigin
 from .spd_models import Pillbox
 from .treatment_models import Tratamiento, MedicamentoTratamiento, ComplementoTratamiento
 from .evolutionary_models import Evolutionary
+from .allergy_models import AlergiasExcipientes, AlergiasPrincipios, Excipientesedo, PrincipiosActivos
 from .common_lib import PILLBOX_ADVISE
 
 
@@ -124,6 +125,12 @@ def patient_evolutionary(request):
     patient = get_or_none(Pacientes, get_param(request.GET, "obj_id"))
     return render(request, "patient/evolutionary/evo-list.html", {'obj': patient})
 
+@group_required("admins","managers")
+def patient_procedure(request):
+    patient = get_or_none(Pacientes, get_param(request.GET, "obj_id"))
+    return render(request, "patient/procedures/procedure-list.html", {'obj': patient})
+
+
 '''
     Patient Org
 '''
@@ -216,6 +223,99 @@ def patient_complement_form(request):
         ct = ComplementoTratamiento.objects.create(tratamiento=obj) if obj.complementos.all().first() == None else obj.complementos.all().first()
 
         return render(request, "patient/treatments/complement-form.html", {'obj': obj, 'complement': ct})
+    except Exception as e:
+        return render(request, 'error_exception.html', {'exc':show_exc(e)})
+
+'''
+    Procedure
+'''
+@group_required("admins","managers")
+def patient_procedure_form(request):
+    try:
+        patient = get_or_none(Pacientes, get_param(request.GET, "patient_id"))
+        if patient == None:
+            return render(request, 'error_exception.html', {'exc':'Paciente no encontrado!'})
+
+        obj = get_or_none(PatientProcedure, request.GET["obj_id"]) if "obj_id" in request.GET else PatientProcedure.objects.create(patient=patient)
+        return render(request, "patient/procedures/procedure-form.html", {'obj': obj, 'procedure_list': Procedure.objects.all()})
+    except Exception as e:
+        return render(request, 'error_exception.html', {'exc':show_exc(e)})
+
+
+@group_required("admins","managers")
+def patient_procedure_remove(request):
+    try:
+        obj = get_or_none(PatientProcedure, request.GET["obj_id"])
+        patient = obj.patient
+        obj.delete()
+
+        return render(request, "patient/procedures/procedure-list.html", {'obj': patient})
+    except Exception as e:
+        return render(request, 'error_exception.html', {'exc':show_exc(e)})
+
+
+
+'''
+    Allergy
+'''
+@group_required("admins","managers")
+def patient_allergy_excipients(request):
+    try:
+        patient = get_or_none(Pacientes, get_param(request.GET, "patient_id"))
+        if patient == None:
+            return render(request, 'error_exception.html', {'exc':'Paciente no encontrado!'})
+
+        if "obj_id" in request.GET:
+            edo = get_or_none(Excipientesedo, request.GET["obj_id"])
+            AlergiasExcipientes.objects.create(n_orden=patient, edo=edo)
+
+        edo_list = [item.edo.codigoedo for item in patient.alergias_excipientes.all()]
+        item_list = Excipientesedo.objects.all().exclude(codigoedo__in=edo_list)
+        return render(request, "patient/allergies/excipient-list.html", {'obj': patient, 'item_list': item_list})
+    except Exception as e:
+        return render(request, 'error_exception.html', {'exc':show_exc(e)})
+
+@group_required("admins","managers")
+def patient_allergy_principles(request):
+    try:
+        patient = get_or_none(Pacientes, get_param(request.GET, "patient_id"))
+        if patient == None:
+            return render(request, 'error_exception.html', {'exc':'Paciente no encontrado!'})
+
+        if "obj_id" in request.GET:
+            pa = get_or_none(PrincipiosActivos, request.GET["obj_id"], "codigoprincipioactivo")
+            AlergiasPrincipios.objects.create(paciente=patient, principio_activo=pa)
+
+        p_list = []
+        for item in patient.alergias_principios.all():
+            if item.principio_activo != None:
+                p_list.append(item.principio_activo.codigoprincipioactivo)
+        item_list = PrincipiosActivos.objects.all().exclude(codigoprincipioactivo__in=p_list)
+        return render(request, "patient/allergies/principles-list.html", {'obj': patient, 'item_list': item_list})
+    except Exception as e:
+        return render(request, 'error_exception.html', {'exc':show_exc(e)})
+
+
+@group_required("admins","managers")
+def patient_allergy_excipient_remove(request):
+    try:
+        obj = get_or_none(AlergiasExcipientes, request.GET["obj_id"])
+        patient = obj.n_orden
+        obj.delete()
+
+        ae_list = AlergiasExcipientes.objects.filter(n_orden = patient.id)
+        return render(request, "patient/allergies/allergy-list.html", {'obj': patient})
+    except Exception as e:
+        return render(request, 'error_exception.html', {'exc':show_exc(e)})
+
+@group_required("admins","managers")
+def patient_allergy_principle_remove(request):
+    try:
+        obj = get_or_none(AlergiasPrincipios, request.GET["obj_id"])
+        patient = obj.paciente
+        obj.delete()
+
+        return render(request, "patient/allergies/allergy-list.html", {'obj': patient})
     except Exception as e:
         return render(request, 'error_exception.html', {'exc':show_exc(e)})
 

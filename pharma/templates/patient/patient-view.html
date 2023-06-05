@@ -18,9 +18,15 @@
             <div class="tab-item ark" data-url="{% url "patient-treatment" %}" data-target="div-container" data-obj_id="{{obj.id}}"> 
                 <i class="fa fa-barcode"></i> <span class="hide-mobile">&nbsp; {% trans "Tratamientos" %} ({{obj.get_active_treatments}})</span></div>
         {% endif %}
+        {% if user|have_menu:"PTR"%}
+            <div class="tab-item ark" data-url="{% url "patient-procedure" %}" data-target="div-container" data-obj_id="{{obj.id}}"> 
+                <i class="fa fa-project-diagram"></i> <span class="hide-mobile">&nbsp; 
+                {% trans "Trámites" %} ({{obj.procedures.all.count}})</span></div>
+        {% endif %}
         {% if user|have_menu:"ALE"%}
             <div class="tab-item ark" data-url="{% url "patient-allergy" %}" data-target="div-container" data-obj_id="{{obj.id}}">
-                <i class="fas fa-allergies"></i><span class="hide-mobile">&nbsp; {% trans "Alergias" %} (0)</span></div>
+                <i class="fas fa-allergies"></i><span class="hide-mobile">&nbsp; {% trans "Alergias" %} 
+                ({{obj.alergias_excipientes.all.count}}/{{obj.alergias_principios.all.count}})</span></div>
         {% endif %}
         {% if user|have_menu:"SPD"%}
             <div class="tab-item ark" data-url="{% url "patient-spd" %}" data-target="div-container" data-obj_id="{{obj.id}}">

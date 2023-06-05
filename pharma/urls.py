@@ -33,8 +33,16 @@ urlpatterns = [
     path('patients/lopd-generate-signed-document/<int:patient_id>', views.patient_lopd_generate_signed_document, name='patient-lopd-generate-signed-document'),
 
     path('patients/allergy/', views.patient_allergy, name='patient-allergy'),
+    path('patients/allergy/excipients', views.patient_allergy_excipients, name='patient-allergy-excipients'),
+    path('patients/allergy/excipient/remove', views.patient_allergy_excipient_remove, name='patient-allergy-excipient-remove'),
+    path('patients/allergy/principles', views.patient_allergy_principles, name='patient-allergy-principles'),
+    path('patients/allergy/principle/remove', views.patient_allergy_principle_remove, name='patient-allergy-principle-remove'),
 
     path('patients/evolutionary/', views.patient_evolutionary, name='patient-evolutionary'),
+
+    path('patients/procedure/', views.patient_procedure, name='patient-procedure'),
+    path('patients/procedure-form/', views.patient_procedure_form, name='patient-procedure-form'),
+    path('patients/procedure-remove/', views.patient_procedure_remove, name='patient-procedure-remove'),
 
     #------------------------- PATIENT ORG --------------------
     path('patients/orgs/', views.patient_orgs, name='patient-orgs'),
@@ -52,6 +60,7 @@ urlpatterns = [
     path('patients/spd/blisters', spd_views.spd_blisters, name='spd-blisters'),
     path('patients/spd/blister-form', spd_views.spd_blister_form, name='spd-blister-form'),
     path('patients/spd/blister-remove', spd_views.spd_blister_remove, name='spd-blister-remove'),
+    path('patients/spd/blister-clone', spd_views.spd_blister_clone, name='spd-blister-clone'),
     path('patients/spd/blister-print/<int:pd_id>', spd_views.spd_blister_print, name='spd-blister-print'),
 
     #------------------------- PATIENT EVOLUTIONARY --------------------
