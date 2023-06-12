@@ -1,7 +1,9 @@
-from django.shortcuts import render
+from django.contrib.auth.models import User
 from django.core.mail import send_mail
+from django.shortcuts import render
 
 from capsulae2.decorators import group_required
+from capsulae2.commons import get_random_str, get_param, get_or_none
 from .models import *
 
 import random, string
@@ -66,4 +68,52 @@ def signup(request):
 
 def privacy_policy(request):
     return render(request, "account/privacy-policy.html", {})
+
+'''
+    Employees
+'''
+def get_employees_context(user, search_value=""):
+    comp = Company.objects.filter(manager=user).first()
+    if comp != None:
+        if search_value != "":
+            return {'items': comp.users.filter(user__username__icontains=search_value)}
+        else:
+            return {'items': comp.users.all()}
+    return {'items': []}
+    #return {'items': get_employees(user, search_value)}
+
+@group_required("admins","managers")
+def employees(request):
+    return render(request, "employees/employees.html", get_employees_context(request.user))
+
+@group_required("admins","managers")
+def employee_list(request):
+    return render(request, "employees/employee-list.html", get_employees_context(request.user))
+
+@group_required("admins","managers")
+def employee_search(request):
+    search_value = get_param(request.GET, "s-name")
+    return render(request, "employees/employee-list.html", get_employees_context(request.user, search_value))
+
+@group_required("admins","managers")
+def employee_form(request):
+    obj_id = get_param(request.GET, "obj_id")
+    obj = get_or_none(EmployeeProfile, obj_id)
+    if obj == None:
+        comp = Company.objects.filter(manager=request.user).first()
+        if comp != None:
+            user = User.objects.create_user(username=get_random_str(8))
+            comp.users.add(user)
+            obj = EmployeeProfile.objects.create(user=user)
+    user_type_list = EmployeeType.objects.all()
+    menu_list = request.user.menus.all()
+    return render(request, "employees/employee-form.html", {'obj': obj, 'user_type_list': user_type_list, 'menu_list': menu_list})
+
+@group_required("admins","managers")
+def employee_remove(request):
+    obj = get_or_none(EmployeeProfile, request.GET["obj_id"]) if "obj_id" in request.GET else None
+    if obj != None:
+        obj.user.delete()
+        obj.delete()
+    return render(request, "employees/employee-list.html", get_employees_context(request.user))
 

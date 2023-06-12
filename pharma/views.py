@@ -22,7 +22,7 @@ from .spd_models import Pillbox
 from .treatment_models import Tratamiento, MedicamentoTratamiento, ComplementoTratamiento
 from .evolutionary_models import Evolutionary
 from .allergy_models import AlergiasExcipientes, AlergiasPrincipios, Excipientesedo, PrincipiosActivos
-from .common_lib import PILLBOX_ADVISE
+from .common_lib import LOPD_LIMIT, PILLBOX_ADVISE, get_config_value
 
 
 @group_required("admins","managers")
@@ -33,12 +33,20 @@ def index(request):
     Patients
 '''
 def get_patients(user, search_value="", start=0, end=50):
-    filters_to_search = ["n_historial__icontains", "nombre__icontains", "apellido__icontains", "cip__icontains"]
+    #filters_to_search = ["n_historial__icontains", "nombre__icontains", "apellido__icontains", "cip__icontains"]
+    filters_to_search = ["n_historial__icontains", "cip__icontains"]
 
     full_query = Q()
     if search_value != "":
         for myfilter in filters_to_search:
             full_query |= Q(**{myfilter: search_value})
+
+        search_list = search_value.split(" ", 1)
+        name_query = Q(**{"nombre__icontains": search_list[0]})
+        if len(search_list) > 1:
+            name_query &= Q(**{"apellido__icontains": search_list[1]})
+        full_query |= name_query
+
     full_query &= Q(**{'id_user': user.id})
 
     # Pacientes con lopd firmada
@@ -46,7 +54,11 @@ def get_patients(user, search_value="", start=0, end=50):
     lopd_list = list(Pacientes.objects.filter(full_query).filter(id__in=lopd_patient_ids)[start:end])
 
     # Pacientes sin lopd firmada pero creados en los últimos 15 días
-    limit = datetime.today() - timedelta(days=15)
+    try:
+        lopd_limit = int(get_config_value("LOPD_{}".format(user.id), LOPD_LIMIT))
+    except:
+        lopd_limit = LOPD_LIMIT
+    limit = datetime.today() - timedelta(days=lopd_limit)
     date_list = list(Pacientes.objects.filter(full_query).exclude(id__in=lopd_patient_ids).filter(created_at__gte=limit))
 
     return date_list + lopd_list

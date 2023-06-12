@@ -10,6 +10,7 @@ class UserActivate(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     class Meta:
+        db_table = 'pharma_useractivate'
         verbose_name = "Activación de usuarios"
 
 class CompanyOptions(models.Model):
@@ -54,11 +55,11 @@ class EmployeeType(models.Model):
     alone = models.BooleanField(verbose_name="Puede estar solo", default=False)
     guards = models.BooleanField(verbose_name="Hace Guardias", default=False)
 
-
     def __str__(self):
         return "%s"%(self.code)
 
     class Meta:
+        db_table = 'companies_employeetype'
         verbose_name="Tipo de perfil"
         verbose_name_plural ="Tipos de perfil"
 
@@ -112,6 +113,7 @@ class EmployeeProfile(models.Model):
         return company
 
     class Meta:
+        db_table = 'companies_employeeprofile'
         verbose_name="Perfil Empleado"
         verbose_name_plural ="Perfiles Empleados"
 
