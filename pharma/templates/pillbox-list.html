@@ -31,7 +31,7 @@
                         <a class="btn btn-xs w-25" title="{%trans "Imprimir blister"%}" href="{%url "spd-blister-print" deliver.id%}" target="_blank">
                             <i class="fas fa-print"></i></a>
                         <a class="btn btn-xs w-25 ark" title="{% trans "Editar blister" %}" data-url="{% url "spd-blister-form" %}"
-                            data-target-modal="common-modal" data-obj_id="{{item.id}}" data-pillbox_id="{{item.pillbox.id}}">
+                            data-target-modal="common-modal" data-obj_id="{{deliver.id}}" data-pillbox_id="{{item.id}}">
                             <i class="fas fa-edit"></i></a>
                         <a class="btn btn-xs w-25 ark" title="{% trans "Eliminar blister" %}" data-url="{% url "spd-blister-remove" %}"
                             data-target="blister-list-{{item.pillbox.id}}" data-obj_id="{{item.id}}"
