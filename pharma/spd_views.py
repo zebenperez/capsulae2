@@ -1,7 +1,8 @@
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.template.defaultfilters import slugify
+
 
 from weasyprint import HTML 
 
@@ -13,7 +14,7 @@ from capsulae2.commons import get_or_none, get_param, show_exc
 from .models import Pacientes
 from .spd_models import Pillbox, PillboxTreatment, PillboxDeliver, PillboxDeliverMed
 from .treatment_models import Tratamiento 
-from .common_lib import PILLBOX_ADVISE
+from .common_lib import PILLBOX_ADVISE, parse_qr
 
 
 '''
@@ -200,4 +201,21 @@ def spd_blister_print(request, pd_id):
         print(e)
         return render(request, 'error_exception.html', {'exc':show_exc(e)})
 
+@group_required("admins", "managers")
+def spd_search_by_qr(request):
+    json_response = {}
+    try:
+        qr_data = request.GET["qr_data"]
+        pd_id = request.GET["pd_id"]
+
+        pd = get_or_none(PillboxDeliver, pd_id)
+        json_response = parse_qr(qr_data)   
+        for pdm in pd.deliver_meds.all():
+            if pdm.treatment.treatment.cn == json_response["cn"][-6:]:
+                json_response["pdm_id"] = pdm.id 
+                break
+    except Exception as e:
+        print(e)
+        json_response['error'] = "Bad request"
+    return JsonResponse(json_response)
 

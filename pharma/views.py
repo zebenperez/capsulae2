@@ -45,6 +45,8 @@ def get_patients(user, search_value="", start=0, end=50):
         name_query = Q(**{"nombre__icontains": search_list[0]})
         if len(search_list) > 1:
             name_query &= Q(**{"apellido__icontains": search_list[1]})
+        else:
+            name_query |= Q(**{"apellido__icontains": search_list[0]})
         full_query |= name_query
 
     full_query &= Q(**{'id_user': user.id})

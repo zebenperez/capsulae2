@@ -63,6 +63,8 @@ urlpatterns = [
     path('patients/spd/blister-clone', spd_views.spd_blister_clone, name='spd-blister-clone'),
     path('patients/spd/blister-print/<int:pd_id>', spd_views.spd_blister_print, name='spd-blister-print'),
 
+    path('patients/spd/search-by-qr/', spd_views.spd_search_by_qr, name='spd-search-by-qr'),
+
     #------------------------- PATIENT EVOLUTIONARY --------------------
     path('patients/evolutionary/', views.patient_evolutionary, name='patient-evolutionary'),
     path('patients/evolutionary/form', evo_views.evolutionary_form, name='evolutionary-form'),

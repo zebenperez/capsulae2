@@ -11,6 +11,7 @@
 
 {% comment %} <span id="div-notification"></span><br/> {% endcomment %}
 
+
 <div class="row justify-center">
     <div class="col-3"> <strong> {% trans "Código" %}</strong> </div>
     <div class="col-3"> <strong> {% trans "F. Preparación" %}</strong> </div>
@@ -35,6 +36,8 @@
     </div>
     <div class="col-12 alert alert-warning"> {% trans "Caduca:" %} {{expiration_date}}</div>
 </div>
+
+<input type="text" class="form-control" id="deliver_med_qr_field" placeholder="{% trans "Código QR del medicamento" %}"/>
 
 <div class="row pt-2"> 
     <div class="col-8"> <strong>{% trans "Dentro del SPD" %}</strong> </div>
@@ -64,4 +67,12 @@
     <button type="button" class="btn btn-sm ark save" data-bs-dismiss="modal" data-url="{% url "spd-blisters" %}"
         data-target="blister-list-{{obj.pillbox.id}}" data-obj_id="{{obj.pillbox.id}}">{% trans "Guardar" %}</button>
 </div>
+
+<script>
+    $("#deliver_med_qr_field").change(function(){
+        var url = "{% url 'spd-search-by-qr' %}";
+        var datas = {"qr_data": $(this).val(), "pd_id": "{{obj.id}}"}
+        ajaxGetSearchMed(url, datas, "code", "expiration_date");
+    });
+</script>
 

@@ -30,7 +30,7 @@
         {% endif %}
         {% if user|have_menu:"SPD"%}
             <div class="tab-item ark" data-url="{% url "patient-spd" %}" data-target="div-container" data-obj_id="{{obj.id}}">
-                <i class="fa fa-pills"></i><span class="hide-mobile">&nbsp; {% trans "Pastilleros" %} ({{obj.pillboxes.all.count}})</span></div>
+                <i class="fa fa-pills"></i><span class="hide-mobile">&nbsp; {% trans "Pastilleros" %} ({{obj.get_active_pillboxes}})</span></div>
         {% endif %}
         {% if user|have_menu:"LOPD"%}
             <div class="tab-item ark" data-url="{% url "patient-lopd" %}" data-target="div-container" data-obj_id="{{obj.id}}">

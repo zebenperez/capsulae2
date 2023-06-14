@@ -104,6 +104,31 @@ function ajaxGetEnabled(url, datas, target, modal_target, obj)
     });
 };
 
+function ajaxGetSearchMed(url, datas, target_prefix1, target_prefix2)
+{
+    setWait();
+    $.ajax({
+        url : url,
+        type : 'GET',
+        data : datas,
+        cache : false,
+        dataType : 'json',
+        beforeSend : function(){},
+        success : function(data){
+            //console.log(data);
+            let expiration_date =""
+            try{
+                expiration_date = `20${data.expiration_date.substring(0,2)}-${data.expiration_date.substring(2,4)}-${data.expiration_date.substring(4,2)}`
+            }catch{}
+
+            $("#"+target_prefix1+"_"+data.pdm_id).val(data.batch_code).change();
+            $("#"+target_prefix2+"_"+data.pdm_id).val(expiration_date).change();
+        },
+        error : function(e){alert("Error: "+e.responseText);},
+        complete : function(){unsetWait();}
+    });
+};
+
 
 function ajaxPostAutosave(url, datas, target)
 {
@@ -739,6 +764,23 @@ $(document).ready(()=>{
         else
             $("."+row).show();
 
+    });
+
+    $("body").on("keyup", ".front-search", function(e){
+        var value = $(this).val();
+        var row = $(this).data("row-class");
+        if(value == "")
+            $("."+row).show();
+        else
+        {
+            $("."+row).each(function(){
+                var id = $(this).attr("id");
+                if (id.indexOf(value.toUpperCase()) != -1)
+                    $(this).show();
+                else
+                    $(this).hide();
+            });
+        }
     });
 
 });

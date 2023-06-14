@@ -94,6 +94,9 @@ class Pacientes(models.Model):
     def get_active_treatments(self):
         return self.tratamientos.filter(activo=True).count()
 
+    def get_active_pillboxes(self):
+        return self.pillboxes.filter(active=True).count()
+
     def __str__(self):
         return self.n_historial if self.n_historial != None else self.nombre
         # return self.__unicode__()
