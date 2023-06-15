@@ -240,6 +240,123 @@ def patient_complement_form(request):
     except Exception as e:
         return render(request, 'error_exception.html', {'exc':show_exc(e)})
 
+@group_required("admins","managers")
+def patient_interactions_comment(request):
+    patient = get_or_none(Pacientes, get_param(request.GET, "patient_id"))
+    if patient == None:
+        return render(request, 'error_exception.html', {'exc':'Paciente no encontrado!'})
+    return render(request, "patient/treatments/interactions-comment.html", {'obj': patient,})
+
+@group_required("admins","managers")
+def patient_interactions_print(request):
+    response = HttpResponse("--ok--")
+#    paciente = Pacientes.objects.get(pk=paciente_id)
+#    comments = request.POST.get('comments', '')
+#    tratamientos = Tratamiento.objects.filter(paciente=paciente,fecha_fin__gte=date.today(), activo=True).order_by('medicamentos__atcs')
+#    registros = BloodPressure.objects.filter(patient=paciente)[:40]
+#
+#    counter = 0         
+#    interacciones = {}
+#    medmed = {}
+#    secwar = {}
+#    diagnosticos = Diagnosticos.objects.filter(n_orden=paciente.n_historial, borrado=False)
+#    list_cie = []
+#    list_ciap = []
+#    list_pato = []
+#    oldman = CieCiap.objects.get(cie='1xxx') #1xxxx codigo de advertencia pacientes ancianos
+#    sec_warning = CieCiap.objects.get(cie='1xxxx')#1xxx codigo de advertencias de seguridad generales
+#    for diagnostico in diagnosticos:
+#        list_cie.append(diagnostico.cie_ciap.cie)
+#        list_ciap.append(diagnostico.cie_ciap.ciap)
+#        list_pato.append(diagnostico.cie_ciap.cie)
+#    
+#    if '1xxxx' not in list_cie:
+#        list_ciap.append('1xxxx')
+#        list_cie.append('1xxxx')
+#        list_pato.append(sec_warning)
+#
+#    if (paciente.edad >= 70):
+#        if '1xxx' not in list_cie:
+#            list_ciap.append('1xxx')
+#            list_cie.append('1xxx')
+#            list_pato.append(oldman)
+#    counter_medmed = 0
+#    medmed = interamedmed(paciente)
+#
+#    tratamientos_duplicados = []
+#    for tratamiento in tratamientos:
+#        counter += 1
+#        list_interacc = []
+#        list_inter_med_med = []
+#        list_secwar = []
+#        medicamentos_in_trat =tratamiento.medicamentos.all()
+#
+#        #FIXME : si el tratamiento pudiera tener mas de un farmaco, esto habria que cambiarlo
+#        duplicities = tratamiento.duplicity_warning
+#        if len(duplicities) > 0:
+#            tratamientos_duplicados.append({'med': medicamentos_in_trat[0], 'duplicities':  tratamiento.duplicity_warning})
+#
+#        for medicamento in medicamentos_in_trat:
+#            list_aux = []
+#            #list_medmed = []
+#            aux_secwar = []
+#            params = {'nregistro':medicamento.code}
+#            list_med, error = medicamentos_search_aemps(params)
+#            for med in list_med:
+#                str_atc = '<strong>%s</strong> : ' % med['name']
+#                str_atc_med = '<strong>%s</strong> : ' % med['name']
+#                str_atc_secwar = '<strong>%s</strong> : ' % med['name']
+#                for atc in med['atcs']:
+#                    #Inter Med-Enf
+#                    #intermedenf = InteraMedEnf.objects.filter(codprincipi = atc['codigo'],cie__in=list_cie).all() or InteraMedEnf.objects.filter(codprincipi = atc['codigo'],ciap__in=list_ciap).all() or InteraMedEnf.objects.filter(codprincipi = atc['codigo'],patologia__in=list_pato)
+#                    #intermedenf = InteraMedEnf.objects.filter(codprincipi = atc['codigo']).filter(Q(cie__in=list_cie)|Q(ciap__in=list_ciap)|Q(patologia__cie__in=list_cie)| Q(patologia__ciap__in=list_ciap)|Q(patologia__in=list_pato))
+#
+#                    intermedenf = InteraMedEnf.objects.filter(atc = atc['codigo']).filter(Q(cie__in=list_cie)|Q(ciap__in=list_ciap)|Q(patologia__cie__in=list_cie)| Q(patologia__ciap__in=list_ciap)|Q(patologia__in=list_pato))
+#                    intermedenf = intermedenf.filter(deleted=False, validate_date__lte = datetime.now())
+#                    for interaccion in intermedenf:
+#                        mensaje = re.sub("[\\n]+", ". ", interaccion.mensaje_pato)
+#                        mensaje ="<br/>%s. %s" % (interaccion.patologia.nombre, mensaje)
+#                        mensaje ="%s.<br/><br/><div style='margin-left:20%%;font-size:0.8em;'><i>%s</i></div>" % (mensaje, interaccion.fuente)
+#                        if (interaccion.cie not in ['1xxx','1xxxx']):
+#                            if (mensaje not in list_aux):
+#                                list_aux.append(mensaje)
+#                        else:
+#                            if (mensaje not in aux_secwar):
+#                                aux_secwar.append(mensaje)
+#
+#            if (len(list_aux) > 0):
+#                str_atc = "%s %s" % (str_atc, ''.join(list_aux))
+#                list_interacc.append(str_atc)
+#            if (len(aux_secwar) > 0):
+#                str_atc_secwar = "%s %s" % (str_atc_secwar, ''.join(aux_secwar))
+#                list_secwar.append(str_atc_secwar)
+#
+#        if (len(list_interacc) > 0):
+#            interacciones['%d' % tratamiento.pk] = list_interacc
+#        if (len(list_secwar) > 0):
+#            secwar['%d' % tratamiento.pk] = list_secwar
+#
+#    prin_in = AlergiasPrincipios.objects.filter(paciente = paciente)
+#    excp_in = AlergiasExcipientes.objects.filter(n_orden=paciente)
+#
+#    context= {'tratamientos':tratamientos, 'paciente':paciente, 'interacciones':interacciones, 'url_base':request.get_host(),
+#            'medmed' : medmed, 'secwar':secwar, 'alergies': list(excp_in) + list(prin_in), 'comments':comments, 'diagnosticos':diagnosticos,
+#                'duplicities': tratamientos_duplicados, 'html_view': html_view, 'registros': registros, 'request':request}
+#
+#    filename = "%s_%s.pdf" % (paciente.n_historial, date.today().strftime("%Y%m%d"))
+#    html_template = render_to_string('tratamientos_print.html', context)
+#
+#    if  html_view is None:
+#        pdf_file = HTML(string=html_template).write_pdf()
+#        response = HttpResponse(pdf_file, content_type='application/pdf')
+#        response['Content-Disposition'] = 'filename="%s"' % filename
+#        response['Content-Transfer-Encoding'] = 'binary'
+#    else:
+#        response = HttpResponse(html_template)
+#
+#    return response
+#
+
 '''
     Procedure
 '''

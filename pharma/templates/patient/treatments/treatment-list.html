@@ -16,6 +16,8 @@
     <div class="col-12 text-end">
         <button type="button" class="btn btn-sm ark new" data-url="{%url "patient-complement-form"%}" data-target-modal="common-modal" 
             data-patient_id="{{obj.id}}"> <i class="fas fa-plus"></i> {% trans 'Crear Complemento' %}</button> 
+        <button type="button" class="btn btn-sm ark new" data-url="{%url "patient-interactions-comment"%}" data-target-modal="common-modal" 
+            data-patient_id="{{obj.id}}"> <i class="fas fa-plus"></i> {% trans 'Informe Farmacoterapéutico' %}</button> 
         |
 
         <button class="btn btn-sm check-row new" data-row="row-item" data-active="True"> 

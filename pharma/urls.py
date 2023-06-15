@@ -25,6 +25,8 @@ urlpatterns = [
     path('patients/treatment-remove/', views.patient_treatment_remove, name='patient-treatment-remove'),
     path('patients/treatment-medication-search/', views.patient_treatment_medication_search, name='patient-treatment-medication-search'),
     path('patients/complement-form/', views.patient_complement_form, name='patient-complement-form'),
+    path('patients/interactions-comment/', views.patient_interactions_comment, name='patient-interactions-comment'),
+    path('patients/interactions-print/', views.patient_interactions_print, name='patient-interactions-print'),
 
     path('patients/lopd/', views.patient_lopd, name='patient-lopd'),
     path('patients/lopd-add', views.patient_lopd_add, name='patient-lopd-add'),

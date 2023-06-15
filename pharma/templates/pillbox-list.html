@@ -18,27 +18,9 @@
         </thead>
 
         <tbody>
-            {% for deliver in delivers %} {% with item=deliver.pillbox %}
-                <tr class="small row-deliver" id="row-{{item.patient}}">
-                    <td><a href="{% url "patient-view" item.patient.id %}#cap-panel-view-content">{{ item.patient }}</a></td>
-                    <td>
-                        {%if item.is_expired%}<i class="fas fa-ban text-danger" title="Pastillero caducado"></i>{%endif%} {{item.description}}
-                    </td>
-                    <td class="text-warning">{{deliver.creation_date|date:"d-m-Y"|default:"--"}}</td>
-                    <td>{{deliver.deliver_date|date:"d-m-Y"|default:"--"}}</td>
-                    <td>{{deliver.finish_date|date:"d-m-Y"|default:"--"}}</td>
-                    <td class="text-right">
-                        <a class="btn btn-xs w-25" title="{%trans "Imprimir blister"%}" href="{%url "spd-blister-print" deliver.id%}" target="_blank">
-                            <i class="fas fa-print"></i></a>
-                        <a class="btn btn-xs w-25 ark" title="{% trans "Editar blister" %}" data-url="{% url "spd-blister-form" %}"
-                            data-target-modal="common-modal" data-obj_id="{{deliver.id}}" data-pillbox_id="{{item.id}}">
-                            <i class="fas fa-edit"></i></a>
-                        <a class="btn btn-xs w-25 ark" title="{% trans "Eliminar blister" %}" data-url="{% url "spd-blister-remove" %}"
-                            data-target="blister-list-{{item.pillbox.id}}" data-obj_id="{{item.id}}"
-                            data-confirm="{% trans "Esta seguro/a de que desea eliminar este elemento?" %}"><i class="fas fa-trash"></i></a>
-                    </td>
-                </tr>
-            {% endwith %} {% endfor %}
+            {% for obj in delivers %} 
+                <tr class="small row-deliver" id="row-{{obj.pillbox.patient}}"> {% include "pillbox-list-row.html" %} </tr>
+            {% endfor %}
         </tbody>
     </table>
 

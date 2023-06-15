@@ -140,6 +140,7 @@ def spd_blister_remove(request):
 def spd_blister_clone(request):
     try:
         obj = get_or_none(PillboxDeliver, request.GET['obj_id'])  
+        dashboard = get_param(request.GET, 'dashboard')
 
         now = datetime.now()
         expiration_date = now + timedelta(days=90)
@@ -154,6 +155,8 @@ def spd_blister_clone(request):
             PillboxDeliverMed.objects.create(treatment=dm.treatment, pillbox_deliver=new_obj, expiration_date=dm.expiration_date, code=dm.code)
 
         deliveries = new_obj.pillbox.pillbox_delivers.all().order_by('-deliver_date')
+        if dashboard != "":
+            return render(request, "pillbox-list-row.html", {'obj': new_obj})
         return render(request, "patient/spd/spd-blisters.html", {'obj': new_obj.pillbox, 'deliveries': deliveries})
     except Exception as e:
         print(e)
