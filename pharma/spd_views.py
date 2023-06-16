@@ -14,7 +14,8 @@ from capsulae2.commons import get_or_none, get_param, show_exc
 from .models import Pacientes
 from .spd_models import Pillbox, PillboxTreatment, PillboxDeliver, PillboxDeliverMed
 from .treatment_models import Tratamiento 
-from .common_lib import PILLBOX_ADVISE, parse_qr
+from .common_lib import PILLBOX_ADVISE
+from .pharma_lib import parse_qr
 
 
 '''

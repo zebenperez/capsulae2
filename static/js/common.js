@@ -766,7 +766,7 @@ $(document).ready(()=>{
 
     });
 
-    $("body").on("keyup", ".front-search", function(e){
+    $("body").on("change", ".front-search", function(e){
         var value = $(this).val();
         var row = $(this).data("row-class");
         if(value == "")
