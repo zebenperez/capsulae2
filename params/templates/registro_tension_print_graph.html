@@ -1,0 +1,214 @@
+{% load pharmatags %}
+<html>
+	<head>
+		<title> Cartilla tension {% if paciente.owner == request.user %} {{ paciente.nombre }} {{ paciente.apellido }} {% endif %}</title>
+		<link href="https://fonts.googleapis.com/css?family=Ubuntu&display=swap" rel="stylesheet">
+		<style>
+
+			 @media screen{
+				 .page {
+					 visibility:hidden;
+				 }
+            }
+
+			@page 
+			{
+				size: landscape;
+                width:93%;
+                margin:2mm 1mm 2mm 1mm;
+				
+               /*transform: rotate(-90deg);*/
+            }
+			body, body *, a, small{
+				color:purple;
+				font-family:'Ubuntu';
+				font-size:8pt;
+
+			}
+			.frame{
+				width:48.8%;
+				height: 48%;
+				display:inline-block;
+				padding: 0.5%;
+				vertical-align:top;
+				margin-bottom: 1px;
+				overflow:hidden;
+			}
+			.frame_big{
+				width:98%;
+				height: 98%;
+				display: inline-block;
+				padding:0.5%;
+			}
+            .frame_large{
+				width:48.8%;
+				height: 78%;
+				display:inline-block;
+				padding: 0.5%;
+				vertical-align:top;
+				margin-bottom: 1px;
+				overflow:hidden;
+			}
+
+			h4{
+				color:#478a00;
+				border-bottom: 1px solid silver;
+			}
+
+		   li span
+		   {
+			   display:block;
+			   margin-left: 1.5em;
+			   font-style:italic;
+		   }
+
+		   span.bullet{
+				background-color: #478a00;
+				display: inline-block;
+				width: 0.5em;
+				height:0.5em;
+				margin-left:0;
+				font-style:normal;
+				margin-right: 1em;
+			}
+
+			ul {
+				list-style: none;
+			}
+
+			li {
+				margin-top: 1.2em;
+			}
+
+			.label{
+				display: inline-block;
+				width: 10%;
+				margin-right: 0.5em;
+				height: 2em;
+				padding-left: .3em;
+				vertical-align:bottom;
+				margin-bottom: -0.4em;
+			}
+			.field-large{
+				display: inline-block;
+				width:85%;
+				height: 2.2em;
+				margin:0;
+				vertical-align: top;
+				background-color:#f0f0f0;
+				color: black;
+				font-size: 9pt;
+				padding-left: 1em;
+				padding-top:0.5em;
+				margin-top: 0.2em;
+			}
+
+			.field-short{
+				display : inline-block;
+				width: 35.5%;
+				height: 1.5em;
+				vertical-align:top;
+				margin: 0;
+				background-color: #f0f0f0;
+				font-size: 9pt;
+				padding-left: 1em;
+				padding-top: 0.5em;
+				color:black;
+
+				margin-top: 0.2em;
+			}
+			.title-box
+			{
+				padding-top: 3em;
+				padding-bottom: 1em;
+				text-align:right;
+			}
+
+			.title-box h1
+			{
+				color: #478a00;
+				font-size: 16pt;
+				font-weight:bolder;
+			}
+
+			.title-box h2{
+				color: purple;
+				font-size: 20pt;
+				font-weight:lighter;
+			}
+
+			.logo-box
+			{
+				text-align:right;
+				margin-top: 3.5em;
+				height: 4em;
+				vertical-align:bottom;
+			}
+
+			#logo{
+				display: inline-block;
+				width: 7em;
+				height:3.6em;
+			}
+			table{
+				width: 100%;
+				border: 0.1em solid #478a00;
+
+				border-collapse:collapse;
+			}
+			thead{
+				border:1px solid #478a00;
+			}
+			th{
+				background-color:#478a00;
+				color:white;
+				font-weight:bolder;
+				border-right:0.1em solid white;
+			}
+			tr{
+				border-bottom: 0.1em solid #478a00;
+				height: 1.5m;
+			}
+
+			td{
+				text-align: center;
+				color:black;
+				padding: 0.6em;
+				height: 1.5em;
+				border-right: 1px solid #478a00;
+			}
+			.empty p{
+				height:1.4em;
+			}
+
+			.frame.right-border{
+				border-right: 0.1em dashed lightgray;
+			}
+			.frame.top-border{
+				border-top: 0.1em dashed lightgray;
+			}
+			canvas
+			{
+				width: 100%!important;
+				height: 100%!important;
+			}
+
+		
+		</style>
+	</head>
+	<body id="">
+		<div class="page">
+			    <div class="frame_big" id="plot-frame">
+				{% with print=True %}
+					{% include "registro_tension_chart_print.html" %}	
+				{% endwith %}
+			    </div>
+			</div>
+		</div>
+		
+	</body>
+	<script>
+
+		setTimeout(function(){window.print()}, 100);
+	</script>
+</html>

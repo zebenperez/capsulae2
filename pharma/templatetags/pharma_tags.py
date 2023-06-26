@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 
 from capsulae2.settings import BASE_DIR
 from pharma.spd_models import Pillbox
+from medication.models import FichaPrincipioActivo
 
 import os
 
@@ -35,6 +36,22 @@ def company_logo(user):
         print("COMPANY LOGO %s"%(e))
     return ""
 
+@register.filter
+def get_ficha(tratamiento):
+    med = tratamiento.medicamentos.first()
+    if med != None:
+        atc = ""
+        for code in med.atcs.split(","):
+            if len(code) > 5:
+                atc = code
+        ficha = FichaPrincipioActivo.objects.filter(cod_atc=atc)
+        if len(ficha) > 0:
+            return ficha[0]
+    return None
+
+'''
+    Simple Tags
+'''
 @register.simple_tag
 def userqr_code(request, paciente):
     import pyqrcode
@@ -44,6 +61,16 @@ def userqr_code(request, paciente):
     url.svg("{}{}{}".format(BASE_DIR, rpath, filename), scale=4)
     out="{}://{}{}{}".format(request.scheme, request.get_host(), rpath, filename)
     return out
+
+@register.simple_tag
+def get_atcs_for_print(dictionary, key, salto=True):
+    result = ""
+    for atc in dictionary.get(str(key)):
+        if (salto):
+            result = "%s<br>%s" % (result, atc)
+        else:
+            result = "%s%s" % (result, atc)
+    return mark_safe(result)
 
 '''
     Inclusion Tags

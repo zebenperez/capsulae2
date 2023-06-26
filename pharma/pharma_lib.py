@@ -1,7 +1,16 @@
+from django.db.models import Q
+from datetime import date, datetime
+
 from .treatment_models import Tratamiento
+from .allergy_models import AlergiasExcipientes, AlergiasPrincipios
+from medication.models import Diagnosticos, CieCiap, InteraMedMed, InteraMedEnf
+from params.models import BloodPressure
+
 from medication.medication_lib import medicamentos_search_aemps
-from datetime import date
-#InteraMedMed - BloodPressure - Diagnosticos - CieCiap - InteraMedEnf - AlergiasPrincipios - AlergiasExcipientes
+
+import re
+
+# - AlergiasPrincipios - AlergiasExcipientes
 
 def parse_qr(qr_data):
     values = {}
@@ -55,22 +64,43 @@ def interamedmed(paciente):
     list_keys = list(med_atcs.keys())
     for idx,key in enumerate(list_keys):
         for key_02 in list_keys[idx+1:]:
-            #interamedmeds = InteraMedMed.objects.filter(atc1__in = med_atcs[key], atc2__in = med_atcs[key_02]) or InteraMedMed.objects.filter(atc2__in = med_atcs[key], atc1__in = med_atcs[key_02])
-            #interamedmeds = interamedmeds.filter(deleted = False, validate_date__lte = datetime.now())
-            interamedmeds = []
+            interamedmeds = InteraMedMed.objects.filter(atc1__in = med_atcs[key], atc2__in = med_atcs[key_02]) or InteraMedMed.objects.filter(atc2__in = med_atcs[key], atc1__in = med_atcs[key_02])
+            interamedmeds = interamedmeds.filter(deleted = False, validate_date__lte = datetime.now())
             if (len(interamedmeds) > 0):
                 result.append([key, key_02, interamedmeds])
 
     return result
 
+def get_values_to_summary_print(paciente, host):
+    tratamientos = Tratamiento.objects.filter(paciente=paciente, fecha_fin__gte=date.today(), activo=True).order_by('medicamentos__atcs')
+    registros = BloodPressure.objects.filter(patient = paciente)[:40]
+    
+    prin_in = AlergiasPrincipios.objects.filter(paciente = paciente)
+    excp_in = AlergiasExcipientes.objects.filter(n_orden=paciente)
+
+    counter = 0
+    interacciones = {}
+
+    context= {
+        'tratamientos':tratamientos, 
+        'paciente':paciente, 
+        'interacciones':interacciones,
+        'simple_report':True, 
+        #'html_view': html_view,
+        'url_base':host, 
+        'alergies':list(excp_in) + list(prin_in), 
+        'registros': registros, 
+        #'request':request
+    }
+
+    return context
+
 def get_values_to_interactions_print(paciente, comments, host):
     tratamientos = Tratamiento.objects.filter(paciente=paciente,fecha_fin__gte=date.today(), activo=True).order_by('medicamentos__atcs')
-    #registros = BloodPressure.objects.filter(patient=paciente)[:40]
-    registros = []
-    #diagnosticos = Diagnosticos.objects.filter(n_orden=paciente.n_historial, borrado=False)
-    diagnosticos = []
-    #oldman = CieCiap.objects.get(cie='1xxx') #1xxxx codigo de advertencia pacientes ancianos
-    #sec_warning = CieCiap.objects.get(cie='1xxxx')#1xxx codigo de advertencias de seguridad generales
+    registros = BloodPressure.objects.filter(patient=paciente)[:40]
+    diagnosticos = Diagnosticos.objects.filter(n_orden=paciente.n_historial, borrado=False)
+    oldman = CieCiap.objects.get(cie='1xxx') #1xxxx codigo de advertencia pacientes ancianos
+    sec_warning = CieCiap.objects.get(cie='1xxxx')#1xxx codigo de advertencias de seguridad generales
     oldman = None
     sec_warning = None
 
@@ -123,9 +153,8 @@ def get_values_to_interactions_print(paciente, comments, host):
                 str_atc_med = '<strong>%s</strong> : ' % med['name']
                 str_atc_secwar = '<strong>%s</strong> : ' % med['name']
                 for atc in med['atcs']:
-                    #intermedenf = InteraMedEnf.objects.filter(atc = atc['codigo']).filter(Q(cie__in=list_cie)|Q(ciap__in=list_ciap)|Q(patologia__cie__in=list_cie)| Q(patologia__ciap__in=list_ciap)|Q(patologia__in=list_pato))
-                    #intermedenf = intermedenf.filter(deleted=False, validate_date__lte = datetime.now())
-                    intermedenf = []
+                    intermedenf = InteraMedEnf.objects.filter(atc = atc['codigo']).filter(Q(cie__in=list_cie)|Q(ciap__in=list_ciap)|Q(patologia__cie__in=list_cie)| Q(patologia__ciap__in=list_ciap)|Q(patologia__in=list_pato))
+                    intermedenf = intermedenf.filter(deleted=False, validate_date__lte = datetime.now())
                     for interaccion in intermedenf:
                         mensaje = re.sub("[\\n]+", ". ", interaccion.mensaje_pato)
                         mensaje ="<br/>%s. %s" % (interaccion.patologia.nombre, mensaje)
@@ -149,10 +178,8 @@ def get_values_to_interactions_print(paciente, comments, host):
         if (len(list_secwar) > 0):
             secwar['%d' % tratamiento.pk] = list_secwar
 
-    #prin_in = AlergiasPrincipios.objects.filter(paciente = paciente)
-    #excp_in = AlergiasExcipientes.objects.filter(n_orden=paciente)
-    prin_in = []
-    excp_in = []
+    prin_in = AlergiasPrincipios.objects.filter(paciente = paciente)
+    excp_in = AlergiasExcipientes.objects.filter(n_orden=paciente)
 
     context= {
         'tratamientos':tratamientos, 

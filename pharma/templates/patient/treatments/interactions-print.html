@@ -1,5 +1,5 @@
 {% load pharma_tags i18n  %}
-{%comment%}{% get_atcs_for_print interacciones intera %}{%endcomment%}
+
 <!DOCTYPE html>
 <html lang="es">
     <head>
@@ -194,7 +194,7 @@
                     <tbody>
                         {%for intera in interacciones %}
                             <tr class='{{forloop.counter0|divisibleby:2|yesno:"even,odd"}}' id="id_{{intera}}">
-                                <td> {%comment%}{% get_atcs_for_print interacciones intera %}{%endcomment%} </td>
+                                <td> {% get_atcs_for_print interacciones intera %} </td>
                                 <td> <div style="display:inline-block"> <button id="rm_{{intera}}"  class="rm-btn"> X </button> </div> </td>
                             </tr>
                         {%endfor%}
@@ -266,7 +266,7 @@
                     <tbody>
                         {%for intera in secwar %}
                             <tr class='{{forloop.counter0|divisibleby:2|yesno:"even,odd"}}' id="id_{{intera}}{{forloop.counter}}">
-                                <td> {%comment%}{% get_atcs_for_print secwar intera %}{%endcomment%} </td>
+                                <td> {% get_atcs_for_print secwar intera %} </td>
                                 <td>
                                     <div style="display:inline-block"><button id="rm_{{intera}}{{forloop.counter}}"  class="rm-btn"> X </button></div>
                                 </td>

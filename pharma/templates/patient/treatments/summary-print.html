@@ -1,0 +1,408 @@
+{% load pharma_tags i18n  %}
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <style>
+button{display:none;}    
+@media screen{button{display:inline;}}
+
+@page 
+{
+    size: A4  {% if simple_report %}landscape {% endif %};
+    /*@top-right{content: "Pág. " counter(page) " de " counter(pages);font-size:0.6em;}
+      @top-left{content: "CAPSULAE";} */
+        {% if interacciones|length > 0 %}
+        @top-center{content:"Plan de tratamiento - {{paciente.n_historial}} -";}
+        {%endif%}
+        @bottom-right{content: "{% now "d F Y" %}";}
+}
+            body {font-size:0.85em; {% if html_view %} width:90%; margin:auto; margin-top:1em; {% endif %}}
+            table {width:99.9%}
+            table.list, table#register {border-collapse:collapse; border:2px solid black;}
+            table.list td, table.list th {border-bottom:1px solid black;}
+            tr.odd { background-color:#eee; border-color:#eee;}
+            tr.medicamentos td{border-bottom:0px;}
+            tr.interacciones td{border-top:1px dotted black;}
+            table.list th {font-size:0.8em}
+            .warnings { font-size:0.6em;}
+            table.firmas td {border:2px solid; border-collapse: collapse; font-size:1em;}
+            table.firmas, table#register {border-collapse:collapse;}
+            table.intera, table#register {border-collapse:collapse;}
+            table.intera thead th {font-size:1.2em;}
+            table.intera tbody tr td , table#register tbody tr td{font-size:0.8em;}
+            table#register * td , table#register th{ border-bottom: 1px solid black; font-size:1.2em;!important}
+            table#register thead * { font-size:0.9em!important;}
+            table#register * tr:nth-child(even) { background-color:#eee}
+            table.info * td, table.info * th {text-align:left;!important}
+            .text-danger {color:red; font-weight:bold}
+
+            .float-button {
+                position: fixed;
+                right: 30px;
+                top: 78px;
+                transition: all 0.2s ease-in 0s;//this is the key attribute
+                z-index: 9999;
+                cursor: pointer;
+            }
+
+
+            button.rm-btn{
+                background-color:none;
+                width: 2em;
+                height: 2em;
+                text-align: center;
+                border: 1px solid silver;
+                border-radius: 3px;
+
+            }
+            #logo{
+                max-width: 100px;
+                max-height: 120px;
+                padding-right: 10px;
+                height: auto;
+            }
+
+        </style>
+
+        {% comment %}
+        <div class="" style="background:grey; padding-top:1em; padding-bottom:3em; padding-right:2em;">
+            <button type="button" onclick="printDiv('printarea')" style="float:right;">Imprimir</button>
+        </div>
+        {% endcomment %}
+    </head>
+
+    <body>
+        <div id="printarea" style="padding-top:1em">
+            <table class="firmas">
+                <tr>
+                    <td align="left" rowspan="2" style="width:15%;border:0px;">
+                        <img id="logo" src="http://{{url_base}}{{request.user|company_logo|default:"/static/imgs/logo-capsulae.png"}}">
+                    </td>
+                    <td align="center"  style="width:70%;font-size:0.8em;text-align:left;padding-left:5px;">
+                        <b>Código de paciente:</b> {{paciente.n_historial}}</br> 
+                        <b>Nombre y apellidos:</b> {{paciente.full_name }}</br>
+                        <b>Fecha de Nacimiento:</b> {{paciente.fecha_nacimiento}}
+                    </td>
+
+                    <td align="center"  style="width:70%;font-size:0.8em;text-align:left;padding-left:5px;">
+                        <b>Sexo:</b> {% if paciente.sexo == 'H' %} Hombre {%else%} Mujer {%endif%}</br>
+                        <b> CIP:</b> {{ paciente.cip|default_if_none:"--" }}</br>
+                    </td>
+                    <td align="center" rowspan="2" style="width:15%;border:0px;"> 
+                        <img src="{% userqr_code request paciente %}" style="display:block; width:1.7cm; height:1.7cm"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2" align="center"  style="font-size:0.8em;text-align:left;padding-left:5px;"><b>{% trans 'ALERGIAS' %}:</b>
+                        {% for alergy in alergies %}
+                        {% if alergy is alergies|last %}
+                        {{alergy}} 
+                        {% else %}
+                        {{alergy}}
+                        {% endif %}
+                        {% endfor %}
+                    </td>
+                </tr>
+            </table>
+            </br>
+            {% comment %}
+            <hr>
+            <table class="info">
+                <tr>
+                    <th>Nombre y apellidos</th>
+                    <th>Fecha de nacimiento: </th>
+                    <th>Sexo:</th>
+                    <th>CIP: </th>
+                </tr>
+                <tr>
+                    <td> {{paciente.full_name }}</td>
+                    <td> {{paciente.fecha_nacimiento}}</td>
+                    <td> {% if paciente.sexo == 'H' %} Hombre {%else%} Mujer {%endif%}</td>
+                    <td> {{ paciente.cip|default_if_none:"--" }}</td>
+
+                </tr>
+            </table>
+            <hr>
+            {% endcomment %}
+            {% if comments %}
+
+            <table class="intera">
+                <thead>
+                    <tr> 
+                        <th>{% trans 'Comentarios' %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>{{ comments }}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <br/>
+
+            <hr/>
+            {%endif%}
+            <table class="list">
+                <tr>
+                    <th style="width:50%;text-align:center;">Medicamento</th>
+                    <th style="width:5%;text-align:center;">Fecha</th>
+                    <th style="width:5%;text-align:center;"><img src="http://{{url_base}}/pharma/assets/desayuno.jpg" style="width:16px; height:16px;"/></th>
+                    <th style="width:5%;text-align:center;"><img src="http://{{url_base}}/pharma/assets/comida.jpg" style="width:20px; height:16px;"/></th>
+                    <th style="width:5%;text-align:center;"><img src="http://{{url_base}}/pharma/assets/cena.jpg" style="width:20px; height:16px;"/></th>
+                    <th style="width:5%;text-align:center;"><img src="http://{{url_base}}/pharma/assets/noche.jpg" style="width:16px; height:16px;"/></th>
+                    <th style="width:25%;text-align:center;">Observaciones</th>
+                </tr>
+                {% for trat in tratamientos %}
+                <tr style="font-size:0.8em;width:40%;" class='{{trat.in_pillbox|yesno:",text-danger"}} {% if interacciones|length > 0 %} medicamentos {%endif%}{{forloop.counter|divisibleby:2|yesno:"even,odd"}}'>
+                    <td>
+                        {% if trat.principio %} {{ trat.principio }} <br> {% endif %}
+                        {% if trat.edo %} {{ trat.edo }} <br> {% endif %}
+                        {% for med in trat.medicamentos.all %}
+                        {{med.name}} <br>
+                        {% endfor %}
+                    </td>
+                    <td style="text-align:right">
+                        {{trat.fecha_inicio|date:'d-m-Y'}} {%if trat.fecha_fin and trat.fecha_fin|date:'Y-m-d' < '2099-01-01' %} - {{trat.fecha_fin|date:'d-m-Y'}}{%endif%}
+                    </td>
+                    <td style="text-align:center;width:5%;">{{trat.m}}</td>
+                    <td style="text-align:center;width:5%;">{{trat.t}}</td>
+                    <td style="text-align:center;width:5%;">{{trat.n}}</td>
+                    <td style="text-align:center;width:5%;">{{trat.o}}</td>
+                    <td style="text-align:center;width:25%;">{{trat.observaciones}}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            {#		{% if interacciones|length == 0 %} #}
+            <hr>
+            <table class="firmas" border="1" style="boder-collapse:collapse; border-spacing:0">
+                <tr style="border-bottom:none; margin-bottom:none;border-collapse:collapse">
+                    <td style="width:50%; border-bottom:none">Observaciones: </td>
+                    {% if simple_report %}
+                    <td style="width:25%; border-bottom:none; border-left:none">Preparado por:</td>
+                    <td style="width:25%; border-bottom:none; border-left:none">Revisado por:</td>
+                    {% endif %}
+                </tr>
+                <tr style="border-collapse:collapse" >
+                    <td style="width:50%; border-top:none; padding-left:1em; vertical-align:top;"><br><br><br><br><br><br><br></td>
+                    {% if simple_report %}
+                    <td style="width:25%; border-top:none; border-left:none"><br><br><br><br><br><br><br></td>
+                    <td style="width:25%; border-top:none; border-left:none"><br><br><br><br><br><br><br></td>
+                    {% endif %}
+                </tr>
+            </table>
+            {#		{% endif %} #}
+
+
+            {% if diagnosticos|length > 0%}
+            <p style="page-break-before: always"></p>
+            <table class="intera">
+                <thead>
+                    <tr>
+                        <th><center> Diagnósticos </center></th>
+                    </tr>
+                    <thead>
+            </table>
+            <table class="list">
+                <thead>
+                    <th> Nombre </th>
+                    <th> Fecha </th>
+                    <th> CIE </th>
+                    <th> CIAP </th>
+                    <th> Observaciones </th>
+                </thead>
+                <tbody>
+                    {% for diag in diagnosticos %}
+                    <tr class="{{forloop.counter0|divisibleby:2|yesno:"even, odd"}}">
+                        <td>{{ diag.cie_ciap.nombre }}</td>
+                        <td> {{ diag.fecha_ini|date:'d-m-Y'}}</td>
+                        <td> {{ diag.cie_ciap.cie }}</td>
+                        <td> {{ diag.cie_ciap.ciap}} </td>
+                        <td>{{ diag.observaciones }}</td>
+                    </tr>
+
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% endif %}
+
+            {% if html_view and registros|length > 0 %}
+            <p style="page-break-before: always"></p>
+            <h3><center> Últimos registros  </center></h3>
+            {% include "registro_tension_table.html" %}
+
+            {% endif %}
+
+            {% if interacciones|length > 0 %}
+            <p style="page-break-before: always" ></p>
+            <table class="intera">
+                <thead>
+                    <tr>
+                        <th > <center>Interacciones Principio Activo - Situación Clínica </center></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {%for intera in interacciones %}
+                    <tr class='{{forloop.counter0|divisibleby:2|yesno:"even,odd"}}' id="id_{{intera}}">
+                        <td >
+                            {% get_atcs_for_print interacciones intera %}
+                        </td>
+                            <td>
+                                <div style="display:inline-block">
+                                    <button id="rm_{{intera}}"  class="rm-btn"> X </button>
+                                </div>
+                            </td>
+                    </tr>
+                    {%endfor%}
+
+                </tbody>
+            </table>
+            {% endif %}
+            {% if medmed|length > 0 %}
+            <p style="page-break-before: always" ></p>
+            <table class="intera">
+                <thead>
+                    <tr> 
+                        <th><center> Interacciones Medicamento Medicamento</center></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {%for intera in medmed %}
+                    <tr id="id_{{ forloop.counter }}" class="{%if forloop.counter|divisibleby:2 %} even {%else%} odd {%endif%}">
+                        <td><strong>{{intera.0}} vs {{intera.1}}</strong></td>
+                        <td>
+                            <div style="display:inline-block">
+                                <button id="rm_{{forloop.counter}}"  class="rm-btn"> X </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% for aux in intera.2 %}
+                    <tr id="id_{{aux.pk}}"class="{%if forloop.parentloop.counter|divisibleby:2 %} even {%else%} odd {%endif%}">
+                        <td>
+                            {{aux.nombre}}
+                            <ul>
+                                <li><i>{% trans 'Efecto previsible' %}: </i>  {{aux.efecto_previsible}}</li>
+                                <li><i>{% trans 'Importancia clínica' %}: </i>  {{aux.importancia_clinica}}</li>
+                            </ul>
+                            <div style='margin-left:20%;font-size:0.8em;'><i>{{aux.fuente}}</i><br/><br/></div>
+                        </td>
+                        <td>
+                            <div style="display:inline-block">
+                                <button id="rm_{{aux.pk}}"  class="rm-btn"> X </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+
+                    {% comment %}
+                    {% get_atcs_for_print medmed intera False %}
+                    {% endcomment %}
+                    {%endfor%}
+                </tbody>
+            </table>
+            {% endif %}
+            {% if duplicities|length > 0 %}
+            <p style="page-break-before: always" ></p>
+            <table class="intera">
+                <thead>
+                    <tr> 
+                        <th><center> Posibles duplicidades </center> <br></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for dup in duplicities %}
+                    <tr class="{%if forloop.counter|divisibleby:2 %} even {%else%} odd {%endif%}" style="color:red">
+                        <td><strong>{{ dup.med.name }}</strong></td>
+                    </tr>
+                    <tr class="{%if forloop.counter|divisibleby:2 %} even {%else%} odd {%endif%}" style="color:red">
+                        <td>
+                            {% for item in dup.duplicities %}
+                            <ul>
+                                <li> Posible duplicidad con  {{ item }} </li>
+                                <li> Valorar retirada </li>
+                            </ul>
+                            {% endfor %}
+                            <div style='margin-left:20%;font-size:0.8em;'><i></i><br/><br/></div>
+                        </td>
+                    </tr>
+
+                    {% comment %}
+                    {% get_atcs_for_print medmed intera False %}
+                    {% endcomment %}
+                    {%endfor%}
+                </tbody>
+            </table>
+            {% endif %}
+            {% if secwar|length > 0 %}
+            <p style="page-break-before: always" ></p>
+            <table class="intera">
+                <thead>
+                    <tr> 
+                        <th><center>Alertas de Seguridad</center></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {%for intera in secwar %}
+                    <tr class='{{forloop.counter0|divisibleby:2|yesno:"even,odd"}}' id="id_{{intera}}{{forloop.counter}}">
+                        <td>
+                            {% get_atcs_for_print secwar intera %}
+                        </td>
+                        <td>
+                            <div style="display:inline-block">
+                                <button id="rm_{{intera}}{{forloop.counter}}"  class="rm-btn"> X </button>
+                            </div>
+                        </td>
+                    </tr>
+                    </tr>
+                    {%endfor%}
+                </tbody>
+            </table>
+            {% endif %}
+            <hr/>
+            <h2 class="warnings">AVISO</h2>
+            <ol class="warnings">
+                <li>Que los datos contenidos en este documento son ORIENTATIVOS, de carácter aproximado, y han sido obtenidos mediante su introducción colaborativa en nuestra base de datos por usuarios de la plataforma debidamente identificados y autorizados y validados por colaboradores, por lo que por nuestra parte no se puede garantizar que no contengan erratas o que estén desactualizados.</li>
+                <li>Por lo tanto, Capsulae no puede asegurar en ningún caso la exactitud de estos datos, y el uso correcto de los mismos quedará supeditado a la práctica clínica y a los conocimientos de quien los utilice, que asumirá cualquier perjuicio que pueda causarse por la aplicación incorrecta de tratamientos o dispensación errónea de medicamentos o interacciones no contempladas con base en estos datos.</li>
+                <li>En virtud de lo anterior, Capsulae, proveedora de los datos niega cualquier responsabilidad que se pudiera producir por el uso de los mismos, dado su carácter orientativo, y esta recaerá de producirse algún resultado dañoso en la persona que los utilice, quien debe discernir en función de sus conocimientos, la correcta aplicación de los tratamientos, dispensaciones, interacciones entre medicamentos etc. 
+                </li>
+            </ol>
+            {% comment %}
+            <center><img style="width:300px;height:auto;" src="http://{{url_base}}/pharma/assets/logo_green.png"></center>
+            {% endcomment %}
+        </div>
+
+        <script
+                                                          src="https://code.jquery.com/jquery-3.4.1.slim.js"
+                                                          integrity="sha255-BTlTdQO9/fascB1drekrDVkaKd9PkwBymMlHOiG+qLI="
+                                                          crossorigin="anonymous">
+        </script>
+
+        <script src="https://code.jquery.com/jquery-3.4.1.js"></script>
+
+        <script>
+$('.rm-btn').on('click', function(e){
+
+    e.stopPropagation();
+    e.preventDefault();
+    id = $(this).attr('id');
+    id_element = id.split("_")[1]
+
+        $("#id_"+id_element).remove();
+
+});
+
+function printDiv(divName) {
+    var printContents = document.getElementById(divName).innerHTML;
+    var originalContents = document.body.innerHTML;
+
+    document.body.innerHTML = printContents;
+
+    window.print();
+
+    document.body.innerHTML = originalContents;
+}
+        </script>
+        <script src="https://cdn.tiny.cloud/1/ux3hwvtttvl9g6frvob39dd08fez1u7xuowtvsi79fo8h7rt/tinymce/5/tinymce.min.js" referrerpolicy="origin"/></script>
+        <script>tinymce.init({selector:'textarea'});</script>
+    </body>
+</html>

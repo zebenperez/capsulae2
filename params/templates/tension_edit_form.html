@@ -1,0 +1,284 @@
+{% load i18n  crispy_forms_tags %}
+<div class="panel panel-primary">
+	<div class="panel-heading">
+		<div class="row">
+            {% if not tension %}
+                <div class="col-xs-12"> {% trans "Nuevo Registro de Parámetros" %}</div>
+            {% else %}
+			<div class="col-xs-12"> {% trans "Modificar Registro de Parámetros"%} {{ tension.date }} </div>
+            {% endif %}
+		</div>
+	</div>
+	<div class="panel-body cap-panel">
+		<div class="col-xs-12">
+			{% if success %}
+				<script>
+                   try{
+					    $.get("{% url 'assistant_params_info_notification' paciente.pk form.instance.pk %}", function(){});
+                    }catch(e){
+                        console.error("No se ha podido enviar el aviso a través de telegram");
+                    }
+					$('#cap-panel-view-content').ajax_load('#cap-panel-view-content',{'loading': true, 'url': "{% url 'registro_tension' paciente.pk %}"});
+					$('body').scroll_to('#cap-panel-view-content');
+					$('#cap-panel-form-tension').html("").empty();
+				</script>
+
+			{% endif %}	
+			{% if form.errors  %}
+				<div class="alert alert-danger">{{ form.errors }}</div>
+			{% endif %}
+			<form action="{% url 'tension_save_form' %}" class="ga-ajax-form form" data-ga-target="#cap-panel-form-tension" id="edit_tension_form" method="post" >{% csrf_token %}
+				 {% if tension %}
+				 	<input type="hidden" value="{{ tension.pk }}" name="tension" id="id_tension"/>
+				 {% endif %}
+                 {% crispy form %}
+				
+				<div class="col-xs-12 text-right">
+					<hr/>
+					<button type="submit"  class="btn btn-success btn-large col-xs-offset-1 col-xs-5" id="tension_save"><i class="glyphicon glyphicon-floppy-save"></i> {% trans "Guardar" %}</button>&nbsp;
+
+                    <button class="btn btn-danger btn-large  ga-clean col-xs-5" style="margin-left:10px" data-ga-target="#cap-panel-form-tension"  id="reset_form_btn"><i class="glyphicon glyphicon-ban-circle"></i> {% trans "Cancelar" %} </button>
+
+
+			</form>
+			<script>
+
+				/* ------------------------------
+			 	Functions				 
+				------------------------------*/ 
+				const C = parseFloat("{{ c_index }}".replace(",","."));
+				const M = parseFloat("{{ m_index }}".replace(",","."));
+				function calculatebmi()
+				{
+					weight = parseFloat($('#id_weight').val());
+					height = parseFloat($('#id_height').val());
+					if (isNaN(weight) || isNaN(height))
+					{
+						return ;
+					}
+
+					bmi = weight / Math.pow(height,2);
+					$('#id_bmi').val(bmi.toFixed(2));
+				}
+
+				function calculate_belt_hip_index(belt, hip)
+				{
+					belt = (belt) ? belt.replace(",",".") : null; 
+					hip = (hip) ? hip.replace(" ",".") : null;
+					let value = ""
+					if (belt && hip)
+					{
+						value = (parseFloat(belt) / parseFloat(hip)).toFixed(2);
+					}
+					$("#id_belt_hip_index").val(value);
+				}
+
+				function calculate_d(fold_values_array){
+					fold_values_array = fold_values_array.filter((el)=>{ return (el != null && el !== "" && !isNaN(el)) });
+				
+					if ((fold_values_array.length < 4) || C == null || M == null)
+					{
+						return false;
+					}
+					
+					let SUM4 = fold_values_array.slice(0,4).reduce((a,b) => a + b );
+					let D =  (C - (M * Math.log(SUM4)))
+					return D
+					
+				}
+				
+				function calculate_muscle_weight()
+				{
+					console.log("weight deberia ser cadena");
+					let weight = ""+$("#id_weight").val();
+					let fweight = ""+$("#id_fat_weight").val();
+					
+					if (!weight || !fweight)
+						return 
+					console.log(weight);
+					try{
+					 	let mweight =  (parseFloat(weight.replace(",",".")) - parseFloat(fweight.replace(",","."))).toFixed(1);
+						$("#id_muscle_weight").val(mweight);
+					}catch(e){ 
+						console.error(e);
+						console.error(weight);
+						console.error(fweight);
+					
+					}
+
+					return "";
+
+				}
+
+				/* ------------------------------
+ 				Event Handlers
+				------------------------------*/ 
+				$('#id_height').on('input', calculatebmi);
+
+				$('#id_weight').on('input', function(){
+					calculatebmi()
+					console.log("peso normal");
+					calculate_muscle_weight();
+					$(".fold_value input").trigger("input");
+
+				});
+				
+				$('#id_fat_weight').on("input", function(){
+					console.log("peso graso");
+					calculate_muscle_weight();
+				});
+				
+
+				$(".fold_value input").on('input', function(e){
+					let fold_values_array = []
+					let weight = false
+					try{
+						 weight = parseFloat($("#id_weight").val().replace(",","."));
+					}catch(e){  }
+					
+
+					$('.fold_value input').each(function(){
+						try{
+							let fvalue = $(this).val()
+							if (fvalue){
+								fold_values_array.push(parseFloat(fvalue.replace(",",".")))
+							}
+						}catch(e){ }
+						
+					});
+
+					let D = calculate_d(fold_values_array)
+					
+					if (D && weight)
+					{
+						let fat_index = ((4.95/D) - 4.5) * 100
+						let fat_weight = ( fat_index * weight ) / 100
+
+						$("#id_fat_index").val(fat_index.toFixed(1));
+						$("#id_fat_weight").val(fat_weight.toFixed(1));
+						console.log("trigger");
+						$("#id_fat_weight").trigger("input");
+					}
+					else{
+						$(".fat_value").val("");
+					}
+				});
+
+				$('#id_glicosylated').on('input', function(e){
+						glicosylated = parseFloat($('#id_glicosylated').val());
+						glucose = $('#id_glucose');
+						if (isNaN(glicosylated))
+						{
+							glucose.val("");
+							return;
+						}
+
+						glucose_val = (glicosylated * 33.6) - 77.3;
+						glucose.val(glucose_val.toFixed(2));
+				
+				});
+
+				$('#id_glucose').on('input', function(e){
+						glucose = parseFloat($('#id_glucose').val());
+						glicosylated = $('#id_glicosylated');
+						if (isNaN(glucose))
+						{
+							glicosylated.val("");
+							return;
+						}
+
+						glicosylated_val = (glucose+ 77.3)/33.6;
+						glicosylated.val(glicosylated_val.toFixed(2));
+				});
+
+                $('#id_got, #id_gpt').on('input', function(e){
+                    got = parseFloat($("#id_got").val());
+                    gpt = parseFloat($("#id_gpt").val());
+                    val = ""
+                    if ($.isNumeric(got) && $.isNumeric(gpt))
+                    {
+                        val = (got/gpt).toFixed(3);
+                    }
+
+                    $("#id_got_gpt").val(val);
+                    
+                });
+
+                $('#id_fev1, #id_fev6').on('input', function(e){
+                    fev1 = parseFloat($("#id_fev1").val());
+                    fev6 = parseFloat($("#id_fev6").val());
+                    val = "--";
+                    if ($.isNumeric(fev1) && $.isNumeric(fev6))
+                    {
+                        val = (fev1/fev6).toFixed(3);
+                    }
+                    $("#id_coef_fev1_fev6").val(val);
+                    
+                });
+
+				$("#id_belt, #id_hip").on("input", function(){
+					calculate_belt_hip_index($("#id_belt").val(), $("#id_hip").val())
+				});
+
+				$('#id_serin_creatine_index').on('input', function(e){
+					sci = parseFloat($(this).val().replace(",",".")) 					
+					age = {{ paciente.edad }}
+
+                    {# NOTA en el documento .pdf el factor para raza negra es 1.210 pero la sociedad española de nefrologia es 1.212 #}
+					fg_base = Math.pow(sci, -1.154) * Math.pow(age, -0.203) {% if paciente.sexo == 'M'  %} * 0.742 {% endif %} {% if paciente.black_race %} * 1.212 {% endif %}
+					mdrd4 = 186 * fg_base
+					$('#id_mdrd_4').val(""+mdrd4.toFixed(3));
+					
+					mdrd4_ims = 175 * fg_base
+					$('#id_mdrd_4_ims').val(""+mdrd4_ims.toFixed(3));
+					cdkec = 0;
+					exp = 1;
+					fact = 1;
+					
+					{% comment %}
+						NOTA :  Los datos de los calculos siguientes provienen de 
+						https://qxmd.com/calculate/calculator_251/egfr-using-ckd-epi
+						https://www.msdmanuals.com/medical-calculators/GFR_CKD_EPI-es.htm --> los nombres de los parametros fueron copiados de aqui
+					{% endcomment %}
+					{% if paciente.sexo == 'M' %}
+						sex = 1.018;
+						alfa = -0.329
+						kappa = 0.7
+					{% else %}
+						sex = 1;
+						alfa = -0.411;
+						kappa = 0.9
+					{% endif %}
+
+					{% if paciente.black_race %}
+						race = 1.159
+					{% else %}
+						race = 1
+					{% endif %}
+					
+					sci_kappa = sci/kappa;
+					cdkec = 141 * Math.pow(Math.min(sci_kappa,1), alfa) * Math.pow(Math.max(sci_kappa, 1), -1.209) * Math.pow(0.993, age) * sex * race;
+					
+					$('#id_cdk_epi_creatinine').val(""+cdkec.toFixed(3));
+						
+				});
+				
+
+				//autoload
+				(()=> {
+					let sex = ('M' == "{{ paciente.sexo }}") ? 'Femenino' : 'Masculino';
+					let html =`
+						<div class="row">
+							<div class="col-xs-12 text-muted small">
+						<i class="fas fa-info-circle"></i> C = {{c_index}} , M = {{ m_index }} ; Valores calculados para una persona de sexo ${sex} de {{ paciente.edad }}  años de edad 
+
+							</div>
+						</div>
+					`
+					$("#antropometricos").append(html);
+
+				})()
+			</script>
+		</div>
+	</div>
+</div>

@@ -150,3 +150,4 @@ class PatientOrigin(models.Model):
         verbose_name ="Origen"
         verbose_name_plural ="Origenes"
 
+

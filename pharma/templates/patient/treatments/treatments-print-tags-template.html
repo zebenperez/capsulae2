@@ -1,0 +1,37 @@
+{% load pharma_tags i18n %}
+
+
+<table>
+    <tr style=""  class="center"> 
+        <td colspan="6" > <p class="title"> {{ medicamento.principles }} </p> <p></p> </td>
+    </tr>
+
+    <tr>
+        <td style="text-aling:center; padding-top:5px; border-right:1px solid silver"> 
+            <div>
+                <table style="width:98%;!important; margin:auto;" class="med_table">
+                    <thead>
+                        <th style="width:5em;text-align:center;">
+                            <img src="http://{{url_base}}/static/imgs/desayuno.jpg" style="width:16px; height:16px;"/></th>
+                        <th style="width:5em;text-align:center;">
+                            <img src="http://{{url_base}}/static/imgs/comida.jpg" style="width:20px; height:16px;"/></th>
+                        <th style="width:5em;text-align:center;">
+                            <img src="http://{{url_base}}/static/imgs/cena.jpg" style="width:20px; height:16px;"/></th>
+                        <th style="width:5em;text-align:center;">
+                            <img src="http://{{url_base}}/static/imgs/noche.jpg" style="width:16px; height:16px;"/></th>
+                    </thead>
+                    <tbody>
+                        <tr style="text-align:center; font-weight:bolder;font-size:8pt; border: 1px solid #eee">
+                            <td>{{ tratamiento.m|default:"&nbsp;<br/><br/>"|safe }}</td>
+                            <td>{{ tratamiento.t|default:"&nbsp;<br/><br/>"|safe }}</td>
+                            <td>{{ tratamiento.n|default:"&nbsp;<br/><br/>"|safe }}</td>
+                            <td>{{ tratamiento.o|default:"&nbsp;<br/><br/>"|safe }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div style="padding-top:5px;"> <p class=""> {{ ficha.consejos|upper|truncatechars:155 }}</p> </div>
+        </td>
+    </tr>
+</table>
+

@@ -1,5 +1,5 @@
 from django.urls import path
-from . import views, views_account, auto_views, spd_views, evolutionary_views as evo_views
+from . import views, views_account, auto_views, spd_views, evolutionary_views as evo_views, treatment_views as t_views
 
 urlpatterns = [
     path('index/', views.index, name='pharma-index'),
@@ -20,14 +20,6 @@ urlpatterns = [
 
     path('patients/form/', views.patient_form, name='patient-form'),
 
-    path('patients/treatment/', views.patient_treatment, name='patient-treatment'),
-    path('patients/treatment-form/', views.patient_treatment_form, name='patient-treatment-form'),
-    path('patients/treatment-remove/', views.patient_treatment_remove, name='patient-treatment-remove'),
-    path('patients/treatment-medication-search/', views.patient_treatment_medication_search, name='patient-treatment-medication-search'),
-    path('patients/complement-form/', views.patient_complement_form, name='patient-complement-form'),
-    path('patients/interactions-comment/', views.patient_interactions_comment, name='patient-interactions-comment'),
-    path('patients/interactions-print/', views.patient_interactions_print, name='patient-interactions-print'),
-
     path('patients/lopd/', views.patient_lopd, name='patient-lopd'),
     path('patients/lopd-add', views.patient_lopd_add, name='patient-lopd-add'),
     path('patients/lopd-remove', views.patient_lopd_remove, name='patient-lopd-remove'),
@@ -45,6 +37,19 @@ urlpatterns = [
     path('patients/procedure/', views.patient_procedure, name='patient-procedure'),
     path('patients/procedure-form/', views.patient_procedure_form, name='patient-procedure-form'),
     path('patients/procedure-remove/', views.patient_procedure_remove, name='patient-procedure-remove'),
+
+    #------------------------- TREATMENT --------------------
+    path('patients/treatment/', views.patient_treatment, name='patient-treatment'),
+    path('patients/treatment-form/', t_views.patient_treatment_form, name='patient-treatment-form'),
+    path('patients/treatment-remove/', t_views.patient_treatment_remove, name='patient-treatment-remove'),
+    path('patients/treatment-medication-search/', t_views.patient_treatment_medication_search, name='patient-treatment-medication-search'),
+    path('patients/complement-form/', t_views.patient_complement_form, name='patient-complement-form'),
+    path('patients/interactions-comment/', t_views.patient_interactions_comment, name='patient-interactions-comment'),
+    path('patients/interactions-print/', t_views.patient_interactions_print, name='patient-interactions-print'),
+    path('patients/summary/<int:patient_id>/', t_views.patient_summary, name='patient-summary'),
+    path('patients/treatments/print/<int:patient_id>/', t_views.patient_treatments_print, name='patient-treatments-print'),
+    path('patients/treatments/print-tags/<int:patient_id>/', t_views.patient_treatments_print_tags, name='patient-treatments-print-tags'),
+    path('patients/timeline/', t_views.patient_timeline, name='patient-timeline'),
 
     #------------------------- PATIENT ORG --------------------
     path('patients/orgs/', views.patient_orgs, name='patient-orgs'),

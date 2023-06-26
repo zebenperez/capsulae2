@@ -23,7 +23,7 @@ from .treatment_models import Tratamiento, MedicamentoTratamiento, ComplementoTr
 from .evolutionary_models import Evolutionary
 from .allergy_models import AlergiasExcipientes, AlergiasPrincipios, Excipientesedo, PrincipiosActivos
 from .common_lib import LOPD_LIMIT, PILLBOX_ADVISE, get_config_value
-from .pharma_lib import get_values_to_interactions_print
+from .pharma_lib import get_values_to_interactions_print, get_values_to_summary_print
 
 
 @group_required("admins","managers")
@@ -242,6 +242,46 @@ def patient_complement_form(request):
         return render(request, 'error_exception.html', {'exc':show_exc(e)})
 
 @group_required("admins","managers")
+def patient_treatments_print(request, patient_id):
+    try:
+        patient = get_or_none(Pacientes, patient_id)
+        context = get_values_to_summary_print(patient, request.get_host())
+
+        html_template = render_to_string('patient/treatments/treatments-print.html', context)
+        pdf_file = HTML(string=html_template).write_pdf()
+        response = HttpResponse(pdf_file, content_type='application/pdf')
+        response['Content-Disposition'] = 'filename="tratamientos.pdf"'
+        response['Content-Transfer-Encoding'] = 'binary'
+        return response
+
+        #return render(request, "patient/treatments/treatments-print.html", context)
+    except Exception as e:
+        print(e)
+        return render(request, 'error_exception.html', {'exc':show_exc(e)})
+
+@group_required("admins","managers")
+def patient_treatments_print_tags(request, patient_id):
+    try:
+        patient = get_or_none(Pacientes, patient_id)
+        tratamientos = Tratamiento.objects.filter(paciente=patient, activo=True)
+
+        context = {'url_base' : request.get_host(), 'tratamientos': tratamientos, 'paciente': patient}
+        return render(request, "patient/treatments/treatments-print-tags.html", context)
+    except Exception as e:
+        print(e)
+        return render(request, 'error_exception.html', {'exc':show_exc(e)})
+
+@group_required("admins","managers")
+def patient_summary(request, patient_id):
+    try:
+        patient = get_or_none(Pacientes, patient_id)
+        context = get_values_to_summary_print(patient, request.get_host())
+        return render(request, "patient/treatments/summary-print.html", context)
+    except Exception as e:
+        print(e)
+        return render(request, 'error_exception.html', {'exc':show_exc(e)})
+
+@group_required("admins","managers")
 def patient_interactions_comment(request):
     patient = get_or_none(Pacientes, get_param(request.GET, "patient_id"))
     if patient == None:
@@ -258,20 +298,6 @@ def patient_interactions_print(request):
     except Exception as e:
         print(e)
         return render(request, 'error_exception.html', {'exc':show_exc(e)})
-#
-#    filename = "%s_%s.pdf" % (paciente.n_historial, date.today().strftime("%Y%m%d"))
-#    html_template = render_to_string('tratamientos_print.html', context)
-#
-#    if  html_view is None:
-#        pdf_file = HTML(string=html_template).write_pdf()
-#        response = HttpResponse(pdf_file, content_type='application/pdf')
-#        response['Content-Disposition'] = 'filename="%s"' % filename
-#        response['Content-Transfer-Encoding'] = 'binary'
-#    else:
-#        response = HttpResponse(html_template)
-#
-#    return response
-#
 
 '''
     Procedure
