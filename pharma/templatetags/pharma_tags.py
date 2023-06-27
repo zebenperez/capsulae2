@@ -29,9 +29,10 @@ def company_logo(user):
             company = user.user_companies.first()
 
         if company != None:
-            url = "/media/companies/{}/logo.png".format(company.code)
-            if os.path.exists("{}{}".format(BASE_DIR, url)):
-                return url
+            return company.image.url
+            #url = "/media/companies/{}/logo.png".format(company.code)
+            #if os.path.exists("{}{}".format(BASE_DIR, url)):
+            #    return url
     except Exception as e:
         print("COMPANY LOGO %s"%(e))
     return ""
