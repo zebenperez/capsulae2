@@ -1,0 +1,50 @@
+{% extends 'base_simple.html' %}
+{% load i18n %}
+
+{% block central_content %}
+    <div class="row">
+	    <div class="col-md-12">
+		    {% if msg_err %}
+			    <div class="row">
+				    <div class="col-md-12 alert alert-danger text-center">
+						{% for error in msg_err %}
+							{%if error == 'ACTIVATION_DATE_EXPIRED' %} 
+                                Ha transcurrido demasiado tiempo desde su registro. Por favoy reactive para completar el mismo. <br/>
+                                {#<center><a href="/pharma/reactivate/{{user_activate.activate_key}}/">{% trans 'REACTIVATE' %}</a>.</center>&nbsp;#}
+                                <center><a href="{% url "reactivate" user_activate.activate_key %}}">{% trans 'REACTIVATE' %}</a>.</center>&nbsp;
+                            {% endif %}                                 
+						{% endfor %}
+					</div>
+				</div>
+			{% else %}
+			    <div class="row">
+					<div class="col-md-12 alert alert-success text-center"> {% trans 'ACTIVATION_OK' %} <br/> </div>
+				</div>
+				<div class="row">
+					<div class="col-md-12">
+                        {#<form action="/pharma/changepassword/{{user_activate.id}}/" method="post" id="frmChangePasswd" name="frmChangePasswd">#}
+                        <form action="{% url "change_password" user_activate.id %}" method="post" id="frmChangePasswd" name="frmChangePasswd">
+							{% csrf_token %}
+							<input type="hidden" name="old_password" value="{{user_activate.user.password}}">
+							<div class="col-md-4 col-md-offset-2">
+								<div class="panel panel-default">
+									<div class="panel-heading">{% trans 'PASSWORD' %}</div>
+									<div class="panel-body"> <input type="password" name="password" class="col-md-12"/> </div>
+								</div>
+							</div>
+							<div class="col-md-4">
+								<div class="panel panel-default">
+									<div class="panel-heading">{% trans 'PASSWORD_CONFIRM' %}</div>
+									<div class="panel-body"> <input type="password" name="password_confirm" class="col-md-12"/> </div>
+								</div>
+							</div>
+							<a href="#" class="btn btn-info col-md-4 col-md-offset-4" 
+                                onclick="javascript:if (checkConfirmedPasswd('frmChangePasswd')) document.frmChangePasswd.submit(); else alert('No coinciden los passwords');">
+                                {% trans 'SEND' %}</a>
+						</form>
+					</div>
+				</div>
+			{% endif %}
+		</div>
+	</div>
+{% endblock central_content %}

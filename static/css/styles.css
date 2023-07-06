@@ -143,6 +143,23 @@ button.btn.btn-danger.btn-sm.ark  {
     border-color: #f44336;
 }
 
+/*********************** TREATMENTS DROPDOWN MENU OPTIONS STYLE **********************************/
+
+button.btn.btn-sm.ark, button.btn.btn-sm.ark a,
+a.btn.btn-sm, a.btn.btn-sm a {
+    border: 1px solid white !important;
+    color: #36abfc;
+}
+
+button.btn.btn-sm.ark:hover, button.btn.btn-sm.ark a:hover,
+a.btn.btn-sm:hover, a.btn.btn-sm a:hover {
+    border: 1px solid white !important;
+    color: #000;
+}
+
+/*****************************************************************/
+
+
 a.btn.btn-primary.ark,
 a.btn.btn-secondary.ark {
     font-size:0.8rem !important;
@@ -181,7 +198,7 @@ a.btn.btn-secondary.ark {
 }
 .toolbar-search a {
     height:2.5em;
-    margin:6px;
+/*    margin:6px;*/
 }
 
 .toolbar-search.projects {
@@ -192,6 +209,17 @@ a.btn.btn-secondary.ark {
     font-size: 1rem;
     color: #777;
     margin-top: 12px;
+}
+
+.profile-btn {
+    text-align: center;
+    line-height: 0 !important;
+}
+.profile-btn:hover {
+    border-radius: 50%;
+    padding: 15px 5px 15px 5px;
+    background: #f4f4f4;
+    line-height: 0 !important;
 }
 
 

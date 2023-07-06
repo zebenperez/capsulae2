@@ -9,6 +9,7 @@ from capsulae2.decorators import group_required
 from capsulae2.commons import get_or_none, get_param, show_exc
 from community.models import Organization, PatientOrg, Procedure, PatientProcedure
 from medication.medication_lib import get_medication
+from medication.models import PresentationsPrescriptionsAempsCache as AempsCache
 from .models import Pacientes
 from .treatment_models import Tratamiento, MedicamentoTratamiento, ComplementoTratamiento
 from .pharma_lib import get_values_to_interactions_print, get_values_to_summary_print

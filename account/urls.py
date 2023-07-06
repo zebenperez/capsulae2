@@ -4,6 +4,12 @@ from . import views
 urlpatterns = [
     path('signup/', views.signup, name='account-signup'),
     path('privacy-policy/', views.privacy_policy, name='privacy-policy'),
+    path('send_new_password/<int:user_id>/', views.send_new_password, name='send_new_password'),
+    path('send_new_password_by_email/', views.send_new_password_by_email, name='send_new_password_by_email'),
+    path('activate_account/<slug:activation_key>/', views.activate_account, name='activate_account'),
+    path('change_password/<int:user_id>/', views.change_password, name='change_password'),
+    path('reactivate/<slug:activation_key>/', views.reactivate, name='reactivate'),
+
 
     #------------------------- EMPLOYEES --------------------
     path('employees/', views.employees, name='employees'),

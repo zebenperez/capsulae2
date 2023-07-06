@@ -34,6 +34,7 @@
         <link rel="stylesheet" href="{% static 'css/dashboard.css' %}" >
         <link rel="stylesheet" href="{% static 'css/login.css' %}" >
         <script src="{% static "js/common.js" %}"></script>
+        <script src="{% static "js/utils.js" %}"></script>
 
         <!-- Favicons -->
         <meta name="theme-color" content="#7952b3">
@@ -41,14 +42,14 @@
 
     <body>
         <div id="main-layout-container">
-	{% comment %}
-	    {% include "base_header.html" %}
-	{% endcomment %}
+	        {% comment %} {% include "base_header.html" %} {% endcomment %}
 
             <main id="main-content w-100">
-		<div class="row header sticky-top w-100" style="margin:0;">
-			<div class="col-lg-2 col-4 divLogo text-left"><a href="/pharma/index/"><img src="/static/imgs/logo-capsulae.png" width="100px"></a></div>
-		</div>
+	            <div class="row header sticky-top w-100" style="margin:0;">
+			        <div class="col-lg-2 col-4 divLogo text-left">
+                        <a href="/pharma/index/"><img src="/static/imgs/logo-capsulae.png" width="100px"></a>
+                    </div>
+	    	    </div>
                 <div class="col-10 offset-1" id="content-section"> {% block central_content %}{% endblock central_content %} </div>
             </main>
 

@@ -32,8 +32,8 @@
             <div class="rightSide p-3 mt-3">
                 <div id="divRegister_form">
                     <h1 class="login">Regístrate ahora</h1>
-                    {#<form action="/pharma/signup/" method="post" enctype="multipart/form-data" name="frmRegister" id="frmRegister">#}
-                    <form action="" method="post" enctype="multipart/form-data" name="frmRegister" id="frmRegister" class="p-3">
+                    <form action="/account/signup/" method="post" enctype="multipart/form-data" name="frmRegister" id="frmRegister" class="p-3">
+                    {#<form action="" method="post" enctype="multipart/form-data" name="frmRegister" id="frmRegister" class="p-3">#}
                         {% csrf_token %}
                         <div class="form-group col-12">
                             <label for="name">Nombre AUX</label>
@@ -79,8 +79,10 @@
                         <div class="col-12 text-right">
                             <a href="#" onClick="javascript:if (checkRegisterCondition('frmRegister')) document.frmRegister.submit();" 
                                 class="btn btn-sm btn-primary ">Reg&iacute;strame</a> 
-                            <a class="btn btn-success btn-sm" href="{#{% url 'password_reset' %}#}">
+                            {%comment%}
+                            <a class="btn btn-success btn-sm" href="{% url 'password_reset' %}">
                                 <i class="fa fa-question-circle"></i>Recordar contrase&ntilde;a</a>
+                            {%endcomment%}
                         </div>
                     </form>
                 </div>
