@@ -39,6 +39,32 @@ def privacy_policy(request):
 '''
     Signup and register
 '''
+def signup_create_user(dic, email, password):
+    user = User.objects.create_user(email, email, password)
+    user.first_name = dic["name"]
+    user.last_name = dic["cif"]
+    user.save()
+    return user 
+
+def signup_add_group(user):
+    manager_group = Group.objects.get(name='managers')
+    manager_group.user_set.add(user)
+
+def signup_create_useractivate(user):
+    useractivate = UserActivate()
+    useractivate.user = user
+    useractivate.activate_key = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(128))
+    useractivate.save()
+    return useractivate
+
+def signup_create_userprofile(dic, user):
+    prof = get_or_none(Profile, dic["profile"])
+    if prof != None:
+        pu, created = UserProfile.objects.get_or_create(user=user, profile=prof)
+        um, created = UserMenu.objects.get_or_create(user=user)
+        for menu in prof.menus.all():
+            um.menus.add(menu)
+
 #@group_required("admins",)
 def signup(request):
     email = request.POST.get('email','')
@@ -51,20 +77,26 @@ def signup(request):
         try:
             password = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(8))
             if not User.objects.filter(username=email).exists():
-                user = User.objects.create_user(email, email, password)
-                user.first_name = request.POST.get('name')
-                user.last_name = request.POST.get('cif')
-                user.save()
-                manager_group = Group.objects.get(name='managers')
-                manager_group.user_set.add(user)
-                profile = EmployeeProfile(user=user)
-                profile.save()
-                useractivate = UserActivate()
-                useractivate.user = user
-                useractivate.activate_key = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(128))
-                useractivate.save()
+                user = signup_create_user(request.POST, email, password)
+                signup_add_group(user)
+                profile = EmployeeProfile.objects.create(user=user)
+                useractivate = signup_create_useractivate(user)
+                signup_create_userprofile(request.POST, user)
                 send_register_email(request.META['HTTP_HOST'], useractivate.activate_key, [email])
                 context = {'user':user, 'useractivate':useractivate, 'error_code':0}
+
+                #user = User.objects.create_user(email, email, password)
+                #user.first_name = request.POST.get('name')
+                #user.last_name = request.POST.get('cif')
+                #user.save()
+                #manager_group = Group.objects.get(name='managers')
+                #manager_group.user_set.add(user)
+                #profile = EmployeeProfile(user=user)
+                #profile.save()
+                #useractivate = UserActivate()
+                #useractivate.user = user
+                #useractivate.activate_key = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(128))
+                #useractivate.save()
                 #html_message = 'Gracias por tu inter&eacute;s en Capsulae. Para la activaci&oacute;n de la cuenta pincha <a href="http://%s/pharma/activate_account/%s/">aqu&iacute;</a>' % (request.META['HTTP_HOST'], useractivate.activate_key)
                 #send_mail('Registro en Capsulae', 'Registro en Capsulae', 'info@shidix.com', [email], html_message=html_message)
                 #send_email('Registro en Capsulae', 'Registro en Capsulae', 'info@shidix.com', [email], html_message)

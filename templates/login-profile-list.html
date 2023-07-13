@@ -1,0 +1,5 @@
+<select class="form-control" name="profile" id="profile">
+    {% for profile in profile_list %}
+        <option value="{{profile.id}}">{{profile.name}}</option>
+    {% endfor %}
+</select>

@@ -137,4 +137,23 @@ class UserMenu(models.Model):
     class Meta:
         verbose_name = "Menu de usuario"
 
+class Profile(models.Model):
+    active = models.BooleanField(verbose_name="Activo", default=False)
+    amount = models.FloatField(verbose_name="Pago mensual", blank=True, default=0)
+    discount = models.FloatField(verbose_name="Descuento mensual", blank=True, default=0)
+    name = models.CharField(verbose_name="Nombre", max_length=150, blank=True, null=True, default="")
+    desc = models.TextField(verbose_name="Descripción", blank=True, null=True, default="")
+    menus = models.ManyToManyField(Menu, verbose_name="Menus", related_name="profiles", blank=True)
+
+    class Meta:
+        verbose_name = "Perfil"
+        verbose_name_plural="Perfiles"
+
+class UserProfile(models.Model):
+    profile = models.ForeignKey(Profile, on_delete=models.SET_NULL, null=True, related_name="users")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="profiles")
+
+    class Meta:
+        verbose_name = "Menu de usuario"
+
 
