@@ -81,6 +81,7 @@ def patient_treatments_print(request, patient_id):
     try:
         patient = get_or_none(Pacientes, patient_id)
         context = get_values_to_summary_print(patient, request.get_host())
+        context["request"] = request
 
         html_template = render_to_string('patient/treatments/treatments-print.html', context)
         pdf_file = HTML(string=html_template).write_pdf()
