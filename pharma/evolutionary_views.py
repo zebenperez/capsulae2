@@ -63,9 +63,11 @@ def evolutionary_referral_form(request, history_num, evolutionary_id=None, view=
     context['org_list'] = Organization.objects.all()
     if evolutionary_id != None:
         ev = Evolutionary.objects.get(pk=evolutionary_id)
+        print(ev.matter)
         context["evolutionary"] = ev
         context["professional"] = ev.observations[(ev.observations.find("Profesional:")+12):ev.observations.find("Observaciones:")-5]
         context["observations"] = ev.observations[(ev.observations.find("Observaciones:")+14):]
+        context["organization"] = ev.matter[(ev.matter.find("Derivación a: ")+14):]
     return render(request, "patient/evolutionary/evo-referral-form.html", context)
 
 

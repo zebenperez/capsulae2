@@ -6,7 +6,7 @@ from django.contrib import auth
 
 from capsulae2.decorators import group_required
 from capsulae2.commons import get_random_str, get_param, get_or_none, show_exc
-from capsulae2.email_lib import send_register_email, send_new_password_email
+from .email_lib import send_register_email, send_new_password_email
 from .models import *
 
 import random, string
@@ -65,6 +65,10 @@ def signup_create_userprofile(dic, user):
         for menu in prof.menus.all():
             um.menus.add(menu)
 
+def signup_create_userpayment(user):
+    expire_date = datetime.today() + datetime.timedelta(days=90)
+    up, created = UserPayment.objects.create(user=user, expire_date=expire_date, desc="Creación de cuenta, 90 días de cortesía")
+
 #@group_required("admins",)
 def signup(request):
     email = request.POST.get('email','')
@@ -82,6 +86,7 @@ def signup(request):
                 profile = EmployeeProfile.objects.create(user=user)
                 useractivate = signup_create_useractivate(user)
                 signup_create_userprofile(request.POST, user)
+                signup_create_userpayment(user)
                 send_register_email(request.META['HTTP_HOST'], useractivate.activate_key, [email])
                 context = {'user':user, 'useractivate':useractivate, 'error_code':0}
 

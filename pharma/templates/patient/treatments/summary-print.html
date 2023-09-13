@@ -161,9 +161,8 @@ button{display:none;}
                     <td>
                         {% if trat.principio %} {{ trat.principio }} <br> {% endif %}
                         {% if trat.edo %} {{ trat.edo }} <br> {% endif %}
-                        {% for med in trat.medicamentos.all %}
-                        {{med.name}} <br>
-                        {% endfor %}
+                        {#{% for med in trat.medicamentos.all %} {{med.name}} <br> {% endfor %}#}
+                        {{trat.name}} <br> 
                     </td>
                     <td style="text-align:right">
                         {{trat.fecha_inicio|date:'d-m-Y'}} {%if trat.fecha_fin and trat.fecha_fin|date:'Y-m-d' < '2099-01-01' %} - {{trat.fecha_fin|date:'d-m-Y'}}{%endif%}

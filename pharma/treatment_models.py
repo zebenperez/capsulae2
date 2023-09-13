@@ -129,16 +129,18 @@ class Tratamiento(models.Model):
                                 duplicities.append(imeds.name+" - "+code)
         return duplicities
 
-#    @property
-#    def in_pillbox(self):
-#        try:
+    @property
+    def in_pillbox(self):
+        try:
 #            pillboxes = PillboxTreatment.objects.filter(treatment=self, pillbox__active = True)
-#            for pillbox in pillboxes:
-#                if pillbox.include_in_spd:
-#                    return True
-#        except:
-#            return False
-#        return False
+            pillboxes = self.pillbox_treatments.filter(pillbox__active = True)
+            for pillbox in pillboxes:
+                if pillbox.include_in_spd:
+                    return True
+        except:
+            return False
+        return False
+
     def is_complement(self):
         return (self.complementos.all().count() > 0)
 

@@ -39,11 +39,11 @@
                         {% if view %}disabled{% endif %}>
 				</div>
 				<div class="entity-data">
-					<strong> {% trans "Datos de la entidad a la que se deriva" %} </strong>
+                    <strong> {% trans "Datos de la entidad a la que se deriva" %} </strong>
 					{#<input type="text" value="" class="print-input print-input-lg">#}
                     <select class="print-input print-input-lg" name="organization" {% if view %}disabled{% endif %}>
                         {% for org in org_list %}
-                            <option value="{{org.name}}|{{org.email}}">{{org.name}}</option>
+                            <option value="{{org.name}}|{{org.email}}" {%if organization == org.name%}selected{%endif%}>{{org.name}}</option>
                         {% endfor %}
                     </select>
 				</div>

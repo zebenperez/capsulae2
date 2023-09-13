@@ -438,7 +438,7 @@ textarea.form-control {
 
 /************* btn styles ***********/
 
-.save, .cancel, .new {
+.save, .new {
 	text-transform: uppercase;
 }
 .save, .new, 
@@ -446,7 +446,8 @@ textarea.form-control {
 .new i.fas.fa-plus:hover { color: #212529; }
 
 .cancel {
-	color: #666;
+	text-transform: uppercase;
+	color: #666 !important;
 }
 
 button.btn.btn-success {
@@ -1281,6 +1282,12 @@ i.fa.fa-gavel { color: #d9534f;}
 }
 
 .nav-link { padding: .5rem 3rem .5rem 1.1rem; }
+
+.list-search {
+    border:1px solid #ccc;
+    border-radius: 0.5em;
+    align-items: center;
+}
 
 
 /**** Estilo formularios ****/

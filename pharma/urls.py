@@ -3,6 +3,7 @@ from . import views, views_account, auto_views, spd_views, evolutionary_views as
 
 urlpatterns = [
     path('index/', views.index, name='pharma-index'),
+    path('new-index/', views.new_index, name='pharma-new-index'),
 
     #------------------------- VIEWS ACCOUNT -----------------------
     path('signup/', views_account.signup, name='account-signup'),
@@ -29,8 +30,10 @@ urlpatterns = [
     path('patients/allergy/', views.patient_allergy, name='patient-allergy'),
     path('patients/allergy/excipients', views.patient_allergy_excipients, name='patient-allergy-excipients'),
     path('patients/allergy/excipient/remove', views.patient_allergy_excipient_remove, name='patient-allergy-excipient-remove'),
+    path('patients/allergy/excipients/search', views.patient_allergy_excipients_search, name='patient-allergy-excipients-search'),
     path('patients/allergy/principles', views.patient_allergy_principles, name='patient-allergy-principles'),
     path('patients/allergy/principle/remove', views.patient_allergy_principle_remove, name='patient-allergy-principle-remove'),
+    path('patients/allergy/principles/search', views.patient_allergy_principles_search, name='patient-allergy-principles-search'),
 
     path('patients/evolutionary/', views.patient_evolutionary, name='patient-evolutionary'),
 

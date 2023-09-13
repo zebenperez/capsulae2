@@ -122,7 +122,8 @@
                         <td>
                             {% if trat.principio %} {{ trat.principio }} <br> {% endif %}
                             {% if trat.edo %} {{ trat.edo }} <br> {% endif %}
-                            {% for med in trat.medicamentos.all %} {{med.name}} <br> {% endfor %}
+                            {#{% for med in trat.medicamentos.all %} {{med.name}} <br> {% endfor %}#}
+                            {{trat.name}} <br> 
                         </td>
                         <td style="text-align:right">
                             {{trat.fecha_inicio|date:'d-m-Y'}} 

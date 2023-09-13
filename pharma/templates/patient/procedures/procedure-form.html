@@ -4,10 +4,10 @@
 <div class="d-flex justify-content-end"> <button type="button" class="btn btn-lg" data-bs-dismiss="modal" title="{% trans "Close" %}">
     <i class="fas fa-times"></i></button> </div>
 
-<h2>{% trans 'Nuevo trámite' %}</h2>
+<h2>{% trans 'Modificar trámite' %}</h2>
 
 <div class="row justify-center">
-	<div class="col-4 text-left p-1">
+	<div class="col-3 text-left p-1">
         <div class="greybox-sm p-1">
             {% trans "Trámite" %}
 		    <div class="select-arrow">
@@ -23,7 +23,7 @@
             <span id="procedure__msg"></span>
         </div>
     </div>
-    <div class="col-6 text-left p-1">
+    <div class="col-5 text-left p-1">
         <div class="greybox-sm p-1">
             {% trans "Nombre" %}
             <input type="text" class="form-control autosave" id="name" name="name" value="{{obj.name}}" title="{{obj.name}}" 
@@ -37,6 +37,14 @@
             <input type="date" class="form-control autosave text-end" id="date" name="date" value="{{obj.date|date:"Y-m-d"}}" title="{{obj.date}}" 
                 data-model-name="community.patientprocedure" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
                 data-target="div-notification"/> <span id="date__msg"></span>
+        </div>
+    </div>
+	<div class="col-2 text-left p-1">
+        <div class="greybox-sm p-1">
+            {% trans "Realizado" %}
+            <input type="checkbox" class="form-check-input autosave" id="done" name="done" title="{{obj.done}}" 
+                data-model-name="community.patientprocedure" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" data-bool="True"
+                data-target="div-notification" {%if obj.done%}checked{%endif%}/> <span id="done__msg"></span>
         </div>
     </div>
     <div class="col-12 mt-3 p-1">

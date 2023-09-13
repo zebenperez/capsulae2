@@ -64,12 +64,9 @@
                             </label>
                             <input name="confirmedemail" type="text" value="" id="confirmedemail" class="form-control" required/>
                         </div>
-                        {%comment%}
-                        <div class="form-group col-12">
-                            <label for="profile"> Perfil </label>
-                            {% get_profile_select %}
-                        </div>
-                        {%endcomment%}
+
+                        {% get_profile_select %}
+
                         <div class="acceptCheck col-12 small">
                             <input type="checkbox" name="acceptconditions"/> <label> Acepto las 
                                 <a class="ark pointer" data-url="{% url "privacy-policy" %}" data-target-modal="common-modal">

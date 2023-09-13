@@ -30,6 +30,9 @@ from .pharma_lib import get_values_to_interactions_print, get_values_to_summary_
 def index(request):
     return render(request, "index.html", {})
 
+def new_index(request):
+    return render(request, "new-index.html", {})
+
 '''
     Patients
 '''
@@ -389,6 +392,41 @@ def patient_allergy_principle_remove(request):
         obj.delete()
 
         return render(request, "patient/allergies/allergy-list.html", {'obj': patient})
+    except Exception as e:
+        return render(request, 'error_exception.html', {'exc':show_exc(e)})
+
+@group_required("admins","managers")
+def patient_allergy_excipients_search(request):
+    try:
+        patient = get_or_none(Pacientes, get_param(request.GET, "patient_id"))
+        if patient == None:
+            return render(request, 'error_exception.html', {'exc':'Paciente no encontrado!'})
+
+        value = get_param(request.GET, "s-name")
+        if value != "":
+            item_list = patient.alergias_excipientes.filter(edo__edo__icontains=value)
+        else:
+            item_list = patient.alergias_excipientes.all()
+
+        return render(request, "patient/allergies/allergy-list-excipient-list.html", {'exp_list': item_list,})
+    except Exception as e:
+        return render(request, 'error_exception.html', {'exc':show_exc(e)})
+
+@group_required("admins","managers")
+def patient_allergy_principles_search(request):
+    try:
+        patient = get_or_none(Pacientes, get_param(request.GET, "patient_id"))
+        if patient == None:
+            return render(request, 'error_exception.html', {'exc':'Paciente no encontrado!'})
+
+        value = get_param(request.GET, "s-name-pri")
+        if value != "":
+            item_list = patient.alergias_principios.filter(principio_activo__principioactivo__icontains=value)
+        else:
+            item_list = patient.alergias_principios.all()
+
+        print(item_list)
+        return render(request, "patient/allergies/allergy-list-principles-list.html", {'pri_list': item_list,})
     except Exception as e:
         return render(request, 'error_exception.html', {'exc':show_exc(e)})
 
