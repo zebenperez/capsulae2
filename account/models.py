@@ -1,7 +1,19 @@
 from django.contrib.auth.models import User
 from django.db import models
 
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
+
+
+class Config(models.Model):
+    key = models.CharField(max_length=200, verbose_name="clave")
+    value = models.TextField(verbose_name="valor", blank=True)
+
+    class Meta:
+        verbose_name="Configuracion"
+        verbose_name_plural = "Configuraciones"
+
+    def __str__(self):
+        return self.key
 
 class UserActivate(models.Model):
     activate_key = models.CharField(max_length=255)
@@ -140,10 +152,12 @@ class UserMenu(models.Model):
 class Profile(models.Model):
     active = models.BooleanField(verbose_name="Activo", default=False)
     amount = models.FloatField(verbose_name="Pago mensual", blank=True, default=0)
-    discount = models.FloatField(verbose_name="Descuento mensual", blank=True, default=0)
     name = models.CharField(verbose_name="Nombre", max_length=150, blank=True, null=True, default="")
     desc = models.TextField(verbose_name="Descripción", blank=True, null=True, default="")
     menus = models.ManyToManyField(Menu, verbose_name="Menus", related_name="profiles", blank=True)
+
+    def __str__(self):
+        return self.name
 
     class Meta:
         verbose_name = "Perfil"
@@ -155,5 +169,28 @@ class UserProfile(models.Model):
 
     class Meta:
         verbose_name = "Menu de usuario"
+
+class UserPayment(models.Model):
+    amount = models.FloatField(verbose_name="Pago", blank=True, default=0)
+    pay_date = models.DateField(verbose_name="Fecha de pago", default=datetime.now)
+    expire_date = models.DateField(verbose_name="Fecha de expiración", default=datetime.now)
+    desc = models.CharField(verbose_name="Descripción", max_length=250, blank=True, null=True, default="")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="payments")
+
+    class Meta:
+        verbose_name = "Pago de usuario"
+        verbose_name_plural="Pagos de usuarios"
+
+class Plan(models.Model):
+    active = models.BooleanField(verbose_name="Activo", default=False)
+    days = models.IntegerField(verbose_name="Días", blank=True, default=0)
+    amount = models.FloatField(verbose_name="Cantidad", blank=True, default=0)
+    name = models.CharField(verbose_name="Nombre", max_length=150, blank=True, null=True, default="")
+    desc = models.TextField(verbose_name="Descripción", blank=True, null=True, default="")
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name="plans")
+
+    class Meta:
+        verbose_name = "Plan"
+        verbose_name_plural="Planes"
 
 

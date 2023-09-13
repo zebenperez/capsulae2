@@ -1,36 +1,20 @@
 {% load i18n %}
 
+<div class="row list-search m-0">
+    <div class="col-lg-1 col-1 text-right"><i class="fas fa-search"></i></div>
+    <div class="col-lg-10 col-10 p-0">
+        <input type="hidden" name="patient_id" id="patient_id" value="{{obj.id}}"/>
+        <input type="text" class="form-control form-control-dark w-100 autosearch" name="s-name" id="s-name" 
+           placeholder="{% trans 'Buscar por nombre' %}" data-url="{% url "patient-allergy-excipients-search" %}" 
+           data-target="excipient-list" data-related="patient_id,s-name" />
+    </div>
+</div>
 
-<div class="row spd-tab">
+<div class="row spd-tab mt-2">
     <div class="col-12 text-end">
         <button type="button" class="btn btn-sm ark new" data-url="{% url "patient-allergy-excipients" %}" data-target-modal="common-modal" 
             data-patient_id="{{obj.id}}"> <i class="fas fa-plus"></i> {% trans 'Nuevo excipiente' %}</button> 
     </div>
 </div>
 
-<table class="table table-striped table-hover">
-    <thead>
-        <tr class="small small">
-            <th class="row main-th">
-                <div class="col-4"> {% trans 'Nombre' %} </div>
-                <div class="col-1"></div>
-            </th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for item in obj.alergias_excipientes.all %}
-            <tr class="small" id="row_{{item.id}}">
-                <td class="row">
-                    <div class="col-4">{{ item.edo }}</div>
-                    <div class="col-1">
-                        <a class="btn btn-sm ark" data-url="{% url "patient-allergy-excipient-remove" %}" data-obj_id="{{item.id}}" 
-                            data-target="div-container" title="{% trans 'Remove' %}" 
-                            data-confirm="{% trans "Are you sure to remove this element?" %}">
-                            <i class="fas fa-trash"></i></a>
-                    </div>
-                </td>
-            </tr>
-        {% endfor %}
-    </tbody>
-</table>
-
+<div id="excipient-list">{% include "patient/allergies/allergy-list-excipient-list.html" with exp_list=obj.alergias_excipientes.all %}</div>

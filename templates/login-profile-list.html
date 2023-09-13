@@ -1,5 +1,26 @@
-<select class="form-control" name="profile" id="profile">
-    {% for profile in profile_list %}
-        <option value="{{profile.id}}">{{profile.name}}</option>
-    {% endfor %}
-</select>
+<div class="form-group col-12">
+    <label for="profile"> Perfil </label>
+    <select class="form-control" name="profile" id="profile">
+        {% for profile in profile_list %}
+            <option value="{{profile.id}}">{{profile.name}}</option>
+        {% endfor %}
+    </select>
+</div>
+<div class="form-group col-12">
+    <label for="profile"> Plan </label>
+    <select class="form-control" name="plan" id="plan">
+        {% for plan in plan_list %}
+            <option class="plan-{{plan.profile.id}}" value="{{plan.id}}">{{plan.name}}</option>
+        {% endfor %}
+    </select>
+</div>
+<script>
+    function showPlan(id)
+    {
+        $("option[class^='plan-']").hide();
+        $(".plan-"+id).show();
+        $(".plan-"+id).first().prop("selected", "selected");
+    }
+    $("#profile").change(function(){ var id = $(this).find(":selected").val(); showPlan(id); });
+    showPlan("{{profile_list.first.id}}");
+</script>

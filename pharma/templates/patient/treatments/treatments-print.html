@@ -121,9 +121,8 @@ button{display:none;}
                     <td style="height:33px">
                         {% if trat.principio %} <span style="font-size:1.2em;">{{ trat.principio }} </span><br> {% endif %}
                         {% if trat.edo %} {{ trat.edo }} <br> {% endif %}
-                        {% for med in trat.medicamentos.all %}
-                        {{med.name}} <br>
-                        {% endfor %}
+                        {#{% for med in trat.medicamentos.all %} {{med.name}} <br> {% endfor %}#}
+                        {{trat.name}} <br> 
                     </td>
                     <td style="text-align:center;width:5%;font-size:1.2em">{{trat.m}}</td>
                     <td style="text-align:center;width:5%;font-size:1.2em">{{trat.t}}</td>
