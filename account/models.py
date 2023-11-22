@@ -52,6 +52,14 @@ class Company(models.Model):
     users = models.ManyToManyField(User, verbose_name="Empleados", related_name="user_companies", blank=True)
     company_options = models.ManyToManyField(CompanyOptions, verbose_name="Opciones", related_name="options_company")
 
+
+    @staticmethod
+    def get_by_user(user):
+        comp = Company.objects.filter(manager = user).first()
+        if comp != None:
+            return comp
+        return Company.objects.filter(users__in = [user]).first()
+
     class Meta:
         db_table = 'companies_company'
         verbose_name="Empresa"
