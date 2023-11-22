@@ -12,8 +12,9 @@ from django.views.decorators.csrf import csrf_exempt
 #from accounts.models import Company
 
 from capsulae2.decorators import group_required
-from capsulae2.commons import get_or_none, get_param, show_exc
+from capsulae2.commons import get_or_none, get_param, show_exc, user_in_group
 from pharma.models import Pacientes
+from account.models import Company
 from .models import PatientFcoc, PatientFci, PatientActivity, Organization, PatientOrg, Procedure
 
 #from .forms import OrganizationForm
@@ -23,8 +24,7 @@ from .models import PatientFcoc, PatientFci, PatientActivity, Organization, Pati
 '''
     Organizations
 '''
-#def get_organizations(user, search_value=""):
-def get_organizations(search_value=""):
+def get_organizations(user, search_value=""):
     filters_to_search = ["name__icontains",]
 
     full_query = Q()
@@ -33,38 +33,34 @@ def get_organizations(search_value=""):
             full_query |= Q(**{myfilter: search_value})
     #full_query &= Q(**{'manager': user.id})
 
-    return Organization.objects.filter(full_query)
+    if user_in_group(user, "admins"):
+        return Organization.objects.filter(full_query)
+    else:
+        comp = Company.get_by_user(user)
+        return Organization.objects.filter(full_query).filter(comp=comp)
 
-#def get_organization_context(user, search_value=""):
-    #return {'items': get_organizations(user, search_value)}
-def get_organization_context(search_value=""):
-    return {'items': get_organizations(search_value)}
+def get_organization_context(user, search_value=""):
+    return {'items': get_organizations(user, search_value)}
 
 @group_required("admins","managers")
 def organizations(request):
-    #return render(request, "organizations/organizations.html", {})
-    return render(request, "organizations/organizations.html", get_organization_context())
+    return render(request, "organizations/organizations.html", get_organization_context(request.user))
 
 @group_required("admins","managers")
 def organization_list(request):
-    return render(request, "organizations/organization-list.html", get_organization_context())
-    #return render(request, "organizations/organization-list.html", get_organization_context(request.user))
+    return render(request, "organizations/organization-list.html", get_organization_context(request.user))
 
 @group_required("admins","managers")
 def organization_search(request):
     search_value = get_param(request.GET, "s-name")
-    return render(request, "organizations/organization-list.html", get_organization_context(search_value))
-    #return render(request, "organizations/organization-list.html", get_organization_context(request.user, search_value))
+    return render(request, "organizations/organization-list.html", get_organization_context(request.user, search_value))
 
 @group_required("admins","managers")
 def organization_form(request):
-    #obj = Project.objects.create(manager=request.user)
-    #po, created = PatientOrigin.objects.get_or_create(patient=obj)
-    #return redirect(reverse('organization-view', kwargs={'organization_id': obj.id}))
     obj_id = get_param(request.GET, "obj_id")
     obj = get_or_none(Organization, obj_id)
     if obj == None:
-        obj = Organization.objects.create()
+        obj = Organization.objects.create(comp=Company.get_by_user(request.user), user=request.user)
     return render(request, "organizations/organization-form.html", {'obj': obj})
 
 @group_required("admins","managers")
@@ -72,8 +68,7 @@ def organization_remove(request):
     obj = get_or_none(Organization, request.GET["obj_id"]) if "obj_id" in request.GET else None
     if obj != None:
         obj.delete()
-    return render(request, "organizations/organization-list.html", get_organization_context())
-    #return render(request, "organizations/organization-list.html", get_organization_context(request.user))
+    return render(request, "organizations/organization-list.html", get_organization_context(request.user))
 
 
 '''

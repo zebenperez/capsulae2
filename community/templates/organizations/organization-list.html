@@ -1,17 +1,31 @@
-{% load i18n %}
+{% load i18n common_tags %}
 
 
 <div class="row patient-list-head main-th small small p-3 m-0">
-    <div class="col-5"> {% trans 'Nombre' %} </div>
-    <div class="col-5"> {% trans 'Correo electrónico' %} </div>
-    <div class="col-2"></div>
+    {% if user|in_group:"admins" %}
+        <div class="col-3"> {% trans 'Nombre' %} </div>
+        <div class="col-3"> {% trans 'Correo electrónico' %} </div>
+        <div class="col-2"> {% trans 'Empresa' %} </div>
+        <div class="col-2"> {% trans 'Usuario' %} </div>
+    {% else %}
+        <div class="col-5"> {% trans 'Nombre' %} </div>
+        <div class="col-5"> {% trans 'Correo electrónico' %} </div>
+    {% endif %}
+        <div class="col-2"></div>
 </div>
 
 {% for item in items %}
     <div class="row line pointer small pt-2 pb-2 m-0" id="row_{{item.id}}">
             {#<div class="row pointer" onclick="window.location='{%url "project-view" item.id%}'">#}
-            <div class="col-5">{{ item.name|default:"---" }}</div>
-            <div class="col-5">{{ item.email }}</div>
+            {% if user|in_group:"admins" %}
+                <div class="col-3">{{ item.name|default:"---" }}</div>
+                <div class="col-3">{{ item.email }}</div>
+                <div class="col-2">{{ item.comp|default:"" }}</div>
+                <div class="col-2">{{ item.user|default:"" }}</div>
+            {% else %}
+                <div class="col-5">{{ item.name|default:"---" }}</div>
+                <div class="col-5">{{ item.email }}</div>
+            {% endif %}
             <div class="col-2 text-right">
                 <a class="btn btn-xs ark p-2" title="{%trans 'Edit organization'%}" data-url="{%url "organization-form" %}"
                     data-target-modal="common-modal" data-obj_id="{{item.id}}" title="{% trans "Editar" %}"> <i class="fas fa-edit"></i></a>
