@@ -1,5 +1,7 @@
 from django.db import models
 from pharma.models import Pacientes
+from account.models import Company
+from django.contrib.auth.models import User
 from datetime import datetime
 
 
@@ -40,6 +42,8 @@ class Organization(models.Model):
     contact = models.CharField(verbose_name="Persona de contacto", max_length=600, blank=True, null=True, default="")
     derivation_way = models.CharField(verbose_name="Vía de derivación", max_length=900, blank=True, null=True, default="")
     derivation = models.TextField(verbose_name="Motivos de derivación", blank=True, null=True, default="")
+    user = models.ForeignKey(User, verbose_name="Usuario", related_name="organizations", on_delete=models.SET_NULL, null=True)
+    comp = models.ForeignKey(Company, verbose_name="Empresa", related_name="organizations", on_delete=models.SET_NULL, null=True)
 
     class Meta:
         verbose_name = "Organización"
