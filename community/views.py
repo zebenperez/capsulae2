@@ -70,6 +70,12 @@ def organization_remove(request):
         obj.delete()
     return render(request, "organizations/organization-list.html", get_organization_context(request.user))
 
+@group_required("admins","managers")
+def organization_print(request):
+    context = get_organization_context(request.user)
+    context["company"] = Company.get_by_user(request.user)
+    return render(request, "organizations/organization-print.html", context)
+
 
 '''
     Procedures
