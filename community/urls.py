@@ -8,6 +8,7 @@ urlpatterns = [
     path('organizations/search/', views.organization_search, name='organization-search'),
     path('organizations/form/', views.organization_form, name='organization-form'),
     path('organizations/remove/', views.organization_remove, name='organization-remove'),
+    path('organizations/print/', views.organization_print, name='organization-print'),
 
     #------------------------- PROCEDURES --------------------
     path('procedures/', views.procedures, name='procedures'),

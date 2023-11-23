@@ -1,0 +1,78 @@
+{% load i18n static %}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="UTF-8">
+	<title>{% trans "Formulario de derivación para "%} {{ patient.history_number }}</title>
+	<link rel="stylesheet" href="{% static 'community/css/colors.css' %}">
+	<link rel="stylesheet" href="{% static 'community/css/documents.css' %}">
+	<link rel="stylesheet" href="{% static 'community/css/referral-form.css' %}">
+	<script src="{% static 'community/js/referral-form.js' %}"></script>
+    <style>
+        .custom-th{
+            border-bottom: 1px solid #999;;
+            padding-bottom:10px;
+        }
+        .custom-td{
+            padding-top:10px;
+            padding-bottom:10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="print-btn-container"> 
+        <a class="print-btn" id="print-btn" onclick="window.print()"> &#128424; {% trans "Imprimir" %}</a> 
+    </div>
+	<div class="page">
+		<div class="page-wrapper">
+            <div class="header"> 
+                <div class="fundec-logo"> <img src="{% static 'community/images/fundec-logo.png' %}" alt="Fundec"/> </div> 
+                <div class="company-logo"> 
+                    {% if company.image %}
+                        <img src="{{company.image.url}}" alt="{{company.name}}" style="height:60px"/> 
+                    {% else %}
+                        <img src="{% static 'community/images/capsulae-logo.png' %}" alt="Capsulae"/> 
+                    {% endif %}
+                </div>
+            </div>
+            <br/><br/>
+			<div class="content">
+				<h2 class="main-title"> {% trans "Listado de Organizaciones" %}</h2>
+
+                {% for item in items %}
+                    <table style="border: 1px solid #000; padding:10px">
+                        <thead> <th colspan="2" class="custom-th">{{item.name}}</th> </thead>
+                        <tbody>
+                            <tr> <td class="custom-td">{% trans "Correo electrónico" %}: </td> <td><strong>{{item.email}}</strong></td> </tr>
+                            <tr> <td class="custom-td">{% trans "Teléfono" %}:</td> <td><strong>{{item.phone}}</strong></td> </tr>
+                            <tr> <td>{% trans "Persona de contacto" %}: </td><td><strong>{{item.contact}}</strong></td> </tr>
+                            <tr> <td colspan="2" class="custom-td">{% trans "Dirección" %}: </td></tr>
+                            <tr> <td colspan="2"><strong>{{item.address}}</strong></td> </tr>
+                            <tr> <td colspan="2" class="custom-td">{% trans "Vía de derivación" %}: </td></tr>
+                            <tr> <td colspan="2"><strong>{{item.derivation_way}}</strong></td> </tr>
+                            <tr> <td colspan="2" class="custom-td">{% trans "Observaciones" %}: </td></tr>
+                            <tr> <td colspan="2"><strong>{{item.derivation}}</strong></td> </tr>
+                        </tbody>
+                    </table>
+                    <br/>
+                {% endfor %}
+			</div>
+
+            <div class="footer">
+	            <div class="data">
+		            <p class="company"> {{ company.name|default:"" }} </p>
+		            <address>
+			            {{ company.main_address|default:"" }} {{company.town|default:"" }},
+			            {{ company.postal_code|default:"" }} {{ company.province|default:"" }}
+		            </address>
+		            <div class="contact-info">
+                        {% if company.phone != "" %} <div class="phone"> tel: {{ company.phone }} </div> {% endif %}
+			            <div class="website"> {{ company.email }} </div>
+		            </div>
+	            </div>
+            </div>
+		</div>
+	</div>
+</body>
+</html>
