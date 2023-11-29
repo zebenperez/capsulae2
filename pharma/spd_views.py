@@ -221,7 +221,7 @@ def spd_search_by_qr(request):
         pd = get_or_none(PillboxDeliver, pd_id)
         json_response = parse_qr(qr_data)   
         for pdm in pd.deliver_meds.all():
-            if pdm.treatment.treatment.cn == json_response["cn"][-6:]:
+            if pdm.treatment.treatment.cn == json_response["cn"][:-1][-6:]:
                 json_response["pdm_id"] = pdm.id 
                 break
     except Exception as e:

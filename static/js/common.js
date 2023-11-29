@@ -118,11 +118,13 @@ function ajaxGetSearchMed(url, datas, target_prefix1, target_prefix2)
             //console.log(data);
             let expiration_date =""
             try{
-                expiration_date = `20${data.expiration_date.substring(0,2)}-${data.expiration_date.substring(2,4)}-${data.expiration_date.substring(4,2)}`
+                expiration_date = `20${data.expiration_date.substring(0,2)}-${data.expiration_date.substring(2,4)}-${data.expiration_date.substring(4,6)}`
             }catch{}
 
             $("#"+target_prefix1+"_"+data.pdm_id).val(data.batch_code).change();
             $("#"+target_prefix2+"_"+data.pdm_id).val(expiration_date).change();
+		//console.log(data.batch_code);
+		//console.log(expiration_date);
         },
         error : function(e){alert("Error: "+e.responseText);},
         complete : function(){unsetWait();}
