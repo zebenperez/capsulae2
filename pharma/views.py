@@ -97,6 +97,11 @@ def patient_new(request):
     return redirect(reverse('patient-view', kwargs={'patient_id': obj.id}))
 
 @group_required("admins","managers")
+def patient_remove_msg(request):
+    context = {'user': request.user, 'patient': get_or_none(Pacientes, request.GET["obj_id"])}
+    return render(request, "patients/patient-remove-dialog.html", context)
+
+@group_required("admins","managers")
 def patient_remove(request):
     obj = get_or_none(Pacientes, request.GET["obj_id"]) if "obj_id" in request.GET else None
     if obj != None:
@@ -147,6 +152,11 @@ def patient_evolutionary(request):
 def patient_procedure(request):
     patient = get_or_none(Pacientes, get_param(request.GET, "obj_id"))
     return render(request, "patient/procedures/procedure-list.html", {'obj': patient})
+
+@group_required("admins","managers")
+def patient_params(request):
+    patient = get_or_none(Pacientes, get_param(request.GET, "obj_id"))
+    return render(request, "patient/parameters/param-list.html", {'obj': patient})
 
 
 '''
@@ -430,6 +440,47 @@ def patient_allergy_principles_search(request):
     except Exception as e:
         return render(request, 'error_exception.html', {'exc':show_exc(e)})
 
+@group_required("admins","managers")
+def patient_allergy_excipient_list_search(request):
+    try:
+        patient = get_or_none(Pacientes, get_param(request.GET, "patient_id"))
+        if patient == None:
+            return render(request, 'error_exception.html', {'exc':'Paciente no encontrado!'})
+
+        if "obj_id" in request.GET:
+            edo = get_or_none(Excipientesedo, request.GET["obj_id"])
+            AlergiasExcipientes.objects.create(n_orden=patient, edo=edo)
+
+        value = get_param(request.GET, "s-exc-name")
+
+        edo_list = [item.edo.codigoedo for item in patient.alergias_excipientes.all()]
+        item_list = Excipientesedo.objects.filter(edo__icontains=value).exclude(codigoedo__in=edo_list)
+        return render(request, "patient/allergies/excipient-list-rows.html", {'obj': patient, 'item_list': item_list})
+    except Exception as e:
+        return render(request, 'error_exception.html', {'exc':show_exc(e)})
+
+@group_required("admins","managers")
+def patient_allergy_principles_list_search(request):
+    try:
+        patient = get_or_none(Pacientes, get_param(request.GET, "patient_id"))
+        if patient == None:
+            return render(request, 'error_exception.html', {'exc':'Paciente no encontrado!'})
+
+        if "obj_id" in request.GET:
+            pa = get_or_none(PrincipiosActivos, request.GET["obj_id"], "codigoprincipioactivo")
+            AlergiasPrincipios.objects.create(paciente=patient, principio_activo=pa)
+
+        value = get_param(request.GET, "s-pri-name")
+
+        p_list = []
+        for item in patient.alergias_principios.all():
+            if item.principio_activo != None:
+                p_list.append(item.principio_activo.codigoprincipioactivo)
+        item_list = PrincipiosActivos.objects.filter(principioactivo__icontains=value).exclude(codigoprincipioactivo__in=p_list)
+        return render(request, "patient/allergies/principles-list-rows.html", {'obj': patient, 'item_list': item_list})
+    except Exception as e:
+        return render(request, 'error_exception.html', {'exc':show_exc(e)})
+
 
 '''
     Lopd
@@ -530,4 +581,5 @@ def patient_lopd_generate_signed_document(request, patient_id):
             return response
 
     return HttpResponse(response)
+
 

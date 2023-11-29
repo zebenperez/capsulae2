@@ -12,34 +12,39 @@
         </div>
     </div>
     <div class="tabs mt-3">
-        <div class="tab-item active ark" data-url="{% url "patient-form" %}" data-target="div-container" data-obj_id="{{obj.id}}"> 
-            <i class="fa fa-user"></i> <span class="hide-mobile">&nbsp; {% trans "Personal" %}</span></div>
+        <div class="tab-item active ark text-center" data-url="{% url "patient-form" %}" data-target="div-container" data-obj_id="{{obj.id}}"> 
+            <i class="fa fa-user"></i><span class="hide-mobile"><br />{% trans "Personal" %}</span></div>
         {% if user|have_menu:"TRA"%}
-            <div class="tab-item ark" data-url="{% url "patient-treatment" %}" data-target="div-container" data-obj_id="{{obj.id}}"> 
-                <i class="fa fa-barcode"></i> <span class="hide-mobile">&nbsp; {% trans "Tratamientos" %} ({{obj.get_active_treatments}})</span></div>
+            <div class="tab-item ark text-center" data-url="{% url "patient-treatment" %}" data-target="div-container" data-obj_id="{{obj.id}}"> 
+                <i class="fa fa-barcode"></i> <span class="hide-mobile"><br />{% trans "Tratamientos" %} ({{obj.get_active_treatments}})</span></div>
         {% endif %}
         {% if user|have_menu:"PTR"%}
-            <div class="tab-item ark" data-url="{% url "patient-procedure" %}" data-target="div-container" data-obj_id="{{obj.id}}"> 
-                <i class="fa fa-project-diagram"></i> <span class="hide-mobile">&nbsp; 
+            <div class="tab-item ark text-center" data-url="{% url "patient-procedure" %}" data-target="div-container" data-obj_id="{{obj.id}}"> 
+                <i class="fa fa-project-diagram"></i> <span class="hide-mobile"><br />
                 {% trans "Trámites" %} ({{obj.procedures.all.count}})</span></div>
         {% endif %}
         {% if user|have_menu:"ALE"%}
-            <div class="tab-item ark" data-url="{% url "patient-allergy" %}" data-target="div-container" data-obj_id="{{obj.id}}">
-                <i class="fas fa-allergies"></i><span class="hide-mobile">&nbsp; {% trans "Alergias" %} 
+            <div class="tab-item ark text-center" data-url="{% url "patient-allergy" %}" data-target="div-container" data-obj_id="{{obj.id}}">
+                <i class="fas fa-allergies"></i><span class="hide-mobile"><br />{% trans "Alergias" %} 
                 ({{obj.alergias_excipientes.all.count}}/{{obj.alergias_principios.all.count}})</span></div>
         {% endif %}
         {% if user|have_menu:"SPD"%}
-            <div class="tab-item ark" data-url="{% url "patient-spd" %}" data-target="div-container" data-obj_id="{{obj.id}}">
-                <i class="fa fa-pills"></i><span class="hide-mobile">&nbsp; {% trans "Pastilleros" %} ({{obj.get_active_pillboxes}})</span></div>
+            <div class="tab-item ark text-center" data-url="{% url "patient-spd" %}" data-target="div-container" data-obj_id="{{obj.id}}">
+                <i class="fa fa-pills"></i><span class="hide-mobile"><br />{% trans "Pastilleros" %} ({{obj.get_active_pillboxes}})</span></div>
         {% endif %}
         {% if user|have_menu:"LOPD"%}
-            <div class="tab-item ark" data-url="{% url "patient-lopd" %}" data-target="div-container" data-obj_id="{{obj.id}}">
-                <i class="fa fa-gavel"></i><span class="hide-mobile">&nbsp; {% trans "LOPD" %} ({{obj.lopd.all.count}})</span></div>
+            <div class="tab-item ark text-center" data-url="{% url "patient-lopd" %}" data-target="div-container" data-obj_id="{{obj.id}}">
+                <i class="fa fa-gavel"></i><span class="hide-mobile"><br />{% trans "LOPD" %} ({{obj.lopd.all.count}})</span></div>
         {% endif %}
         {% if user|have_menu:"EVO"%}
-            <div class="tab-item ark" data-url="{% url "patient-evolutionary" %}" data-target="div-container" data-obj_id="{{obj.id}}">
-                <i class="fa fa-history"></i><span class="hide-mobile">&nbsp; {% trans "Evolutivo" %} ({{obj.evolutionary.all.count}})</span></div>
+            <div class="tab-item ark text-center" data-url="{% url "patient-evolutionary" %}" data-target="div-container" data-obj_id="{{obj.id}}">
+                <i class="fa fa-history"></i><span class="hide-mobile"><br />{% trans "Evolutivo" %} ({{obj.evolutionary.all.count}})</span></div>
         {% endif %}
+        {% if user|have_menu:"PARAM"%}
+            <div class="tab-item ark text-center" data-url="{% url "patient-params" %}" data-target="div-container" data-obj_id="{{obj.id}}">
+                <i class="fa fa-history"></i><span class="hide-mobile"><br />{% trans "Parametros" %} ({{obj.blood_pressure.all.count}})</span></div>
+        {% endif %}
+
     </div>
 
     <div id="div-container">{% include "patient/patient-form.html" %}</div>

@@ -1,0 +1,54 @@
+{% load i18n static %}
+
+
+<div class="row justify-center">
+    <div class="col-6 text-left p-1">
+        <div class="greybox-sm p-1">
+            {% trans "Pa max (mm/Hg)" %}
+            <input type="text" class="form-control autosave" id="bpressure_max" name="bpressure_max" value="{{obj.bpressure_max|default:""}}" 
+                title="{{obj.bpressure_max}}" data-model-name="pharma.bloodpressure" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+                data-target="div-notification"/> <span id="bpressure_max__msg"></span>
+        </div>
+    </div>
+    <div class="col-6 text-left p-1">
+        <div class="greybox-sm p-1">
+            {% trans "Pa min(mm/Hg)" %}
+            <input type="text" class="form-control autosave" id="bpressure_min" name="bpressure_min" value="{{obj.bpressure_min|default:""}}" 
+                title="{{obj.bpressure_min}}" data-model-name="pharma.bloodpressure" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+                data-target="div-notification"/> <span id="bpressure_min__msg"></span>
+        </div>
+    </div>
+</div>
+<div class="row justify-center">
+    <div class="col-3 text-left p-1">
+        <div class="greybox-sm p-1">
+            {% trans "Pulso" %}
+            <input type="text" class="form-control autosave" id="hearth_rate" name="hearth_rate" value="{{obj.hearth_rate|default:""}}" 
+                title="{{obj.hearth_rate}}" data-model-name="pharma.bloodpressure" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+                data-target="div-notification"/> <span id="hearth_rate__msg"></span>
+        </div>
+    </div>
+    <div class="col-3 text-left p-1">
+        <div class="greybox-sm p-1">
+            {% trans "INR" %}
+            <input type="text" class="form-control autosave" id="inr" name="inr" value="{{obj.inr|default:""}}" 
+                title="{{obj.inr}}" data-model-name="pharma.bloodpressure" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+                data-target="div-notification"/> <span id="inr__msg"></span>
+        </div>
+    </div>
+    <div class="col-3 text-left p-1">
+        <div class="greybox-sm p-1">
+            {% trans "Framingham" %}
+            <input type="text" class="form-control autosave" id="framingham" name="framingham" value="{{obj.framingham|default:""}}" 
+                title="{{obj.framingham}}" data-model-name="pharma.bloodpressure" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+                data-target="div-notification" readonly/> <span id="framingham__msg"></span>
+        </div>
+    </div>
+    <div class="col-3 text-left p-1">
+        <div class="greybox-sm p-1">
+            <a href='{% static "tablasdereferencia.html" %}' style='margin-top:1em;' class='btn btn-link ga-ajax-load' data-ga-target='modal' 
+                data-ga-modal-title='Tablas de Referencia' target="_blank"><i class='fa fa-table'></i> Tablas</a>
+        </div>
+    </div>
+</div>
+

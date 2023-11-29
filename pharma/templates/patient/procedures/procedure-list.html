@@ -30,9 +30,9 @@
                     <div class="col-4">{{ item.obs }}</div>
                     <div class="col-2">{% if item.done %}<i class="fas fa-check"></i>{% else %}<i class="fas fa-times"></i>{% endif %}</div>
                     <div class="col-1 text-right">
-                        <a class="btn btn-xs ark" title="{%trans 'Edit procedure'%}" data-url="{%url "patient-procedure-form" %}"
+                        <a class="btn btn-sm ark" title="{%trans 'Edit procedure'%}" data-url="{%url "patient-procedure-form" %}"
                             data-target-modal="common-modal" data-obj_id="{{item.id}}" data-patient_id="{{obj.id}}"> 
-                            <i class="fas fa-edit"></i></a>
+                            <i class="fas fa-edit"></i></a>&nbsp; &nbsp; &nbsp; 
                         <a class="btn btn-sm ark" data-url="{%url "patient-procedure-remove"%}" data-obj_id="{{item.id}}" data-target="div-container" 
                             title="{% trans 'Remove' %}" data-confirm="{% trans "Are you sure to remove this element?" %}">
                             <i class="fas fa-trash"></i></a>

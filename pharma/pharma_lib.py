@@ -3,8 +3,8 @@ from datetime import date, datetime
 
 from .treatment_models import Tratamiento
 from .allergy_models import AlergiasExcipientes, AlergiasPrincipios
+from .params_models import BloodPressure
 from medication.models import Diagnosticos, CieCiap, InteraMedMed, InteraMedEnf
-from params.models import BloodPressure
 
 from medication.medication_lib import medicamentos_search_aemps
 

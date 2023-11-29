@@ -59,6 +59,10 @@
 
 <div class="d-flex justify-content-end">
     <button type="button" class="btn btn-sm ark save" data-bs-dismiss="modal" data-url="{% url "patient-procedure" %}"
-        data-target="div-container" data-obj_id="{{obj.patient.id}}">{% trans "Save" %}</button>
+        data-target="div-container" data-obj_id="{{obj.patient.id}}">{% trans "Guardar" %}</button>
+
+    <button class="btn btn-sm ark cancel" data-bs-dismiss="modal" data-url="{%url "patient-procedure-remove"%}" data-obj_id="{{obj.id}}" 
+        data-target="div-container" title="{% trans 'Eliminar' %}" data-confirm="{% trans "Are you sure to remove this element?" %}">
+        {% trans "Remove" %}</a>
 </div>
 

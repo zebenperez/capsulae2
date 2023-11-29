@@ -1,0 +1,48 @@
+{% load i18n static %}
+
+
+<div class="row justify-center">
+    <div class="col-4 text-left p-1">
+        <div class="greybox-sm p-1">
+            {% trans "FEM (l/m)" %}
+            <input type="text" class="form-control autosave" id="fem" name="fem" value="{{obj.fem|default:""}}" 
+                title="{{obj.fem}}" data-model-name="pharma.bloodpressure" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+                data-target="div-notification"/> <span id="fem__msg"></span>
+        </div>
+    </div>
+    <div class="col-4 text-left p-1">
+        <div class="greybox-sm p-1">
+            {% trans "FEV1 (l/seg)" %}
+            <input type="text" class="form-control autosave" id="fev1" name="fev1" value="{{obj.fev1|default:""}}" 
+                title="{{obj.fev1}}" data-model-name="pharma.bloodpressure" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+                data-target="div-notification"/> <span id="fev1__msg"></span>
+        </div>
+    </div>
+    <div class="col-4 text-left p-1">
+        <div class="greybox-sm p-1">
+            {% trans "FEV6 (l/seg)" %}
+            <input type="text" class="form-control autosave" id="fev6" name="fev6" value="{{obj.fev6|default:""}}" 
+                title="{{obj.fev6}}" data-model-name="pharma.bloodpressure" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+                data-target="div-notification"/> <span id="fev6__msg"></span>
+        </div>
+    </div>
+</div>
+<div class="row justify-center">
+    <div class="col-3 text-left p-1">
+        <div class="greybox-sm p-1">
+            {% trans "FEV1 / FEV6" %}
+            <input type="text" class="form-control autosave" id="coef_fev1_fev6" name="coef_fev1_fev6" value="{{obj.coef_fev1_fev6|default:""}}" 
+                title="{{obj.coef_fev1_fev6}}" data-model-name="pharma.bloodpressure" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+                data-target="div-notification" readonly/> <span id="coef_fev1_fev6__msg"></span>
+        </div>
+    </div>
+    <div class="col-3 text-left p-1">
+        <div class="greybox-sm p-1">
+            {% trans "Edad Pulmonar Estimada" %}
+            <input type="text" class="form-control autosave" id="epe" name="epe" value="{{obj.epe|default:""}}" 
+                title="{{obj.epe}}" data-model-name="pharma.bloodpressure" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+                data-target="div-notification"/> <span id="epe__msg"></span>
+        </div>
+    </div>
+</div>
+

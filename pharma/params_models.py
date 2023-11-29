@@ -1,12 +1,13 @@
 from django.db import models
+from datetime import datetime
 
 from pharma.models import Pacientes
-# Create your models here.
+
 
 class BloodPressure(models.Model):
     patient = models.ForeignKey(Pacientes, related_name="blood_pressure", on_delete=models.CASCADE, verbose_name="Paciente")
     creation_date = models.DateTimeField(verbose_name="Fecha de creación", auto_now_add=True)
-    date = models.DateTimeField(verbose_name="Fecha")
+    date = models.DateTimeField(verbose_name="Fecha", default=datetime.now)
     observations = models.CharField(verbose_name="Observaciones", max_length=200, blank=True, null=True, default="")
     weight = models.DecimalField(max_digits=6, decimal_places=2, verbose_name="Peso (Kg)", blank=True, null=True)
     height = models.DecimalField(verbose_name="Altura (m)", blank=True, null=True, decimal_places=2, max_digits=4)

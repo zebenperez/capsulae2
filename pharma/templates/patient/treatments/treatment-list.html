@@ -103,13 +103,13 @@
                     <div class="col-1">{{ item.o }}</div>
                     <div class="col-1 text-right">
                         {% if comp %}
-                            <a class="btn btn-xs ark" title="{%trans 'Edit treatment'%}" data-url="{%url "patient-complement-form" %}"
+                            <a class="btn btn-sm ark" title="{%trans 'Edit treatment'%}" data-url="{%url "patient-complement-form" %}"
                                 data-target-modal="common-modal" data-obj_id="{{item.id}}" data-patient_id="{{obj.id}}"> 
-                                <i class="fas fa-edit"></i></a>
+                                <i class="fas fa-edit"></i></a>&nbsp; &nbsp; &nbsp; 
                         {% else %}
-                            <a class="btn btn-xs ark" title="{%trans 'Edit treatment'%}" data-url="{%url "patient-treatment-form" %}"
+                            <a class="btn btn-sm ark" title="{%trans 'Edit treatment'%}" data-url="{%url "patient-treatment-form" %}"
                                 data-target-modal="common-modal" data-obj_id="{{item.id}}" data-patient_id="{{obj.id}}"> 
-                                <i class="fas fa-edit"></i></a>
+                                <i class="fas fa-edit"></i></a>&nbsp; &nbsp; &nbsp; 
                         {% endif %}
                         <a class="btn btn-sm ark" data-url="{%url "patient-treatment-remove"%}" data-obj_id="{{item.id}}" data-target="div-container" 
                             title="{% trans 'Remove' %}" data-confirm="{% trans "Are you sure to remove this element?" %}">
