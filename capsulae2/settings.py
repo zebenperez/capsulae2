@@ -45,7 +45,6 @@ INSTALLED_APPS = [
     'projects',
     'mylogin',
     'community',
-    'params',
 ]
 
 MIDDLEWARE = [

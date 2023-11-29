@@ -38,19 +38,19 @@
                         <div class="col-2 p-2"><span class="text text-warning">{{ deliver.finish_date|sub_days:advice_days|date:"d-m-Y"}}</span></div>
                     {% endwith %}
                     <div class="col-2 p-2 text-right">
-                        <a class="btn btn-xs ark p-2" data-url="{%url "spd-blisters" %}" data-target="blister-list-{{item.id}}" 
+                        <a class="btn btn-sm ark p-2" data-url="{%url "spd-blisters" %}" data-target="blister-list-{{item.id}}" 
                             data-obj_id="{{item.id}}" data-show="blister-list-{{item.id}}" title="{% trans "Entregas" %}"> 
                             <i class="fas fa-history"></i> </a>
 
-                        <a class="btn btn-xs ark p-2" title="{%trans 'Edit blister'%}" data-url="{%url "spd-form" %}"
+                        <a class="btn btn-sm ark p-2" title="{%trans 'Edit blister'%}" data-url="{%url "spd-form" %}"
                             data-target-modal="common-modal" data-obj_id="{{item.id}}" data-patient_id="{{obj.id}}"
                             title="{% trans "Editar" %}"> <i class="fas fa-edit"></i></a>
 
                         {%if item.active %} 
-						    <a class="btn btn-xs ark p-2" data-url="{% url 'spd-active-toggle' %}" data-target="div-container"
+						    <a class="btn btn-sm ark p-2" data-url="{% url 'spd-active-toggle' %}" data-target="div-container"
                                 data-obj_id="{{item.pk}}" title="{% trans "Desactivar SPD" %}"><i class="fas fa-times"></i></a>
 						{% else %} 
-						    <a class="btn btn-xs ark p-2" data-url="{% url 'spd-active-toggle' %}" data-target="div-container"
+						    <a class="btn btn-sm ark p-2" data-url="{% url 'spd-active-toggle' %}" data-target="div-container"
                                 data-obj_id="{{item.pk}}" title="{% trans "Activar SPD" %}"><i class="fas fa-check"></i></a>
 						{%endif%}
  
@@ -59,7 +59,7 @@
                             <i class="fas fa-trash"></i></a>
 
                         {%comment%}
-                        <a class="btn btn-xs ark" data-url="{% url "spd-log" %}" data-target-modal="common-modal" data-obj_id="{{item.pk}}" 
+                        <a class="btn btn-sm ark" data-url="{% url "spd-log" %}" data-target-modal="common-modal" data-obj_id="{{item.pk}}" 
                             title="{% trans "Ver Histórico" %}"> <i class="fas fa-history"></i> </a>
                         {%endcomment%}
                     </div>

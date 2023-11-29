@@ -10,11 +10,14 @@ from capsulae2.commons import get_or_none_str, set_obj_field, show_exc
 #@login_required
 def autosave_field(request):
     try:
+        print("--a--")
         app = request.GET["model_name"].split(".")[0]
         model = request.GET["model_name"].split(".")[1]
         obj_id = request.GET["obj_id"]
 
         field = request.GET["field"]
+
+        print(field)
         try:
             reffield = request.GET["ref_field"]
         except:

@@ -603,7 +603,11 @@ $(document).ready(()=>{
     });
 
     $("body").on("click", ".autoremove", function(e){
-        if (confirm("Esta seguro/a de que desea borrar el elemento?"))
+        var confirmMsg = "Esta seguro/a de que desea borrar el elemento?";
+        if ($(this).data("confirm"))
+            confirmMsg = $(this).data("confirm");
+
+        if (confirm(confirmMsg))
         {
             model_name = $(this).data("model-name");
             obj_id = $(this).data("obj-id");

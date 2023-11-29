@@ -1,0 +1,93 @@
+{% load i18n static %}
+
+
+<div class="row spd-tab">
+    <div class="col-12 text-end">
+        <button type="button" class="btn btn-sm ark new" data-url="{%url "patient-params-form"%}" data-target-modal="common-modal" 
+            data-patient_id="{{obj.id}}"> <i class="fas fa-plus"></i> {% trans 'Crear Parámetros' %}</button> 
+    </div>
+</div>
+
+
+<table class="table table-striped table-hover">
+    <thead>
+        <tr class="small small">
+            <th> {% trans 'Fecha' %} </th>
+            <th> {% trans 'Peso (Kg)' %} </th>
+            <th> {% trans 'Pa M.(mmHg)' %} </th>
+            <th> {% trans 'Pa m.(mmHg)' %} </th>
+            <th> {% trans 'Pulso' %} </th>
+            <th> {% trans 'IMC' %} </th>
+            <th> {% trans 'Clicosi. (HbA1c)' %} </th>
+            <th> {% trans 'Clico.B. mg/dc' %} </th>
+            <th> {% trans 'FEM L/min.' %} </th>
+            <th> {% trans 'Fra.' %} </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in obj.blood_pressure.all %}
+            <tr class="small row-item" id="row_{{item.id}}">
+                <td>{{ item.date|date:"d-m-Y" }}</td>
+                <td>{{ item.weight|default:"--" }}</td>
+                <td>{{ item.bpressure_min|default:"--" }}</td>
+                <td>{{ item.bpressure_max|default:"--" }}</td>
+                <td>{{ item.hearth_rate|default:"--" }}</td>
+                <td>{{ item.bmi|default:"--" }}</td>
+                <td>{{ item.glicosylated|default:"--" }}</td>
+                <td>{{ item.glucose|default:"--" }}</td>
+                <td></td>
+                <td>
+                    {% if region == "c" %}
+                        {% if item.framingham <= 5 %}
+                            <span style="background: green; color:white; padding:5px; border-radius:5px" class="badge">
+                                {{ item.framingham|floatformat|default_if_none:"--" }} </span>
+                        {% endif %}
+                        {% if item.framingham > 5 and item.framingham <= 10 %}
+                            <span style="background: yellow; color:darkgray; padding:5px;" class="badge">
+                                {{ item.framingham|floatformat|default_if_none:"--" }} </span>
+                        {% endif %}
+                        {% if item.framingham > 10 and item.framingham <= 19 %}
+                            <span style="background: orange; color:black; padding:3px; border-radius:5px" class="badge">
+                                {{ item.framingham|floatformat|default_if_none:"--" }} </span>
+                        {% endif %}
+                        {% if item.framingham > 19 and item.framingham <= 39 %}
+                            <span style="background: violet; color:black; padding:5px;" class="badge">
+                                {{ item.framingham|floatformat|default_if_none:"--" }} </span>
+                        {% endif %}
+                        {% if item.framingham > 39 %}
+                            <span style="background: red; color:darkgray; padding:5px;" class="badge">
+                                {{ item.framingham|floatformat|default_if_none:"--" }} </span>
+                        {% endif %}
+                    {% else %}
+                        {% if item.framingham <= 5 %}
+                            <span style="background: green; color:black; padding:2px;" class="badge">
+                                {{ item.framingham|floatformat|default_if_none:"--" }} </span>
+                        {% endif %}
+                        {% if item.framingham > 5 and item.framingham <= 10 %}
+                            <span style="background: yellow; color:black; padding:2px;">
+                                {{ item.framingham|floatformat|default_if_none:"--" }} </span>
+                        {% endif %}
+                        {% if item.framingham > 10 and item.framingham <= 15 %}
+                            <span style="background: orange; color:black; padding:2px;">
+                                {{ item.framingham|floatformat|default_if_none:"--" }} </span>
+                        {% endif %}
+                        {% if item.framingham > 15 and item.framingham <= 39 %}
+                            <span style="background: red; color:black; padding:2px;">
+                                {{ item.framingham|floatformat|default_if_none:"--" }} </span>
+                        {% endif %}
+                    {% endif %}
+                </td>
+                <td>
+                    <a class="btn btn-sm ark" title="{%trans 'Edit parameters'%}" data-url="{%url "patient-params-form" %}"
+                        data-target-modal="common-modal" data-obj_id="{{item.id}}" data-patient_id="{{obj.id}}"> 
+                        <i class="fas fa-edit"></i></a>&nbsp;&nbsp;&nbsp;
+                    <a class="btn btn-sm ark" data-url="{%url "patient-params-remove"%}" data-obj_id="{{item.id}}" data-target="div-container" 
+                        title="{% trans 'Remove' %}" data-confirm="{% trans "Are you sure to remove this element?" %}">
+                        <i class="fas fa-trash"></i></a>
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+

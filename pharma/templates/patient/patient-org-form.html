@@ -26,7 +26,7 @@
             {% endfor%}
         </select>
     </div>
-    <div class="col-12">
+    <div class="col-12 mt-3">
         <textarea class="form-control autosave blister-description" id="obs" name="obs" title="{{obj.obs}}" data-model-name="community.patientorg" 
             data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" data-target="div-notification-org" placeholder="Observations..."> 
             {{obj.obs|safe}}</textarea> <span id="rol__msg"></span>

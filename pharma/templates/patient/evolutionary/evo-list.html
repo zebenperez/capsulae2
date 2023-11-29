@@ -41,9 +41,9 @@
                         <a href="{% url "evolutionary-referral-form" paciente.n_historial evolutivo.id True %}" class="btn btn-primary btn-sm"
                             target="_blank" rel="noopener noreferrer"><i class="fa fa-info"></i> </a>
                     {%endcomment%}
-                        <a href="{% url "evolutionary-referral-form" obj.n_historial item.id True %}" class="btn btn-xs p-2"
+                        <a href="{% url "evolutionary-referral-form" obj.n_historial item.id True %}" class="btn btn-sm p-2"
                             target="_blank" rel="noopener noreferrer"><i class="fa fa-info"></i> </a>
-                        <a class="btn btn-xs ark p-2" title="{%trans 'Edit evolutivo'%}" data-url="{%url "evolutionary-form" %}"
+                        <a class="btn btn-sm ark p-2" title="{%trans 'Edit evolutivo'%}" data-url="{%url "evolutionary-form" %}"
                             data-target-modal="common-modal" data-obj_id="{{item.id}}" data-patient_id="{{obj.id}}"
                             title="{% trans "Editar" %}"> <i class="fas fa-edit"></i></a>
                         <a class="btn btn-sm ark p-2" data-url="{%url "evolutionary-remove"%}" data-obj_id="{{item.id}}" data-target="div-container" 

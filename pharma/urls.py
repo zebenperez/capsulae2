@@ -1,5 +1,5 @@
 from django.urls import path
-from . import views, views_account, auto_views, spd_views, evolutionary_views as evo_views, treatment_views as t_views
+from . import views, views_account, auto_views, spd_views, evolutionary_views as evo_views, treatment_views as t_views, params_views
 
 urlpatterns = [
     path('index/', views.index, name='pharma-index'),
@@ -15,6 +15,7 @@ urlpatterns = [
     #path('patients/form/', views.patient_form, name='patient-form'),
     path('patients/new/', views.patient_new, name='patient-new'),
     path('patients/remove/', views.patient_remove, name='patient-remove'),
+    path('patients/remove-msg/', views.patient_remove_msg, name='patient-remove-msg'),
 
     #------------------------- PATIENT --------------------
     path('patients/view/<int:patient_id>', views.patient_view, name='patient-view'),
@@ -31,9 +32,11 @@ urlpatterns = [
     path('patients/allergy/excipients', views.patient_allergy_excipients, name='patient-allergy-excipients'),
     path('patients/allergy/excipient/remove', views.patient_allergy_excipient_remove, name='patient-allergy-excipient-remove'),
     path('patients/allergy/excipients/search', views.patient_allergy_excipients_search, name='patient-allergy-excipients-search'),
+    path('patients/allergy/excipients/list/search', views.patient_allergy_excipient_list_search, name='patient-allergy-excipient-list-search'),
     path('patients/allergy/principles', views.patient_allergy_principles, name='patient-allergy-principles'),
     path('patients/allergy/principle/remove', views.patient_allergy_principle_remove, name='patient-allergy-principle-remove'),
     path('patients/allergy/principles/search', views.patient_allergy_principles_search, name='patient-allergy-principles-search'),
+    path('patients/allergy/principles/list/search', views.patient_allergy_principles_list_search, name='patient-allergy-principles-list-search'),
 
     path('patients/evolutionary/', views.patient_evolutionary, name='patient-evolutionary'),
 
@@ -83,6 +86,12 @@ urlpatterns = [
     path('patients/evolutionary/referral-form/<slug:history_num>/<int:evolutionary_id>/', evo_views.evolutionary_referral_form, name='evolutionary-referral-form'),
     path('patients/evolutionary/referral-form/<slug:history_num>/<int:evolutionary_id>/<slug:view>/', evo_views.evolutionary_referral_form, name='evolutionary-referral-form'),
     path('patients/evolutionary/send-form/', evo_views.evolutionary_send_form, name='evolutionary-send-form'),
+
+    #------------------------- PARAMETERS --------------------
+    path('patients/params/', views.patient_params, name='patient-params'),
+    path('patients/params-form/', params_views.patient_params_form, name='patient-params-form'),
+    path('patients/params-form-tab/', params_views.patient_params_form_tab, name='patient-params-form-tab'),
+    path('patients/params-remove/', params_views.patient_params_remove, name='patient-params-remove'),
 
     #---------------------- AUTO -----------------------
     path('autosave_field/', auto_views.autosave_field, name='autosave_field'),
