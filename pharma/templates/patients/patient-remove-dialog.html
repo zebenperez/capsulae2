@@ -21,8 +21,13 @@
 <div class="d-flex justify-content-end">
     <button type="button" class="btn btn-sm" data-bs-dismiss="modal">{% trans "Close" %}</button>
 
-    <button class="btn btn-sm ark" data-bs-dismiss="modal" data-url="{%url "patient-remove"%}" data-obj_id="{{patient.id}}" 
-        data-target="patient-list" title="{% trans 'Eliminar' %}"> {% trans "Remove" %}</a>
+    <button class="btn btn-sm ark" data-bs-dismiss="modal" data-url="{%url "patient-soft-remove"%}" data-obj_id="{{patient.id}}" 
+        data-target="patient-list" title="{% trans 'Eliminar' %}"> {% trans "Unactivate" %}</a>
+
+    {% if request.user|in_group:"admins" %}
+        <button class="btn btn-sm ark" data-bs-dismiss="modal" data-url="{%url "patient-remove"%}" data-obj_id="{{patient.id}}" 
+            data-target="patient-list" title="{% trans 'Eliminar' %}"> {% trans "Remove" %}</a>
+    {% endif %}
 </div>
 
 

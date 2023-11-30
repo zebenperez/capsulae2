@@ -4,12 +4,23 @@
 {% block central_content %}
     <div class="row toolbar-search pt-2 pb-2 m-0">
         <div class="col-lg-1 col-1"><i class="fas fa-search"></i></div>
-        <div class="col-lg-11 col-11 text-left p-0">
+        <div class="col-lg-7 col-7 text-left p-0">
             <input type="text" class="autosearch form-control form-control-dark w-100" name="s-name" id="s-name" 
                placeholder="{% trans 'Historial, Nombre o CIP' %}" data-url="{% url "patient-search" %}" 
                data-target="patient-list" data-related="s-name" />
         </div>
+        <div class="spd-tab col-4">
+            <div class="text-end">
+                <button class="btn btn-sm check-row new" data-row="row-item" data-active="True"> 
+                    <i class="fas fa-eye-open"></i> {%trans 'Activos'%}</button> |
+    		    <button class="btn btn-sm check-row new" data-row="row-item" data-active="False"> 
+                    <i class="fas fa-eye-open"></i> {%trans 'No Activos'%}</button> | 
+		        <button class="btn btn-sm check-row new" data-row="row-item" data-active=""> 
+                    <i class="fas fa-eye-open"></i> {%trans 'Todos'%}</button> 
+            </div>
+        </div>
     </div>
+
     <div class="content mt-4">
         <div class="toolbar-content">
 	    <h2 class="pathway b-right">{% trans 'Pacientes' %} <span id="items-counter" class="badge badge-secondary">{{items|length}}</span></h2>

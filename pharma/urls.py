@@ -15,6 +15,7 @@ urlpatterns = [
     #path('patients/form/', views.patient_form, name='patient-form'),
     path('patients/new/', views.patient_new, name='patient-new'),
     path('patients/remove/', views.patient_remove, name='patient-remove'),
+    path('patients/soft-remove/', views.patient_soft_remove, name='patient-soft-remove'),
     path('patients/remove-msg/', views.patient_remove_msg, name='patient-remove-msg'),
 
     #------------------------- PATIENT --------------------
@@ -48,6 +49,7 @@ urlpatterns = [
     path('patients/treatment/', views.patient_treatment, name='patient-treatment'),
     path('patients/treatment-form/', t_views.patient_treatment_form, name='patient-treatment-form'),
     path('patients/treatment-remove/', t_views.patient_treatment_remove, name='patient-treatment-remove'),
+    path('patients/treatment-soft-remove/', t_views.patient_treatment_soft_remove, name='patient-treatment-soft-remove'),
     path('patients/treatment-medication-search/', t_views.patient_treatment_medication_search, name='patient-treatment-medication-search'),
     path('patients/complement-form/', t_views.patient_complement_form, name='patient-complement-form'),
     path('patients/interactions-comment/', t_views.patient_interactions_comment, name='patient-interactions-comment'),

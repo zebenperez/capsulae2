@@ -91,6 +91,10 @@ class Pacientes(models.Model):
         except Exception:
             return "--"
 
+    @property
+    def is_active(self):
+        return False if self.activo == False else True
+
     def get_active_treatments(self):
         return self.tratamientos.filter(activo=True).count()
 

@@ -46,6 +46,17 @@ def patient_treatment_form(request):
         return render(request, 'error_exception.html', {'exc':show_exc(e)})
 
 @group_required("admins","managers")
+def patient_treatment_soft_remove(request):
+    try:
+        obj = get_or_none(Tratamiento, request.GET["obj_id"])
+        obj.activo = False
+        obj.save()
+
+        return render(request, "patient/treatments/treatment-list.html", {'obj': obj.paciente})
+    except Exception as e:
+        return render(request, 'error_exception.html', {'exc':show_exc(e)})
+
+@group_required("admins","managers")
 def patient_treatment_remove(request):
     try:
         obj = get_or_none(Tratamiento, request.GET["obj_id"])

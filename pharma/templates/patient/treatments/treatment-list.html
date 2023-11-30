@@ -1,4 +1,4 @@
-{% load i18n static %}
+{% load i18n static common_tags %}
 
 <div class="row toolbar-search pt-2 pb-2 m-0">
     <div class="col-lg-1 col-1"><i class="fas fa-search"></i></div>
@@ -105,15 +105,23 @@
                         {% if comp %}
                             <a class="btn btn-sm ark" title="{%trans 'Edit treatment'%}" data-url="{%url "patient-complement-form" %}"
                                 data-target-modal="common-modal" data-obj_id="{{item.id}}" data-patient_id="{{obj.id}}"> 
-                                <i class="fas fa-edit"></i></a>&nbsp; &nbsp; &nbsp; 
+                                <i class="fas fa-edit"></i></a>&nbsp; &nbsp;
                         {% else %}
                             <a class="btn btn-sm ark" title="{%trans 'Edit treatment'%}" data-url="{%url "patient-treatment-form" %}"
                                 data-target-modal="common-modal" data-obj_id="{{item.id}}" data-patient_id="{{obj.id}}"> 
-                                <i class="fas fa-edit"></i></a>&nbsp; &nbsp; &nbsp; 
+                                <i class="fas fa-edit"></i></a>&nbsp; &nbsp;
                         {% endif %}
-                        <a class="btn btn-sm ark" data-url="{%url "patient-treatment-remove"%}" data-obj_id="{{item.id}}" data-target="div-container" 
-                            title="{% trans 'Remove' %}" data-confirm="{% trans "Are you sure to remove this element?" %}">
-                            <i class="fas fa-trash"></i></a>
+
+                        <a class="btn btn-sm ark" data-url="{%url "patient-treatment-soft-remove"%}" data-obj_id="{{item.id}}" 
+                            data-target="div-container" title="{% trans 'Remove' %}" 
+                            data-confirm="{% trans "Are you sure to desactivate this element?" %}"> <i class="fas fa-trash-alt"></i></a>
+                            &nbsp;
+
+                        {% if request.user|in_group:"admins" %}
+                            <a class="btn btn-sm ark" data-url="{%url "patient-treatment-remove"%}" data-obj_id="{{item.id}}" 
+                                data-target="div-container" title="{% trans 'Remove' %}" 
+                                data-confirm="{% trans "Are you sure to remove this element?" %}"> <i class="fas fa-trash"></i></a>
+                        {% endif %}
                     </div>
                 </td>
             </tr>

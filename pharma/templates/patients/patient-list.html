@@ -2,7 +2,8 @@
 
 
 {% for item in items %}
-    <div class="row line small pt-2 pb-2" id="row_{{item.id}}" style="margin:0;">
+    <div class="row line small pt-2 pb-2 row-item {%if item.activo == False%}hide{%endif%}" id="row_{{item.id}}" data-active="{{item.is_active}}" 
+        style="margin:0;">
         <div class="col-11">
             <div class="row pointer" id="row_{{item.id}}" style="margin:0;" onclick="window.location='{%url "patient-view" item.id%}'">
                 <div class="col-2">
