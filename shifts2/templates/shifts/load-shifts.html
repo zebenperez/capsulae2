@@ -1,0 +1,16 @@
+{% load i18n static %}
+
+<script>
+    var ev_list = calendar.getEvents();
+    for(let ev of ev_list) { ev.remove(); }
+            
+    {% for item in event_list%}
+        calendar.addEvent({
+            id: '{{item.pk}}',
+            title: '{{item.name}}',
+            start: '{{item.ini_date|date:"Y-m-d"}} {{item.ini_time|date:"h:i:s"}}',
+            {% if item.ini_date|date:"Y-m-d" != item.end_date|date:"Y-m-d" %} end: '{{item.end_date|date:"Y-m-d"}} {{item.end_time|date:"h:i:s"}}' {% endif %}
+        });
+    {% endfor %}
+</script>
+

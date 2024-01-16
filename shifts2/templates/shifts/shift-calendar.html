@@ -1,0 +1,23 @@
+{% load i18n static %}
+
+<div class="content mt-4">
+    <div class="toolbar-content">
+	    <h2 class="pathway b-right">{%trans 'Turnos'%}</h2>
+
+        {% if perms.clone_shifts %}
+            <a class="btn btn-sm new" data-target="#shift-clone-modal" data-toggle="modal"> 
+                <i class="fas fa-clone"></i>{% trans "Clonar turnos" %} </a>
+
+        {% endif %}
+        {% if perms.create_shifts %}
+            <a class="btn btn-sm ark new" data-url="{% url "shifts-get-shift" %}" data-target="div-shifts"> 
+                <i class="fas fa-plus"></i>{% trans "Añadir turno" %} </a>
+        {% endif %}
+        </div>
+    </div>
+
+<div id="div-calendar">{% include "shifts/calendar.html" %}</div>
+<div id="load-events"></div>
+
+{#{% include "cam/event-modal.html" %}#}
+{% include "shifts/shift-clone-modal.html" %}
