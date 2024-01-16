@@ -1,4 +1,5 @@
 #import requests
+from django.contrib.auth.models import User, Group
 from django.shortcuts import render, redirect
 from django.db.models import Q
 #from django.core.mail import send_mail
@@ -14,11 +15,14 @@ from django.views.decorators.csrf import csrf_exempt
 from capsulae2.decorators import group_required
 from capsulae2.commons import get_or_none, get_param, show_exc, user_in_group
 from pharma.models import Pacientes
-from account.models import Company
-from .models import PatientFcoc, PatientFci, PatientActivity, Organization, PatientOrg, Procedure
+from account.models import Company, Profile, UserProfile, UserMenu
+from account.email_lib import send_new_password_email
+from .models import PatientFcoc, PatientFci, PatientActivity, Organization, OrganizationInfo, PatientOrg, Procedure
 
 #from .forms import OrganizationForm
 #from generic.views import get_session_feedback
+
+import random, string
 
 
 '''
@@ -64,6 +68,18 @@ def organization_form(request):
     return render(request, "organizations/organization-form.html", {'obj': obj})
 
 @group_required("admins","managers")
+def organization_view(request, obj_id):
+    try:
+        obj = get_or_none(Organization, obj_id)
+        try:
+            info = obj.info
+        except:
+            info = OrganizationInfo.objects.create(org=obj)
+        return render(request, "organizations/organization-view.html", {'obj': obj, 'info': info})
+    except Exception as e:
+        return render(request, 'error_exception.html', {'exc':show_exc(e)})
+
+@group_required("admins","managers")
 def organization_remove(request):
     obj = get_or_none(Organization, request.GET["obj_id"]) if "obj_id" in request.GET else None
     if obj != None:
@@ -75,6 +91,94 @@ def organization_print(request):
     context = get_organization_context(request.user)
     context["company"] = Company.get_by_user(request.user)
     return render(request, "organizations/organization-print.html", context)
+
+@group_required("admins")
+def organization_share_users(request):
+    try:
+        obj = get_or_none(Organization, request.GET["obj_id"])
+        user_list = User.objects.filter(groups__name='managers')
+        return render(request, "organizations/organization-share.html", {'obj': obj, 'user_list': user_list})
+    except Exception as e:
+        return render(request, 'error_exception.html', {'exc':show_exc(e)})
+
+@group_required("admins")
+def organization_share(request):
+    try:
+        obj = get_or_none(Organization, request.GET["obj_id"])
+        user = get_or_none(User, request.GET["user"])
+        new_org = obj
+        new_org.pk = None
+        new_org.user = user
+        new_org.comp = Company.get_by_user(user)
+        new_org.save()
+        return redirect("organization-list")
+    except Exception as e:
+        return render(request, 'error_exception.html', {'exc':show_exc(e)})
+
+@group_required("admins")
+def organization_create_user(request):
+    try:
+        obj = get_or_none(Organization, request.GET["obj_id"])
+        if obj.email == "":
+            return render(request, "organizations/organization-create-user.html", {'msg': "Se necesita un correo para crear el usuario!",})
+
+        if User.objects.filter(username=obj.email).exists():
+            return render(request, "organizations/organization-create-user.html", {'msg': "Este usuario ya existe!",})
+
+        # Create User
+        password = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(8))
+        user = User.objects.create_user(obj.email, obj.email, password)
+        user.first_name = obj.name
+        user.save()
+        # Assign manager group
+        manager_group = Group.objects.get(name='managers')
+        manager_group.user_set.add(user)
+        # Assign profile
+        prof = Profile.objects.filter(code="asoc").first()
+        if prof != None:
+            pu, created = UserProfile.objects.get_or_create(user=user, profile=prof)
+            um, created = UserMenu.objects.get_or_create(user=user)
+            for menu in prof.menus.all():
+                um.menus.add(menu)
+        # Send Password
+        send_new_password_email(password, [user.email])
+
+        return render(request, "organizations/organization-create-user.html", {'msg': 'El usuario ha sido creado correctamente!'})
+    except Exception as e:
+        return render(request, 'error_exception.html', {'exc':show_exc(e)})
+
+def organization_register(request, username):
+    user = User.objects.filter(username = username).first()
+    if user == None:
+        return render(request, 'error_exception.html', {'exc': "Formulario no disponible!"})
+    return render(request, "organizations/organization-register-form.html", {'username': username})
+
+def organization_register_send(request):
+    try:
+        if request.POST:
+            user = User.objects.filter(username = request.POST["username"]).first()
+            comp = Company.get_by_user(user)
+            org = Organization(user=user, comp=comp)
+            org.reviewed = False 
+            org.name = request.POST["name"]
+            org.address = request.POST["address"]
+            org.email = request.POST["email"]
+            org.phone = request.POST["phone"]
+            org.contact = request.POST["contact"]
+            org.derivation_way = request.POST["derivation_way"]
+            org.derivation = request.POST["derivation"]
+            org.save()
+            info = OrganizationInfo(org=org)
+            info.ambit = request.POST["ambit"]
+            info.activities = request.POST["activities"]
+            info.participate = request.POST["participate"]
+            info.health = request.POST["health"]
+            info.improvements = request.POST["improvements"]
+            info.resources = request.POST["resources"]
+            info.save()
+        return render(request, "organizations/organization-register-sended.html", {})
+    except Exception as e:
+        return render(request, 'error_exception.html', {'exc':show_exc(e)})
 
 
 '''

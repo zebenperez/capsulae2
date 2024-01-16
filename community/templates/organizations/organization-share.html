@@ -1,0 +1,33 @@
+{% load i18n %}
+
+
+<div class="row">
+    <div class="col-11"> <h2><i class="fa fa-history"></i>&nbsp; {% trans 'Compartir organización' %}</h2> </div>
+    <div class="col-1">
+        <div class="d-flex justify-content-end"> <button type="button" class="btn btn-lg" data-bs-dismiss="modal" title="{% trans "Close" %}">
+            <i class="fas fa-times"></i></button> </div>
+    </div>
+</div>
+
+<div id="div-notification"></div>
+
+<div class="row justify-center">
+    <div class="col-12">
+        <div class="row">
+            <div class="greybox-sm p-1">
+                {% trans "Usuario" %}
+                <select id="user" class="form-control" onchange="$('#btn-share').data('user', $(this).val())">
+                    {% for item in user_list %}
+                        <option value="{{item.id}}">{{item.username}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="d-flex justify-content-end">
+    <button type="button" id="btn-share" class="btn btn-sm ark save" data-bs-dismiss="modal" data-url="{% url "organization-share" %}"
+        data-target="org-list" data-obj_id="{{obj.id}}" data-user="">{% trans "Compartir" %}</button>
+</div>
+

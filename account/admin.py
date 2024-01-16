@@ -19,9 +19,13 @@ class UserMenuAdmin(admin.ModelAdmin):
     list_display = ("user",)
     filter_horizontal = ('menus',)
 
+class UserProfileAdmin(admin.ModelAdmin):
+    list_display = ("user", "profile")
+
 admin.site.register(Config, ConfigAdmin)
 admin.site.register(Company)
 admin.site.register(Menu, MenuAdmin)
 admin.site.register(Plan, PlanAdmin)
 admin.site.register(Profile, ProfileAdmin)
 admin.site.register(UserMenu, UserMenuAdmin)
+admin.site.register(UserProfile, UserProfileAdmin)

@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'projects',
     'mylogin',
     'community',
+    'shifts2',
 ]
 
 MIDDLEWARE = [

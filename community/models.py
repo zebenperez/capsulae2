@@ -35,6 +35,7 @@ class PatientActivity(models.Model):
         verbose_name_plural = "Actividades del paciente"
 
 class Organization(models.Model):
+    reviewed = models.BooleanField(verbose_name="Realizado", default=True)
     name = models.CharField(verbose_name="Nombre", max_length=600, blank=True, null=True, default="")
     address = models.CharField(verbose_name="Dirección", max_length=900, blank=True, null=True, default="")
     email = models.CharField(verbose_name="Correo electrónico", max_length=600, blank=True, null=True, default="")
@@ -48,6 +49,19 @@ class Organization(models.Model):
     class Meta:
         verbose_name = "Organización"
         verbose_name_plural = "Organizaciones"
+
+class OrganizationInfo(models.Model):
+    ambit = models.TextField(verbose_name="Ámbito", blank=True, null=True, default="")
+    activities = models.TextField(verbose_name="Actividades", blank=True, null=True, default="")
+    participate = models.TextField(verbose_name="Participación", blank=True, null=True, default="")
+    health = models.TextField(verbose_name="Salud", blank=True, null=True, default="")
+    improvements = models.TextField(verbose_name="Mejoras", blank=True, null=True, default="")
+    resources = models.TextField(verbose_name="Recursos", blank=True, null=True, default="")
+    org = models.OneToOneField(Organization, verbose_name="Organización", on_delete=models.CASCADE, related_name="info", blank=True, null=True)
+
+    class Meta:
+        verbose_name = "Información de la Organización"
+        verbose_name_plural = "Información de las Organizaciones"
 
 class PatientOrg(models.Model):
     rol = models.CharField(verbose_name="Nombre", max_length=600, blank=True, null=True, default="")

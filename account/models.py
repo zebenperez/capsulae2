@@ -50,7 +50,7 @@ class Company(models.Model):
 
     manager = models.OneToOneField(User, verbose_name="Manager", on_delete=models.SET_NULL, related_name="company", blank=True, null=True)
     users = models.ManyToManyField(User, verbose_name="Empleados", related_name="user_companies", blank=True)
-    company_options = models.ManyToManyField(CompanyOptions, verbose_name="Opciones", related_name="options_company")
+    company_options = models.ManyToManyField(CompanyOptions, verbose_name="Opciones", related_name="options_company", blank=True)
 
 
     @staticmethod
@@ -160,6 +160,7 @@ class UserMenu(models.Model):
 class Profile(models.Model):
     active = models.BooleanField(verbose_name="Activo", default=False)
     amount = models.FloatField(verbose_name="Pago mensual", blank=True, default=0)
+    code = models.CharField(verbose_name="Código", max_length=50, blank=True, null=True, default="")
     name = models.CharField(verbose_name="Nombre", max_length=150, blank=True, null=True, default="")
     desc = models.TextField(verbose_name="Descripción", blank=True, null=True, default="")
     menus = models.ManyToManyField(Menu, verbose_name="Menus", related_name="profiles", blank=True)
@@ -176,7 +177,7 @@ class UserProfile(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="profiles")
 
     class Meta:
-        verbose_name = "Menu de usuario"
+        verbose_name = "Perfil de usuario"
 
 class UserPayment(models.Model):
     amount = models.FloatField(verbose_name="Pago", blank=True, default=0)

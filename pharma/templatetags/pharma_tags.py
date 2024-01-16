@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 from capsulae2.settings import BASE_DIR
 from pharma.spd_models import Pillbox
 from medication.models import FichaPrincipioActivo
+from account.models import UserProfile
 
 import os
 
@@ -49,6 +50,11 @@ def get_ficha(tratamiento):
         if len(ficha) > 0:
             return ficha[0]
     return None
+
+@register.filter
+def is_pharma(user):
+    up = UserProfile.objects.filter(user=user).first()
+    return (up != None and up.profile != None and up.profile.code == "pharma")
 
 '''
     Simple Tags

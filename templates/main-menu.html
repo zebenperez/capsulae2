@@ -15,7 +15,7 @@
         {% endif %}
         {% if user|have_menu:"ORG"%}
             <li class="nav-item"><a class="nav-link " href="{%url "organizations"%}">
-                <i class="fa fa-users"></i> {%trans "Organizaciones"%}</a></li><hr/>
+                <i class="fa fa-sitemap"></i> {%trans "Organizaciones"%}</a></li><hr/>
         {% endif %}
         {% if user|have_menu:"TRM"%}
             <li class="nav-item"><a class="nav-link " href="{%url "procedures"%}">
@@ -24,6 +24,10 @@
         {% if user|have_menu:"EMP"%}
             <li class="nav-item"><a class="nav-link " href="{%url "employees"%}">
                 <i class="fa fa-users"></i> {%trans "Usuarios"%}</a></li><hr/>
+        {% endif %}
+        {% if user|have_menu:"TUR"%}
+            <li class="nav-item"><a class="nav-link " href="{%url "shifts-index"%}">
+                <i class="fa fa-calendar"></i> {%trans "Turnos"%}</a></li><hr/>
         {% endif %}
     {% endif %}
     </ul>

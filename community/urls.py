@@ -7,8 +7,14 @@ urlpatterns = [
     path('organizations/list/', views.organization_list, name='organization-list'),
     path('organizations/search/', views.organization_search, name='organization-search'),
     path('organizations/form/', views.organization_form, name='organization-form'),
+    path('organizations/view/<int:obj_id>/', views.organization_view, name='organization-view'),
     path('organizations/remove/', views.organization_remove, name='organization-remove'),
     path('organizations/print/', views.organization_print, name='organization-print'),
+    path('organizations/share-users/', views.organization_share_users, name='organization-share-users'),
+    path('organizations/create-user/', views.organization_create_user, name='organization-create-user'),
+    path('organizations/share/', views.organization_share, name='organization-share'),
+    path('organizations/register-send/', views.organization_register_send, name='organization-register-send'),
+    path('organizations/register/<slug:username>/', views.organization_register, name='organization-register'),
 
     #------------------------- PROCEDURES --------------------
     path('procedures/', views.procedures, name='procedures'),

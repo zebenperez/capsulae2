@@ -1,0 +1,151 @@
+{% load i18n static %}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="UTF-8">
+	<title>{% trans "Formulario de derivación para "%} {{ patient.history_number }}</title>
+	<link rel="stylesheet" href="{% static 'community/css/colors.css' %}">
+	<link rel="stylesheet" href="{% static 'community/css/documents.css' %}">
+	<link rel="stylesheet" href="{% static 'community/css/referral-form.css' %}">
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" 
+        integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.min.js" 
+        integrity="sha384-ODmDIVzN+pFdexxHEHFBQH3/9/vQ9uori45z4JjnFsRydbmQbmL5t1tQ0culUzyK" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js" 
+        integrity="sha384-A3rJD856KowSb7dwlZdYEkO39Gagi7vIsF0jrRAoQmDKKtQBHUuLZ9AsSv4jD4Xa" crossorigin="anonymous"></script>
+
+    <style>
+        .custom-th{
+            border-bottom: 1px solid #999;;
+            padding-bottom:10px;
+        }
+        .custom-td{
+            padding-top:10px;
+            padding-bottom:10px;
+        }
+    </style>
+</head>
+<body>
+ 	<div class="page-infinite">
+		<div class="page-wrapper">
+            <div class="header"> 
+                <div class="fundec-logo"> <img src="{% static 'community/images/fundec-logo.png' %}" alt="Fundec"/> </div> 
+                <div class="company-logo"> 
+                    {% if company.image %}
+                        <img src="{{company.image.url}}" alt="{{company.name}}" style="height:60px"/> 
+                    {% else %}
+                        <img src="{% static 'community/images/capsulae-logo.png' %}" alt="Capsulae"/> 
+                    {% endif %}
+                </div>
+            </div>
+            <br/><br/>
+            <form action="{% url "organization-register-send" %}" method="POST">
+            {%csrf_token%}
+            <input type="hidden" name="username" value="{{username}}"/>
+			<div class="content">
+                <h2 class="main-title"> <strong>{% trans "Listado de Organizaciones" %}</strong></h2>
+
+                <div class="row"> <div class="col-12"> <div class="greybox-sm p-1">
+                    {% trans "Nombre" %} <input type="text" class="form-control" id="name" name="name" value="" placeholder="Nombre..." /> 
+                </div> </div> </div>
+
+                <div class="row mt-2"> 
+                    <div class="col-6"> <div class="greybox-sm p-1">
+                        {% trans "Correo electrónico" %}
+                        <input type="text" class="form-control" id="email" name="email" value="" placeholder="Correo electrónico..." /> 
+                    </div> </div>
+                    <div class="col-6"> <div class="greybox-sm p-1">
+                        {% trans "Teléfono" %}
+                        <input type="text" class="form-control" id="phone" name="phone" value="" placeholder="Teléfono..." /> 
+                    </div> </div>
+                </div>
+
+                <div class="row mt-2"> <div class="col-12"> <div class="greybox-sm p-1">
+                    {% trans "Persona de contacto" %}
+                    <input type="text" class="form-control" id="contact" name="contact" value="" placeholder="Persona de contacto..." /> 
+                </div> </div> </div>
+
+                <div class="row mt-2"> <div class="col-12"> <div class="greybox-sm p-1">
+                    {% trans "Dirección" %}
+                    <input type="text" class="form-control" id="address" name="address" value="" placeholder="Dirección..." /> 
+                </div> </div> </div>
+
+                <div class="row mt-2"> <div class="col-12"> <div class="greybox-sm p-1">
+                    {% trans "Vía de derivación" %}
+                    <input type="text" class="form-control" id="derivation_way" name="derivation_way" value="" placeholder="Vía de derivación..." />
+                </div> </div> </div>
+
+                <div class="row mt-2"> <div class="col-12"> <div class="greybox-sm p-1">
+                    {% trans "Observaciones" %}
+                    <textarea class="form-control" id="derivation" name="derivation" placeholder="Observaciones..."></textarea>
+                </div> </div> </div>
+                <div class="row mt-4"> <div class="col-12"> <div class="greybox-sm p-1">
+                    Ámbito de actuación 
+                    {#<textarea class="form-control mt-2" id="ambit" name="ambit" placeholder="Ámbito..."></textarea>#}
+                    <select name="ambit" class="form-control">
+                        <option value="">-- Selecciones una opción --</option>
+                        <option value="mayores">Mayores</option>
+                        <option value="infancia y adolescencia">Infancia y adolescencia</option>
+                        <option value="jovenes">Jovenes</option>
+                        <option value="inmigrantes">Inmigrantes</option>
+                        <option value="mujeres">Mujeres</option>
+                        <option value="personas racializadas">Personas racializadas</option>
+                        <option value="personas en situación de drogodependencia">Personas en situación de drogodependencia</option>
+                        <option value="personas en situación de sinhogarismo">Personas en situación de sinhogarismo</option>
+                        <option value="otros">Otros</option>
+                    </select>
+                </div> </div> </div>
+
+                <div class="row mt-2"> <div class="col-12"> <div class="greybox-sm p-1">
+                    Actividades que realiza
+                    <textarea class="form-control" id="activities" name="activities" placeholder=""></textarea>
+                </div> </div> </div>
+
+                <div class="row mt-2"> <div class="col-12"> <div class="greybox-sm p-1">
+                    ¿Cómo participar?  <textarea class="form-control" id="participate" name="participate" placeholder=""></textarea>
+                </div> </div> </div>
+
+                <div class="row mt-2"> <div class="col-12"> <div class="greybox-sm p-1">
+                    ¿Cómo veis la salud del pueblo?  
+                    <textarea class="form-control" id="health" name="health" placeholder=""></textarea>
+                </div> </div> </div>
+
+                <div class="row mt-2"> <div class="col-12"> <div class="greybox-sm p-1">
+                    ¿De qué forma creéis que vuestras actividades mejoran el bienestar en el pueblo?
+                    <textarea class="form-control" id="improvements" name="improvements" placeholder=""></textarea>
+                </div> </div> </div>
+
+                <div class="row mt-2"> <div class="col-12"> <div class="greybox-sm p-1">
+                    ¿Qué otro recurso no podría faltar en esta guía?
+                    <textarea class="form-control" id="resources" name="resources" placeholder=""></textarea>
+                </div> </div> </div>
+            </div>
+
+            <br/>
+            <div class="d-flex justify-content-center"> <input type="submit" class="btn btn-secondary" value="{% trans "Enviar" %}"/> </div>
+            </form>
+
+            {%comment%}
+            <div class="footer">
+	            <div class="data">
+		            <p class="company"> {{ company.name|default:"" }} </p>
+		            <address>
+			            {{ company.main_address|default:"" }} {{company.town|default:"" }},
+			            {{ company.postal_code|default:"" }} {{ company.province|default:"" }}
+		            </address>
+		            <div class="contact-info">
+                        {% if company.phone != "" %} <div class="phone"> tel: {{ company.phone }} </div> {% endif %}
+			            <div class="website"> {{ company.email }} </div>
+		            </div>
+	            </div>
+            </div>
+            {%endcomment%}
+		</div>
+	</div>
+</body>
+</html>
+
+
