@@ -192,7 +192,9 @@ def organization_register_send(request):
             addr.number = request.POST["number"] 
             addr.door = request.POST["door"] 
             addr.postal_code = request.POST["postal_code"] 
-            addr.place = request.POST["place2"] if request.POST["place"] == "otro" else request.POST["place"]
+            #addr.place = request.POST["place2"] if request.POST["place"] == "otro" else request.POST["place"]
+            addr.place = request.POST["place"]
+            addr.place_other = request.POST["place2"] 
             addr.same_place = True if request.POST["same_place"] == "1" else False 
             addr.activity_place = request.POST["activity_place"] 
             addr.save()
@@ -213,11 +215,13 @@ def organization_register_send(request):
             info.resources = request.POST["resources"]
             info.save()
 
-            groups = "{};{}".format(";".join(request.POST.getlist("group")), request.POST["group2"])
+            #groups = "{};{}".format(";".join(request.POST.getlist("group")), request.POST["group2"])
+            groups = ";".join(request.POST.getlist("group"))
             res = OrganizationResource(org=org)
             res.free = True if request.POST["free"] == "1" else False 
             res.owner = request.POST["owner"]
             res.group = groups
+            res.group_other = request.POST["group2"]
             res.description = request.POST["description"]
             res.save()
  

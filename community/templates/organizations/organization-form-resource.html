@@ -39,5 +39,12 @@
             <option value="otros" {%if res.group == "otros"%}selected{%endif%}>Otros</option>
         </select>
     </div>
+    <div class="col-12 mt-3">
+        {% trans "Titularidad del recurso" %}
+        <input type="text" class="form-control input autosave" id="group_other" name="group_other" value="{{res.group_other|default:""}}" 
+            title="{{res.group_other}}" data-model-name="community.organizationaddress" data-obj-id="{{res.id}}" 
+            data-url="{%url "autosave_field"%}" data-target="div-notification" placeholder="Titularidad..." disabled/> <span id="group_other__msg"></span>
+    </div>
+
 </div>
 

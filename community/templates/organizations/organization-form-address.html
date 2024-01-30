@@ -3,8 +3,8 @@
 <div class="row" style="margin:0;">
     <div class="col-12 mt-3">
         {% trans "Tipo de vía" %}
-        <select id="street_type" name="street_type" class="form-control input autosave" data-model-name="community.organizationaddress" data-obj-id="{{addr.id}}" 
-            data-url="{%url "autosave_field"%}" data-target="div-notification" disabled>
+        <select id="street_type" name="street_type" class="form-control input autosave" data-model-name="community.organizationaddress" 
+            data-obj-id="{{addr.id}}" data-url="{%url "autosave_field"%}" data-target="div-notification" disabled>
             <option value="">-- Selecciones una opción --</option>
             <option value="calle" {%if addr.street_type == "calle"%}selected{%endif%}>Calle</option>
             <option value="avenida" {%if addr.street_type == "avenida"%}selected{%endif%}>Avenida</option>
@@ -64,9 +64,9 @@
     </div>
     <div class="col-12 mt-3">
         {% trans "Barrio o núcleo" %}
-        <input type="text" class="form-control input autosave" id="place" name="place" value="{{addr.place|default:""}}" 
-            title="{{addr.place}}" data-model-name="community.organizationaddress" data-obj-id="{{addr.id}}" 
-            data-url="{%url "autosave_field"%}" data-target="div-notification" placeholder="Barrio..." disabled/> <span id="place__msg"></span>
+        <input type="text" class="form-control input autosave" id="place_other" name="place_other" value="{{addr.place_other|default:""}}" 
+            title="{{addr.place_other}}" data-model-name="community.organizationaddress" data-obj-id="{{addr.id}}" 
+            data-url="{%url "autosave_field"%}" data-target="div-notification" placeholder="Barrio..." disabled/> <span id="place_other__msg"></span>
     </div>
     <div class="col-12 mt-3">
         {% trans "¿La mayoría de sus actividades se desarrollan en un barrio/núcleo diferente al de su sede?" %}
@@ -76,8 +76,8 @@
     </div>
     <div class="col-12 mt-3" id="div-place">
         {% trans "Barrio o núcleo" %}
-        <select id="activity_place" name="activity_place" class="form-control input autosave" data-model-name="community.organizationaddress" data-obj-id="{{addr.id}}" 
-            data-url="{%url "autosave_field"%}" data-target="div-notification" disabled>
+        <select id="activity_place" name="activity_place" class="form-control input autosave" data-model-name="community.organizationaddress" 
+            data-obj-id="{{addr.id}}" data-url="{%url "autosave_field"%}" data-target="div-notification" disabled>
             <option value="">-- Selecciones una opción --</option>
             <option value="los abrigos" {%if addr.place == "los abrigos"%}selected{%endif%}>Los Abrigos</option>
             <option value="los blanquitos" {%if addr.place == "los blanquitos"%}selected{%endif%}>Los Blanquitos</option>

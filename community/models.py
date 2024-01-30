@@ -62,6 +62,7 @@ class OrganizationAddress(models.Model):
     door = models.CharField(verbose_name="Puerta", max_length=600, blank=True, null=True, default="")
     postal_code = models.CharField(verbose_name="Codigo postal", max_length=600, blank=True, null=True, default="")
     place = models.CharField(verbose_name="Barrio", max_length=600, blank=True, null=True, default="")
+    place_other = models.CharField(verbose_name="Barrio", max_length=600, blank=True, null=True, default="")
     activity_place = models.TextField(verbose_name="Localización de actividad", blank=True, null=True, default="")
     org = models.OneToOneField(Organization, verbose_name="Organización", on_delete=models.CASCADE, related_name="address", blank=True, null=True)
 
@@ -98,6 +99,7 @@ class OrganizationResource(models.Model):
     free = models.BooleanField(verbose_name="Gratuito", default=True)
     owner = models.CharField(verbose_name="Titularidad del recurso", max_length=600, blank=True, null=True, default="")
     group = models.CharField(verbose_name="Grupo poblacional", max_length=1600, blank=True, null=True, default="")
+    group_other = models.CharField(verbose_name="Grupo poblacional", max_length=1600, blank=True, null=True, default="")
     description = models.TextField(verbose_name="Descripción", blank=True, null=True, default="")
     org = models.OneToOneField(Organization, verbose_name="Organización", on_delete=models.CASCADE, related_name="resource", blank=True, null=True)
 
