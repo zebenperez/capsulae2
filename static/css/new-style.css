@@ -37,6 +37,12 @@ a {
 	color:#fff;
 	outline:none;
 }
+a.contactLink {
+	text-decoration:none;
+	color: #b060cf;
+}
+
+
 img {
 	max-width:100%;
 }
