@@ -28,7 +28,7 @@ urlpatterns = [
     path('community/', include('community.urls')),
     path('shifts/', include('shifts2.urls')),
 
-    path('accounts/login/', auth_views.LoginView.as_view(template_name='login.html'), name='auth_login'),
+    path('accounts/login/', auth_views.LoginView.as_view(template_name='home.html'), name='auth_login'),
     path('logout/', auth_views.LogoutView.as_view(next_page='/pharma/index/'), name='auth_logout'),
     path('admin/', admin.site.urls),
 ]

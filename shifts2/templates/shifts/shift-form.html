@@ -1,56 +1,124 @@
-{% load i18n cam_tags %}
+{% load i18n %}
 
+<div class="content"> 
+    <div class="patient-data-title p-4">
+        <div class="col-lg-11 col-10 col-offset-1">{{obj.name}}</div>
+    </div>
+</div>
+
+<div id="div-container">
+    <div id="organization-container">
+        <div class="row w-100 patient-data-body-2 p-1" style="margin:0;">
+            <div class="col-11 patient-data">
+                <div class="row" style="margin:0;">
+                    <div class="col-12 mt-3">
+                        {% trans "Nombre" %}
+                        <input type="text" class="form-control input autosave" id="name" name="name" value="{{obj.name|default:""}}" 
+                            title="{{obj.name}}" data-model-name="shifts2.shift" data-obj-id="{{obj.id}}" 
+                            data-url="{%url "autosave_field"%}" data-target="div-notification" placeholder="Nombre..." disabled/>
+                    </div>
+                    <div class="col-3 mt-3">
+                        {% trans "Fecha de inicio" %}
+                        <input type="date" class="form-control input autosave" id="ini_date" name="ini_date" value="{{obj.ini_date|date:"Y-m-d"}}" 
+                            data-model-name="shifts2.shift" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+                            data-target="div-notification" disabled/>
+                    </div>
+                    <div class="col-3 mt-3">
+                        {% trans "Hora de inicio" %}
+                        <input type="time" class="form-control input autosave" id="ini_time" name="ini_time" value="{{obj.ini_time|date:"H:i"}}" 
+                            data-model-name="shifts2.shift" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+                            data-target="div-notification" disabled/>
+                    </div>
+                    <div class="col-3 mt-3">
+                        {% trans "Fecha de fin" %}
+                        <input type="date" class="form-control input autosave" id="end_date" name="end_date" value="{{obj.end_date|date:"Y-m-d"}}" 
+                            data-model-name="shifts2.shift" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+                            data-target="div-notification" disabled/>
+                    </div>
+                    <div class="col-3 mt-3">
+                        {% trans "Hora de inicio" %}
+                        <input type="time" class="form-control input autosave" id="end_time" name="end_time" value="{{obj.end_time|date:"H:i"}}" 
+                            data-model-name="shifts2.shift" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+                            data-target="div-notification" disabled/>
+                    </div>
+                    <div class="col-12 mt-3">
+                        {% trans "Descripción" %}
+                        <textarea class="form-control input autosave" id="desc" name="desc" title="{{obj.desc}}" 
+                            data-model-name="shifts.shift" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+                            data-target="div-notification" placeholder="Escriba aquí la descripción..." disabled>{{obj.desc}}</textarea>
+                    </div>
+                    <div class="col-12 mt-3">
+                        {% trans "Empleado" %}
+                        {%comment%}
+                        <select class="form-control input autosave" name="employees" id="employees" data-model-name="shifts2.shift" 
+                            data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" multiple disabled>
+                        {%endcomment%}
+                        <select class="form-control input ark_change" name="employees" id="employees"  
+                            data-obj_id="{{obj.id}}" data-url="{%url "shifts-add-employee"%}" multiple disabled>
+                            {% for item in emp_list %}
+                                <option value="{{item.id}}" {%if item in obj.employees.all%}selected{%endif%}>{{item.username}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>    
+            <div class="col-1 text-end">
+                <button id="btn-edit" class="btn btn-sm toggle-edit new" data-class-name="input" data-text="{%trans "Edit"%}" 
+                    data-text-alt="{%trans "Hecho"%}">{%trans "Edit"%} </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{%comment%}
 <div class="flex space-between center-vertical vertical-separator">
 	<h5> {% trans "Eventos"%} </h5>
 	<div class="tools">
-        <a class="cancel btn btn-tools tools-primary btn-labeled ark" data-url="{% url "events-event-calendar" %}" data-target="div-events">   
+        <a class="cancel btn btn-tools tools-primary btn-labeled ark" data-url="{% url "shifts-shift-calendar" %}" data-target="div-events">   
             <i class="fas fa-arrow-left"></i> {% trans "Volver" %}</a> 
         {% if perms.create_events %}
-            <a class="cancel btn btn-tools tools-primary btn-labeled mgf-edit-toggle" data-mg-form="#event-mg-form" data-mg-editable="true" data-select-all="select_all">
-                <i class="fas fa-pencil-alt"></i> {% trans "Editar" %}</a>
-            <a class="cancel btn btn-tools tools-danger btn-labeled ark" data-url="{% url "events-remove-event" %}" data-target="div-events" data-obj_id="{{obj.id}}"> 
-                <i class="fas fa-window-close"></i> {% trans "Borrar" %}</a> 
+            <a class="cancel btn btn-tools tools-primary btn-labeled mgf-edit-toggle" data-mg-form="#event-mg-form" data-mg-editable="true" 
+                data-select-all="select_all"> <i class="fas fa-pencil-alt"></i> {% trans "Editar" %}</a>
+            <a class="cancel btn btn-tools tools-danger btn-labeled ark" data-url="{% url "shifts-remove-event" %}" data-target="div-events" 
+                data-obj_id="{{obj.id}}"> <i class="fas fa-window-close"></i> {% trans "Borrar" %}</a> 
         {% endif %}
 	</div>
 </div>
 
-<mg-form id="event-mg-form" editable="false" form-class="form-inline form"> 
-    <input type="hidden" id="id" name="id" value="{{obj.pk}}"/>
-	
     <div class="product-card">
 	    <div class="row column-left p-3" >
             <span class="title-0 pl-3">Nombre</span><br >
             <div class="col-lg-12">
-                <mg-input itype="text" iclass="form-control autosave w-100" iname="name" iid="name__{{obj.pk}}" bind="#event-name" 
-                    iplaceholder="{% trans "Nombre del evento"%}" ivalue="{{ obj.name }}" data-model-name="cam.event" data-obj-id="{{obj.id}}">
+                <input type="text" class="form-control autosave w-100" name="name" id="name__{{obj.pk}}" bind="#event-name" 
+                    placeholder="{% trans "Nombre del evento"%}" value="{{ obj.name }}" data-model-name="cam.event" data-obj-id="{{obj.id}}">
                     <h4 class="event-name bold">{{ obj.name|default:"Nombre del evento" }}</h4>
-                </mg-input>
+                </input>
             </div>
 
             <span class="title-0 pl-3">Fechas</span><br />
             <div class="col-lg-12"><strong>Fecha de inicio:</strong>
-                <mg-input itype="date" iclass="form-control autosave" iname="ini_date" iid="ini_date__{{obj.pk}}" 
-                    ivalue="{{ obj.ini_date|date:"Y-m-d"}}" data-model-name="cam.event" data-obj-id="{{obj.id}}">{{obj.ini_date|date:"Y-m-d"}}
-                </mg-input> (
-                <mg-input itype="time" iclass="form-control autosave" iname="ini_time" iid="ini_time__{{obj.pk}}" 
-                    ivalue="{{ obj.ini_time|date:"H:i"}}" data-model-name="cam.event" data-obj-id="{{obj.id}}">{{obj.ini_time|date:"H:i"}}
-                </mg-input> )
+                <input type="date" class="form-control autosave" name="ini_date" id="ini_date__{{obj.pk}}" 
+                    value="{{ obj.ini_date|date:"Y-m-d"}}" data-model-name="cam.event" data-obj-id="{{obj.id}}">{{obj.ini_date|date:"Y-m-d"}}
+                </input> (
+                <input type="time" class="form-control autosave" name="ini_time" id="ini_time__{{obj.pk}}" 
+                    value="{{ obj.ini_time|date:"H:i"}}" data-model-name="cam.event" data-obj-id="{{obj.id}}">{{obj.ini_time|date:"H:i"}}
+                </input> )
             </div>
             <div class="col-lg-12"><strong>Fecha de fin:</strong>
-                <mg-input itype="date" iclass="form-control autosave" iname="end_date" iid="end_date__{{ obj.pk }}" 
-                    ivalue="{{ obj.end_date|date:"Y-m-d"}}" data-model-name="cam.event" data-obj-id="{{ obj.id }}">{{obj.end_date|date:"Y-m-d"}}
-                </mg-input> (
-                <mg-input itype="time" iclass="form-control autosave" iname="end_time" iid="end_time__{{ obj.pk }}" 
-                    ivalue="{{ obj.end_time|date:"H:i"}}" data-model-name="cam.event" data-obj-id="{{ obj.id }}">{{obj.end_time|date:"H:i"}}
-                </mg-input>	)			
+                <input type="date" class="form-control autosave" name="end_date" id="end_date__{{ obj.pk }}" 
+                    value="{{ obj.end_date|date:"Y-m-d"}}" data-model-name="cam.event" data-obj-id="{{ obj.id }}">{{obj.end_date|date:"Y-m-d"}}
+                </input> (
+                <input type="time" class="form-control autosave" name="end_time" id="end_time__{{ obj.pk }}" 
+                    value="{{ obj.end_time|date:"H:i"}}" data-model-name="cam.event" data-obj-id="{{ obj.id }}">{{obj.end_time|date:"H:i"}}
+                </input>	)			
             </div>
             
             <div class="col-lg-12 pt-3">
                 <span class="title-0">Descripción</span>
-                <mg-textarea iclass="form-control autosave w-100" iname="desc" iid="desc__{{obj.pk}}" bind="#event-desc"
-                    iplaceholder="{% trans "Descripción del evento"%}" ivalue="{{ obj.desc }}" data-model-name="cam.event" data-obj-id="{{obj.id}}">
+                <textarea class="form-control autosave w-100" name="desc" id="desc__{{obj.pk}}" 
+                    placeholder="{% trans "Descripción del evento"%}" value="{{ obj.desc }}" data-model-name="cam.event" data-obj-id="{{obj.id}}">
                     {{ obj.desc|default:"Descripción del evento" }}	
-                </mg-textarea>
+                </textarea>
             </div>
 		</div>
 
@@ -58,19 +126,22 @@
             <span class="title-0 p-3">Clientes</span>
             <div class="label-cont col-lg-12">
                 <div class="tools pb-3">
-                    <input type="text" class="select_all filter_multiselect w-65" data-select="mg-option-btn" style="display:none; border:1px solid #ccc; padding: 10px;" />
+                    <input type="text" class="select_all filter_multiselect w-65" data-select="mg-option-btn" 
+                        style="display:none; border:1px solid #ccc; padding: 10px;" />
                     <a class="btn-tools btn-labeled btn-sm select_all autosave_multiselect pt-3" data-select="clients__{{obj.pk}}" data-options="all"
                         style="display:none"><i class="fas fa-check-circle"></i> {%trans "Seleccionar todos"%}</a>
                     <a class="btn-tools btn-labeled btn-sm select_all autosave_multiselect pt-3" data-select="clients__{{obj.pk}}" data-options=""
                         style="display:none"><i class="far fa-times-circle"></i> {%trans "Deseleccionar todos"%}</a>
                 </div>
-                <mg-multiselect iclass="form-control autosave" iname="clients" iid="clients__{{ obj.pk }}" data-model-name="cam.event" data-obj-id="{{obj.id}}">
-                    {% for item in client_list %}
-                        <option value="{{item.id}}" {%if item in obj.clients.all%}selected{%endif%}>({{item.code}}) {{item.profile.name}}</option>
+                <select class="form-control autosave" name="clients" id="clients__{{ obj.pk }}" data-model-name="cam.event" 
+                    data-obj-id="{{obj.id}}">
+                    {% for item in emp_list %}
+                        <option value="{{item.id}}" {%if item in obj.employees.all%}selected{%endif%}>{{item.username}}</option>
                     {% endfor %}
-                </mg-select>
+                </select>
             </div>
 		</div>
 	</div>
 </mg-form>
+{%endcomment%}
 

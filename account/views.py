@@ -6,6 +6,7 @@ from django.contrib import auth
 
 from capsulae2.decorators import group_required
 from capsulae2.commons import get_random_str, get_param, get_or_none, show_exc
+from shifts2.models import Journey
 from .email_lib import send_register_email, send_new_password_email
 from .models import *
 
@@ -229,9 +230,13 @@ def employee_form(request):
             user = User.objects.create_user(username=get_random_str(8))
             comp.users.add(user)
             obj = EmployeeProfile.objects.create(user=user)
+
+    um, created = UserMenu.objects.get_or_create(user=obj.user)
+
     user_type_list = EmployeeType.objects.all()
-    menu_list = request.user.menus.all()
-    return render(request, "employees/employee-form.html", {'obj': obj, 'user_type_list': user_type_list, 'menu_list': menu_list})
+    user_menu = request.user.menus.first()
+    menu_list = user_menu.menus.all()
+    return render(request, "employees/employee-form.html", {'obj': obj, 'user_type_list': user_type_list, 'user_menu': um, 'menu_list': menu_list})
 
 @group_required("admins","managers")
 def employee_remove(request):
@@ -240,4 +245,14 @@ def employee_remove(request):
         obj.user.delete()
         obj.delete()
     return render(request, "employees/employee-list.html", get_employees_context(request.user))
+
+@group_required("admins","managers")
+def employee_journeys(request):
+    try:
+        obj = get_or_none(EmployeeProfile, request.GET["obj_id"])
+        j_list = Journey.objects.filter(user=obj.user)
+        return render(request, "employees/employee-journeys.html", {'obj': obj, 'items': j_list})
+    except Exception as e:
+        print(e)
+        return render(request, 'error_exception.html', {'exc':show_exc(e)})
 

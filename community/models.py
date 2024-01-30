@@ -37,10 +37,14 @@ class PatientActivity(models.Model):
 class Organization(models.Model):
     reviewed = models.BooleanField(verbose_name="Realizado", default=True)
     name = models.CharField(verbose_name="Nombre", max_length=600, blank=True, null=True, default="")
-    address = models.CharField(verbose_name="Dirección", max_length=900, blank=True, null=True, default="")
-    email = models.CharField(verbose_name="Correo electrónico", max_length=600, blank=True, null=True, default="")
-    phone = models.CharField(verbose_name="Teléfono", max_length=20, blank=True, null=True, default="")
+    year = models.CharField(verbose_name="Año de creación", max_length=600, blank=True, null=True, default="")
+    #address = models.CharField(verbose_name="Dirección", max_length=900, blank=True, null=True, default="")
+    email = models.CharField(verbose_name="Correo electrónico", max_length=1600, blank=True, null=True, default="")
+    phone = models.CharField(verbose_name="Teléfono", max_length=600, blank=True, null=True, default="")
     contact = models.CharField(verbose_name="Persona de contacto", max_length=600, blank=True, null=True, default="")
+    contact_resp = models.CharField(verbose_name="Cargo de la persona de contacto", max_length=600, blank=True, null=True, default="")
+    in_charge = models.CharField(verbose_name="Persona responsable", max_length=600, blank=True, null=True, default="")
+    in_charge_resp = models.CharField(verbose_name="Cargo de la persona responsable", max_length=600, blank=True, null=True, default="")
     derivation_way = models.CharField(verbose_name="Vía de derivación", max_length=900, blank=True, null=True, default="")
     derivation = models.TextField(verbose_name="Motivos de derivación", blank=True, null=True, default="")
     user = models.ForeignKey(User, verbose_name="Usuario", related_name="organizations", on_delete=models.SET_NULL, null=True)
@@ -49,6 +53,33 @@ class Organization(models.Model):
     class Meta:
         verbose_name = "Organización"
         verbose_name_plural = "Organizaciones"
+
+class OrganizationAddress(models.Model):
+    same_place = models.BooleanField(verbose_name="Mismo lugar", default=True)
+    street_type = models.CharField(verbose_name="Tipo de vía", max_length=600, blank=True, null=True, default="")
+    street_name = models.CharField(verbose_name="Nombre de vía", max_length=600, blank=True, null=True, default="")
+    number = models.CharField(verbose_name="Número", max_length=600, blank=True, null=True, default="")
+    door = models.CharField(verbose_name="Puerta", max_length=600, blank=True, null=True, default="")
+    postal_code = models.CharField(verbose_name="Codigo postal", max_length=600, blank=True, null=True, default="")
+    place = models.CharField(verbose_name="Barrio", max_length=600, blank=True, null=True, default="")
+    activity_place = models.TextField(verbose_name="Localización de actividad", blank=True, null=True, default="")
+    org = models.OneToOneField(Organization, verbose_name="Organización", on_delete=models.CASCADE, related_name="address", blank=True, null=True)
+
+    class Meta:
+        verbose_name = "Dirección de la Organización"
+        verbose_name_plural = "Dirección de las Organizaciones"
+
+class OrganizationSocial(models.Model):
+    facebook = models.CharField(verbose_name="Facebook", max_length=600, blank=True, null=True, default="")
+    instagram = models.CharField(verbose_name="Instagram", max_length=600, blank=True, null=True, default="")
+    twitter = models.CharField(verbose_name="Twitter", max_length=600, blank=True, null=True, default="")
+    youtube = models.CharField(verbose_name="Youtube", max_length=600, blank=True, null=True, default="")
+    org = models.OneToOneField(Organization, verbose_name="Organización", on_delete=models.CASCADE, related_name="social", blank=True, null=True)
+
+    class Meta:
+        verbose_name = "Redes social de la Organización"
+        verbose_name_plural = "Redes sociales de las Organizaciones"
+
 
 class OrganizationInfo(models.Model):
     ambit = models.TextField(verbose_name="Ámbito", blank=True, null=True, default="")
@@ -62,6 +93,18 @@ class OrganizationInfo(models.Model):
     class Meta:
         verbose_name = "Información de la Organización"
         verbose_name_plural = "Información de las Organizaciones"
+
+class OrganizationResource(models.Model):
+    free = models.BooleanField(verbose_name="Gratuito", default=True)
+    owner = models.CharField(verbose_name="Titularidad del recurso", max_length=600, blank=True, null=True, default="")
+    group = models.CharField(verbose_name="Grupo poblacional", max_length=1600, blank=True, null=True, default="")
+    description = models.TextField(verbose_name="Descripción", blank=True, null=True, default="")
+    org = models.OneToOneField(Organization, verbose_name="Organización", on_delete=models.CASCADE, related_name="resource", blank=True, null=True)
+
+    class Meta:
+        verbose_name = "Recurso de la Organización"
+        verbose_name_plural = "Recursos de las Organizaciones"
+
 
 class PatientOrg(models.Model):
     rol = models.CharField(verbose_name="Nombre", max_length=600, blank=True, null=True, default="")

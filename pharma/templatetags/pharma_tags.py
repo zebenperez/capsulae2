@@ -3,9 +3,11 @@ from django.utils.safestring import mark_safe
 from datetime import datetime, timedelta
 
 from capsulae2.settings import BASE_DIR
+from pharma.models import Pacientes
 from pharma.spd_models import Pillbox
 from medication.models import FichaPrincipioActivo
 from account.models import UserProfile
+from shifts2.models import Journey
 
 import os
 
@@ -56,6 +58,14 @@ def is_pharma(user):
     up = UserProfile.objects.filter(user=user).first()
     return (up != None and up.profile != None and up.profile.code == "pharma")
 
+@register.filter
+def journey_started(user):
+    return (Journey.objects.filter(user=user, started=True).count() > 0)
+
+@register.filter
+def get_patients(user):
+    return Pacientes.objects.filter(id_user=user).count()
+
 '''
     Simple Tags
 '''
@@ -79,6 +89,7 @@ def get_atcs_for_print(dictionary, key, salto=True):
             result = "%s%s" % (result, atc)
     return mark_safe(result)
 
+
 '''
     Inclusion Tags
 '''
@@ -91,4 +102,10 @@ def get_pillbox_list(user):
     delivers = sorted(delivers, key=lambda d: d.finish_date)
 
     return {'delivers': delivers}
+ 
+@register.inclusion_tag('journey-list.html')
+def get_journey_list(user):
+    j_list = Journey.objects.filter(user=user)[:10]
+
+    return {'journey_list': j_list}
  

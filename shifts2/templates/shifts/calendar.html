@@ -11,28 +11,31 @@
                 right: 'dayGridMonth,timeGridWeek,timeGridDay,listMonth'
             },
 
-        initialDate: '{{today|date:"Y-m-d"}}',
-        navLinks: true, // can click day/week names to navigate views
-        dayMaxEvents: true,
-        {% if perms.create_events %}
-            dateClick: function(info) { if (stop == false) ajaxGet('{% url "shifts-get-shift" %}', {'date': info.dateStr}, "div-shifts", "") },
-        {% endif %}
-        eventClick: function(info) { ajaxGet('{% url "shifts-get-shift" %}', {'obj_id': info.event.id}, "div-shifts", "") },
-        events: [
-            {% for item in shift_list%}
-                {
-                    id: '{{item.pk}}',
-                    title: '{{item.name}}',
-                    start: '{{item.ini_date|date:"Y-m-d"}} {{item.ini_time|date:"H:i"}}',
-                    {% if item.ini_date|date:"Y-m-d" != item.end_date|date:"Y-m-d" %} end: '{{item.end_date|date:"Y-m-d"}} {{item.end_time|date:"H:i"}}' {% endif %}
-                },
-            {% endfor %}
-        ]
+            initialDate: '{{today|date:"Y-m-d"}}',
+            navLinks: true, // can click day/week names to navigate views
+            dayMaxEvents: true,
+            {% if perms.create_events %}
+                dateClick: function(info) { if (stop == false) ajaxGet('{% url "shifts-get-shift" %}', {'date': info.dateStr}, "div-shifts", "") },
+            {% endif %}
+            eventClick: function(info) { ajaxGet('{% url "shifts-get-shift" %}', {'obj_id': info.event.id}, "div-shifts", "") },
+            events: [
+                {% for item in shift_list%}
+                    {
+                        id: '{{item.pk}}',
+                        title: '{{item.name}}<br/>{{item.employee_list}}',
+                        start: '{{item.ini_date|date:"Y-m-d"}} {{item.ini_time|date:"H:i"}}',
+                        {% if item.ini_date|date:"Y-m-d" != item.end_date|date:"Y-m-d" %} end: '{{item.end_date|date:"Y-m-d"}} {{item.end_time|date:"H:i"}}' {% endif %}
+                    },
+                {% endfor %}
+            ],
+                
+            eventContent: function(arg) {
+                return { html: arg.event.title.replace("|", "<br/>") }
+            },
         });
         calendar.render();
     });
 
-	console.log(" calendar render ");
     $(".fc-today-button").click(function(){
         var y = calendar.getDate().getYear();
         var m = calendar.getDate().getMonth();

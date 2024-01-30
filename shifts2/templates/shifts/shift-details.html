@@ -1,9 +1,9 @@
-{% load i18n cam_tags %}
+{% load i18n %}
 
 <div class="flex space-between center-vertical vertical-separator">
 	<h5> {% trans "Eventos"%} </h5>
 	<div class="tools">
-        <a class="cancel btn btn-tools tools-primary btn-labeled ark" data-url="{% url "events-event-calendar" %}" data-target="div-events">   
+        <a class="cancel btn btn-tools tools-primary btn-labeled ark" data-url="{% url "shifts-shift-calendar" %}" data-target="div-events">   
             <i class="fas fa-arrow-left"></i> {% trans "Volver" %}</a> 
 	</div>
 </div>

@@ -1,0 +1,29 @@
+{% load i18n %}
+
+<div class="row" style="margin:0;">
+    <div class="col-12 mt-3">
+        {% trans "Facebook" %}
+        <input type="text" class="form-control input autosave" id="facebook" name="facebook" value="{{social.facebook|default:""}}" 
+            title="{{social.facebook}}" data-model-name="community.organizationsocial" data-obj-id="{{social.id}}" 
+            data-url="{%url "autosave_field"%}" data-target="div-notification" placeholder="Nombre..." disabled/> <span id="facebook__msg"></span>
+    </div>
+    <div class="col-12 mt-3">
+        {% trans "Instagram" %}
+        <input type="text" class="form-control input autosave" id="instagram" name="instagram" value="{{social.instagram|default:""}}" 
+            title="{{social.instagram}}" data-model-name="community.organizationsocial" data-obj-id="{{social.id}}" 
+            data-url="{%url "autosave_field"%}" data-target="div-notification" placeholder="Nombre..." disabled/> <span id="instagram__msg"></span>
+    </div>
+    <div class="col-12 mt-3">
+        {% trans "Twitter" %}
+        <input type="text" class="form-control input autosave" id="twitter" name="twitter" value="{{social.twitter|default:""}}" 
+            title="{{social.twitter}}" data-model-name="community.organizationsocial" data-obj-id="{{social.id}}" 
+            data-url="{%url "autosave_field"%}" data-target="div-notification" placeholder="Nombre..." disabled/> <span id="twitter__msg"></span>
+    </div>
+    <div class="col-12 mt-3">
+        {% trans "Youtube" %}
+        <input type="text" class="form-control input autosave" id="youtube" name="youtube" value="{{social.youtube|default:""}}" 
+            title="{{social.youtube}}" data-model-name="community.organizationsocial" data-obj-id="{{social.id}}" 
+            data-url="{%url "autosave_field"%}" data-target="div-notification" placeholder="Nombre..." disabled/> <span id="youtube__msg"></span>
+    </div>
+</div>
+

@@ -26,12 +26,12 @@ from .common_lib import LOPD_LIMIT, PILLBOX_ADVISE, get_config_value
 from .pharma_lib import get_values_to_interactions_print, get_values_to_summary_print
 
 
-@group_required("admins","managers")
+@group_required("admins","managers","employee")
 def index(request):
     return render(request, "index.html", {})
 
-def new_index(request):
-    return render(request, "new-index.html", {})
+def home(request):
+    return render(request, "home.html", {})
 
 '''
     Patients

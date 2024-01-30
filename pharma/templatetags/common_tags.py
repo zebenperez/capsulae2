@@ -72,7 +72,9 @@ def userqr_code(request, paciente):
 '''
 @register.inclusion_tag('main-menu.html')
 def get_main_menu(user):
-    if user.groups.filter(name="admins").exists() or user.groups.filter(name="managers").exists() or user.is_superuser:
+    groups = ["admins", "managers", "employee"]
+    #if user.groups.filter(name="admins").exists() or user.groups.filter(name="managers").exists() or user.is_superuser:
+    if user.groups.filter(name__in=groups).exists() or user.is_superuser:
         return {'user': user, 'menu': "admins"}
     return {}
 

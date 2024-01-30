@@ -17,7 +17,8 @@ from capsulae2.commons import get_or_none, get_param, show_exc, user_in_group
 from pharma.models import Pacientes
 from account.models import Company, Profile, UserProfile, UserMenu
 from account.email_lib import send_new_password_email
-from .models import PatientFcoc, PatientFci, PatientActivity, Organization, OrganizationInfo, PatientOrg, Procedure
+from .models import PatientFcoc, PatientFci, PatientActivity, PatientOrg, Procedure
+from .models import Organization, OrganizationAddress, OrganizationInfo, OrganizationSocial, OrganizationResource
 
 #from .forms import OrganizationForm
 #from generic.views import get_session_feedback
@@ -75,7 +76,20 @@ def organization_view(request, obj_id):
             info = obj.info
         except:
             info = OrganizationInfo.objects.create(org=obj)
-        return render(request, "organizations/organization-view.html", {'obj': obj, 'info': info})
+        try:
+            addr = obj.address
+        except:
+            addr = OrganizationAddress.objects.create(org=obj)
+        try:
+            social = obj.social
+        except:
+            social = OrganizationSocial.objects.create(org=obj)
+        try:
+            res = obj.resource
+        except:
+            res = OrganizationResource.objects.create(org=obj)
+        context = {'obj': obj, 'info': info, 'addr': addr, 'social': social, 'res': res}
+        return render(request, "organizations/organization-view.html", context)
     except Exception as e:
         return render(request, 'error_exception.html', {'exc':show_exc(e)})
 
@@ -151,7 +165,7 @@ def organization_register(request, username):
     user = User.objects.filter(username = username).first()
     if user == None:
         return render(request, 'error_exception.html', {'exc': "Formulario no disponible!"})
-    return render(request, "organizations/organization-register-form.html", {'username': username})
+    return render(request, "organizations/organization-register-form.html", {'username': username, 'company': Company.get_by_user(user)})
 
 def organization_register_send(request):
     try:
@@ -161,21 +175,52 @@ def organization_register_send(request):
             org = Organization(user=user, comp=comp)
             org.reviewed = False 
             org.name = request.POST["name"]
-            org.address = request.POST["address"]
+            #org.address = request.POST["address"]
             org.email = request.POST["email"]
             org.phone = request.POST["phone"]
             org.contact = request.POST["contact"]
-            org.derivation_way = request.POST["derivation_way"]
-            org.derivation = request.POST["derivation"]
+            org.contact_resp = request.POST["contact_resp"]
+            org.in_charge = request.POST["in_charge"]
+            org.in_charge_resp = request.POST["in_charge_resp"]
+            #org.derivation_way = request.POST["derivation_way"]
+            #org.derivation = request.POST["derivation"]
             org.save()
+
+            addr = OrganizationAddress(org=org)
+            addr.street_type = request.POST["street_type"] 
+            addr.street_name = request.POST["street_name"] 
+            addr.number = request.POST["number"] 
+            addr.door = request.POST["door"] 
+            addr.postal_code = request.POST["postal_code"] 
+            addr.place = request.POST["place2"] if request.POST["place"] == "otro" else request.POST["place"]
+            addr.same_place = True if request.POST["same_place"] == "1" else False 
+            addr.activity_place = request.POST["activity_place"] 
+            addr.save()
+
+            social = OrganizationSocial(org=org)
+            social.facebook = request.POST["facebook"] 
+            social.instagram = request.POST["instagram"] 
+            social.twitter = request.POST["twitter"] 
+            social.youtube = request.POST["youtube"] 
+            social.save()
+
             info = OrganizationInfo(org=org)
-            info.ambit = request.POST["ambit"]
+            #info.ambit = request.POST["ambit"]
             info.activities = request.POST["activities"]
             info.participate = request.POST["participate"]
             info.health = request.POST["health"]
             info.improvements = request.POST["improvements"]
             info.resources = request.POST["resources"]
             info.save()
+
+            groups = "{};{}".format(";".join(request.POST.getlist("group")), request.POST["group2"])
+            res = OrganizationResource(org=org)
+            res.free = True if request.POST["free"] == "1" else False 
+            res.owner = request.POST["owner"]
+            res.group = groups
+            res.description = request.POST["description"]
+            res.save()
+ 
         return render(request, "organizations/organization-register-sended.html", {})
     except Exception as e:
         return render(request, 'error_exception.html', {'exc':show_exc(e)})

@@ -1,0 +1,43 @@
+{% load i18n %}
+
+<div class="row" style="margin:0;">
+    <div class="col-12 mt-3">
+        {% trans "Titularidad del recurso" %}
+        <select id="owner" name="owner" class="form-control input autosave" data-model-name="community.organizationresource" data-obj-id="{{res.id}}" 
+            data-url="{%url "autosave_field"%}" data-target="div-notification" disabled>
+            <option value="">-- Selecciones una opción --</option>
+            <option value="gobierno de canarias" {%if res.owner == "gobierno de canarias"%}selected{%endif%}>Calle</option>
+            <option value="cabildo de tenerife" {%if res.owner == "cabildo de tenerife"%}selected{%endif%}>Avenida</option>
+            <option value="ayuntamiento de granadilla de abona" {%if res.owner == "ayuntamiento de granadilla de abona"%}selected{%endif%}>Paso</option>
+            <option value="entidade sin animo de lucro" {%if res.owner == "entidade sin animo de lucro"%}selected{%endif%}>Camino</option>
+            <option value="otros" {%if res.owner == "otros"%}selected{%endif%}>Otros</option>
+        </select>
+    </div>
+    <div class="col-12 mt-3">
+        {% trans "¿Se trata de un recurso gratuito?" %}
+        <input type="checkbox" class="input autosave" id="free" name="free" data-model-name="community.organizationresource" 
+            data-obj-id="{{res.id}}" data-url="{%url "autosave_field"%}" data-target="div-notification" data-bool="True" 
+            placeholder="" {%if res.free%}checked{%endif%} disabled/> <span id="free__msg"></span>
+    </div>
+    <div class="col-12 mt-3">
+        {% trans "Titularidad del recurso" %}
+        <select id="group" name="group" class="form-control input autosave" data-model-name="community.organizationresource" data-obj-id="{{res.id}}" 
+            data-url="{%url "autosave_field"%}" data-target="div-notification" disabled>
+            <option value="población general" {%if res.group == "población general"%}selected{%endif%}>Población general</option>
+            <option value="mayores" {%if res.group == "mayores"%}selected{%endif%}>Mayores</option>
+            <option value="infancia y adolescencia" {%if res.group == "infancia y adolescencia"%}selected{%endif%}>Infancia y adolescencia</option>
+            <option value="jóvenes" {%if res.group == "jóvenes"%}selected{%endif%}>Jóvenes</option>
+            <option value="inmigrantes" {%if res.group == "inmigrantes"%}selected{%endif%}>Inmigrantes</option>
+            <option value="mujeres" {%if res.group == "mujeres"%}selected{%endif%}>Mujeres</option>
+            <option value="personas racializadas" {%if res.group == "personas racializadas"%}selected{%endif%}>Personas racializadas</option>
+            <option value="personas LGTBIQ+" {%if res.group == "personas LGTBIQ+"%}selected{%endif%}>Personas LGTBIQ+</option>
+            <option value="personas en situación de drogodependencia" 
+                {%if res.group == "personas en situación de drogodependencia"%}selected{%endif%}>Personas en situación de drogodependencia</option>
+            <option value="personas en situación de sinhogarismo" 
+                {%if res.group == "personas en situación de sinhogarismo"%}selected{%endif%}>Personas en situación de sinhogarismo</option>
+            <option value="personas con discapacidad" {%if res.group == "personas con discapacidad"%}selected{%endif%}>Personas con discapacidad</option>
+            <option value="otros" {%if res.group == "otros"%}selected{%endif%}>Otros</option>
+        </select>
+    </div>
+</div>
+

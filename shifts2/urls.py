@@ -9,6 +9,11 @@ urlpatterns = [
     path('shifts/calendar/', views.calendar, name="shifts-calendar"),
     path('shifts/get-shift/', views.get_shift, name="shifts-get-shift"),
     path('shifts/get-shift/<int:shift_id>/', views.get_shift, name="shifts-get-shift"),
+    path('shifts/add-employee/', views.add_employee, name="shifts-add-employee"),
     path('shifts/remove-shift/', views.remove_shift, name="shifts-remove-shift"),
     path('shifts/clone-shifts/', views.clone_shifts, name="shifts-clone-shifts"),
+
+    # ------------------------- JOURNEY ----------------------------------------
+    path('shifts/journey-start/', views.journey_start, name="shifts-journey-start"),
+    path('shifts/journey-end/', views.journey_end, name="shifts-journey-end"),
 ]

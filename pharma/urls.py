@@ -3,7 +3,7 @@ from . import views, views_account, auto_views, spd_views, evolutionary_views as
 
 urlpatterns = [
     path('index/', views.index, name='pharma-index'),
-    path('new-index/', views.new_index, name='pharma-new-index'),
+    path('home/', views.home, name='pharma-home'),
 
     #------------------------- VIEWS ACCOUNT -----------------------
     path('signup/', views_account.signup, name='account-signup'),

@@ -28,6 +28,7 @@
 
     {% include "common-modal.html" %}
     <script>
+        $("#div-pillbox-number").html("{{delivers|length}}");
         /*$("#search").keyup(function(){
             var value = $(this).val();
             if(value == "")

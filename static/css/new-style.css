@@ -114,6 +114,7 @@ h4.subHeading{
 
 .heading{
 	text-align:left;
+	padding-top:45px;
 	padding-bottom:45px;
 }
 .heading .container{
@@ -201,7 +202,7 @@ header{
 	background:url(../images/logo.png) no-repeat 0 0;
 }
 .navArea{
-	float:right;
+/*	float:right;*/
 }
 .navwrapper .container{
 	padding:0;
@@ -220,7 +221,7 @@ header{
 .navbar-nav{
 	margin: 0 auto;
 	float: none;
-	text-align:right;
+/*	text-align:right;*/
 }
 
 .navbar-toggle{
@@ -250,6 +251,7 @@ header{
 	max-height:100%;
 }
 
+.navbar-collapse,
 .navbar.navbar-inverse.navbar-static-top {
 	margin:0px auto;
 	background:none;
@@ -260,6 +262,7 @@ header{
 	font-weight:600;
 	text-transform:uppercase;
 }
+.navbar-collapse a,
 .navbar.navbar-inverse.navbar-static-top a{
   color:#fff;
   padding:31px 16px;
@@ -309,6 +312,33 @@ header{
 	-moz-transition: all .5s; 
 	-webkit-transition: all .5s;
 	transition: all .5s;
+}
+
+.loginPanel {
+/*    background-color: #bc82b4;*/
+    border-left: 1px solid white;
+    display: grid; 
+    grid-template-columns: 35% 35% 30%; 
+    align-items: center;
+    font-size: 0.8em;
+    padding: 10px;
+/*    border: 1px solid #ffffff;*/
+    margin-right: 1%;
+}
+
+.loginPanel .form-control {
+    line-height: 2;
+}
+.loginPanel label {
+    color: #000;
+    color: #fff;
+}
+.btn.submitBnt.form-control {
+    border:1px solid #f3bd19;
+    background: #f3bd19;
+    font-weight: 600;
+    width: 80%;
+    color: #fff;
 }
 
 

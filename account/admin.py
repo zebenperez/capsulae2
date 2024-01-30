@@ -2,6 +2,10 @@ from django.contrib import admin
 from .models import *
 
 
+class CompanyAdmin(admin.ModelAdmin):
+    list_display = ("name", "code")
+    filter_horizontal = ('users',)
+
 class ConfigAdmin(admin.ModelAdmin):
     list_display = ("key", "value",)
 
@@ -23,7 +27,7 @@ class UserProfileAdmin(admin.ModelAdmin):
     list_display = ("user", "profile")
 
 admin.site.register(Config, ConfigAdmin)
-admin.site.register(Company)
+admin.site.register(Company, CompanyAdmin)
 admin.site.register(Menu, MenuAdmin)
 admin.site.register(Plan, PlanAdmin)
 admin.site.register(Profile, ProfileAdmin)
