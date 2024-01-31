@@ -117,9 +117,19 @@ h2.main-title{
 	margin-bottom: 1.5rem;
 }
 
+.intro-register {
+    color: #444444;
+    font-size: 11pt;
+    text-align: justify;
+}
+.greybox-sm.register {
+    color: #832b7f;
+	font-size: 10pt;
+}
+
 .greybox-sm {
     color: #333;
-	font-size: 11pt;
+	font-size: 10pt;
 }
 
 .label{
@@ -129,9 +139,18 @@ h2.main-title{
 }
 
 input.form-control,
+select.form-control,
 textarea.form-control {
-   font-size: 11pt;
+   color: #71777d;
+   font-size: 10pt;
    margin-top: 5px;
+}
+
+.bg-section {
+    background-color: #f8ddf6; 
+    color: #923e8b; 
+    font-size: 10pt; 
+    line-height:2.5;
 }
 
 .print-input{

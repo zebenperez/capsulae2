@@ -2,13 +2,13 @@
 
 <div class="row" style="margin:0;">
     <div class="col-12 mt-3">
-        {% trans "Nombre" %}
-        <input type="text" class="form-control input autosave" id="name" name="name" value="{{obj.name|default:""}}" title="{{obj.name}}" 
+        <label class="label">{% trans "Nombre" %}:</label>
+        <input type="text" class="form-control input autosave input view" id="name" name="name" value="{{obj.name|default:""}}" title="{{obj.name}}" 
             data-model-name="community.organization" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
             data-target="div-notification" placeholder="Nombre..." disabled/> <span id="name__msg"></span>
     </div>
     <div class="col-4 mt-3">
-        {% trans "Correo electrónico" %}
+        <label class="label">{% trans "Correo electrónico" %}:</label>
         <input type="text" class="form-control input autosave" id="email" name="email" value="{{obj.email|default:""}}" title="{{obj.email}}" 
             data-model-name="community.organization" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" data-target="div-notification" 
             placeholder="Correo electrónico..." disabled/> <span id="email__msg"></span>
