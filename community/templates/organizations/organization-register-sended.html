@@ -32,14 +32,14 @@
  	<div class="page-infinite">
 		<div class="page-wrapper">
             <div class="header"> 
-                <div class="fundec-logo"> <img src="{% static 'community/images/fundec-logo.png' %}" alt="Fundec"/> </div> 
-                <div class="company-logo"> 
+                <div class="fundec-logo">
                     {% if company.image %}
                         <img src="{{company.image.url}}" alt="{{company.name}}" style="height:60px"/> 
-                    {% else %}
-                        <img src="{% static 'community/images/capsulae-logo.png' %}" alt="Capsulae"/> 
                     {% endif %}
-                </div>
+                </div> 
+                <div class="company-logo"> 
+                    <img src="{% static 'community/images/fundec-logo.png' %}" alt="Fundec"/>
+               </div>
             </div>
             <br/><br/>
             <div class="content"> <h2 class="main-title"> {% trans "Formulario enviado correctamente!" %}</h2></div>

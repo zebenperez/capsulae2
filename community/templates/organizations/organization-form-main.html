@@ -9,37 +9,37 @@
     </div>
     <div class="col-4 mt-3">
         <label class="label">{% trans "Correo electrónico" %}:</label>
-        <input type="text" class="form-control input autosave" id="email" name="email" value="{{obj.email|default:""}}" title="{{obj.email}}" 
+        <input type="text" class="form-control input autosave input view" id="email" name="email" value="{{obj.email|default:""}}" title="{{obj.email}}" 
             data-model-name="community.organization" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" data-target="div-notification" 
             placeholder="Correo electrónico..." disabled/> <span id="email__msg"></span>
     </div>
     <div class="col-4 mt-3">
-        {% trans "Teléfono" %}
-        <input type="text" class="form-control input autosave" id="phone" name="phone" value="{{obj.phone|default:""}}" title="{{obj.phone}}" 
+        <label class="label">{% trans "Teléfono" %}:</label>
+        <input type="text" class="form-control input autosave input view" id="phone" name="phone" value="{{obj.phone|default:""}}" title="{{obj.phone}}" 
             data-model-name="community.organization" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" data-target="div-notification" 
             placeholder="Teléfono..." disabled/> <span id="phone__msg"></span>
     </div>
     <div class="col-4 mt-3">
-        {% trans "Persona de contacto" %}
-        <input type="text" class="form-control input autosave" id="contact" name="contact" value="{{obj.contact|default:""}}" title="{{obj.contact}}" 
+        <label class="label">{% trans "Persona de contacto" %}:</label>
+        <input type="text" class="form-control input autosave input view" id="contact" name="contact" value="{{obj.contact|default:""}}" title="{{obj.contact}}" 
             data-model-name="community.organization" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" data-target="div-notification" 
             placeholder="Persona de contacto..." disabled/> <span id="contact__msg"></span>
     </div>
     <div class="col-12 mt-3">
-        {% trans "Dirección" %}
-        <input type="text" class="form-control input autosave" id="address" name="address" value="{{obj.address|default:""}}" title="{{obj.address}}" 
+        <label class="label">{% trans "Dirección" %}:</label>
+        <input type="text" class="form-control input autosave input view" id="address" name="address" value="{{obj.address|default:""}}" title="{{obj.address}}" 
             data-model-name="community.organization" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" data-target="div-notification" 
             placeholder="Dirección..." disabled/> <span id="address__msg"></span>
     </div>
     <div class="col-12 col-6 mt-3">
-        {% trans "Vía de derivación" %}
-        <input type="text" class="form-control input autosave" id="derivation_way" name="derivation_way" value="{{obj.derivation_way|default:""}}" 
+        <label class="label">{% trans "Vía de derivación" %}:</label>
+        <input type="text" class="form-control input autosave input view" id="derivation_way" name="derivation_way" value="{{obj.derivation_way|default:""}}" 
             title="{{obj.derivation_way}}" data-model-name="community.organization" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
             data-target="div-notification" placeholder="Vía de derivación..." disabled/> <span id="derivation_way__msg"></span>
     </div>
     <div class="col-12 mt-3">
-        {% trans "Observaciones" %}
-        <textarea class="form-control input autosave" id="derivation" name="derivation" title="{{obj.derivation}}" 
+        <label class="label">{% trans "Observaciones" %}:</label>
+        <textarea class="form-control input autosave input view" id="derivation" name="derivation" title="{{obj.derivation}}" 
             data-model-name="community.organization" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
             data-target="div-notification" placeholder="Escriba aquí las observaciones..." disabled>{{obj.derivation}}</textarea>
             <span id="derivation__msg"></span>
