@@ -15,6 +15,7 @@ urlpatterns = [
     path('organizations/share/', views.organization_share, name='organization-share'),
     path('organizations/register-send/', views.organization_register_send, name='organization-register-send'),
     path('organizations/register/<slug:username>/', views.organization_register, name='organization-register'),
+    path('organizations/register-tos/', views.organization_register_tos, name='organization-register-tos'),
 
     #------------------------- PROCEDURES --------------------
     path('procedures/', views.procedures, name='procedures'),

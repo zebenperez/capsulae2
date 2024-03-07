@@ -4,12 +4,12 @@ from django.utils.translation import ugettext_lazy as _
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from capsulae2.commons import get_or_none, show_exc, user_in_group
 from capsulae2.decorators import group_required
 from account.models import Company
-from .common_lib import get_month_shifts
+from .common_lib import get_month_shifts, get_journeys_hours
 from .models import Shift, Journey
 
 import logging
@@ -19,15 +19,15 @@ logger = logging.getLogger(__name__)
 '''
     Events
 '''
-def get_perms(request):
-    if user_in_group(request.user, "employee"):
-        return {"clone_shifts": False, "create_shifts": False}
-    elif user_in_group(request.user, "managers"):
-        return {"clone_shifts": True, "create_shifts": True}
-    elif user_in_group(request.user, "admins"):
-        return {"clone_shifts": True, "create_shifts": True}
+def get_perms(user, groups):
+    if "employee" in groups:
+        return {"clone_shifts": False, "create_shifts": False, "remove_shifts": False}
+    elif "managers" in groups:
+        return {"clone_shifts": True, "create_shifts": True, "remove_shifts": True}
+    elif "admins" in groups:
+        return {"clone_shifts": True, "create_shifts": True, "remove_shifts": True}
     else:
-        return {"clone_shifts": False, "create_shifts": False}
+        return {"clone_shifts": False, "create_shifts": False, "remove_shifts": False}
 
 #    if hasattr(request, "employee"):
 #        return {"clone_shifts": False, "create_shifts": False}
@@ -36,9 +36,13 @@ def get_perms(request):
 #    else:
 #        return {"clone_shifts": False, "create_shifts": False}
 
-def get_shift_context(request, year=None, month=None):
-    perms = get_perms(request)
-    today, shift_list = get_month_shifts(year, month)
+def get_shift_context(user, year=None, month=None):
+    groups = user.groups.all().values_list('name', flat=True)
+    perms = get_perms(user, groups)
+    today, s_list = get_month_shifts(year,month,user) if "managers" in groups or "admins" in groups else get_month_shifts(year,month,None,user)
+    shift_list = []
+    for shift in s_list:
+        shift_list += shift.date_split()
     return {
         'shift_list': shift_list,
         'today': today, 
@@ -68,11 +72,11 @@ def get_date(values):
 
 @group_required("admins","managers","employee")
 def index(request):
-    return render(request, "shifts/index.html", get_shift_context(request))
+    return render(request, "shifts/index.html", get_shift_context(request.user))
 
 @group_required("admins","managers","employee")
 def shift_calendar(request):
-    return render(request, "shifts/shift-calendar.html", get_shift_context(request))
+    return render(request, "shifts/shift-calendar.html", get_shift_context(request.user))
 
 @group_required("admins","managers","employee")
 def calendar(request):
@@ -83,7 +87,7 @@ def calendar(request):
     else:
         year = request.GET["year"] if "year" in request.GET else None
         month = request.GET["month"] if "month" in request.GET else None
-    return render(request, "shifts/load-shifts.html", get_shift_context(request, year, month))
+    return render(request, "shifts/load-shifts.html", get_shift_context(request.user, year, month))
 
 @group_required("admins","managers","employee")
 def get_shift(request, shift_id=None):
@@ -92,7 +96,8 @@ def get_shift(request, shift_id=None):
         obj = get_or_none(Shift, shift_id)
     elif "obj_id" in request.GET:
         obj = get_or_none(Shift, request.GET["obj_id"])
-    perms = get_perms(request)
+    groups = request.user.groups.all().values_list('name', flat=True)
+    perms = get_perms(request.user, groups)
     context = {'obj': obj, 'perms': perms}
     template = "shifts/shift-details.html"
 
@@ -101,7 +106,8 @@ def get_shift(request, shift_id=None):
         emp_list = []
         if obj == None:
             date = get_date(request.GET)
-            obj = Shift.objects.create(name="Nuevo turno", ini_date=date, end_date=date)
+            obj = Shift.objects.create(ini_date=date, end_date=date, user=request.user)
+            #obj = Shift.objects.create(name="---", ini_date=date, end_date=date)
             #obj.employees.set(emp_list)
             context["obj"] = obj
         context["emp_list"] = comp.users.all()
@@ -112,25 +118,36 @@ def get_shift(request, shift_id=None):
 def add_employee(request):
     try:
         obj = get_or_none(Shift, request.GET["obj_id"])
-        obj.employees.clear()
-        for val in request.GET.getlist("value[]"):
-            user = User.objects.get(pk=val)
+        user = User.objects.get(pk=request.GET["value"])
+        if user in obj.employees.all():
+            obj.employees.remove(user)
+        else:
             obj.employees.add(user)
+        #obj.employees.clear()
+        #for val in request.GET.getlist("value[]"):
+        #    user = User.objects.get(pk=val)
+        #    obj.employees.add(user)
         return HttpResponse("")
     except Exception as e:
         print(e)
         return HttpResponse("Error!")
 
 @group_required("admins","managers","employee")
-def remove_shift(request):
-    year = month = None
-    if "obj_id" in request.GET:
-        obj = get_or_none(Event, request.GET["obj_id"])
+def remove_shift(request, shift_id):
+    #year = month = None
+    #if "obj_id" in request.GET:
+        #obj = get_or_none(Event, request.GET["obj_id"])
+    try:
+        obj = get_or_none(Shift, shift_id)
         year = str(obj.ini_date.year)
         month = str(obj.ini_date.month)
         obj.delete()
+    except Exception as e:
+        print(e)
+        return (render(request, "error_exception.html", {'exc':show_exc(e)}))
+    return redirect("shifts-index")
     #return render(request, "cam/load-shifts.html", get_shift_context(year, month))
-    return render(request, "shifts/shift-calendar.html", get_shift_context(request))
+    #return render(request, "shifts/shift-calendar.html", get_shift_context(request))
 
 @group_required("admins","managers","employee")
 def clone_shifts(request):
@@ -144,6 +161,34 @@ def clone_shifts(request):
     except Exception as e:
         logger.error("[cam-clone_shifts]" + str(e))
         return (render(request, "error_exception.html", {'exc':show_exc(e)}))
+
+@group_required("admins","managers","employee")
+def check_updates(request):
+    import subprocess
+
+    res = ""
+    try:
+        result = subprocess.check_output("/var/www/django/capsulae2/check_updates.sh", shell=True, executable="/bin/bash", stderr=subprocess.STDOUT)
+    except subprocess.CalledProcessError as cpe:
+        result = cpe.output
+    finally:
+        for line in result.splitlines():
+            l = line.decode()
+            if "commit" in l or "Author" in l or "Date" in l:
+                res = "{}<br/>{}".format(res, l)
+            if len(l) == 0:
+                res = "{}<br/>".format(res)
+            #print(line.decode())
+    return render(request, "check-updates.html", {"title": "Módulo de Turnos", "res": res})
+
+@group_required("admins","managers","employee")
+def check_log(request):
+    from django.conf import settings
+    import os 
+
+    f = open(os.path.join(settings.BASE_DIR, "logs.txt"), "r", encoding='utf-8')
+    text = f.read()
+    return render(request, 'logs.html', {'text': text.replace("\n", "<br/>")})
 
 '''
     Journeys
@@ -167,6 +212,32 @@ def journey_end(request):
             journey.started = False
             journey.save()
         return redirect("pharma-index")
+    except Exception as e:
+        logger.error("[journey_end]" + str(e))
+        return (render(request, "error_exception.html", {'exc':show_exc(e)}))
+
+@group_required("admins","managers","employee")
+def journey_list(request):
+    try:
+        user = User.objects.get(pk=request.GET["obj_id"])
+        ini = datetime.strptime(request.GET["ini"], "%Y-%m-%d")
+        end = datetime.strptime(request.GET["end"], "%Y-%m-%d").replace(hour=23, minute=59)
+        j_list = Journey.objects.filter(user=user, ini_date__gte= ini, end_date__lte=end)
+        context = {'user': user, 'journey_list': j_list, 'ini_date': ini, 'end_date': end}
+        return render(request, "journeys/journey-list-details.html", context)
+    except Exception as e:
+        logger.error("[journey_end]" + str(e))
+        return (render(request, "error_exception.html", {'exc':show_exc(e)}))
+
+@group_required("admins","managers","employee")
+def journey_stats(request):
+    try:
+        user = User.objects.get(pk=request.GET["obj_id"])
+        ini = datetime.strptime(request.GET["ini"], "%Y-%m-%d")
+        end = datetime.strptime(request.GET["end"], "%Y-%m-%d")
+        comp = Company.get_by_user(user)
+        context = {'user': user, 'user_list': comp.users.all(), 'ini_date': ini, 'end_date': end}
+        return render(request, "journeys/journey-stats-details.html", context)
     except Exception as e:
         logger.error("[journey_end]" + str(e))
         return (render(request, "error_exception.html", {'exc':show_exc(e)}))

@@ -1,0 +1,5 @@
+{% load i18n %}
+
+<td>{{obj.ini_date|date:"d-m-Y H:i"|default:"--"}}</td>
+<td>{{obj.end_date|date:"d-m-Y H:i"|default:"--"}}</td>
+<td></td>

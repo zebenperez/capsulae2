@@ -25,6 +25,8 @@
 .stat-box.color-1 { border-bottom: 4px solid #28a745; }
 .stat-box.color-2 { border-bottom: 4px solid #dc3545; }
 .stat-box.color-3 { border-bottom: 4px solid #03a9f3; }
+.stat-box.color-4 { border-bottom: 4px solid #913c8d; }
+.stat-box.color-5 { border-bottom: 4px solid #ffc127; }
 
 .stat-box .stat-box-body {
 	float: left;

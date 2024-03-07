@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'mylogin',
     'community',
     'shifts2',
+    'agenda',
 ]
 
 MIDDLEWARE = [
@@ -142,4 +143,52 @@ try:
     from .local_settings import *
 except Exception as e:
     print(str(e))
+
+LOG_FILENAME = os.path.join(BASE_DIR, 'logs.txt')
+DEBUG_LEVEL = "INFO"
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            #'format': '{levelname} {asctime} {name}->{funcName} {message}',
+            'format': '{levelname} {asctime} ->{funcName} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
+        'file': {
+            'level': DEBUG_LEVEL,
+            'class': 'logging.FileHandler',
+            'filename': LOG_FILENAME,
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'capsulae2': {
+            'handlers': ['file', 'console'],
+            'level': DEBUG_LEVEL,
+            'propagate': True,
+        },
+        'shifts2': {
+            'handlers': ['file', 'console'],
+            'level': DEBUG_LEVEL,
+            'propagate': True,
+        },
+        'agenda': {
+            'handlers': ['file', 'console'],
+            'level': DEBUG_LEVEL,
+            'propagate': True,
+        },
+    },
+}
+
 

@@ -1,72 +1,95 @@
 {% load i18n %}
 
-<div class="content"> 
-    <div class="patient-data-title p-4">
-        <div class="col-lg-11 col-10 col-offset-1">{{obj.name}}</div>
+<div class="stat-box color-4"> 
+    <div class="patient-data-title p-2">
+        <div class="col-9 col-offset-1"> {{obj.name}}</div>
+        <div class="col-2 text-end">
+	        <a class="btn btn-sm new" href="{% url "shifts-index" %}"> <i class="fas fa-arrow-left"></i> {% trans "Volver" %}</a> 
+            {% if perms.remove_shifts %}
+                <a class="btn btn-sm new" href="{% url "shifts-remove-shift" obj.id %}"
+                    onclick="return confirm('{%trans "Está seguro/a de que desea borrar este elemento?"%}')"> 
+                    <i class="fas fa-trash"></i> {% trans "Eliminar" %}</a> 
+            {% endif %}
+	    </div>
     </div>
 </div>
-
-<div id="div-container">
+<div id="div-container" class="stat-box mt-1">
     <div id="organization-container">
-        <div class="row w-100 patient-data-body-2 p-1" style="margin:0;">
-            <div class="col-11 patient-data">
-                <div class="row" style="margin:0;">
+        <div class="row w-100 patient-data-body-2 m-0">
+            <div class="col-10">
+                <h2>{% trans "Detalle del turno" %}</h2>
+            </div>
+            <div class="col-2 text-end">
+                <button id="btn-edit" class="btn btn-sm toggle-edit new" data-class-name="input" data-text="{%trans "Edit"%}" 
+                    data-text-alt="{%trans "Hecho"%}">{%trans "Edit"%} </button>
+            </div>
+            <div class="col-12 patient-data">
+                <div class="row m-0">
                     <div class="col-12 mt-3">
-                        {% trans "Nombre" %}
+                        <label class="label">{% trans "Nombre" %}</label>
                         <input type="text" class="form-control input autosave" id="name" name="name" value="{{obj.name|default:""}}" 
                             title="{{obj.name}}" data-model-name="shifts2.shift" data-obj-id="{{obj.id}}" 
                             data-url="{%url "autosave_field"%}" data-target="div-notification" placeholder="Nombre..." disabled/>
                     </div>
                     <div class="col-3 mt-3">
-                        {% trans "Fecha de inicio" %}
+                        <label class="label">{% trans "Fecha de inicio" %}</label>
                         <input type="date" class="form-control input autosave" id="ini_date" name="ini_date" value="{{obj.ini_date|date:"Y-m-d"}}" 
                             data-model-name="shifts2.shift" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
                             data-target="div-notification" disabled/>
                     </div>
                     <div class="col-3 mt-3">
-                        {% trans "Hora de inicio" %}
+                        <label class="label">{% trans "Hora de inicio" %}</label>
                         <input type="time" class="form-control input autosave" id="ini_time" name="ini_time" value="{{obj.ini_time|date:"H:i"}}" 
                             data-model-name="shifts2.shift" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
                             data-target="div-notification" disabled/>
                     </div>
                     <div class="col-3 mt-3">
-                        {% trans "Fecha de fin" %}
+                        <label class="label">{% trans "Fecha de fin" %}</label>
                         <input type="date" class="form-control input autosave" id="end_date" name="end_date" value="{{obj.end_date|date:"Y-m-d"}}" 
                             data-model-name="shifts2.shift" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
                             data-target="div-notification" disabled/>
                     </div>
                     <div class="col-3 mt-3">
-                        {% trans "Hora de inicio" %}
+                        <label class="label">{% trans "Hora de fin" %}</label>
                         <input type="time" class="form-control input autosave" id="end_time" name="end_time" value="{{obj.end_time|date:"H:i"}}" 
                             data-model-name="shifts2.shift" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
                             data-target="div-notification" disabled/>
                     </div>
-                    <div class="col-12 mt-3">
-                        {% trans "Descripción" %}
+                    <div class="col-12 mt-3 border-bottom border-primary">
+                        <label class="label">{% trans "Descripción" %}</label>
                         <textarea class="form-control input autosave" id="desc" name="desc" title="{{obj.desc}}" 
-                            data-model-name="shifts.shift" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+                            data-model-name="shifts2.shift" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
                             data-target="div-notification" placeholder="Escriba aquí la descripción..." disabled>{{obj.desc}}</textarea>
                     </div>
                     <div class="col-12 mt-3">
-                        {% trans "Empleado" %}
+                        <label class="label">{% trans "Empleado" %}</label>
                         {%comment%}
                         <select class="form-control input autosave" name="employees" id="employees" data-model-name="shifts2.shift" 
                             data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" multiple disabled>
                         {%endcomment%}
+                        {%comment%}
                         <select class="form-control input ark_change" name="employees" id="employees"  
                             data-obj_id="{{obj.id}}" data-url="{%url "shifts-add-employee"%}" multiple disabled>
                             {% for item in emp_list %}
                                 <option value="{{item.id}}" {%if item in obj.employees.all%}selected{%endif%}>{{item.username}}</option>
                             {% endfor %}
                         </select>
+                        {%endcomment%}
+                        <div class="row m-0">
+                        {% for item in emp_list %}
+                            <div class="col-3 mb-3 text-center p-1">
+                                <button class="btn {%if item in obj.employees.all%}btn-outline-primary{%else%}btn-outline-default{%endif%} ark w-100 border"
+                                    data-url="{%url "shifts-add-employee"%}" data-target="" data-obj_id="{{obj.id}}" data-value="{{item.id}}"
+                                    onclick="$(this).toggleClass('btn-outline-default btn-outline-primary')">
+                                    {{item.first_name}} <br/> <small>({{item.employee_profile.user_type.name}})</small>
+                                </button>
+                            </div>
+                        {% endfor %}
+                        </div>
                     </div>
                 </div>
             </div>    
-            <div class="col-1 text-end">
-                <button id="btn-edit" class="btn btn-sm toggle-edit new" data-class-name="input" data-text="{%trans "Edit"%}" 
-                    data-text-alt="{%trans "Hecho"%}">{%trans "Edit"%} </button>
-            </div>
-        </div>
+         </div>
     </div>
 </div>
 

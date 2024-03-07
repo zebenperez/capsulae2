@@ -1,6 +1,12 @@
 
 /* classes attached to <body> */
 
+a {
+    color: red;
+    color: #6e2462;
+    text-decoration: none;
+}
+
 .fc-not-allowed,
 .fc-not-allowed .fc-event { /* override events' custom cursors */
   cursor: not-allowed;
@@ -56,8 +62,10 @@
 }
 .fc-theme-standard td,
   .fc-theme-standard th {
-    border: 1px solid #ddd;
-    border: 1px solid var(--fc-border-color, #ddd);
+      background-color: #fbf3fa;
+/*    border: 1px solid #ddd;
+    border: 1px solid var(--fc-border-color, #ddd); */
+    border: 1px solid #f9cdf2;
   }
 /* for FF, which doesn't expand a 100% div within a table cell. use absolute positioning */
 /* inner-wrappers are responsible for being absolute */
@@ -292,6 +300,7 @@ When it's NOT activated, the fc-button classes won't even be in the DOM.
     margin-top: 1.5em;
   }
 .fc .fc-toolbar-title {
+    color: #7e5a00;
     font-size: 1.75em;
     margin: 0;
   }
@@ -433,6 +442,8 @@ When it's NOT activated, the fc-button classes won't even be in the DOM.
 .fc .fc-col-header-cell-cushion {
     display: inline-block; /* x-browser for when sticky (when multi-tier header) */
     padding: 2px 4px;
+    text-decoration: none;
+    color: #000;
   }
 .fc .fc-bg-event,
   .fc .fc-non-business,
@@ -576,10 +587,11 @@ A HORIZONTAL event
 */
 .fc-h-event { /* allowed to be top-level */
   display: block;
-  border: 1px solid #3788d8;
-  border: 1px solid var(--fc-event-border-color, #3788d8);
-  background-color: #3788d8;
-  background-color: var(--fc-event-bg-color, #3788d8)
+
+  border: 1px solid #c02891;
+  border: 1px solid var(--fc-event-border-color, #c02891);
+  background-color: #c02891;
+  background-color: var(--fc-event-bg-color, #c02891);
 
 }
 .fc-h-event .fc-event-main {

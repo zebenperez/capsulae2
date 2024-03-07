@@ -1,0 +1,103 @@
+{% load i18n %}
+
+<div class="stat-box color-5"> 
+    <div class="patient-data-title p-2">
+        <div class="col-9 col-offset-1">{{obj.name}}</div>
+        <div class="col-2 text-end">
+	        <a class="btn btn-sm new" href="{% url "notes-index" %}"> <i class="fas fa-arrow-left"></i> {% trans "Volver" %}</a> 
+            {% if perms.remove_notes %}
+                <a class="btn btn-sm new" href="{% url "notes-remove-note" obj.id %}"
+                    onclick="return confirm('{%trans "Está seguro/a de que desea borrar este elemento?"%}')"> 
+                    <i class="fas fa-trash"></i> {% trans "Eliminar" %}</a> 
+            {% endif %}
+	    </div>
+    </div>
+</div>
+<div id="div-container" class="stat-box mt-1">
+    <div id="organization-container">
+        <div class="row w-100 patient-data-body-2 m-0">
+            <div class="col-10">
+                <h2 class="text-dark">{% trans "Detalle" %}</h2>
+            </div>
+            <div class="col-2 text-end">
+                <button id="btn-edit" class="btn btn-sm toggle-edit new" data-class-name="input" data-text="{%trans "Edit"%}" 
+                    data-text-alt="{%trans "Hecho"%}">{%trans "Edit"%} </button>
+            </div>
+            <div class="col-12 patient-data">
+                <div class="row m-0">
+                    <div class="col-6 mt-3">
+                        <label class="label">{% trans "Nombre" %}</label>
+                        <input type="text" class="form-control input autosave" id="name" name="name" value="{{obj.name|default:""}}" 
+                            title="{{obj.name}}" data-model-name="agenda.note" data-obj-id="{{obj.id}}" 
+                            data-url="{%url "autosave_field"%}" data-target="div-notification" placeholder="Nombre..." disabled/>
+                    </div>
+                    <div class="col-3 mt-3">
+                        <label class="label">{% trans "Estado" %}</label>
+                        <select class="form-control input autosave" id="status" name="status" data-model-name="agenda.note" data-obj-id="{{obj.id}}" 
+                            data-url="{%url "autosave_field"%}" data-target="div-notification" disabled>
+                            <option value="">{% trans "-- Selecciona un estado --" %}</option>
+                            {% for status in status_list %}
+                                <option value="{{status.id}}" {% if status == obj.status %}selected{% endif %}>{{status.name}}</option>
+                            {% endfor%}
+                        </select>
+                    </div>
+                    <div class="col-3 mt-3">
+                        <label class="label">{% trans "Fecha" %}</label>
+                        <input type="datetime-local" class="form-control input ark_change" id="ini_date" name="ini_date" 
+                            value="{{obj.ini_date|date:"Y-m-d H:i"}}" title="{{obj.ini_date}}" data-obj_id="{{obj.id}}" 
+                            data-url="{%url "notes-update-dates"%}" data-target="div-notification" disabled/>
+                    </div>
+
+                    {%comment%}
+                    <div class="col-3 mt-3">
+                        {% trans "Fecha de inicio" %}
+                        <input type="date" class="form-control input autosave" id="ini_date" name="ini_date" value="{{obj.ini_date|date:"Y-m-d"}}" 
+                            data-model-name="agenda.note" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+                            data-target="div-notification" disabled/>
+                    </div>
+                    <div class="col-3 mt-3">
+                        {% trans "Hora de inicio" %}
+                        <input type="time" class="form-control input autosave" id="ini_time" name="ini_time" value="{{obj.ini_time|date:"H:i"}}" 
+                            data-model-name="agenda.note" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+                            data-target="div-notification" disabled/>
+                    </div>
+                    <div class="col-3 mt-3">
+                        {% trans "Fecha de fin" %}
+                        <input type="date" class="form-control input autosave" id="end_date" name="end_date" value="{{obj.end_date|date:"Y-m-d"}}" 
+                            data-model-name="agenda.note" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+                            data-target="div-notification" disabled/>
+                    </div>
+                    <div class="col-3 mt-3">
+                        {% trans "Hora de fin" %}
+                        <input type="time" class="form-control input autosave" id="end_time" name="end_time" value="{{obj.end_time|date:"H:i"}}" 
+                            data-model-name="agenda.note" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+                            data-target="div-notification" disabled/>
+                    </div>
+                    {%endcomment%}
+                    <div class="col-12 mt-3 border-bottom border-primary">
+                        <label class="label">{% trans "Descripción" %}</label>
+                        <textarea class="form-control input autosave" id="desc" name="desc" title="{{obj.desc}}" 
+                            data-model-name="agenda.note" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+                            data-target="div-notification" placeholder="Escriba aquí la descripción..." disabled>{{obj.desc}}</textarea>
+                    </div>
+                    <div class="col-12 mt-3">
+                        <label class="label">{% trans "Empleado" %}</label>
+                        <div class="row m-0">
+                        {% for item in emp_list %}
+                            <div class="col-3 mb-3 text-center p-1">
+                                <button class="btn {%if item in obj.employees.all%}btn-outline-primary{%else%}btn-outline-default{%endif%} ark w-100 border"
+                                    data-url="{%url "notes-add-employee"%}" data-target="" data-obj_id="{{obj.id}}" data-value="{{item.id}}"
+                                    onclick="$(this).toggleClass('btn-outline-default btn-outline-primary')">
+                                    {{item.username}} <br/> <small>({{item.employee_profile.user_type.name}})</small>
+                                </button>
+                            </div>
+                        {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>    
+        </div>
+        <div id="div-files" class="row stat-box color-5 w-100 patient-data-body-2 p-1 m-0">{% include "notes/note-files.html" %}</div>
+    </div>
+</div>
+

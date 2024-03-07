@@ -229,6 +229,9 @@ def organization_register_send(request):
     except Exception as e:
         return render(request, 'error_exception.html', {'exc':show_exc(e)})
 
+def organization_register_tos(request):
+    return render(request, "organizations/organization-register-{}.html".format(request.GET["temp"]), {})
+
 
 '''
     Procedures

@@ -1,0 +1,25 @@
+{% load i18n %}
+
+<div class="row">
+    {% for obj in note_list %} 
+        <div class="col-4">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <div class="row"><div class="col-9">{{obj.name}}</div><div class="col-3">{{obj.status.name}}</div></div>
+                </div>
+                <div class="card-body"> 
+                    {{obj.desc}} {#<hr/> <br/> {{obj.employee_list}}#} 
+                    <hr/><br/>
+                    {% for item in obj.files.all %}
+                        <div class="files-list-item col-12">
+                            {#<a href="{% url "note-file-get" item.id %}" title="{% trans "Descargar fichero" %}" download class="download-btn"> #}
+                            <a href="{{item.note_file.url}}" title="{% trans "Descargar fichero" %}" download class="download-btn" target="_blank"> 
+                                <div class="w3-xlarge"><i class="fa fa-file-pdf"></i></div> <div>{{item.name}}</div></a>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+

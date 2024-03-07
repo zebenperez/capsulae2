@@ -21,6 +21,8 @@
     <script src="https://code.jquery.com/jquery-3.6.1.min.js" integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" 
         crossorigin="anonymous"></script>
 
+    <script src="{% static "js/common.js" %}"></script>
+
     <style>
         .custom-th{
             border-bottom: 1px solid #999;;
@@ -29,6 +31,11 @@
         .custom-td{
             padding-top:10px;
             padding-bottom:10px;
+        }
+        .tos-link{
+            color: #832bf7;
+            text-decoration: none;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -309,7 +316,20 @@
             </div>
 
             <br/>
-            <div class="d-flex justify-content-center"> <input type="submit" class="btn btn-secondary" value="{% trans "Enviar" %}"/> </div>
+            <hr />
+            <div class="row mt-4"> <div class="col-12"> <div class="greybox-sm register p-1">
+                <input type="checkbox" id="tos" name="tos" /> 
+                <a class="ark tos-link" data-url="{%url "organization-register-tos"%}" data-target-modal="common-modal" data-temp="tos">
+                    Acepto los terminos de protección de datos.</a> 
+            </div></div></div>
+            <div class="row mt-4"> <div class="col-12"> <div class="greybox-sm register p-1">
+                <input type="checkbox" id="tos-datas" name="tos" /> 
+                <a class="ark tos-link" data-url="{%url "organization-register-tos"%}" data-target-modal="common-modal" data-temp="tos-datas">
+                    Acepto la publicación de los datos proporcionados.</a> 
+            </div></div></div>
+            <br/>
+            <div class="d-flex justify-content-center"> 
+                <input type="submit" id="btn-send" class="btn btn-secondary" value="{% trans "Enviar" %}"/> </div>
             </form>
 
             {%comment%}
@@ -329,6 +349,7 @@
             {%endcomment%}
 		</div>
 	</div>
+    {% include "common-modal.html" %}
     <script>
         $("#place").change(function(){
             var val = $(this).val();
@@ -344,6 +365,12 @@
                 $("#div-group2").show();
             else
                 $("#div-group2").hide();
+        });
+        $("#btn-send").click(function(){
+            if( $('#tos').is(':checked') && $('#tos-datas').is(':checked') ) 
+                return true;
+            alert('Debe confirmar que acepta la publicación y la protección de los datos proporcionados');
+            return false;
         });
     </script>
 </body>
