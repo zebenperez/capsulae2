@@ -27,7 +27,7 @@
     <div class="col-3">
         <input type="date" class="form-control autosave mb-4 blister-date" id="deliver_date" name="deliver_date" 
             value="{{obj.deliver_date|date:"Y-m-d"}}" data-model-name="pharma.pillboxdeliver" data-obj-id="{{obj.id}}" 
-            data-url="{%url "autosave_field"%}" data-target="div-notification"/> <span id="deliver_date__msg"></span>
+            data-url="{%url "autosave_field"%}" data-target="div-notification" onfocusout="setFinishDate();"/> <span id="deliver_date__msg"></span>
     </div>
     <div class="col-3">
         <input type="date" class="form-control autosave mb-4 blister-date" id="finish_date" name="finish_date" 
@@ -69,6 +69,21 @@
 </div>
 
 <script>
+    Date.prototype.toInputFormat = function() {
+       var yyyy = this.getFullYear().toString();
+       var mm = (this.getMonth()+1).toString(); // getMonth() is zero-based
+       var dd  = this.getDate().toString();
+       return yyyy + "-" + (mm[1]?mm:"0"+mm[0]) + "-" + (dd[1]?dd:"0"+dd[0]); // padding
+    };
+
+    function setFinishDate()
+    {
+        var d = new Date($("#deliver_date").val());
+        d.setDate(d.getDate() + 7);
+        $("#finish_date").val(d.toInputFormat());
+        $("#finish_date").change();
+    }
+
     $("#deliver_med_qr_field").change(function(){
         var url = "{% url 'spd-search-by-qr' %}";
         var datas = {"qr_data": $(this).val(), "pd_id": "{{obj.id}}"}
