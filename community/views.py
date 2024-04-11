@@ -1,5 +1,6 @@
 #import requests
 from django.contrib.auth.models import User, Group
+from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.db.models import Q
 #from django.core.mail import send_mail
@@ -23,7 +24,7 @@ from .models import Organization, OrganizationAddress, OrganizationInfo, Organiz
 #from .forms import OrganizationForm
 #from generic.views import get_session_feedback
 
-import random, string
+import random, string, csv
 
 
 '''
@@ -105,6 +106,26 @@ def organization_print(request):
     context = get_organization_context(request.user)
     context["company"] = Company.get_by_user(request.user)
     return render(request, "organizations/organization-print.html", context)
+
+@group_required("admins","managers")
+def organization_csv(request):
+    #context["company"] = Company.get_by_user(request.user)
+    try:
+        context = get_organization_context(request.user)
+
+        response = HttpResponse(
+            content_type='text/csv',
+            headers={'Content-Disposition': 'attachment; filename="organizations.csv"'},
+        )
+
+        writer = csv.writer(response)
+        writer.writerow(['Nombre', 'Correo electrónico', 'teléfono', 'Persona de contacto', 'Vía de derivación', 'Observaciones'])
+        for item in context["items"]:
+            writer.writerow([item.name, item.email, item.phone, item.contact, item.derivation_way, item.derivation])
+        return response
+    except Exception as e:
+        return render(request, 'error_exception.html', {'exc':show_exc(e)})
+
 
 @group_required("admins")
 def organization_share_users(request):

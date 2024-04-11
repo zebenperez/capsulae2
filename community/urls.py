@@ -10,6 +10,7 @@ urlpatterns = [
     path('organizations/view/<int:obj_id>/', views.organization_view, name='organization-view'),
     path('organizations/remove/', views.organization_remove, name='organization-remove'),
     path('organizations/print/', views.organization_print, name='organization-print'),
+    path('organizations/csv/', views.organization_csv, name='organization-csv'),
     path('organizations/share-users/', views.organization_share_users, name='organization-share-users'),
     path('organizations/create-user/', views.organization_create_user, name='organization-create-user'),
     path('organizations/share/', views.organization_share, name='organization-share'),
