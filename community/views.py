@@ -119,9 +119,17 @@ def organization_csv(request):
         )
 
         writer = csv.writer(response)
-        writer.writerow(['Nombre', 'Correo electrónico', 'teléfono', 'Persona de contacto', 'Vía de derivación', 'Observaciones'])
+        writer.writerow(['Nombre', 'Correo electrónico', 'teléfono', 'Persona de contacto', 'Vía de derivación', 'Observaciones', 'Códgo postal', 'Barrio', 'Barrio 2'])
         for item in context["items"]:
-            writer.writerow([item.name, item.email, item.phone, item.contact, item.derivation_way, item.derivation])
+            try:
+                cp = item.address.postal_code
+                place = item.address.place
+                place2 = item.address.place_other
+            except:
+                cp = ""
+                place = ""
+                place2 = ""
+            writer.writerow([item.name, item.email, item.phone, item.contact, item.derivation_way, item.derivation, cp, place, place2])
         return response
     except Exception as e:
         return render(request, 'error_exception.html', {'exc':show_exc(e)})
