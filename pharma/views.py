@@ -118,12 +118,12 @@ def patient_remove(request):
         obj.delete()
     return render(request, "patients/patient-list.html", get_patient_context(request.user))
 
-@group_required("admins","managers")
+@group_required("admins")
 def patient_evolutionaries(request):
     ev_list = Evolutionary.objects.filter(matter__contains="Derivación")
     return render(request, "patients/evolutionary/evo-list.html", {'ev_list': ev_list})
 
-@group_required("admins","managers")
+@group_required("admins")
 def patient_evolutionaries_csv(request):
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="derivaciones.csv"'

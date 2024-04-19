@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load i18n pharma_tags %}
+{% load i18n pharma_tags common_tags %}
 
 {% block central_content %}
     <div class="row toolbar-search pt-2 pb-2 m-0">
@@ -27,9 +27,9 @@
             {% if request.user|is_pharma %}{% trans 'Pacientes' %} {% else %} {% trans 'Usuarios' %} {% endif %}
             <span id="items-counter" class="badge badge-secondary">{{items|length}}</span></h2>
             {#<a class="btn btn-primary ark" data-url="{% url "patient-form" %}" data-target-modal="common-modal">{% trans "New paciente"%}</a>  #}
-            <a class="btn btn-sm new" href="{% url "patient-evolutionaries" %}">
-                <i class="fas fa-arrow-right"></i> {%trans "Derivaciones"%}
-            </a>
+            {% if request.user|in_group:"admins" %}
+                <a class="btn btn-sm new" href="{% url "patient-evolutionaries" %}"> <i class="fas fa-arrow-right"></i> {%trans "Derivaciones"%} </a>
+            {% endif %}
             <a class="btn btn-sm new" href="{% url "patient-new" %}">
                 <i class="fas fa-plus"></i> {%if request.user|is_pharma%}{%trans "Nuevo paciente"%}{%else%}{%trans "Nuevo usuario"%}{%endif%}
             </a>
