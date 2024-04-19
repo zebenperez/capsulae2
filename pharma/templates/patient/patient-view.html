@@ -44,6 +44,10 @@
             <div class="tab-item ark text-center" data-url="{% url "patient-params" %}" data-target="div-container" data-obj_id="{{obj.id}}">
                 <i class="fa fa-history"></i><span class="hide-mobile"><br />{% trans "Parametros" %} ({{obj.blood_pressure.all.count}})</span></div>
         {% endif %}
+        {% if user|have_menu:"TELEGRAM"%}
+            <div class="tab-item ark text-center" data-url="{% url "patient-telegram" %}" data-target="div-container" data-obj_id="{{obj.id}}">
+                <i class="fab fa-telegram"></i><span class="hide-mobile"><br />{% trans "Telegram" %}</span></div>
+        {% endif %}
 
     </div>
 

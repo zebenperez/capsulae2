@@ -38,6 +38,12 @@
                         <div class="col-2 p-2"><span class="text text-warning">{{ deliver.finish_date|sub_days:advice_days|date:"d-m-Y"}}</span></div>
                     {% endwith %}
                     <div class="col-2 p-2 text-right">
+                        {% if obj.patient_telegram.all.count > 0 %}
+                            <a class="btn btn-xs ark p-2" data-url="{% url 'patient-telegram-pillbox-deliver-notification' %}" 
+                                data-target-modal="common-modal" data-obj_id="{{obj.id}}" title="Enviar notificación de recogida">
+                                <i class="fab fa-telegram"></i> </a>
+                        {% endif %}
+
                         <a class="btn btn-sm ark p-2" data-url="{%url "spd-blisters" %}" data-target="blister-list-{{item.id}}" 
                             data-obj_id="{{item.id}}" data-show="blister-list-{{item.id}}" title="{% trans "Entregas" %}"> 
                             <i class="fas fa-history"></i> </a>
