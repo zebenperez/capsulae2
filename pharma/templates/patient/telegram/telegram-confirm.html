@@ -1,0 +1,14 @@
+{% load i18n %}
+
+<div class="d-flex justify-content-end"> <button type="button" class="btn btn-lg" data-bs-dismiss="modal" title="{% trans "Close" %}">
+    <i class="fas fa-times"></i></button> </div>
+<h2>{% trans 'Envío de mensaje' %}</h2>
+<div class="row justify-center"> <div class="col-12 text-left p-1"> 
+    {% if sended %} 
+        <div class="alert alert-success">{% trans "Mensaje envíado correctamente" %}</div> 
+    {% else %} 
+        <div class="alert alert-danger">{% trans "No se ha podido enviar el mensaje, disculpe las molestias" %}</div> 
+    {% endif %}
+</div> </div> 
+<div class="d-flex justify-content-end"> <button type="button" class="btn btn-sm" data-bs-dismiss="modal">{% trans "Cerrar" %}</button> </div>
+
