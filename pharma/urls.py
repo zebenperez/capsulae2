@@ -1,5 +1,6 @@
 from django.urls import path
-from . import views, views_account, auto_views, spd_views, evolutionary_views as evo_views, treatment_views as t_views, params_views
+from . import views, views_account, auto_views, spd_views, evolutionary_views as evo_views, treatment_views as t_views, params_views, telegram_views
+from . import telegram_views
 
 urlpatterns = [
     path('index/', views.index, name='pharma-index'),
@@ -17,6 +18,8 @@ urlpatterns = [
     path('patients/remove/', views.patient_remove, name='patient-remove'),
     path('patients/soft-remove/', views.patient_soft_remove, name='patient-soft-remove'),
     path('patients/remove-msg/', views.patient_remove_msg, name='patient-remove-msg'),
+    path('patients/evolutionaries/', views.patient_evolutionaries, name='patient-evolutionaries'),
+    path('patients/evolutionaries-csv/', views.patient_evolutionaries_csv, name='patient-evolutionaries-csv'),
 
     #------------------------- PATIENT --------------------
     path('patients/view/<int:patient_id>', views.patient_view, name='patient-view'),
@@ -94,6 +97,17 @@ urlpatterns = [
     path('patients/params-form/', params_views.patient_params_form, name='patient-params-form'),
     path('patients/params-form-tab/', params_views.patient_params_form_tab, name='patient-params-form-tab'),
     path('patients/params-remove/', params_views.patient_params_remove, name='patient-params-remove'),
+
+    #------------------------- TELEGRAM --------------------
+    path('patients/telegram/', views.patient_telegram, name='patient-telegram'),
+    path('patients/telegram-register/', telegram_views.patient_telegram_register, name='patient-telegram-register'),
+    path('patients/telegram-register-send/', telegram_views.patient_telegram_register_send, name='patient-telegram-register-send'),
+    path('patients/telegram-register-check/', telegram_views.patient_telegram_register_check, name='patient-telegram-register-check'),
+    path('patients/telegram-register-remove/', telegram_views.patient_telegram_register_remove, name='patient-telegram-register-remove'),
+    path('patients/telegram-message/', telegram_views.patient_telegram_message, name='patient-telegram-message'),
+    path('patients/telegram-message-send/', telegram_views.patient_telegram_message_send, name='patient-telegram-message-send'),
+    path('patients/telegram-web-hook/', telegram_views.telegram_web_hook, name='telegram-web-hook'),
+    path('patients/telegram/pillbox-deliver-notification/', telegram_views.pillbox_deliver_notification, name='patient-telegram-pillbox-deliver-notification'),
 
     #---------------------- AUTO -----------------------
     path('autosave_field/', auto_views.autosave_field, name='autosave_field'),

@@ -7,7 +7,7 @@ from django.template.loader import render_to_string
 from datetime import datetime, timedelta
 from weasyprint import HTML, CSS
 
-import os
+import os, csv
 
 from capsulae2.decorators import group_required
 from capsulae2.commons import get_or_none, get_param, show_exc
@@ -24,6 +24,7 @@ from .evolutionary_models import Evolutionary
 from .allergy_models import AlergiasExcipientes, AlergiasPrincipios, Excipientesedo, PrincipiosActivos
 from .common_lib import LOPD_LIMIT, PILLBOX_ADVISE, get_config_value
 from .pharma_lib import get_values_to_interactions_print, get_values_to_summary_print
+from .telegram_models import TelegramUserChat
 
 
 @group_required("admins","managers","employee")
@@ -117,6 +118,25 @@ def patient_remove(request):
         obj.delete()
     return render(request, "patients/patient-list.html", get_patient_context(request.user))
 
+@group_required("admins","managers")
+def patient_evolutionaries(request):
+    ev_list = Evolutionary.objects.filter(matter__contains="Derivación")
+    return render(request, "patients/evolutionary/evo-list.html", {'ev_list': ev_list})
+
+@group_required("admins","managers")
+def patient_evolutionaries_csv(request):
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="derivaciones.csv"'
+
+    writer = csv.writer(response, delimiter=';')
+    ev_list = Evolutionary.objects.filter(matter__contains="Derivación")
+
+    writer.writerow(['Paciente', 'Genero', 'Asunto', 'Fecha', 'Observaciones'])
+    for ev in ev_list:
+        name = "{} {}".format(ev.patient.nombre, ev.patient.apellido)
+        writer.writerow([name, ev.patient.sexo, ev.matter, ev.date, ev.observations])
+
+    return response
 
 '''
     Patient
@@ -166,6 +186,11 @@ def patient_procedure(request):
 def patient_params(request):
     patient = get_or_none(Pacientes, get_param(request.GET, "obj_id"))
     return render(request, "patient/parameters/param-list.html", {'obj': patient})
+
+@group_required("admins","managers")
+def patient_telegram(request):
+    patient = get_or_none(Pacientes, get_param(request.GET, "obj_id"))
+    return render(request, "patient/telegram/chat-list.html", {'obj': patient})
 
 
 '''
