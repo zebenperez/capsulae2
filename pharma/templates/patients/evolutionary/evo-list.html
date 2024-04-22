@@ -14,8 +14,9 @@
                 <th class="row main-th">
                     <div class="col-2"> {% trans 'Paciente' %} </div>
                     <div class="col-1"> {% trans 'Genero' %} </div>
+                    <div class="col-1"> {% trans 'Teléfono' %} </div>
                     <div class="col-2"> {% trans 'Asunto' %} </div>
-                    <div class="col-2"> {% trans 'Fecha' %} </div>
+                    <div class="col-1"> {% trans 'Fecha' %} </div>
                     <div class="col-3"> {% trans 'Observaciones' %} </div>
                     <div class="col-2"></div>
                 </th>
@@ -27,8 +28,9 @@
                     <td class="row p-0">
                         <div class="col-2 p-2">{{ item.patient.nombre }} {{ item.patient.apellido }}</div>
                         <div class="col-1 p-2">{{ item.patient.sexo }}</div>
+                        <div class="col-1 p-2">{{ item.patient.telefono1 }}</div>
                         <div class="col-2 p-2">{{ item.matter }}</div>
-                        <div class="col-2 p-2"> {{ item.date|date:"d-m-Y"|default_if_none:"--" }} &nbsp; </div>
+                        <div class="col-1 p-2"> {{ item.date|date:"d-m-Y"|default_if_none:"--" }} &nbsp; </div>
                         <div class="col-3 p-2">{{ item.observations|safe }}</div>
                         <div class="col-2 p-2 text-right">
                             <a href="{% url "evolutionary-referral-form" item.patient.n_historial item.id True %}" class="btn btn-sm p-2"

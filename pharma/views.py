@@ -131,10 +131,10 @@ def patient_evolutionaries_csv(request):
     writer = csv.writer(response, delimiter=';')
     ev_list = Evolutionary.objects.filter(matter__contains="Derivación")
 
-    writer.writerow(['Paciente', 'Genero', 'Asunto', 'Fecha', 'Observaciones'])
+    writer.writerow(['Paciente', 'Genero', 'Teléfono', 'Asunto', 'Fecha', 'Observaciones'])
     for ev in ev_list:
         name = "{} {}".format(ev.patient.nombre, ev.patient.apellido)
-        writer.writerow([name, ev.patient.sexo, ev.matter, ev.date, ev.observations])
+        writer.writerow([name, ev.patient.sexo, ev.patient.telefono1, ev.matter, ev.date, ev.observations])
 
     return response
 
