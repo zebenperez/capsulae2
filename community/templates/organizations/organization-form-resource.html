@@ -3,13 +3,15 @@
 <div class="row" style="margin:0;">
     <div class="col-12 mt-3">
         <label class="label">{% trans "Titularidad del recurso" %}:</label>
-        <select id="owner" name="owner" class="form-control input autosave input view" data-model-name="community.organizationresource" data-obj-id="{{res.id}}" 
-            data-url="{%url "autosave_field"%}" data-target="div-notification" disabled>
+        <select id="owner" name="owner" class="form-control input autosave input view" data-model-name="community.organizationresource" 
+            data-obj-id="{{res.id}}" data-url="{%url "autosave_field"%}" data-target="div-notification" disabled>
             <option value="">-- Selecciones una opción --</option>
-            <option value="gobierno de canarias" {%if res.owner == "gobierno de canarias"%}selected{%endif%}>Calle</option>
-            <option value="cabildo de tenerife" {%if res.owner == "cabildo de tenerife"%}selected{%endif%}>Avenida</option>
-            <option value="ayuntamiento de granadilla de abona" {%if res.owner == "ayuntamiento de granadilla de abona"%}selected{%endif%}>Paso</option>
-            <option value="entidade sin animo de lucro" {%if res.owner == "entidade sin animo de lucro"%}selected{%endif%}>Camino</option>
+            <option value="gobierno de canarias" {%if res.owner == "gobierno de canarias"%}selected{%endif%}>Gobierno de Canarias</option>
+            <option value="cabildo de tenerife" {%if res.owner == "cabildo de tenerife"%}selected{%endif%}>Cabildo de Tenerife</option>
+            <option value="ayuntamiento de granadilla de abona" {%if res.owner == "ayuntamiento de granadilla de abona"%}selected{%endif%}>i
+                Ayuntamiento de Granadilla de Abona</option>
+            <option value="entidad sin animo de lucro" {%if res.owner == "entidad sin animo de lucro"%}selected{%endif%}>
+                Entidad sin ánimo de lucro</option>
             <option value="otros" {%if res.owner == "otros"%}selected{%endif%}>Otros</option>
         </select>
     </div>
@@ -42,7 +44,7 @@
     <div class="col-12 mt-3">
         <label class="label">{% trans "Titularidad del recurso" %}:</label>
         <input type="text" class="form-control input autosave input view" id="group_other" name="group_other" value="{{res.group_other|default:""}}" 
-            title="{{res.group_other}}" data-model-name="community.organizationaddress" data-obj-id="{{res.id}}" 
+            title="{{res.group_other}}" data-model-name="community.organizationresource" data-obj-id="{{res.id}}" 
             data-url="{%url "autosave_field"%}" data-target="div-notification" placeholder="Titularidad..." disabled/> <span id="group_other__msg"></span>
     </div>
 
