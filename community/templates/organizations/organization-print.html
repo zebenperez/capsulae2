@@ -10,11 +10,22 @@
 	<link rel="stylesheet" href="{% static 'community/css/referral-form.css' %}">
 	<script src="{% static 'community/js/referral-form.js' %}"></script>
     <style>
+        .custom-h3{
+            color: #814496;
+        }
+        .custom-box{
+            border: 1px solid #999;;
+            border-color: #814496;
+            padding: 10px;
+        }
         .custom-th{
+            color: #814496;
             border-bottom: 1px solid #999;;
+            border-color: #814496;
             padding-bottom:10px;
         }
         .custom-td{
+            color: #814496;
             padding-top:10px;
             padding-bottom:10px;
         }
@@ -41,6 +52,116 @@
 				<h2 class="main-title"> {% trans "Listado de Organizaciones" %}</h2>
 
                 {% for item in items %}
+
+                    <div class="custom-box">
+                        <h3 class="custom-h3">{{item.name}}</h3>
+                        <table width="100%">
+                            <thead> <th colspan="2" class="custom-th">Principal</th> </thead>
+                            <tbody>
+                                <tr> <td colspan="2" class="custom-td">{% trans "Breve descripción" %}: </td> </tr>
+                                <tr> <td colspan="2">{{item.description}}</td> </tr>
+                                <tr> <td class="custom-td">{% trans "Año de creación" %}: </td> <td>{{item.year}}</td> </tr>
+                                {%comment%}
+                                <tr> <td colspan="2" class="custom-td">{% trans "Via de derivación" %}: </td></tr>
+                                <tr> <td colspan="2"><strong>{{item.derivation_way}}</strong></td> </tr>
+                                <tr> <td colspan="2" class="custom-td">{% trans "Observaciones" %}: </td></tr>
+                                <tr> <td colspan="2"><strong>{{item.derivation}}</strong></td> </tr>
+                                {%endcomment%}
+                            </tbody>
+                        </table>
+                        <br/>
+                        <table width="100%">
+                            <thead> <th colspan="6" class="custom-th">Dirección</th> </thead>
+                            <tbody>
+                                <tr> <td colspan="3" class="custom-td">{% trans "Tipo de vía" %}: </td> </tr>
+                                <tr> <td colspan="3">{{item.address.street_type}}</td> </tr>
+                                <tr> <td colspan="3" class="custom-td">{% trans "Nombre de la vía" %}: </td> </tr>
+                                <tr> <td colspan="3">{{item.address.street_name}}</td> </tr>
+                                <tr>
+                                    <td class="custom-td">{% trans "Número" %}: </td>
+                                    <td class="custom-td">{% trans "Puerta" %}: </td>
+                                    <td class="custom-td">{% trans "Código postal" %}: </td>
+                                </tr>
+                                <tr>
+                                    <td>{{item.address.number}}</td>
+                                    <td>{{item.address.door}}</td>
+                                    <td>{{item.address.postal_code}}</td>
+                                </tr>
+                                <tr> <td colspan="3" class="custom-td">{% trans "Barrio o núcleo" %}: </td> </tr>
+                                <tr> <td colspan="3">{{item.address.place}} / {{item.address.place_other}}</td> </tr>
+                                <tr> <td colspan="3" class="custom-td">{% trans "¿Las actividades se desarrollan en el mismo lugar?" %}: </td> </tr>
+                                <tr> <td colspan="3">{% if item.address.same_place %} Si {% else %} No {% endif %}</td> </tr>
+                                <tr> <td colspan="3" class="custom-td">{% trans "Localización de la actividad" %}: </td> </tr>
+                                <tr> <td colspan="3">{{item.address.activity_place}}</td> </tr>
+
+                                <tr> <td colspan="3" class="custom-td">{% trans "Correo electrónico" %}: </td> </tr>
+                                <tr> <td colspan="3">{{item.email}}</td> </tr>
+                                <tr> <td colspan="3" class="custom-td">{% trans "Teléfono" %}: </td> </tr>
+                                <tr> <td colspan="3">{{item.phone}}</td> </tr>
+                            </tbody>
+                        </table>
+                        <br/> <br/>
+                        <table width="100%">
+                            <thead> <th colspan="2" class="custom-th">Social</th> </thead>
+                            <tbody>
+                                <tr><td class="custom-td">{% trans "Facebook" %}: </td><td>{{item.social.facebook}}</td></tr>
+                                <tr><td class="custom-td">{% trans "Instagram" %}: </td><td>{{item.social.instagram}}</td></tr>
+                                <tr><td class="custom-td">{% trans "Twitter" %}: </td><td>{{item.social.twitter}}</td></tr>
+                                <tr><td class="custom-td">{% trans "Youtube" %}: </td><td>{{item.social.youtube}}</td></tr>
+                            </tbody>
+                        </table>
+                        <br/> <br/>
+                        <table width="100%">
+                            <thead> <th colspan="2" class="custom-th">Responsable</th> </thead>
+                            <tbody>
+                                <tr><td class="custom-td">{% trans "Persona responsable" %}: </td> <td>{{item.in_charge}}</td></tr>
+                                <tr><td class="custom-td">{% trans "Cargo de la persona responsable" %}: </td> <td>{{item.in_charge_resp}}</td></tr>
+                                <tr><td class="custom-td">{% trans "Persona de contacto" %}: </td> <td>{{item.contact}}</td></tr>
+                                <tr><td class="custom-td">{% trans "Cargo de la persona de contacto" %}: </td> <td>{{item.contact_resp}}</td></tr>
+                            </tbody>
+                        </table>
+                        <br/> <br/>
+                        <table width="100%">
+                            <thead> <th colspan="2" class="custom-th">Recurso</th> </thead>
+                            <tbody>
+                                <tr><td class="custom-td">{% trans "Titularidad del recurso" %}: </td> <td>{{item.resource.owner}}</td></tr>
+                                <tr><td class="custom-td">{% trans "Se trata de un recurso gratuito" %}: </td>
+                                    <td>{% if item.resource.free %} Si {% else %} No {% endif %}</td></tr>
+                                {%comment%}
+                                <tr><td class="custom-td">{% trans "Descripción" %}: </td>
+                                    <td><strong>{{item.resource.description}} </strong></td></tr>
+                                {%endcomment%}
+                            </tbody>
+                        </table>
+                        <br/> <br/>
+                        <table width="100%">
+                            <thead> <th colspan="2" class="custom-th">Otra información</th> </thead>
+                            <tbody>
+                                <tr><td class="custom-td">{% trans "Grupo poblacional" %}: </td></tr>
+                                <tr><td>{{item.resource.group}} / {{item.resource.group_other}}</td></tr>
+                                {%comment%}
+                                <tr><td class="custom-td">{% trans "Ámbito de actuación" %}: </td>
+                                    <td><strong>{{item.info.ambit}}</strong></td></tr>
+                                {%endcomment%}
+                                <tr><td class="custom-td">{% trans "Actividades que realiza" %}: </td></tr>
+                                <tr><td>{{item.info.activities}}</td></tr>
+                                <tr><td class="custom-td">{% trans "¿Cómo participar?" %}: </td></tr>
+                                <tr><td>{{item.info.participate}}</td></tr>
+                                {%comment%}
+                                <tr><td class="custom-td">{% trans "Salud" %}: </td>
+                                    <td><strong>{{item.info.health}} </strong></td></tr>
+                                {%endcomment%}
+                                <tr> <td class="custom-td">
+                                    {% trans "¿De qué forma creen que sus actividades mejoran el bienestar en el municipio?" %}: </td></tr>
+                                <tr><td>{{item.info.improvements}} </td></tr>
+                                <tr><td class="custom-td">{% trans "¿Qué otro recurso no podría faltar en esta guía?" %}: </td></tr>
+                                <tr><td>{{item.info.resources}} </td></tr>
+                            </tbody>
+                        </table>
+
+                    </div>
+
+                            {%comment%}
                     <table style="border: 1px solid #000; padding:10px">
                         <thead> <th colspan="2" class="custom-th">{{item.name}}</th> </thead>
                         <tbody>
@@ -55,6 +176,7 @@
                             <tr> <td colspan="2"><strong>{{item.derivation}}</strong></td> </tr>
                         </tbody>
                     </table>
+                            {%endcomment%}
                     <br/>
                 {% endfor %}
 			</div>
