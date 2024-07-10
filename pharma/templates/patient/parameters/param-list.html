@@ -79,6 +79,12 @@
                     {% endif %}
                 </td>
                 <td>
+                    {% if obj.patient_telegram.all.count > 0 %}
+                        <a class="btn btn-xs ark p-2" data-url="{% url 'patient-telegram-params-notification' %}" 
+                            data-target-modal="common-modal" data-obj_id="{{item.id}}" title="Enviar notificación de recogida">
+                            <i class="fab fa-telegram"></i> </a>
+                    {% endif %}
+
                     <a class="btn btn-sm ark" title="{%trans 'Edit parameters'%}" data-url="{%url "patient-params-form" %}"
                         data-target-modal="common-modal" data-obj_id="{{item.id}}" data-patient_id="{{obj.id}}"> 
                         <i class="fas fa-edit"></i></a>&nbsp;&nbsp;&nbsp;

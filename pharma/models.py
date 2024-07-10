@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.template.defaultfilters import slugify
 
+from medication.models import CieCiap 
+
 from datetime import datetime, date
 import random, string
 
@@ -95,6 +97,10 @@ class Pacientes(models.Model):
     def is_active(self):
         return False if self.activo == False else True
 
+    @property
+    def diagnoses(self):
+        return Diagnosticos.objects.filter(n_orden=self.n_historial, borrado=False).order_by('fecha_ini', 'cie_ciap__nombre')
+
     def get_active_treatments(self):
         return self.tratamientos.filter(activo=True).count()
 
@@ -154,4 +160,16 @@ class PatientOrigin(models.Model):
         verbose_name ="Origen"
         verbose_name_plural ="Origenes"
 
+class Diagnosticos(models.Model):
+    cie_ciap = models.ForeignKey(CieCiap, db_column='id_cie_ciap', on_delete=models.SET_NULL, null=True, related_name="diagnoses")
+    n_orden = models.CharField(max_length=10) 
+    fecha_ini = models.DateField(default = date.today())
+    observaciones = models.CharField(max_length=255, blank=True, null=True)
+    borrado = models.BooleanField(default=False)
+        
+    class Meta:
+        managed = False
+        db_table = 'diagnosticos'
+        verbose_name = 'diagnostico'
+        verbose_name_plural = 'diagnosticos'
 

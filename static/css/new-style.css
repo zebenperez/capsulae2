@@ -1,4 +1,4 @@
-<!-- Hoja de estilo ><!-->
+!-- Hoja de estilo ><!-->
 <style>
 /* ------------------------------------------------------------------------------
 
@@ -670,6 +670,33 @@ header{
 	line-height:50px;
 }
 
+.alert-warning-pay {
+    color: #e27822 !important;
+    font-size: 2rem;
+    letter-spacing: -1px;
+}
+
+.card.warning-pay { 
+    margin-top: -30px;
+    border: 1px solid #8f3d8a;
+}
+.card.warning-pay .card-header {
+    background: #c5398a;
+    letter-spacing: -1px;
+}
+.card.warning-pay .card-body {
+    color: #4e1134;
+    letter-spacing: -1px;
+}
+.btn.btn-primary.payment {
+    background: #dfab0a;
+    border:1px solid #cfa113;
+    letter-spacing: -1px;
+    font-size: 1.2rem;
+}
+.btn.btn-primary.payment:hover {
+    background: #f3bd19;
+}
 
 /*---------------------------------------------------------------------------------
 	 10. Responsive style

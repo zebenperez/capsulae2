@@ -1,4 +1,5 @@
 from django.core.files import File
+from django.contrib.auth import logout
 from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import render, redirect, reverse
@@ -12,7 +13,7 @@ import os, csv
 from capsulae2.decorators import group_required
 from capsulae2.commons import get_or_none, get_param, show_exc
 from capsulae2.settings import MEDIA_ROOT
-from account.models import Company
+from account.models import Company, UserPayment
 from lopd.models import LOPDConsents
 from community.models import Organization, PatientOrg, Procedure, PatientProcedure
 from medication.medication_lib import get_medication
@@ -27,12 +28,26 @@ from .pharma_lib import get_values_to_interactions_print, get_values_to_summary_
 from .telegram_models import TelegramUserChat
 
 
+def check_user_payment(user):
+    now = datetime.now()
+    up = UserPayment.objects.filter(user = user, expire_date__gte = now).first()
+    if up == None:
+        return False
+    return True
+
 @group_required("admins","managers","employee")
 def index(request):
+    if not check_user_payment(request.user):
+        logout(request)
+        return redirect('pharma-payment-error')
     return render(request, "index.html", {})
 
 def home(request):
     return render(request, "home.html", {})
+
+def payment_error(request):
+    up = UserPayment.objects.all().order_by('-expire_date').first()
+    return render(request, "error-payments.html", {'payment': up})
 
 '''
     Patients
@@ -192,6 +207,10 @@ def patient_telegram(request):
     patient = get_or_none(Pacientes, get_param(request.GET, "obj_id"))
     return render(request, "patient/telegram/chat-list.html", {'obj': patient})
 
+@group_required("admins","managers")
+def patient_diagnoses(request):
+    patient = get_or_none(Pacientes, get_param(request.GET, "obj_id"))
+    return render(request, "patient/diagnoses/diagnosis-list.html", {'obj': patient})
 
 '''
     Patient Org

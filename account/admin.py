@@ -26,6 +26,9 @@ class UserMenuAdmin(admin.ModelAdmin):
 class UserProfileAdmin(admin.ModelAdmin):
     list_display = ("user", "profile")
 
+class UserPaymentAdmin(admin.ModelAdmin):
+    list_display = ("user", "amount", "pay_date", "expire_date")
+
 admin.site.register(Config, ConfigAdmin)
 admin.site.register(Company, CompanyAdmin)
 admin.site.register(Menu, MenuAdmin)
@@ -33,3 +36,4 @@ admin.site.register(Plan, PlanAdmin)
 admin.site.register(Profile, ProfileAdmin)
 admin.site.register(UserMenu, UserMenuAdmin)
 admin.site.register(UserProfile, UserProfileAdmin)
+admin.site.register(UserPayment, UserPaymentAdmin)

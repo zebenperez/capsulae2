@@ -18,6 +18,11 @@
             <div class="tab-item ark text-center" data-url="{% url "patient-treatment" %}" data-target="div-container" data-obj_id="{{obj.id}}"> 
                 <i class="fa fa-barcode"></i> <span class="hide-mobile"><br />{% trans "Tratamientos" %} ({{obj.get_active_treatments}})</span></div>
         {% endif %}
+        {% if user|have_menu:"DIA"%}
+            <div class="tab-item ark text-center" data-url="{% url "patient-diagnoses" %}" data-target="div-container" data-obj_id="{{obj.id}}"> 
+                <i class="fa fa-list"></i> <span class="hide-mobile"><br />
+                {% trans "Diagnósticos" %} ({{obj.diagnoses.all.count}})</span></div>
+        {% endif %}
         {% if user|have_menu:"PTR"%}
             <div class="tab-item ark text-center" data-url="{% url "patient-procedure" %}" data-target="div-container" data-obj_id="{{obj.id}}"> 
                 <i class="fa fa-project-diagram"></i> <span class="hide-mobile"><br />

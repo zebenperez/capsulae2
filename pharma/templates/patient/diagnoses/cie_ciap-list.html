@@ -1,0 +1,58 @@
+{% load i18n %}
+
+
+<div class="d-flex justify-content-end"> <button type="button" class="btn btn-lg" data-bs-dismiss="modal" title="{% trans "Close" %}">
+    <i class="fas fa-times"></i></button> </div>
+
+<table class="table table-striped table-hover">
+    <thead>
+        <tr class="small small">
+            <th class="row main-th">
+                <div class="col-7"> {% trans 'Nombre' %} </div>
+                <div class="col-2"> {% trans 'Cie' %} </div>
+                <div class="col-2"> {% trans 'Ciap' %} </div>
+                <div class="col-1"></div>
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in items %}
+            <tr class="small" id="row_{{item.id}}">
+                <td class="row"> 
+                    <div class="col-7"> {{item.nombre}} </div>
+                    <div class="col-2"> {{item.cie}} </div>
+                    <div class="col-2"> {{item.ciap}} </div>
+                    <div class="col-1 text-right">
+                        <a class="btn btn-xs ark" title="{%trans 'Add diagnosis'%}" data-url="{%url "patient-diagnoses-form" %}"
+                            data-target-modal="common-modal" data-cie_ciap="{{item.id}}" data-patient_id="{{patient_id}}"> 
+                            <i class="fas fa-plus"></i></a>
+                    </div> 
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+
+
+{%comment%}
+<div class="row"> 
+    <div class="col-4">{% trans "Nombre" %} </div> 
+    <div class="col-2">{% trans "ATCs" %} </div> 
+    <div class="col-2">{% trans "CN" %} </div> 
+    <div class="col-3">{% trans "Familia" %} </div> 
+    <div class="col-1"></div> 
+</div>
+{% for item in items %}
+    <div class="row"> 
+        <div class="col-4"> {{item.name}} </div>
+        <div class="col-2"> {{item.cod_atc}} </div>
+        <div class="col-2"> {{item.cn}} </div>
+        <div class="col-3"> <span class="small">{{item.family}}</span></div>
+        <div class="col-1">
+            <a class="btn btn-xs ark" title="{%trans 'Add treatment'%}" data-url="{%url "patient-treatment-form" %}"
+                data-target-modal="common-modal" data-medication_id="{{item.id}}" data-patient_id="{{patient_id}}"> <i class="fas fa-plus"></i></a>
+        </div> 
+    </div>
+{% endfor %}
+{%endcomment%}

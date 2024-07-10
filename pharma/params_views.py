@@ -8,6 +8,14 @@ from .models import Pacientes
 
 def get_cm_constants(sex, age):
     AGE_INDEXES = [16, 20, 30, 40, 50]
+    MALE_CONSTANTS = {
+        'C': [1.1620, 1.1631, 1.1422, 1.1620, 1.1715],
+        'M': [0.0630, 0.0632, 0.0544, 0.07, 0.0779],
+    }
+    FEMALE_CONSTANTS = {
+        'C': [1.1549, 1.1599, 1.1423, 1.1333, 1.1339],
+        'M': [0.0678, 0.0717, 0.0632, 0.0612, 0.0645],
+    }
 
     ret = {'c_index': None, 'm_index': None}
     if age < 16 or not age:

@@ -119,17 +119,123 @@ def organization_csv(request):
         )
 
         writer = csv.writer(response)
-        writer.writerow(['Nombre', 'Correo electrónico', 'teléfono', 'Persona de contacto', 'Vía de derivación', 'Observaciones', 'Códgo postal', 'Barrio', 'Barrio 2'])
+        writer.writerow([
+            'Nombre', 
+            'Año de creación', 
+            'Correo electrónico', 
+            'teléfono', 
+            'Persona de contacto', 
+            'Vía de derivación', 
+            'Observaciones', 
+            'Mismo lugar', 
+            'Tipo de vía', 
+            'Nombre de la vía',
+            'Número',
+            'Puerta',
+            'Código postal',
+            'Barrio',
+            'Barrio otro lugar',
+            'Localización actividad',
+            'facebook',
+            'instagram',
+            'twitter',
+            'youtube',
+            'ambit',
+            'activities',
+            'participate',
+            'health',
+            'improvements',
+            'resources',
+            'free',
+            'owner',
+            'group',
+            'group_other',
+            'description'
+        ])
         for item in context["items"]:
             try:
-                cp = item.address.postal_code
+                same_place = item.address.same_place
+                street_type = item.address.street_type
+                street_name = item.address.street_name
+                number = item.address.number
+                door = item.address.door
+                postal_code = item.address.postal_code
                 place = item.address.place
-                place2 = item.address.place_other
+                place_other = item.address.place_other
+                activity_place = item.address.activity_place
+                facebook = item.social.facebook
+                instagram = item.social.instagram
+                twitter = item.social.twitter
+                youtube = item.social.youtube
+                ambit = item.info.ambit
+                activities = item.info.activities
+                participate = item.info.participate
+                health = item.info.health
+                improvements = item.info.improvements
+                resources = item.info.resources
+                free = item.resource.free
+                owner = item.resource.owner
+                group = item.resource.group
+                group_other = item.resource.group_other
+                description = item.resource.description
             except:
-                cp = ""
+                same_place = ""
+                street_type = ""
+                street_name = ""
+                number = ""
+                door = ""
+                postal_code = ""
                 place = ""
-                place2 = ""
-            writer.writerow([item.name, item.email, item.phone, item.contact, item.derivation_way, item.derivation, cp, place, place2])
+                place_other = ""
+                activity_place = ""
+                facebook = ""
+                instagram = ""
+                twitter = ""
+                youtube = ""
+                ambit = ""
+                activities = ""
+                participate = ""
+                health = ""
+                improvements = ""
+                resources = ""
+                free = ""
+                owner = ""
+                group = ""
+                group_other = ""
+                description = ""
+            writer.writerow([
+                item.name, 
+                item.year, 
+                item.email, 
+                item.phone, 
+                item.contact, 
+                item.derivation_way, 
+                item.derivation, 
+                same_place, 
+                street_type, 
+                street_name, 
+                number, 
+                door, 
+                postal_code, 
+                place, 
+                place_other, 
+                activity_place,
+                facebook,
+                instagram,
+                twitter,
+                youtube,
+                ambit,
+                activities,
+                participate,
+                health,
+                improvements,
+                resources,
+                free,
+                owner,
+                group,
+                group_other,
+                description
+            ])
         return response
     except Exception as e:
         return render(request, 'error_exception.html', {'exc':show_exc(e)})

@@ -6,6 +6,8 @@ from telegram import Update
 
 from capsulae2.decorators import group_required
 from capsulae2.commons import get_or_none, get_param, show_exc
+from .treatment_models import Tratamiento
+from .params_models import BloodPressure
 from .telegram_models import TelegramUserChat
 from .models import Pacientes
 from .telegram_lib import TG_BOT, patient_register_confirm, get_message
@@ -114,8 +116,8 @@ def pillbox_deliver_notification(request):
 
         sended = False
         for item in chats:
-            if item.code == "da2d0c9c":
-                sended = TG_BOT.send_message(item.telegram_chat_id, message)
+            #if item.code == "da2d0c9c":
+            sended = TG_BOT.send_message(item.telegram_chat_id, message)
             #sended = sended + 1 if send_result else sended
 
         return render(request, "patient/telegram/telegram-confirm.html", {'sended': sended})
@@ -123,7 +125,22 @@ def pillbox_deliver_notification(request):
     except Exception as e:
         return render(request, 'error_exception.html', {'exc':show_exc(e)})
 
-#def treatment_added_notification(request, patient_id, treatment_id):
+def treatment_notification(request):
+    try:
+        treatment = get_or_none(Tratamiento, request.GET["obj_id"])
+        chats = treatment.paciente.patient_telegram.filter()
+        message = get_message('treatment_notification', {'full_name': treatment.paciente.full_name, 'treatment_name': treatment.name})
+
+        sended = False
+        for item in chats:
+            #if item.code == "da2d0c9c":
+            sended = TG_BOT.send_message(item.telegram_chat_id, message)
+            #sended = sended + 1 if send_result else sended
+
+        return render(request, "patient/telegram/telegram-confirm.html", {'sended': sended})
+ 
+    except Exception as e:
+        return render(request, 'error_exception.html', {'exc':show_exc(e)})
 #    sended = 0
 #    patient = get_or_none(Pacientes, patient_id)
 #    treatment = patient.tratamientos.filter(pk=treatment_id).first()
@@ -138,7 +155,35 @@ def pillbox_deliver_notification(request):
 #            sended = sended + 1 if send_result else sended
 #
 #    return HttpResponse(get_sended_result(sended))
-#
+
+def params_notification(request):
+    try:
+        params = get_or_none(BloodPressure, request.GET["obj_id"])
+        chats = params.patient.patient_telegram.filter()
+
+        params_dict = {'weight':params.weight, 'bpressure_min':params.bpressure_min, 'bpressure_max':params.bpressure_max, 'bmi':params.bmi, 'hdl':params.hdl, 'glucose':params.glucose, 'height':params.height}
+        for key in params_dict.keys():
+            value = params_dict.get(key, None)
+            if value:
+                if key == "height":
+                    params_dict[key] = "%.2f" % value
+                else:
+                    params_dict[key] = ("%.1f" % value).replace(".", ',')
+            else:
+                params_dict[key] = "Sin medida"
+        message = get_message("params_notification", params_dict)
+
+        sended = False
+        for item in chats:
+            #if item.code == "da2d0c9c":
+            sended = TG_BOT.send_message(item.telegram_chat_id, message)
+            #sended = sended + 1 if send_result else sended
+
+        return render(request, "patient/telegram/telegram-confirm.html", {'sended': sended})
+ 
+    except Exception as e:
+        return render(request, 'error_exception.html', {'exc':show_exc(e)})
+
 #def params_info_notification(request, patient_id, bpressure_id):
 #    sended = 0
 #    patient = get_or_none(Pacientes, patient_id)

@@ -29,7 +29,8 @@ def get_message(key, params=None, lang="es"):
             return tmp_parse(message, **params)
         return message
     except Exception as e:
-        logger.error(str(e))
+        #logger.error(str(e))
+        print(e)
         return ""
 
 # ---------------------------
@@ -64,7 +65,8 @@ def patient_treatments(bot, update):
         bot.send_message(tg_user_chat.telegram_chat_id, message)
         return True
     except Exception as e:
-        logger.error(str(e))
+        #logger.error(str(e))
+        print(e)
 
     return None
 

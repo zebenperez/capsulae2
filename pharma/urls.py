@@ -1,10 +1,11 @@
 from django.urls import path
-from . import views, views_account, auto_views, spd_views, evolutionary_views as evo_views, treatment_views as t_views, params_views, telegram_views
-from . import telegram_views
+from . import views, views_account, auto_views, spd_views, evolutionary_views as evo_views, treatment_views as t_views, params_views
+from . import telegram_views, diagnoses_views
 
 urlpatterns = [
     path('index/', views.index, name='pharma-index'),
     path('home/', views.home, name='pharma-home'),
+    path('payment-error/', views.payment_error, name='pharma-payment-error'),
 
     #------------------------- VIEWS ACCOUNT -----------------------
     path('signup/', views_account.signup, name='account-signup'),
@@ -108,6 +109,14 @@ urlpatterns = [
     path('patients/telegram-message-send/', telegram_views.patient_telegram_message_send, name='patient-telegram-message-send'),
     path('patients/telegram-web-hook/', telegram_views.telegram_web_hook, name='telegram-web-hook'),
     path('patients/telegram/pillbox-deliver-notification/', telegram_views.pillbox_deliver_notification, name='patient-telegram-pillbox-deliver-notification'),
+    path('patients/telegram/treatment-notification/', telegram_views.treatment_notification, name='patient-telegram-treatment-notification'),
+    path('patients/telegram/params-notification/', telegram_views.params_notification, name='patient-telegram-params-notification'),
+
+    #------------------------- DIAGNOSIS --------------------
+    path('patients/diagnoses/', views.patient_diagnoses, name='patient-diagnoses'),
+    path('patients/diagnoses/form/', diagnoses_views.patient_diagnoses_form, name='patient-diagnoses-form'),
+    path('patients/diagnoses/remove/', diagnoses_views.patient_diagnoses_remove, name='patient-diagnoses-remove'),
+    path('patients/diagnoses/search/', diagnoses_views.patient_diagnoses_search, name='patient-diagnoses-search'),
 
     #---------------------- AUTO -----------------------
     path('autosave_field/', auto_views.autosave_field, name='autosave_field'),
