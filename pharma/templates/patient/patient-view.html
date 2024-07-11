@@ -18,24 +18,23 @@
             <div class="tab-item ark text-center" data-url="{% url "patient-treatment" %}" data-target="div-container" data-obj_id="{{obj.id}}"> 
                 <i class="fa fa-barcode"></i> <span class="hide-mobile"><br />{% trans "Tratamientos" %} ({{obj.get_active_treatments}})</span></div>
         {% endif %}
+        {% if user|have_menu:"PARAM"%}
+            <div class="tab-item ark text-center" data-url="{% url "patient-params" %}" data-target="div-container" data-obj_id="{{obj.id}}">
+                <i class="fa fa-history"></i><span class="hide-mobile"><br />{% trans "Parametros" %} ({{obj.blood_pressure.all.count}})</span></div>
+        {% endif %}
         {% if user|have_menu:"DIA"%}
             <div class="tab-item ark text-center" data-url="{% url "patient-diagnoses" %}" data-target="div-container" data-obj_id="{{obj.id}}"> 
                 <i class="fa fa-list"></i> <span class="hide-mobile"><br />
                 {% trans "Diagnósticos" %} ({{obj.diagnoses.all.count}})</span></div>
         {% endif %}
-        {% if user|have_menu:"PTR"%}
-            <div class="tab-item ark text-center" data-url="{% url "patient-procedure" %}" data-target="div-container" data-obj_id="{{obj.id}}"> 
-                <i class="fa fa-project-diagram"></i> <span class="hide-mobile"><br />
-                {% trans "Trámites" %} ({{obj.procedures.all.count}})</span></div>
+        {% if user|have_menu:"SPD"%}
+            <div class="tab-item ark text-center" data-url="{% url "patient-spd" %}" data-target="div-container" data-obj_id="{{obj.id}}">
+                <i class="fa fa-pills"></i><span class="hide-mobile"><br />{% trans "Pastilleros" %} ({{obj.get_active_pillboxes}})</span></div>
         {% endif %}
         {% if user|have_menu:"ALE"%}
             <div class="tab-item ark text-center" data-url="{% url "patient-allergy" %}" data-target="div-container" data-obj_id="{{obj.id}}">
                 <i class="fas fa-allergies"></i><span class="hide-mobile"><br />{% trans "Alergias" %} 
                 ({{obj.alergias_excipientes.all.count}}/{{obj.alergias_principios.all.count}})</span></div>
-        {% endif %}
-        {% if user|have_menu:"SPD"%}
-            <div class="tab-item ark text-center" data-url="{% url "patient-spd" %}" data-target="div-container" data-obj_id="{{obj.id}}">
-                <i class="fa fa-pills"></i><span class="hide-mobile"><br />{% trans "Pastilleros" %} ({{obj.get_active_pillboxes}})</span></div>
         {% endif %}
         {% if user|have_menu:"LOPD"%}
             <div class="tab-item ark text-center" data-url="{% url "patient-lopd" %}" data-target="div-container" data-obj_id="{{obj.id}}">
@@ -45,15 +44,15 @@
             <div class="tab-item ark text-center" data-url="{% url "patient-evolutionary" %}" data-target="div-container" data-obj_id="{{obj.id}}">
                 <i class="fa fa-history"></i><span class="hide-mobile"><br />{% trans "Evolutivo" %} ({{obj.evolutionary.all.count}})</span></div>
         {% endif %}
-        {% if user|have_menu:"PARAM"%}
-            <div class="tab-item ark text-center" data-url="{% url "patient-params" %}" data-target="div-container" data-obj_id="{{obj.id}}">
-                <i class="fa fa-history"></i><span class="hide-mobile"><br />{% trans "Parametros" %} ({{obj.blood_pressure.all.count}})</span></div>
-        {% endif %}
         {% if user|have_menu:"TELEGRAM"%}
             <div class="tab-item ark text-center" data-url="{% url "patient-telegram" %}" data-target="div-container" data-obj_id="{{obj.id}}">
                 <i class="fab fa-telegram"></i><span class="hide-mobile"><br />{% trans "Telegram" %}</span></div>
         {% endif %}
-
+        {% if user|have_menu:"PTR"%}
+            <div class="tab-item ark text-center" data-url="{% url "patient-procedure" %}" data-target="div-container" data-obj_id="{{obj.id}}"> 
+                <i class="fa fa-project-diagram"></i> <span class="hide-mobile"><br />
+                {% trans "Trámites" %} ({{obj.procedures.all.count}})</span></div>
+        {% endif %}
     </div>
 
     <div id="div-container">{% include "patient/patient-form.html" %}</div>
