@@ -66,6 +66,11 @@ def remote_auth(request):
         if username != None:
             user = User.objects.get(username=username)
             user_auth = ExternalAuth.objects.get(username=username, domain=request.META['HTTP_HOST'])
+            #print("--3--")
+            #print(user_auth.id)
+            #print(user_auth.request)
+            #print(user_auth.response)
+            #print(user_auth.domain)
 
             if user is not None and user_auth.request == user_auth.response:
                 if user.is_active:
