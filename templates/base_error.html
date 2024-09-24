@@ -34,9 +34,9 @@
     <body>
         <div id="main-layout-container">
             <main id="main-content">
-                <aside id="sidebar" class="bg-light closed"> <div id="side_menu"> {% get_main_menu request.user %} </div> </aside>
+                {#<aside id="sidebar" class="bg-light closed"> <div id="side_menu"> {% get_main_menu request.user %} </div> </aside>#}
                 <div class="row w-100" style="margin:0">
-                    <div class="col-12" id="custom-menu"> {% block custom_menu %}{% endblock custom_menu %} </div>
+                    {#<div class="col-12" id="custom-menu"> {% block custom_menu %}{% endblock custom_menu %} </div>#}
                     <div class="col-12" id="content-section" class="ml-3"> {% block central_content %}{% endblock central_content %} </div>
                 </div>
             </main>

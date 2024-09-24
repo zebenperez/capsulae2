@@ -1,0 +1,42 @@
+{% extends 'base_error.html' %}
+{% load i18n common_tags %}
+
+{% block central_content %}
+
+    <div class="row"> 
+        <div class="col-12 menu sticky-top text-center bg-black py-3"> 
+            <a href="#"><img src="/static/imgs/logo-w.png" alt="white logo" width="150"></a>
+        </div>
+
+        {% if request.user.is_authenticated %}
+            <div class="row w-100 mt-2 z-9k">
+                <div class="col-12 text-end"> <a href="{% url 'auth_logout' %}"><i class="fas fa-power-off"></i> Salir</a> </div>
+            </div>
+        {% endif %}
+
+        <div id="msg-error-exc" class="col-lg-10 offset-lg-1 col-12">
+            <div class="col-lg-10 offset-lg-1 col-12 alert alert-warning-pay text-center mt-5">
+                {% trans "¡Cuenta desactivada!" %}{%if err_msg%} {{err_msg}} {%endif%}</div>
+            <span class="separator">&nbsp;</span>
+            <div class="col-lg-10 offset-lg-1 col-12 card warning-pay">
+                {% if error == True %}
+                    <div class="card-header text-white text-center"> <div class="row"> <div class="col-lg-10 offset-lg-1 col-12">
+                        {% trans 'Descripción del problema' %}</div> </div> </div>
+                    <div class="card-body text-center p-3"> Ha habido un problema al procesar su pago, disculpe las molestias!
+	                    <div class="col-lg-4 offset-lg-4 text-center pt-5 pb-3"> <a class="btn btn-primary payment w-100 py-3" 
+                            href="{% url "account-payment-error" %}"> <strong>{% trans "VOLVER" %}</strong></a></div>
+                    </div>
+                {% else %}
+                    <div class="card-header text-white text-center"> <div class="row"> <div class="col-lg-10 offset-lg-1 col-12">
+                        {% trans 'Pago procesado' %}</div> </div> </div>
+                    <div class="card-body text-center p-3"> Su pago, por un importe de {{obj.amount}} se ha procesado correctamente.
+                        <br/> Le recordamos que su pago expira el {{obj.expire_date}}
+	                    <div class="col-lg-4 offset-lg-4 text-center pt-5 pb-3"> <a class="btn btn-primary payment w-100 py-3" 
+                            href="{% url "pharma-index" %}"> <strong>{% trans "ACCEDER" %}</strong></a></div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

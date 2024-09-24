@@ -1,5 +1,5 @@
 from django.core.files import File
-from django.contrib.auth import logout
+#from django.contrib.auth import logout
 from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import render, redirect, reverse
@@ -13,7 +13,8 @@ import os, csv
 from capsulae2.decorators import group_required
 from capsulae2.commons import get_or_none, get_param, show_exc
 from capsulae2.settings import MEDIA_ROOT
-from account.models import Company, UserPayment
+#from account.models import Company, UserPayment
+from account.models import Company
 from lopd.models import LOPDConsents
 from community.models import Organization, PatientOrg, Procedure, PatientProcedure
 from medication.medication_lib import get_medication
@@ -28,26 +29,26 @@ from .pharma_lib import get_values_to_interactions_print, get_values_to_summary_
 from .telegram_models import TelegramUserChat
 
 
-def check_user_payment(user):
-    now = datetime.now()
-    up = UserPayment.objects.filter(user = user, expire_date__gte = now).first()
-    if up == None:
-        return False
-    return True
+#def check_user_payment(user):
+#    now = datetime.now()
+#    up = UserPayment.objects.filter(user = user, expire_date__gte = now).first()
+#    if up == None:
+#        return False
+#    return True
 
 @group_required("admins","managers","employee")
 def index(request):
-    if not check_user_payment(request.user):
-        logout(request)
-        return redirect('pharma-payment-error')
+#    if not check_user_payment(request.user):
+#        logout(request)
+#        return redirect('pharma-payment-error')
     return render(request, "index.html", {})
 
 def home(request):
     return render(request, "home.html", {})
 
-def payment_error(request):
-    up = UserPayment.objects.all().order_by('-expire_date').first()
-    return render(request, "error-payments.html", {'payment': up})
+#def payment_error(request):
+#    up = UserPayment.objects.all().order_by('-expire_date').first()
+#    return render(request, "error-payments.html", {'payment': up})
 
 '''
     Patients
@@ -138,19 +139,60 @@ def patient_evolutionaries(request):
     ev_list = Evolutionary.objects.filter(matter__contains="Derivación")
     return render(request, "patients/evolutionary/evo-list.html", {'ev_list': ev_list})
 
+def get_obs_answer(question, text):
+    if "{}: Si".format(question) in text:
+        return "Si"
+    if "{}: No".format(question) in text:
+        return "No"
+    return "-"
+
 @group_required("admins")
 def patient_evolutionaries_csv(request):
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="derivaciones.csv"'
 
-    writer = csv.writer(response, delimiter=';')
+    writer = csv.writer(response, delimiter='|')
     ev_list = Evolutionary.objects.filter(matter__contains="Derivación")
 
-    writer.writerow(['Paciente', 'Genero', 'Teléfono', 'Asunto', 'Fecha', 'Observaciones'])
+    header = [
+        'Paciente', 
+        'Genero', 
+        'Teléfono', 
+        'Asunto', 
+        'Fecha', 
+        'Profesional',
+        'Organización',
+        '¿La persona vive sola?',
+        '¿Vive con alguna persona cuidadora de similar edad y/o personas con discapacidad,con problemas de salud mental, menores de edad?',
+        '¿Cuenta con una red social en la que poder apoyarse?',
+        '¿Existe barrera idiomática?',
+        '¿Migrante?',
+        '¿Está en situación de dependencia?',
+        '¿Población excluida de Tarjeta Sanitaria?',
+        '¿Recibe algún tipo de ayuda?',
+        '¿Discapacidad reconocida?',
+        '¿Cuenta con una vivienda que reúna las condiciones de habitabilidad?',
+        'Observaciones'
+    ]
+
+    #writer.writerow(['Paciente', 'Genero', 'Teléfono', 'Asunto', 'Fecha', 'Observaciones'])
+    writer.writerow(header)
     for ev in ev_list:
         name = "{} {}".format(ev.patient.nombre, ev.patient.apellido)
-        writer.writerow([name, ev.patient.sexo, ev.patient.telefono1, ev.matter, ev.date, ev.observations])
-
+        prof = ev.observations[(ev.observations.find("Profesional:")+12):ev.observations.find("Observaciones:")-5]
+        obs = ev.observations[(ev.observations.find("Observaciones:")+14):] if "Observaciones:" in ev.observations else ev.observations
+        q1 = get_obs_answer("¿La persona vive sola?", ev.observations)
+        q2 = get_obs_answer("¿Vive con alguna persona cuidadora de similar edad y/o personas con discapacidad,con problemas de salud mental, menores de edad?", ev.observations)
+        q3 = get_obs_answer("¿Cuenta con una red social en la que poder apoyarse?", ev.observations)
+        q4 = get_obs_answer("¿Existe barrera idiomática?", ev.observations)
+        q5 = get_obs_answer("¿Migrante?", ev.observations)
+        q6 = get_obs_answer("¿Está en situación de dependencia?", ev.observations)
+        q7 = get_obs_answer("¿Población excluida de Tarjeta Sanitaria?", ev.observations)
+        q8 = get_obs_answer("¿Recibe algún tipo de ayuda?", ev.observations)
+        q9 = get_obs_answer("¿Discapacidad reconocida?", ev.observations)
+        q10 = get_obs_answer("¿Cuenta con una vivienda que reúna las condiciones de habitabilidad?", ev.observations)
+        org = ev.matter[(ev.matter.find("Derivación a: ")+14):]
+        writer.writerow([name, ev.patient.sexo, ev.patient.telefono1, ev.matter, ev.date, prof, org, q1, q2, q3, q4, q5, q6, q7, q8, q9, q10, obs])
     return response
 
 '''

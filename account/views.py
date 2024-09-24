@@ -3,13 +3,13 @@ from django.contrib.auth.models import User, Group
 from django.shortcuts import render, redirect
 from django.contrib import auth
 
-
 from capsulae2.decorators import group_required
 from capsulae2.commons import get_random_str, get_param, get_or_none, show_exc
 from shifts2.models import Journey
 from .email_lib import send_register_email, send_new_password_email
 from .models import *
 
+from datetime import datetime, timedelta
 import random, string
 
 CAT_REGISTER = "Registro"
@@ -58,6 +58,17 @@ def signup_create_useractivate(user):
     useractivate.save()
     return useractivate
 
+def signup_create_comp(dic, user):
+    comp = Company.objects.create(manager=user)
+    comp.code = dic["cif"]
+    comp.name = dic["name"]
+    comp.main_address = dic["address"]
+    comp.town = dic["town"]
+    comp.province = dic["province"]
+    comp.email = dic["email1"]
+    comp.save()
+    return comp 
+
 def signup_create_userprofile(dic, user):
     prof = get_or_none(Profile, dic["profile"])
     if prof != None:
@@ -67,13 +78,13 @@ def signup_create_userprofile(dic, user):
             um.menus.add(menu)
 
 def signup_create_userpayment(user):
-    expire_date = datetime.today() + datetime.timedelta(days=90)
-    up, created = UserPayment.objects.create(user=user, expire_date=expire_date, desc="Creación de cuenta, 90 días de cortesía")
+    expire_date = datetime.today() + timedelta(days=90)
+    up = UserPayment.objects.create(user=user, expire_date=expire_date, desc="Creación de cuenta, 90 días de cortesía")
 
 #@group_required("admins",)
 def signup(request):
-    email = request.POST.get('email','')
-    confirmedemail = request.POST.get('confirmedemail','')
+    email = request.POST.get('email1','')
+    confirmedemail = request.POST.get('email2','')
 
     user = None
     useractivate = None
@@ -86,36 +97,21 @@ def signup(request):
                 signup_add_group(user)
                 profile = EmployeeProfile.objects.create(user=user)
                 useractivate = signup_create_useractivate(user)
+                signup_create_comp(request.POST, user)
                 signup_create_userprofile(request.POST, user)
                 signup_create_userpayment(user)
                 send_register_email(request.META['HTTP_HOST'], useractivate.activate_key, [email])
                 context = {'user':user, 'useractivate':useractivate, 'error_code':0}
-
-                #user = User.objects.create_user(email, email, password)
-                #user.first_name = request.POST.get('name')
-                #user.last_name = request.POST.get('cif')
-                #user.save()
-                #manager_group = Group.objects.get(name='managers')
-                #manager_group.user_set.add(user)
-                #profile = EmployeeProfile(user=user)
-                #profile.save()
-                #useractivate = UserActivate()
-                #useractivate.user = user
-                #useractivate.activate_key = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(128))
-                #useractivate.save()
-                #html_message = 'Gracias por tu inter&eacute;s en Capsulae. Para la activaci&oacute;n de la cuenta pincha <a href="http://%s/pharma/activate_account/%s/">aqu&iacute;</a>' % (request.META['HTTP_HOST'], useractivate.activate_key)
-                #send_mail('Registro en Capsulae', 'Registro en Capsulae', 'info@shidix.com', [email], html_message=html_message)
-                #send_email('Registro en Capsulae', 'Registro en Capsulae', 'info@shidix.com', [email], html_message)
-                #LogManager(user=user, app=CAT_REGISTER).save_action(request.path, "Usuario registrado sin confirmar")
             else:
                 user = User.objects.get(email=email)
                 context = {'user':user, 'useractivate':useractivate, 'error_code':1}
         except Exception as e:
             print(e)
             return render(request, 'error_exception.html', {'exc':show_exc(e)})
-            #context = {'user':user, 'useractivate':useractivate, 'error_code':2, 'error_msg':e}
         #else:
         #    context = {'error_msg': 'Error de validación del captcha' }
+    else:
+        context = {'error_code':2}
     return render (request, "account/signup.html", context)
 
 
@@ -183,7 +179,7 @@ def reactivate(request, activation_key):
         useractivate = UserActivate.objects.get(activate_key=activation_key)
         user = useractivate.user
         useractivate.activate_key = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(128))
-        useractivate.valid_date = date.today() + datetime.timedelta(days=7)
+        useractivate.valid_date = date.today() + timedelta(days=7)
         useractivate.save()
         send_register_email(request.META['HTTP_HOST'], useractivate.activate_key, [email])
         #html_message = 'Gracias por tu inter&eacute;s en Capsulae. Para la activaci&oacute;n de la cuenta pincha <a href="http://%s/pharma/activate_account/%s/">aqu&iacute;</a>' % (request.META['HTTP_HOST'], useractivate.activate_key)
@@ -193,6 +189,50 @@ def reactivate(request, activation_key):
         useractivate = None
         msg_err.append('KEY_DOES_NOT_EXIST')
     return render(request, "signup.html", {'user':user, 'useractivate':useractivate, 'msg_err': msg_err})
+
+'''
+    Profiles
+'''
+@group_required("admins", "managers")
+def profile_view(request):
+    comp = Company.objects.filter(manager=request.user).first()
+    return render(request, "profile/profile-view.html", {'obj': comp})
+
+'''
+    Payments
+'''
+def check_account_datas(comp):
+    return (comp.code != "" and comp.name != "" and comp.main_address != "" and comp.town != "" and comp.province != "" and comp.email != "")
+
+def payment_error(request):
+    if request.user.is_authenticated:
+        comp = Company.objects.filter(manager=request.user).first()
+        if comp == None:
+            return render(request, 'error_exception.html', {'exc': 'Organización o Empresa no encontrada!'})
+        register = check_account_datas(comp)
+        up = UserPayment.objects.filter(user=request.user, cancel=False).order_by('-expire_date').first()
+        plan_list = Plan.objects.all().order_by("amount")
+        return render(request, "error-payments.html", {'payment': up, 'register': register, 'obj': comp, 'plan_list': plan_list})
+    return redirect("pharma-index")
+
+#@group_required("admins", "managers")
+def payment_send(request, plan_id):
+    plan = get_or_none(Plan, plan_id)
+    if plan == None or not request.user.is_authenticated:
+        return render(request, "account/payment-confirm.html", {'error': True})
+
+    expire_date = datetime.today() + timedelta(days=plan.days)
+    up = UserPayment.objects.create(user=request.user, amount=plan.amount, expire_date=expire_date, desc="Pago cuota")
+    return render(request, "account/payment-confirm.html", {'error': False, 'obj': up})
+
+def payment_stripe_error(request):
+    return render(request, "account/payment-confirm.html", {'error': True})
+
+def payment_stripe_success(request, code):
+    up = UserPayment.objects.find(code=code).first()
+    if up == None:
+        return render(request, "account/payment-confirm.html", {'error': True})
+    return render(request, "account/payment-confirm.html", {'error': False, 'obj': up})
 
 '''
     Employees

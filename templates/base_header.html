@@ -15,7 +15,7 @@
                         <i class="fas fa-ellipsis-v"></i> </a>
                     <div class="dropdown-menu user-dropdown" aria-labelledby="dropdownProfile">
                         <ul>
-                            <li><a href="#"><i class="fas fa-user"></i> Mi perfil</a></li>
+                            <li><a href="{% url "profile-view" %}"><i class="fas fa-user"></i> Mi perfil</a></li>
                             <div class="dropdown-divider"></div>
                             <li><a href="{% url 'auth_logout' %}"><i class="fas fa-power-off"></i> Salir</a></li>
                         </ul>

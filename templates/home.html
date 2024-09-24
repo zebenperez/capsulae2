@@ -30,7 +30,7 @@
             <header class="qba">
   	            <!--menu start-->
                 <div class="menu sticky-top">
-                    <div class="TopBar" style="display: grid; grid-template-columns: 20% 30% 50%; align-items: center;">
+                    <div class="TopBar" id="divTop">
                         <div class=""><a href="#"><img src="/static/imgs/logo-w.png" alt="white logo" width="80%"></a> </div>
                         <div class="">
                             <div class="navArea">
@@ -60,16 +60,27 @@
                                         </div>
                                         <div class="form-group">
                                             <label for="btn-submit">&nbsp;</label>
-                                            <button type="submit" class="btn submitBnt form-control" id="btn-submit">Entrar</button> <br />
-                                            <a class="" onclick="$('#row-new-passwd').show()">¿Has olvidado tu contraseña?</a>
+                                            <button type="submit" class="btn submitBnt form-control pointer" id="btn-submit">Entrar</button> <br />
+                                            <a onclick="$('#row-new-passwd').toggle()" style="cursor:pointer">¿Has olvidado tu contraseña?</a>
                                         </div>
                                     </div>
                                 </form>
                             </div>
+                            <form class="form-horizontal p-2" method="post" action="{% url "send_new_password_by_email" %}">
+                                {% csrf_token %}
+                                <div class="hideClass" id="row-new-passwd">
+                                    <div class="recover-pass">
+					    <div class=""> <input name="email" type="text" value="" id="email" class="form-control" 
+						placeholder="Indique su correo electrónico"/> </div>
+					    <div class=""> <button type="submit" class="btn sendBtn form-control pointer" id="btn-submit">
+						{% trans "Enviar nuevo password" %}</button> </div>
+				    </div>
+                                </div>
+                            </form>
                         </div>
                     </div>
                 </div>
-                <!--menu end-->     
+               <!--menu end-->     
 
                 <!--banner start-->
                 <div class="banner row" id="banner">
@@ -111,20 +122,40 @@
               
             <!--planes start-->
             <section class="protfolio" id="planes">
-                <div class="container">
-                    <div class="heading">
-                        <h2>Planes</h2>
-                    </div>
-                </div>	
+                <div class="container"> <div class="heading"> <h2>Planes</h2> </div> </div>	
                 <div class="planes">
-                    <div class="plan-box-1"><a href=""><img src="/static/imgs/bg-plan1.png" height="164" width="244" /></a></div>
-                    <div class="plan-box-2"><a href=""><img src="/static/imgs/bg-plan2.png" height="164" width="244" /></a></div>
-                    <div class="plan-box-3"><a href=""><img src="/static/imgs/bg-plan3.png" height="164" width="244" /></a></div>
-                    <div class="plan-box-4"><a href=""><img src="/static/imgs/bg-plan4.png" height="164" width="244" /></a></div>
+                    <div class="plan-box-1">
+			            <div class="plan-text">&quot;Con este plan la <strong>cuota mensual</strong> se paga muy cómodamente&quot;</div>
+			            <img src="/static/imgs/bg-plan1.png" height="100" width="244" />
+		    	        <div><button class="btn btn-access pointer" onclick="setFocus('username')">Accede</button> o 
+                            <button class="btn btn-register pointer" onclick="setFocus('name')">Regístrate</a></div>
+		            </div>
+                    <div class="plan-box-2">
+			            <div class="plan-text">&quot;Anota en tu agenda el <strong>pago trimestral</strong> y olvídate del mes a mes&quot;</div>
+			            <img src="/static/imgs/bg-plan2.png" height="100" width="244" />
+		    	        <div><button class="btn btn-access pointer" onclick="setFocus('username')">Accede</button> o 
+                            <button class="btn btn-register pointer" onclick="setFocus('name')">Regístrate</a></div>
+		            </div>
+                    <div class="plan-box-3">
+			            <div class="plan-text">&quot;<strong>Dos pagos al año</strong> y tienes este plan para ti&quot;</div>
+			            <img src="/static/imgs/bg-plan3.png" height="100" width="244" />
+		    	        <div><button class="btn btn-access pointer" onclick="setFocus('username')">Accede</button> o 
+                            <button class="btn btn-register pointer" onclick="setFocus('name')">Regístrate</a></div>
+		            </div>
+                    <div class="plan-box-4">
+			            <div class="plan-text">&quot;Con este <strong>plan anual</strong> te despreocupas durante todo un año&quot;</div>
+			            <img src="/static/imgs/bg-plan4.png" height="100" width="244" />
+		    	        <div><button class="btn btn-access pointer" onclick="setFocus('username')">Accede</button> o 
+                            <button class="btn btn-register pointer" onclick="setFocus('name')">Regístrate</a></div>
+		            </div>
                 </div>
             </section>
             <!--planes end-->   
               
+            <!--register start-->
+            {% include "account/register.html" %}
+            <!--register end-->
+
             <!--contact start-->
             <section class="contact" id="contact">
                 <div class="container">
@@ -138,8 +169,8 @@
             <section class="contactDetails">
                 <div class="container"> 
                 <!--contact form start-->
-                    <div class="row">
-                        <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4 left-contact">
+                    <div class=" w-100">
+                        <div class="left-contact">
                                 <h3>Dirección</h3>
                                     Calle la Hoyita, 22. 38611. San Isidro. Santa Cruz de Tenerife<br /><br />
                                 <h3>Datos de contacto</h3>
@@ -147,7 +178,7 @@
                                     <a href="www.fundec.org" class="contactLink">www.fundec.org</a>
                         </div>
                 
-                        <div class="col-xs-12 col-sm-12 col-md-8 col-lg-8 conForm right-contact">
+                        <div class="conForm right-contact">
                             <div id="message"></div>
                             <form method="post" action="php/contact.php" name="cform" id="cform">
                                 <div class="w-100"><input name="name" id="name" type="text" class="w-100" placeholder="Su nombre" ></div>
@@ -191,8 +222,15 @@
 <!--wrapper end--> 
 
         <script>
+            function setFocus(div){ 
+                var obj = $("#"+div);
+                obj.focus();
+                obj.css('border-color', 'blue');
+                obj.prop('style', 'border: 1px solid green !important');
+                setTimeout(function(){obj.prop('style', 'border: 1px solid #dbdbdb !important');}, 1000);
+            }
+
             $(".menuItem").click(function(){
-                    console.log("--1--");
                 $(".menuItem").removeClass("active");
                 $(this).addClass("active");
             });

@@ -3,8 +3,8 @@
 <div class="row" style="margin:0;">
     <div class="col-12 mt-3">
         <label class="label">{% trans "Ámbito de actuación" %}:</label>
-        <select id="ambit" name="ambit" class="form-control input autosave input view" data-model-name="community.organizationinfo" data-obj-id="{{info.id}}" 
-            data-url="{%url "autosave_field"%}" data-target="div-notification" disabled>
+        <select id="ambit" name="ambit" class="form-control input autosave input view" data-model-name="community.organizationinfo" 
+            data-obj-id="{{info.id}}" data-url="{%url "autosave_field"%}" data-target="div-notification" disabled>
             <option value="">-- Selecciones una opción --</option>
             <option value="mayores" {%if info.ambit == "mayores"%}selected{%endif%}>Mayores</option>
             <option value="infancia y adolescencia" {%if info.ambit == "infancia y adolescencia"%}selected{%endif%}>Infancia y adolescencia</option>
@@ -30,28 +30,28 @@
         <label class="label">{% trans "¿Cómo participar?" %}:</label>
         <textarea class="form-control input autosave input view" id="participate" name="participate" title="{{info.participate}}" 
             data-model-name="community.organizationinfo" data-obj-id="{{info.id}}" data-url="{%url "autosave_field"%}" 
-            data-target="div-notification" placeholder="Escriba aquí las actividades..." disabled>{{info.participate}}</textarea>
+            data-target="div-notification" placeholder="¿Cómo participar?..." disabled>{{info.participate}}</textarea>
             <span id="participate__msg"></span>
     </div>
     <div class="col-12 mt-3">
         <label class="label">{% trans "¿Cómo ve la salud del pueblo?" %}:</label>
         <textarea class="form-control input autosave input view" id="health" name="health" title="{{info.health}}" 
             data-model-name="community.organizationinfo" data-obj-id="{{info.id}}" data-url="{%url "autosave_field"%}" 
-            data-target="div-notification" placeholder="Escriba aquí las actividades..." disabled>{{info.health}}</textarea>
+            data-target="div-notification" placeholder="¿Cómo ve la salud del pueblo?..." disabled>{{info.health}}</textarea>
             <span id="health__msg"></span>
     </div>
     <div class="col-12 mt-3">
         <label class="label">{% trans "¿De qué forma sus actividades mejoran el bienestar en el pueblo?" %}:</label>
         <textarea class="form-control input autosave input view" id="improvements" name="improvements" title="{{info.improvements}}" 
             data-model-name="community.organizationinfo" data-obj-id="{{info.id}}" data-url="{%url "autosave_field"%}" 
-            data-target="div-notification" placeholder="Escriba aquí las actividades..." disabled>{{info.improvements}}</textarea>
-            <span id="improvements__msg"></span>
+            data-target="div-notification" placeholder="¿De qué forma sus actividades mejoran el bienestar en el pueblo?..." disabled>
+            {{info.improvements}}</textarea> <span id="improvements__msg"></span>
     </div>
     <div class="col-12 mt-3">
         <label class="label">{% trans "¿Qué otro recurso no podría faltar en esta guía?" %}:</label>
         <textarea class="form-control input autosave input view" id="resources" name="resources" title="{{info.resources}}" 
             data-model-name="community.organizationinfo" data-obj-id="{{info.id}}" data-url="{%url "autosave_field"%}" 
-            data-target="div-notification" placeholder="Escriba aquí las actividades..." disabled>{{info.resources}}</textarea>
+            data-target="div-notification" placeholder="¿Qué otro recurso no podría faltar en esta guía?..." disabled>{{info.resources}}</textarea>
             <span id="resources__msg"></span>
     </div>
 </div>

@@ -282,6 +282,7 @@ a.btn.btn-secondary.ark {
 .profile-btn {
     text-align: center;
     line-height: 0 !important;
+    width: 50px;
 }
 .profile-btn:hover {
     border-radius: 50%;
@@ -956,6 +957,7 @@ i.fas.fa-home:hover, i.far.fa-folder-open:hover, i.fas.fa-users:hover, i.fas.fa-
 
 #main-content {
     display: flex;
+    background: #fff;
 	border:1px solid white !important;
 	/*width: 99%;*/
 	width: 100%;
@@ -989,7 +991,7 @@ i.fas.fa-home:hover, i.far.fa-folder-open:hover, i.fas.fa-users:hover, i.fas.fa-
     flex-basis: 99.5%;
     padding-top: 15px;
     padding-bottom: 3.5rem;
-/*    height: 99vh;*/
+    height: 99vh;
 }
 
 div#cover.image.special {
