@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% load i18n common_tags %}
+
+{% block central_content %}
+    <div class="content">
+        <div class="patient-data-title p-4">
+            <div class="col-lg-1 col-1 patient-profile-left">
+                <div class="img"> <img src="/static/imgs/no-avatar.png" class="patient-profile-img"> </div>
+            </div>
+            <div class="col-lg-11 col-10 col-offset-1">{{obj.name}}</div>
+        </div>
+    </div>
+    <div id="div-container">{% include "profile/profile-form.html" %}</div>
+
+    {% include "common-modal.html" %}
+
+    <script>
+        $(".tab-item").click(function(){
+            $(".tab-item").removeClass("active");
+            $(this).addClass("active");
+        });
+    </script>
+{% endblock central_content %}
+

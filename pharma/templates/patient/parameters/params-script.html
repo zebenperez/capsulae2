@@ -13,7 +13,7 @@
     function calculatebmi()
     {
         weight = parseFloat($('#weight').val());
-        height = parseFloat($('#height').val());
+        height = parseFloat($('#height').val().replace(",","."));
         if (isNaN(weight) || isNaN(height))
         {
             return ;
@@ -25,7 +25,6 @@
 
     function calculate_belt_hip_index(belt, hip)
     {
-            console.log("--1--");
         belt = (belt) ? belt.replace(",",".") : null; 
         hip = (hip) ? hip.replace(" ",".") : null;
         let value = ""

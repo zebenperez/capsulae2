@@ -7,7 +7,7 @@ class ConfigAdmin(admin.ModelAdmin):
     list_display = ('key', 'value')
 
 class TelegramUserChatAdmin(admin.ModelAdmin):
-    list_display = ('code', 'patient', 'telegram_chat_id', 'confirmed')
+    list_display = ('code', 'patient', 'telegram_chat_id', 'observations', 'confirmed')
 
 class PacientesAdmin(admin.ModelAdmin):
     list_display = ('n_historial', 'id_user')

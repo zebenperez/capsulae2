@@ -5,10 +5,9 @@ from . import telegram_views, diagnoses_views
 urlpatterns = [
     path('index/', views.index, name='pharma-index'),
     path('home/', views.home, name='pharma-home'),
-    path('payment-error/', views.payment_error, name='pharma-payment-error'),
 
     #------------------------- VIEWS ACCOUNT -----------------------
-    path('signup/', views_account.signup, name='account-signup'),
+    #path('signup/', views_account.signup, name='account-signup'),
     
     #------------------------- PATIENTS --------------------
     path('patients/', views.patients, name='patients'),

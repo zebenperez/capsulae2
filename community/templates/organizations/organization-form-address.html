@@ -24,7 +24,8 @@
         <label class="label">{% trans "Nombre de la vía" %}:</label>
         <input type="text" class="form-control input autosave input view" id="street_name" name="street_name" value="{{addr.street_name|default:""}}" 
             title="{{addr.street_name}}" data-model-name="community.organizationaddress" data-obj-id="{{addr.id}}" 
-            data-url="{%url "autosave_field"%}" data-target="div-notification" placeholder="Nombre..." disabled/> <span id="street_name__msg"></span>
+            data-url="{%url "autosave_field"%}" data-target="div-notification" placeholder="Nombre de la vía..." disabled/> 
+        <span id="street_name__msg"></span>
     </div>
     <div class="col-4 mt-3">
         <label class="label">{% trans "Número" %}:</label>
@@ -63,7 +64,7 @@
         </select>
     </div>
     <div class="col-12 mt-3">
-        <label class="label">{% trans "Barrio o núcleo" %}:</label>
+        <label class="label">{% trans "Barrio o núcleo (otro)" %}:</label>
         <input type="text" class="form-control input autosave input view" id="place_other" name="place_other" value="{{addr.place_other|default:""}}" 
             title="{{addr.place_other}}" data-model-name="community.organizationaddress" data-obj-id="{{addr.id}}" 
             data-url="{%url "autosave_field"%}" data-target="div-notification" placeholder="Barrio..." disabled/> <span id="place_other__msg"></span>
@@ -72,12 +73,13 @@
         {% trans "¿La mayoría de sus actividades se desarrollan en un barrio/núcleo diferente al de su sede?" %}
         <input type="checkbox" class="input autosave input view" id="same_place" name="same_place" data-model-name="community.organizationaddress" 
             data-obj-id="{{addr.id}}" data-url="{%url "autosave_field"%}" data-target="div-notification" data-bool="True" 
-            placeholder="Código..." {%if addr.same_place%}checked{%endif%} disabled/> <span id="same_place__msg"></span>
+            {%if addr.same_place%}checked{%endif%} disabled/> <span id="same_place__msg"></span>
     </div>
     <div class="col-12 mt-3" id="div-place">
-        <label class="label">{% trans "Barrio o núcleo" %}:</label>
-        <select id="activity_place" name="activity_place" class="form-control input autosave input view" data-model-name="community.organizationaddress" 
-            data-obj-id="{{addr.id}}" data-url="{%url "autosave_field"%}" data-target="div-notification" disabled>
+        <label class="label">{% trans "Localización de la actividad" %}:</label>
+        <select id="activity_place" name="activity_place" class="form-control input autosave input view"
+            data-model-name="community.organizationaddress" data-obj-id="{{addr.id}}" data-url="{%url "autosave_field"%}" 
+            data-target="div-notification" disabled>
             <option value="">-- Selecciones una opción --</option>
             <option value="los abrigos" {%if addr.place == "los abrigos"%}selected{%endif%}>Los Abrigos</option>
             <option value="los blanquitos" {%if addr.place == "los blanquitos"%}selected{%endif%}>Los Blanquitos</option>

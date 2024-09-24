@@ -180,9 +180,11 @@ class UserProfile(models.Model):
         verbose_name = "Perfil de usuario"
 
 class UserPayment(models.Model):
+    cancel = models.BooleanField(verbose_name="Cancelado", default=False)
     amount = models.FloatField(verbose_name="Pago", blank=True, default=0)
     pay_date = models.DateField(verbose_name="Fecha de pago", default=datetime.now)
     expire_date = models.DateField(verbose_name="Fecha de expiración", default=datetime.now)
+    code = models.CharField(verbose_name="Stripe code", max_length=250, blank=True, null=True, default="")
     desc = models.CharField(verbose_name="Descripción", max_length=250, blank=True, null=True, default="")
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="payments")
 

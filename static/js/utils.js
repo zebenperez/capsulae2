@@ -17,7 +17,24 @@ function checkConfirmedPasswd(form)
 
 function checkRegisterCondition(form)
 {
-	aceptado = $("#"+form+ " :input[name='acceptconditions']").prop('checked');
+    var f = `#${form}`;
+    var msg = "";
+    var isOk = false;
+    var requiredFields = ["username", "passwd"]
+
+    $(f).find('input').each(function(){
+        if (($(this).prop("name").indexOf('csrf') == -1) && ($(this).prop("name") != "tos"))
+            msg += "<br/> El campo " + $(this).prop('title') + " es requirido";
+    });
+    if ($("#email").val() != $("#email2").val())
+        msg += "Los correos electrónicos no coinciden. <br/>";
+    if (!$("#tos").prop("checked"))
+        msg += "<br/> Debe aceptar las condiciones de uso.";
+
+    if (!isOk)
+        $("#div-errors").html(msg);
+
+	/*aceptado = $("#"+form+ " :input[name='acceptconditions']").prop('checked');
 	emailConfirmed = $("#"+form+ " :input[name='confirmedemail']").val();
 	email = $("#"+form+ " :input[name='email']").val();
 	strMsg = "";
@@ -33,7 +50,8 @@ function checkRegisterCondition(form)
 		isOk = false;
 		$('.email_error').show();
 		strMsg = strMsg + 'Error en los emails';
-	}
+	}*/
+    console.log(isOk);
 	return (isOk);
 }
 
@@ -104,55 +122,83 @@ function do_fill_div(input_field, id_div, val)
 		div = $('#'+id_div);
 		div.html("<div class='alert alert-warning'>Buscando...</div>");
 		$.ajax({
-					type:'POST',
-					url:'/pharma/medicamentos/search_remote/',
-					data: {'especialidad':value_to_search, 'comercializado':'S', 'prActiv1':value_to_search, 'codATC':value_to_search, 'cn':value_to_search},
-					success: function(response_data)
-								{
-									msg = response_data["medicamentos"];
-									error = response_data["error"];
-									newHtml = "";
-									if (msg.length == 0)
-									{
-										if ((error != 'null') && (error != null))
-											newHtml = "<div class='alert alert-danger'>" + error + "</div>";
-										else
-											newHtml = "<div class='alert alert-danger'>No hay resultados</div>";
-									}
-									else
-									{
-										if ((error != null) && (error != 'null'))
-										{
-											newHtml = "<div class='alert alert-warning'>" + error + "</div>";
-										}
-									}
-								for (i = 0; i < msg.length; i++)
-								{
-									item = msg[i];
-									newHtml = (newHtml+"<a id='medic_"+ item.code+"' href=\'#search_anchor\' class=\'btn btn-default medic_item_search small btn-block\' onclick=\"add_code_medic('" +item.cn + "', \'"+item.name+"\');\" title=\'" + item.principles + "\' style=\'overflow-x:hidden;\'><p class='wrap_content'>" + item.name  +"["+item.cod_atc +" - " + item.cn +"]</p><p style='text-align:center'><small>"+item.family+"</small></p></a>");
-								} 
-								div.html(newHtml);
-							}
-			});
+            type:'POST',
+            url:'/pharma/medicamentos/search_remote/',
+            data: {'especialidad':value_to_search, 'comercializado':'S', 'prActiv1':value_to_search, 'codATC':value_to_search, 'cn':value_to_search},
+            success: function(response_data) {
+                msg = response_data["medicamentos"];
+                error = response_data["error"];
+                newHtml = "";
+                if (msg.length == 0) {
+                    if ((error != 'null') && (error != null))
+                        newHtml = "<div class='alert alert-danger'>" + error + "</div>";
+                    else
+                        newHtml = "<div class='alert alert-danger'>No hay resultados</div>";
+                } else {
+                    if ((error != null) && (error != 'null')) {
+                        newHtml = "<div class='alert alert-warning'>" + error + "</div>";
+                    }
+                }
+                for (i = 0; i < msg.length; i++) {
+                    item = msg[i];
+                    newHtml = (newHtml+"<a id='medic_"+ item.code+"' href=\'#search_anchor\' class=\'btn btn-default medic_item_search small btn-block\' onclick=\"add_code_medic('" +item.cn + "', \'"+item.name+"\');\" title=\'" + item.principles + "\' style=\'overflow-x:hidden;\'><p class='wrap_content'>" + item.name  +"["+item.cod_atc +" - " + item.cn +"]</p><p style='text-align:center'><small>"+item.family+"</small></p></a>");
+                } 
+                div.html(newHtml);
+            }
+		});
+    } else { $('#'+id_div).html(""); }
 }
-else
-{
-	$('#'+id_div).html("");
-}
-}
+
+
 timer=null;
 function fill_div(input_field, id_div)
 {
-value_to_search = $('#' + input_field).val();
-timer = setTimeout(do_fill_div, 400, input_field, id_div, value_to_search);
+    value_to_search = $('#' + input_field).val();
+    timer = setTimeout(do_fill_div, 400, input_field, id_div, value_to_search);
 }
 
 function gotoelement(id, padding = 120)
 {
-offset = $('#'+id).offset().top - parseInt(padding);
-$('html,body').animate({scrollTop:offset}, 1000);
+    offset = $('#'+id).offset().top - parseInt(padding);
+    $('html,body').animate({scrollTop:offset}, 1000);
 }
-
 
 $.expr[":"].contains = $.expr.createPseudo(function(arg) { return function (elem) {return $(elem).text().toUpperCase().indexOf(arg.toUpperCase()) >= 0; }; });
 
+$(document).ready(()=>{
+    $("body").on("click", "#btn-register-send", function(e){
+        console.log("--1--");
+        e.preventDefault();
+        //e.stopPropagation();
+
+        var obj = $(this);
+        var msg = "";
+        var isOk = true;
+
+        obj.find('input').each(function(){
+            if (($(this).prop("name").indexOf('csrf') == -1) && ($(this).prop("name") != "tos"))
+            {
+                msg += "<br/> El campo " + $(this).prop('title') + " es requirido";
+                isOk = false;
+            }
+        });
+	console.log ($("#email1").val());
+        console.log("--2--");
+	console.log ($("#email2").val());
+        if (!isEmail($("#email1").val()) || $("#email1").val() != $("#email2").val())
+        {
+            msg += "Los correos electrónicos no coinciden. <br/>";
+            isOk = false;
+        }
+        if (!$("#tos").prop("checked"))
+        {
+            msg += "<br/> Debe aceptar las condiciones de uso.";
+            isOk = false;
+        }
+
+        if (!isOk)
+            $("#div-errors").html(msg).show();
+        else
+            $("#frmRegister").submit();
+    });
+});

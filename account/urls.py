@@ -10,6 +10,14 @@ urlpatterns = [
     path('change_password/<int:user_id>/', views.change_password, name='change_password'),
     path('reactivate/<slug:activation_key>/', views.reactivate, name='reactivate'),
 
+    #------------------------- PROFILE --------------------
+    path('profile/view/', views.profile_view, name='profile-view'),
+
+    #------------------------- PAYMENTS --------------------
+    path('payment-error/', views.payment_error, name='account-payment-error'),
+    path('payment-send/<int:plan_id>/', views.payment_send, name='account-payment-send'),
+    path('payment-stripe-error/', views.payment_stripe_error, name='account-payment-stripe-error'),
+    path('payment-stripe-success/<slug:code>', views.payment_stripe_success, name='account-payment-stripe-success'),
 
     #------------------------- EMPLOYEES --------------------
     path('employees/', views.employees, name='employees'),

@@ -1,0 +1,56 @@
+{% load i18n %}
+
+<span id="div-notification"></span>
+
+<div id="patient-container">
+    <div class="row w-100 patient-data-body-2 p-1" style="margin:0;">
+        <div class="col-11 patient-data">
+            <div class="row" style="margin:0;">
+                <div class="col-4 mt-3">
+                    <label class="label">{% trans "Nombre" %}:</label>
+                    <input type="text" class="form-control autosave input view" id="name" name="name" value="{{obj.name}}" title="{{obj.name}}" 
+                        data-model-name="account.company" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" data-target="div-notification"
+                        disabled/> <span id="name__msg"></span>
+                </div>
+                <div class="col-4 mt-3">
+                    <label class="label">{% trans "CIF" %}:</label>
+                    <input type="text" class="form-control autosave input view" id="code" name="code" value="{{obj.code}}" 
+                        title="{{obj.code}}" data-model-name="account.company" data-obj-id="{{obj.id}}" data-url="{% url "autosave_field" %}" 
+                        data-target="div-notification" disabled/> <span id="code__msg"></span>
+                </div>
+
+                <div class="col-4 mt-3">
+                    <label class="label">{% trans "Correo electrónico" %}:</label>
+                    <input type="text" class="form-control autosave input view" id="email" name="email" value="{{obj.email}}" 
+                        title="{{obj.email}}" data-model-name="account.company" data-obj-id="{{obj.id}}" data-url="{% url "autosave_field" %}" 
+                        data-target="div-notification" disabled/> <span id="email__msg"></span>
+                </div>
+            </div>
+            <div class="row" style="margin:0;">
+                <div class="col-4 mt-3">
+                    <label class="label">{% trans "Dirección" %}:</label>
+                    <input type="text" class="form-control autosave input view" id="main_address" name="main_address" value="{{obj.main_address}}" 
+                        title="{{obj.main_address}}" data-model-name="account.company" data-obj-id="{{obj.id}}" data-url="{% url "autosave_field" %}"
+                        data-target="div-notification" disabled/> <span id="main_address__msg"></span>
+                </div>
+                <div class="col-4 mt-3">
+                    <label class="label">{% trans "Localidad" %}:</label>
+                    <input type="text" class="form-control autosave input view" id="town" name="town" value="{{obj.town}}" 
+                        title="{{obj.town}}" data-model-name="account.company" data-obj-id="{{obj.id}}" data-url="{% url "autosave_field" %}"
+                        data-target="div-notification" disabled/> <span id="town__msg"></span>
+                </div>
+                <div class="col-4 mt-3">
+                    <label class="label">{% trans "Provincia" %}:</label>
+                    <input type="text" class="form-control autosave input view" id="province" name="province" value="{{obj.province}}" 
+                        title="{{obj.province}}" data-model-name="account.company" data-obj-id="{{obj.id}}" data-url="{% url "autosave_field" %}"
+                        data-target="div-notification" disabled/> <span id="province__msg"></span>
+                </div>
+            </div>
+        </div>    
+        <div class="col-1 text-end">
+            <button id="btn-edit" class="btn btn-sm toggle-edit new" data-class-name="input" data-text="{%trans "Edit"%}" 
+                data-text-alt="{%trans "Hecho"%}">{%trans "Edit"%} </button>
+        </div>
+    </div>
+</div>
+
