@@ -37,8 +37,11 @@ def check_user_payment(user):
 
 @group_required("admins","managers","employee")
 def index(request):
-    if not check_user_payment(request.user):
-        logout(request)
+    if  not check_user_payment(request.user):
+        if request.user.is_superuser:
+            return(redirect('/admin/'))
+        else:
+            logout(request)
         return redirect('pharma-payment-error')
     return render(request, "index.html", {})
 
@@ -133,24 +136,65 @@ def patient_remove(request):
         obj.delete()
     return render(request, "patients/patient-list.html", get_patient_context(request.user))
 
-@group_required("admins")
+@group_required("admins", "managers")
 def patient_evolutionaries(request):
-    ev_list = Evolutionary.objects.filter(matter__contains="Derivación")
+    ev_list = Evolutionary.objects.filter(matter__contains="Derivación", patient__id_user = request.user.id)
     return render(request, "patients/evolutionary/evo-list.html", {'ev_list': ev_list})
+
+def get_obs_answer(question, text):
+    if "{}: Si".format(question) in text:
+        return "Si"
+    if "{}: No".format(question) in text:
+        return "No"
+    return "-"
 
 @group_required("admins")
 def patient_evolutionaries_csv(request):
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="derivaciones.csv"'
 
-    writer = csv.writer(response, delimiter=';')
+    writer = csv.writer(response, delimiter='|')
     ev_list = Evolutionary.objects.filter(matter__contains="Derivación")
 
-    writer.writerow(['Paciente', 'Genero', 'Teléfono', 'Asunto', 'Fecha', 'Observaciones'])
+    header = [
+        'Paciente',
+        'Genero',
+        'Teléfono',
+        'Asunto',
+        'Fecha',
+        'Profesional',
+        'Organización',
+        '¿La persona vive sola?',
+        '¿Vive con alguna persona cuidadora de similar edad y/o personas con discapacidad,con problemas de salud mental, menores de edad?',
+        '¿Cuenta con una red social en la que poder apoyarse?',
+        '¿Existe barrera idiomática?',
+        '¿Migrante?',
+        '¿Está en situación de dependencia?',
+        '¿Población excluida de Tarjeta Sanitaria?',
+        '¿Recibe algún tipo de ayuda?',
+        '¿Discapacidad reconocida?',
+        '¿Cuenta con una vivienda que reúna las condiciones de habitabilidad?',
+        'Observaciones'
+    ]
+
+    #writer.writerow(['Paciente', 'Genero', 'Teléfono', 'Asunto', 'Fecha', 'Observaciones'])
+    writer.writerow(header)
     for ev in ev_list:
         name = "{} {}".format(ev.patient.nombre, ev.patient.apellido)
-        writer.writerow([name, ev.patient.sexo, ev.patient.telefono1, ev.matter, ev.date, ev.observations])
-
+        prof = ev.observations[(ev.observations.find("Profesional:")+12):ev.observations.find("Observaciones:")-5]
+        obs = ev.observations[(ev.observations.find("Observaciones:")+14):] if "Observaciones:" in ev.observations else ev.observations
+        q1 = get_obs_answer("¿La persona vive sola?", ev.observations)
+        q2 = get_obs_answer("¿Vive con alguna persona cuidadora de similar edad y/o personas con discapacidad,con problemas de salud mental, menores de edad?", ev.observations)
+        q3 = get_obs_answer("¿Cuenta con una red social en la que poder apoyarse?", ev.observations)
+        q4 = get_obs_answer("¿Existe barrera idiomática?", ev.observations)
+        q5 = get_obs_answer("¿Migrante?", ev.observations)
+        q6 = get_obs_answer("¿Está en situación de dependencia?", ev.observations)
+        q7 = get_obs_answer("¿Población excluida de Tarjeta Sanitaria?", ev.observations)
+        q8 = get_obs_answer("¿Recibe algún tipo de ayuda?", ev.observations)
+        q9 = get_obs_answer("¿Discapacidad reconocida?", ev.observations)
+        q10 = get_obs_answer("¿Cuenta con una vivienda que reúna las condiciones de habitabilidad?", ev.observations)
+        org = ev.matter[(ev.matter.find("Derivación a: ")+14):]
+        writer.writerow([name, ev.patient.sexo, ev.patient.telefono1, ev.matter, ev.date, prof, org, q1, q2, q3, q4, q5, q6, q7, q8, q9, q10, obs])
     return response
 
 '''

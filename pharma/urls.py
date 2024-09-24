@@ -43,7 +43,7 @@ urlpatterns = [
     path('patients/allergy/principles/search', views.patient_allergy_principles_search, name='patient-allergy-principles-search'),
     path('patients/allergy/principles/list/search', views.patient_allergy_principles_list_search, name='patient-allergy-principles-list-search'),
 
-    path('patients/evolutionary/', views.patient_evolutionary, name='patient-evolutionary'),
+    #path('patients/evolutionary/', views.patient_evolutionary, name='patient-evolutionary'),
 
     path('patients/procedure/', views.patient_procedure, name='patient-procedure'),
     path('patients/procedure-form/', views.patient_procedure_form, name='patient-procedure-form'),
@@ -81,6 +81,7 @@ urlpatterns = [
     path('patients/spd/blister-remove', spd_views.spd_blister_remove, name='spd-blister-remove'),
     path('patients/spd/blister-clone', spd_views.spd_blister_clone, name='spd-blister-clone'),
     path('patients/spd/blister-print/<int:pd_id>', spd_views.spd_blister_print, name='spd-blister-print'),
+    path('patients/spd/blister-qr-print/<int:pd_id>', spd_views.spd_blister_qr_print, name='spd-blister-qr-print'),
 
     path('patients/spd/search-by-qr/', spd_views.spd_search_by_qr, name='spd-search-by-qr'),
 

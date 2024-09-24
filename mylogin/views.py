@@ -58,20 +58,13 @@ def check_remote_user(request):
             return redirect("index")
     return (render(request, "error_exception.html", {'exc':"This is not a valid user"}))
                                                                
-#def remote_auth(request, username=None):
 def remote_auth(request):
     try:
         # authentication of the user, to check if it's active or None
         username = request.GET["username"] if "username" in request.GET else None
         if username != None:
-            user = User.objects.get(username=username)
             user_auth = ExternalAuth.objects.get(username=username, domain=request.META['HTTP_HOST'])
-            #print("--3--")
-            #print(user_auth.id)
-            #print(user_auth.request)
-            #print(user_auth.response)
-            #print(user_auth.domain)
-
+            user = User.objects.get(username=user_auth.username)
             if user is not None and user_auth.request == user_auth.response:
                 if user.is_active:
                     user_auth.response = ''.join(random.choice(string.ascii_letters + string.digits) for x in range(128))
@@ -79,7 +72,7 @@ def remote_auth(request):
                     user_auth.update = datetime.datetime.now()
                     user_auth.save()
                     auth.login(request, user)
-                    #LogManager(user=user, app=CAT_LOGIN).save_action(request.path, "Inicio Sesión")
+                    print(f"USER {user_auth.localusername} authenticated in {user_auth.domain} as {user.username}")
 
                     return redirect(reverse('pharma-index'))
         return HttpResponse("Sorry. You are not authorized")

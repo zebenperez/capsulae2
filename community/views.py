@@ -122,6 +122,7 @@ def organization_csv(request):
         writer.writerow([
             'Nombre', 
             'Año de creación', 
+            'Breve descripción', 
             'Correo electrónico', 
             'teléfono', 
             'Persona de contacto', 
@@ -150,7 +151,6 @@ def organization_csv(request):
             'owner',
             'group',
             'group_other',
-            'description'
         ])
         for item in context["items"]:
             try:
@@ -206,6 +206,7 @@ def organization_csv(request):
             writer.writerow([
                 item.name, 
                 item.year, 
+                description,
                 item.email, 
                 item.phone, 
                 item.contact, 
@@ -233,8 +234,7 @@ def organization_csv(request):
                 free,
                 owner,
                 group,
-                group_other,
-                description
+                group_other
             ])
         return response
     except Exception as e:
@@ -310,6 +310,7 @@ def organization_register_send(request):
             org = Organization(user=user, comp=comp)
             org.reviewed = False 
             org.name = request.POST["name"]
+            org.year = request.POST["year"]
             #org.address = request.POST["address"]
             org.email = request.POST["email"]
             org.phone = request.POST["phone"]

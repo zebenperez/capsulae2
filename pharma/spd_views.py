@@ -211,6 +211,54 @@ def spd_blister_print(request, pd_id):
         print(e)
         return render(request, 'error_exception.html', {'exc':show_exc(e)})
 
+@group_required("admins","managers")
+def spd_blister_qr_print(request, pd_id):
+    try:
+        obj = get_or_none(PillboxDeliver, pd_id)  
+
+        patient = obj.pillbox.patient
+        #spd_treatments = [item.patient_treatment for item in obj.deliver_meds.filter(treatment__include_in_spd=True)]
+        spd_treatments = []
+        for item in obj.deliver_meds.filter(treatment__include_in_spd = True):
+            try:
+                spd_treatments.append(item.patient_treatment)
+            except Exception as e:
+                pass
+        no_spd_treatments = []
+        for item in obj.deliver_meds.filter(treatment__include_in_spd=False):
+            try:
+                no_spd_treatments.append(item.patient_treatment)
+            except Exception as e:
+                print(e)
+        #no_spd_treatments = [item.patient_treatment for item in obj.deliver_meds.filter(treatment__include_in_spd=False)]
+
+        #prin_in = AlergiasPrincipios.objects.filter(paciente=patient)
+        #excp_in = AlergiasExcipientes.objects.filter(n_orden=patient)
+        prin_in = []
+        excp_in = []
+
+        context = {
+            'tratamientos_spd': spd_treatments, 
+            'tratamientos_no_spd': no_spd_treatments, 
+            'paciente': patient, 
+            'code': obj.code,
+            'url_base': request.get_host(), 
+            'alergies': list(excp_in) + list(prin_in), 
+            'request': request
+        }
+        html_template = render_to_string('patient/spd/spd-blister-qr-print.html', context)
+        filename = 'filename="%s_%s_%s.pdf"' % (slugify(obj.pillbox.patient.full_name), obj.code, obj.deliver_date.strftime("%Y%m%d"))
+
+        pdf_file = HTML(string=html_template).write_pdf()
+        response = HttpResponse(pdf_file, content_type='application/pdf')
+        response['Content-Disposition'] = filename  
+        response['Content-Transfer-Encoding'] = 'binary'
+
+        return response
+    except Exception as e:
+        print(e)
+        return render(request, 'error_exception.html', {'exc':show_exc(e)})
+
 @group_required("admins", "managers")
 def spd_search_by_qr(request):
     json_response = {}

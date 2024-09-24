@@ -191,7 +191,3 @@ LOGGING = {
     },
 }
 
-#TELEGRAM
-TELEGRAM_BOT_TOKEN = "923235903:AAGwOhclKWR97L_7pvkwgNtmqOJs9I_t7JQ"
-TELEGRAM_BOT_WEBHOOK = ""
-#TELEGRAM_BOT_WEBHOOK = "https://capsulae.org/assistant/"

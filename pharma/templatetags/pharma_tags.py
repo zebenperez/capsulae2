@@ -2,7 +2,7 @@ from django import template
 from django.utils.safestring import mark_safe
 from datetime import datetime, timedelta
 
-from capsulae2.settings import BASE_DIR
+from capsulae2.settings import BASE_DIR, MEDIA_ROOT
 from pharma.models import Pacientes
 from pharma.spd_models import Pillbox
 from medication.models import FichaPrincipioActivo
@@ -65,6 +65,13 @@ def is_pharma(user):
 @register.filter
 def get_patients(user):
     return Pacientes.objects.filter(id_user=user).count()
+
+@register.filter
+def get_lopd_url(doc):
+    media_path = os.path.abspath(os.path.join(MEDIA_ROOT, doc.url))
+    if os.path.exists(media_path):
+        return doc.url
+    return "https://capsulae.org/{}".format(doc.url)
 
 '''
     Simple Tags

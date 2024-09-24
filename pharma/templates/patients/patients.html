@@ -27,7 +27,7 @@
             {% if request.user|is_pharma %}{% trans 'Pacientes' %} {% else %} {% trans 'Usuarios' %} {% endif %}
             <span id="items-counter" class="badge badge-secondary">{{items|length}}</span></h2>
             {#<a class="btn btn-primary ark" data-url="{% url "patient-form" %}" data-target-modal="common-modal">{% trans "New paciente"%}</a>  #}
-            {% if request.user|in_group:"admins" %}
+            {% if request.user|in_group:"admins" or request.user|in_group:"managers" %}
                 <a class="btn btn-sm new" href="{% url "patient-evolutionaries" %}"> <i class="fas fa-arrow-right"></i> {%trans "Derivaciones"%} </a>
             {% endif %}
             <a class="btn btn-sm new" href="{% url "patient-new" %}">
