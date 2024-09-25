@@ -27,6 +27,7 @@ from .allergy_models import AlergiasExcipientes, AlergiasPrincipios, Excipientes
 from .common_lib import LOPD_LIMIT, PILLBOX_ADVISE, get_config_value
 from .pharma_lib import get_values_to_interactions_print, get_values_to_summary_print
 from .telegram_models import TelegramUserChat
+from capsulae2.capsulae_lib import check_user_payment
 
 
 #def check_user_payment(user):
