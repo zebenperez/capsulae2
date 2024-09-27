@@ -2,6 +2,7 @@ from django.contrib.auth.models import User, Group
 #from django.core.mail import send_mail
 from django.shortcuts import render, redirect
 from django.contrib import auth
+from django.http import HttpResponse
 
 from capsulae2.decorators import group_required
 from capsulae2.commons import get_random_str, get_param, get_or_none, show_exc
@@ -211,8 +212,8 @@ def payment_error(request):
             return render(request, 'error_exception.html', {'exc': 'Organización o Empresa no encontrada!'})
         register = check_account_datas(comp)
         up = UserPayment.objects.filter(user=request.user, cancel=False).order_by('-expire_date').first()
-        plan_list = Plan.objects.all().order_by("amount")
-        return render(request, "error-payments.html", {'payment': up, 'register': register, 'obj': comp, 'plan_list': plan_list})
+        plan_list = Plan.objects.filter(profile__id=1).order_by("amount")
+        return render(request, "account/error-payments.html", {'payment': up, 'register': register, 'obj': comp, 'plan_list': plan_list})
     return redirect("pharma-index")
 
 #@group_required("admins", "managers")
@@ -222,7 +223,8 @@ def payment_send(request, plan_id):
         return render(request, "account/payment-confirm.html", {'error': True})
 
     expire_date = datetime.today() + timedelta(days=plan.days)
-    up = UserPayment.objects.create(user=request.user, amount=plan.amount, expire_date=expire_date, desc="Pago cuota")
+    up = UserPayment.objects.create(user=request.user, amount=plan.amount, expire_date=expire_date, code=get_random_str(128), desc="Pago cuota")
+    return redirect(f"{plan.payment_link}?client_reference_id={up.code}")
     return render(request, "account/payment-confirm.html", {'error': False, 'obj': up})
 
 def payment_stripe_error(request):
@@ -233,6 +235,28 @@ def payment_stripe_success(request, code):
     if up == None:
         return render(request, "account/payment-confirm.html", {'error': True})
     return render(request, "account/payment-confirm.html", {'error': False, 'obj': up})
+
+def payment_stripe_verify(request, code):
+    from .libstripe import ShStripe
+    stripe = ShStripe('sk_test_51PhcNxRoZVlu63Sfbj4IXF9YBurdnpDkC0pjxr5fdCWeNzpdz6lVdT5xZXjYCa3O7zdKequs5kZQgUMpX8MkPB6z00LmcMegFf')
+    session = stripe.get_session(code)
+    if session == None:
+        return render(request, "account/payment-confirm.html", {'error': True})
+    if session.payment_status == "paid":
+        code = session.client_reference_id
+        up = UserPayment.objects.filter(code=code).first()
+        if up != None:
+            up.pay_date = datetime.now()
+            up.cancel = False
+            up.save()
+            return render(request, "account/payment-confirm.html", {'error': False, 'obj': up})
+        else:
+            return render(request, "account/payment-confirm.html", {'error': True})
+
+        # print (session.client_reference_id)
+        # print (session.amount_total)
+        # print (session.customer_details.email)
+        # print (session.customer_details.address)
 
 '''
     Employees

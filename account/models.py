@@ -198,6 +198,7 @@ class Plan(models.Model):
     amount = models.FloatField(verbose_name="Cantidad", blank=True, default=0)
     name = models.CharField(verbose_name="Nombre", max_length=150, blank=True, null=True, default="")
     desc = models.TextField(verbose_name="Descripción", blank=True, null=True, default="")
+    payment_link = models.CharField(verbose_name="Enlace de pago", max_length=250, blank=True, null=True, default="")
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name="plans")
 
     class Meta:

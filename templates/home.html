@@ -10,283 +10,104 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <!--main style-->
         <link rel="stylesheet" type="text/css" media="screen" href="/static/css/new-style.css">
-        {#<link rel="stylesheet" type="text/css" media="screen" href="css/bootstrap.css">#}
 
         <!-- font icon css style-->
-        {#<link rel="stylesheet" href="css/font-awesome.css">#}
-        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
-
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" 
+            integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
         <script src="https://code.jquery.com/jquery-3.6.1.min.js" integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" 
             crossorigin="anonymous"></script>
+
+	    <!-- Bootstrap core CSS -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+            integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" 
+            integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+
 
         <style>html{scroll-behavior:smooth}</style>
     </head>
 
     <!--<body onLoad="load()" onUnload="GUnload()">-->
     <body>
-        <!--wrapper start-->
-        <div class="wrapper" id="wrapper">
-            <!--Header start -->
-            <header class="qba">
-  	            <!--menu start-->
-                <div class="menu sticky-top">
-                    <div class="TopBar" id="divTop">
-                        <div class=""><a href="#"><img src="/static/imgs/logo-w.png" alt="white logo" width="80%"></a> </div>
-                        <div class="">
-                            <div class="navArea">
-                                <div class="navbar-collapse collapse">
-                                    <ul class="nav navbar-nav" style="padding:0;">
-                                        <li class="menuItem active"><a href="#wrapper">Inicio</a></li>
-                                        <li class="menuItem"><a href="#perfiles">Perfiles</a></li>
-                                        <li class="menuItem"><a href="#planes">Planes</a></li>
-                                        <li class="menuItem"><a href="#contact">Contacto</a></li>
-                                    </ul>
-                                </div>
-                            </div>
+        <header class="qba">
+            <div class="menu sticky-top m-0">
+                <nav class="navbar navbar-expand-lg navbar-dark topnav">
+                    <div class="container-fluid">
+		 	<div class="row m-0 d-flex align-items-center">
+		 		<div class="col-lg-10 col-10">
+					<a class="navbar-brand p-0" href="#"><img src="/static/imgs/logo-w.png" alt="Logo CAPSULAE" width="270px"></a>
+				</div>
+		 		<div class="col-lg-2 col-2">
+					<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" 
+					    aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+					    <span class="navbar-toggler-icon"></span>
+					</button>
+				</div>
+			</div>
+                        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                                <li class="nav-item"> <a href="#wrapper" class="active">Inicio</a> </li>
+                                <li class="nav-item"> <a href="#perfiles">Perfiles</a> </li>
+                                <li class="nav-item"> <a href="#planes">Planes</a> </li>
+                                <li class="nav-item"> <a href="#contact">Contacto</a> </li>
+                            </ul>
                         </div>
-                        <div class="loginBlock">
-                            <div class="dataForm">
-                                <form class="form-horizontal p-2" method="post" action="{% url "auth_login" %}">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="next" value="{% url 'pharma-index' %}" />
-                                    <div class="loginPanel">
-                                        <div class="form-group">
-                                            <label for="username">Usuario</label><br />
-                                            <input name="username" type="text" value="" id="username" class="form-control">
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="password">Contraseña</label><br />
-                                            <input name="password" type="password" value="" id="password" class="form-control">
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="btn-submit">&nbsp;</label>
-                                            <button type="submit" class="btn submitBnt form-control pointer" id="btn-submit">Entrar</button> <br />
-                                            <a onclick="$('#row-new-passwd').toggle()" style="cursor:pointer">¿Has olvidado tu contraseña?</a>
-                                        </div>
-                                    </div>
-                                </form>
-                            </div>
-                            <form class="form-horizontal p-2" method="post" action="{% url "send_new_password_by_email" %}">
-                                {% csrf_token %}
-                                <div class="hideClass" id="row-new-passwd">
-                                    <div class="recover-pass">
-					    <div class=""> <input name="email" type="text" value="" id="email" class="form-control" 
-						placeholder="Indique su correo electrónico"/> </div>
-					    <div class=""> <button type="submit" class="btn sendBtn form-control pointer" id="btn-submit">
-						{% trans "Enviar nuevo password" %}</button> </div>
-				    </div>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-               <!--menu end-->     
+                        {% include "home-login.html" %}
+                   </div>
+                </nav>
+            </div>
 
-                <!--banner start-->
-                <div class="banner row" id="banner">
-                    <!--background slide show start-->
-                    <div class="slide"> 
-                      <img src="/static/imgs/bg-slider.jpg" alt="bg-slider"> </div>        
-                    <!--background slide show end--> 
-                  </div>
-                <!--banner end--> 
-            </header>
-            <!--Header end -->
+       
+	        <div class="banner d-none d-lg-block" id="banner"> <div class="slide"><img src="/static/imgs/bg-slider.jpg" alt="bg-slider"> </div> </div>
+        </header>
   
-            <!--perfiles start -->
-            <section class="perfiles" id="perfiles">
-                <div class="container">
-                    <div class="col-lg-10 offset-lg-1 col-12 heading">
-                            <h2>Perfiles</h2>
-                            <h3>Existen dos perfiles de usuarios bien diferenciados dentro de Capsulae que se distinguen en Farmacias y Organizaciones.</h3>        
-                        </div>	
-                    <div class="perfil-box">        
-                        <div class="expertiesico"><span class="ico"><i class="fas fa-clinic-medical"></i></span></div>
-                        <div class="expertiesdesc col-xs-12 col-sm-9 col-md-9 col-lg-9">
-                                    <h4>SOY UNA FARMACIA</h4>
-                                    <p>Los programas de gestión clínica son una herramienta fundamental a la hora de gestionar la complejidad farmacoterapéutica, especialmente en pacientes ancianos y pluripatológicos. <br /><br />
-                                    Capsulae tiene sus inicios en el año 2005 ante la necesidad de gestionar los tratamientos médicos de distintas residencias sociosanitarias y evoluciona posteriormente bajo distintas denominaciones: Suberalia, Clinic, Clinicarea y finalmente Capsulae, ampliando sus capacidades para cubrir y facilitar, todo lo relacionado con el uso adecuado de los medicamentos, la gestión de historias clínicas, farmacológicas, sociales, siempre con una visión abierta, colaborativa e interconectada que facilita su uso por distintos profesionales e instituciones (médicos, farmacéuticos, enfermeros, podólogos, odontólogos y trabajadores del ámbito de lo social). </p>
-                        </div>
-                    </div>	
-                
-                    <div class="perfil-box">        
-                        <div class="expertiesico"><span class="ico"><i class="fas fa-users"></i></span></div>
-                        <div class="expertiesdesc col-xs-12 col-sm-9 col-md-9 col-lg-9">
-                                    <h4>SOY UNA ASOCIACIÓN</h4>
-                                    <p>Capsulae evoluciona hacia la gestión integral de distintos establecimientos sociosanitarios y organizaciones, intentando abarcar toda la gestión de los mismos y personalizar la experiencia del usuario.</p>
-                        </div>
-                    </div>	       
-                </div>
-            </section>
-            <!--perfiles end -->
+        <!--perfiles start -->
+        {% include "home-profiles.html" %}
               
-            <!--planes start-->
-            <section class="protfolio" id="planes">
-                <div class="container"> <div class="heading"> <h2>Planes</h2> </div> </div>	
-                <div class="planes">
-                    <div class="plan-box-1">
-			            <div class="plan-text">&quot;Con este plan la <strong>cuota mensual</strong> se paga muy cómodamente&quot;</div>
-			            <img src="/static/imgs/bg-plan1.png" height="100" width="244" />
-		    	        <div><button class="btn btn-access pointer" onclick="setFocus('username')">Accede</button> o 
-                            <button class="btn btn-register pointer" onclick="setFocus('name')">Regístrate</a></div>
-		            </div>
-                    <div class="plan-box-2">
-			            <div class="plan-text">&quot;Anota en tu agenda el <strong>pago trimestral</strong> y olvídate del mes a mes&quot;</div>
-			            <img src="/static/imgs/bg-plan2.png" height="100" width="244" />
-		    	        <div><button class="btn btn-access pointer" onclick="setFocus('username')">Accede</button> o 
-                            <button class="btn btn-register pointer" onclick="setFocus('name')">Regístrate</a></div>
-		            </div>
-                    <div class="plan-box-3">
-			            <div class="plan-text">&quot;<strong>Dos pagos al año</strong> y tienes este plan para ti&quot;</div>
-			            <img src="/static/imgs/bg-plan3.png" height="100" width="244" />
-		    	        <div><button class="btn btn-access pointer" onclick="setFocus('username')">Accede</button> o 
-                            <button class="btn btn-register pointer" onclick="setFocus('name')">Regístrate</a></div>
-		            </div>
-                    <div class="plan-box-4">
-			            <div class="plan-text">&quot;Con este <strong>plan anual</strong> te despreocupas durante todo un año&quot;</div>
-			            <img src="/static/imgs/bg-plan4.png" height="100" width="244" />
-		    	        <div><button class="btn btn-access pointer" onclick="setFocus('username')">Accede</button> o 
-                            <button class="btn btn-register pointer" onclick="setFocus('name')">Regístrate</a></div>
-		            </div>
-                </div>
-            </section>
-            <!--planes end-->   
+        <!--planes start-->
+        {% include "home-plans.html" %}
               
-            <!--register start-->
-            {% include "account/register.html" %}
-            <!--register end-->
+        <!--register start-->
+        {% include "account/register.html" %}
 
-            <!--contact start-->
-            <section class="contact" id="contact">
-                <div class="container">
-                    <div class="heading">
-                        <h2>Contacto</h2>
-                        <h3>Estamos abiertos a cualquier sugerencia o simplemente para charlar.</h3>       
-                    </div>
-                </div>    
-            </section>
-
-            <section class="contactDetails">
-                <div class="container"> 
-                <!--contact form start-->
-                    <div class=" w-100">
-                        <div class="left-contact">
-                                <h3>Dirección</h3>
-                                    Calle la Hoyita, 22. 38611. San Isidro. Santa Cruz de Tenerife<br /><br />
-                                <h3>Datos de contacto</h3>
-                                    <a href="mailto:info@fundec.org" class="contactLink">info@fundec.org</a><br />
-                                    <a href="www.fundec.org" class="contactLink">www.fundec.org</a>
-                        </div>
-                
-                        <div class="conForm right-contact">
-                            <div id="message"></div>
-                            <form method="post" action="php/contact.php" name="cform" id="cform">
-                                <div class="w-100"><input name="name" id="name" type="text" class="w-100" placeholder="Su nombre" ></div>
-                                <input name="email" id="email" type="email" class="noMarr" placeholder="Su correo electrónico" >
-                                <textarea name="comments" id="comments" cols="" rows="" class="" placeholder="Su mensaje"></textarea>
-                                <input type="submit" id="submit" name="send" class="submitBnt" value="Enviar mensaje">
-                                <div id="simple-msg"></div>
-                            </form>
-                        </div>
-                    </div>
-                <!--contact form end--> 
-                </div>
-            </section> 
-
-            {%comment%}
-            <!--google map start-->
-            <div class="row mapArea">
-                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d14028.34866574585!2d-16.30829755405033!3d28.476921461996984!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xc41cc5321823e09%3A0x1c9e218206d17096!2sFinca%20Espa%C3%B1a%2C%2038205%20La%20Laguna%2C%20Santa%20Cruz%20de%20Tenerife!5e0!3m2!1ses!2ses!4v1690279995640!5m2!1ses!2ses" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-                <div id="map" style="width: 100%; height: 100%"></div>
-            </div> 
-            <!--google map end-->  
-            {%endcomment%}
-        <!--contact end-->  
+        <!--contact start-->
+        {% include "home-contact.html" %}
   
-            <!--footer start-->
-            <section class="footer" id="footer">
-                <div class="container">
-                    <ul>
-                        <li><a href="#"><i class="fab fa-twitter"></i></a></li>
-                        <li><a href="#"><i class="fab fa-facebook-f"></i></a></li>
-                        <li><a href="#"><i class="fab fa-linkedin"></i></a></li>
-                    </ul>
-                    <p>© 2023 capsulae.org. All Rights Reserved.<br>
-                    Design created by <a href="https://www.shidix.com" target="_blank">Shidix Technologies</a></p>
-                </div>
-                    <p class="text-center"><a href="#wrapper" class="gototop"><i class="fa fa-chevron-up fa-2x"></i></a></p>
-            </section>
-              <!--footer end-->   
+        <!--footer start-->
+        <section class="footer" id="footer">
+            <div class="container">
+                <ul>
+                    <li><a href="#"><i class="fab fa-twitter"></i></a></li>
+                    <li><a href="#"><i class="fab fa-facebook-f"></i></a></li>
+                    <li><a href="#"><i class="fab fa-linkedin"></i></a></li>
+                </ul>
+                <p>© 2023 capsulae.org. Todos los derechos reservados.<br>
+                Diseño creado por <a href="https://www.shidix.com" target="_blank">Shidix Technologies</a></p>
+            </div>
+                <p class="text-center"><a href="#wrapper" class="gototop"><i class="fa fa-chevron-up fa-2x"></i></a></p>
+        </section>
+    </div>
 
-        </div>
-<!--wrapper end--> 
+    <script>
+        function setFocus(div){ 
+            var obj = $("#"+div);
+            obj.focus();
+            obj.css('border-color', 'blue');
+            obj.prop('style', 'border: 1px solid green !important');
+            setTimeout(function(){obj.prop('style', 'border: 1px solid #dbdbdb !important');}, 1000);
+        }
 
-        <script>
-            function setFocus(div){ 
-                var obj = $("#"+div);
-                obj.focus();
-                obj.css('border-color', 'blue');
-                obj.prop('style', 'border: 1px solid green !important');
-                setTimeout(function(){obj.prop('style', 'border: 1px solid #dbdbdb !important');}, 1000);
-            }
-
-            $(".menuItem").click(function(){
-                $(".menuItem").removeClass("active");
-                $(this).addClass("active");
-            });
-        </script>
-
-        {%comment%}
-        <!--jquary min js--> 
-        <script type="text/javascript" src="js/jquery.min.js"></script> 
-        <script src="js/bootstrap.js"></script> 
-
-        <!--for placeholder jquery--> 
-        <script type="text/javascript" src="js/jquery.placeholder.js"></script> 
-
-        <!--for header jquery--> 
-        <script type="text/javascript" src="js/stickUp.js"></script> 
-        <script type="text/javascript">
-        jQuery(function($) {
-            $(document).ready( function() {
-              //enabling stickUp on the '.navbar-wrapper' class
-                $('.navbar-wrapper').stickUp({
-                    parts: {
-                      0: 'banner',
-                      1: 'perfiles',
-                      2: 'planes',
-                      5: 'contacto'
-                    },
-                    itemClass: 'menuItem',
-                    itemHover: 'active',
-                    topMargin: 'auto'
-                    });		
-                });
-                    
-                $('#da-slider').cslider({
-                    autoplay	: true,
-                    bgincrement	: 0,
-                    interval    : 5000  
-                });
-
+        $(".menuItem").click(function(){
+            $(".menuItem").removeClass("active");
+            $(this).addClass("active");
         });
-        </script>
 
-        <!--contact form js--> 
-        <script type="text/javascript" src="js/jquery.contact.js"></script> 
+	    function myFunction() {
+	        var x = document.getElementById("myTopnav");
+	        if (x.className === "topnav") { x.className += "responsive"; } else { x.className = "topnav"; }
+	    }
+	</script>
 
-        <!--about jquery--> 
-        <script src="js/jquery.classyloader.min.js"></script>
-        <script defer src="js/jquery.flexslider.js"></script> 
-
-        <script src="js/jquery.easing.js"></script> 
-        <script src="js/jquery.mousewheel.js"></script> 
-
-        <script type="text/javascript" src="switcher/js/jquery.cookie.js"></script> <!-- jQuery cookie --> 
-
-        <!--for theme custom jquery--> 
-        <script src="js/custom.js"></script>
-        {%endcomment%}
 
         <!-- Start Style Switcher -->
         <div class="switcher"></div>

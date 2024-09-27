@@ -64,12 +64,12 @@
 		<form action="/account/signup/" method="post" enctype="multipart/form-data" name="frmRegister" id="frmRegister" class="p-3">
 		    {% csrf_token %}
             <!--contact form start-->
-            <div class="row w-100">
-                <div class="left-contact">
+            <div class="row w-100 m-0">
+                <div class="col-lg-4 col-12">
 			<h1 class="login">Registro</h1>
-			<div class="text-center"><img src="/static/imgs/register-now.png" alt="white logo" width="100%"></div>
+			<div class="text-center"><img src="/static/imgs/register-now.png" alt="Imagen registrate ahora"></div>
 		</div>
-                <div class="conForm right-contact">
+                <div class="col-lg-8 col-12 conForm">
 				    <div class="form-group">
 					    <input type="text" id="name" name="name" class="form-control" title="Nombre" placeholder="(*) Nombre" required/> </div>
 				    <div class="form-group">
@@ -92,6 +92,7 @@
 					(*) Campos obligatorios
 
 				    {% get_profile_select %}
+
 				    <br/>
 				    <div class="acceptCheck small">
 					    <input type="checkbox" id="tos" name="tos"/> 

@@ -18,6 +18,7 @@ urlpatterns = [
     path('payment-send/<int:plan_id>/', views.payment_send, name='account-payment-send'),
     path('payment-stripe-error/', views.payment_stripe_error, name='account-payment-stripe-error'),
     path('payment-stripe-success/<slug:code>', views.payment_stripe_success, name='account-payment-stripe-success'),
+    path('payment-stripe-verify/<slug:code>/', views.payment_stripe_verify, name='account-payment-stripe-verify'),
 
     #------------------------- EMPLOYEES --------------------
     path('employees/', views.employees, name='employees'),
