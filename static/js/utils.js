@@ -212,7 +212,7 @@ $(document).ready(()=>{
                 isOk = false;
             }
         });
-        if ($("#plan").val() == "")
+        if ($("#plan-d").val() == "")
         {
             msg += "Debe seleccionar un Plan. <br/>";
             isOk = false;

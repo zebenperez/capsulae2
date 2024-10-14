@@ -34,7 +34,7 @@
                     <div class="card-body text-center p-3"> Su pago, por un importe de {{obj.amount|floatformat:2}}&euro; se ha procesado correctamente.
                         <br/> Le recordamos que su pago expira el {{obj.expire_date|date:"d-m-Y"}}
 	                    <div class="col-lg-4 offset-lg-4 text-center pt-5 pb-3"> <a class="btn btn-primary payment w-100 py-3" 
-                            href="{% url "pharma-index" %}"> <strong>{% trans "ACCEDER" %}</strong></a></div>
+                            href="{% url "pharma-index" %}"> <strong>{#{% trans "ACCEDER" %}#}{% trans "VOLVER" %}</strong></a></div>
                     </div>
                 {% endif %}
             </div>

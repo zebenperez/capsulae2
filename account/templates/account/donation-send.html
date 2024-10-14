@@ -20,6 +20,8 @@
                         {% csrf_token %}
                         <input type="hidden" id="custom-pvp" name="custom-pvp" value="{{up.amount}}" />
                         <input type="hidden" id="period" name="period" value="{{up.plan.days}}" />
+                        <input type="hidden" id="plan" name="plan" value="{{up.plan.id}}" />
+                        <input type="hidden" id="user" name="user" value="{{user.username}}" />
                         <button class="btn btn-primary payment w-50 py-3"><strong>{% trans "CONFIRMAR DONACIÓN" %}</strong></button>
                     </form>
                 </div>
@@ -31,7 +33,7 @@
         <div class="row"> <div class="col-12">
             <div class="jumbotron text-center">
                 <div class="info">{% trans 'CIF ya registrado: ' %} <strong>{{user.first_name}}</strong></div>
-                <div class="mt-5">{% trans '...' %}</div>
+                <div class="mt-5">Para realizar una nueva donación, modificar una existente o darse de baja debe acceder a su cuenta.</div>
                 <div class="mt-5"><a href="{% url "pharma-index" %}" class="link">{% trans "Volver" %}</a></div> 
             </div>
         </div> </div>
@@ -39,7 +41,7 @@
         <div class="row"> <div class="col-12">
             <div class="jumbotron text-center">
                 <div class="info">{% trans 'Correo electrónico ya registrado: ' %} <strong>{{user.first_name}}</strong></div>
-                <div class="mt-5">{% trans '...' %}</div>
+                <div class="mt-5">Para realizar una nueva donación, modificar una existente o darse de baja debe acceder a su cuenta.</div>
                 <div class="mt-5"><a href="{% url "pharma-index" %}" class="link">{% trans "Volver" %}</a></div> 
             </div>
         </div> </div>
@@ -47,7 +49,7 @@
         <div class="row"> <div class="col-12">
             <div class="jumbotron text-center"> 
                 <div class="info">{% trans 'Los correos electrónicos no coinciden' %}</div>
-                <div class="mt-5">{% trans '...' %}</div>
+                <div class="mt-5">{% trans 'Por favor rellene de nuevo el formulario' %}</div>
                 <div class="mt-5"><a href="{% url "pharma-index" %}" class="link">{% trans "Volver" %}</a></div> 
             </div>
         </div> </div>
@@ -55,7 +57,7 @@
         <div class="row"> <div class="col-12">
             <div class="jumbotron text-center"> 
                 <div class="info">{% trans 'No se ha encontrado el plan indicado' %}</div>
-                <div class="mt-5">{% trans '...' %}</div>
+                <div class="mt-5">{% trans 'Disculpe las molestias' %}</div>
                 <div class="mt-5"><a href="{% url "pharma-index" %}" class="link">{% trans "Volver" %}</a></div> 
             </div>
         </div> </div>
@@ -63,7 +65,7 @@
         <div class="row"> <div class="col-12">
             <div class="jumbotron text-center"> 
                 <div class="info">{% trans 'No se ha encontrado el perfil indicado' %}</div>
-                <div class="mt-5">{% trans '...' %}</div>
+                <div class="mt-5">{% trans 'Discule las molestias' %}</div>
                 <div class="mt-5"><a href="{% url "pharma-index" %}" class="link">{% trans "Volver" %}</a></div> 
             </div>
         </div> </div>

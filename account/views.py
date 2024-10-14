@@ -209,7 +209,6 @@ def check_account_datas(comp):
     return (comp.code != "" and comp.name != "" and comp.main_address != "" and comp.town != "" and comp.province != "" and comp.email != "")
 
 def payment_error(request):
-    print("--A--")
     if request.user.is_authenticated:
         comp = Company.objects.filter(manager=request.user).first()
         if comp == None:
@@ -243,7 +242,6 @@ def payment_stripe_success(request, code):
 def payment_stripe_verify(request, code):
     from .libstripe import ShStripe
 
-    print("--B--")
     # Get domainname from request
     domain = request.META['HTTP_HOST']
     stripe = None
@@ -410,41 +408,50 @@ def donation_send(request):
         return render(request, 'error_exception.html', {'exc':show_exc(e)})
 
 def donation_custom(request):
-
     domain = request.META['HTTP_HOST']
     custom_pvp = get_int(request.POST.get('custom-pvp',None))
     period_days = request.POST.get('period', "")
+    user = User.objects.get(username=request.POST.get("user", ""))
+    
+    if period_days == "0":
+        plan = get_or_none(Plan, request.POST.get('plan', ""))
+        expire_date = datetime.today() + timedelta(days=plan.days)
+        up = UserPayment.objects.create(user=user,amount=custom_pvp,expire_date=expire_date,code=get_random_str(128),desc="Donación única")
+        return redirect(f"{plan.payment_link}?client_reference_id={up.code}")
+    else:
+        periods = {"30": "month", "365": "year", "7": "week", "1": "day", "180": "semiannual", "90": "quarter"}
+        labels = {"month": "mensual", "year": "anual", "week": "semanal", "day": "diario", "semiannual": "semestral", "quarter": "trimestral"}
+        duration = {"month": 30, "year": 365, "week": 7, "day": 1, "semiannual": 180, "quarter": 90}
 
-    periods = {"30": "month", "365": "year", "7": "week", "1": "day", "180": "semiannual", "90": "quarter"}
-    labels = {"month": "mensual", "year": "anual", "week": "semanal", "day": "diario", "semiannual": "semestral", "quarter": "trimestral"}
-    duration = {"month": 30, "year": 365, "week": 7, "day": 1, "semiannual": 180, "quarter": 90}
+        period = periods[period_days]
 
-    period = periods[period_days]
+        if custom_pvp == None:
+            if "shidix.es" in domain:
+                custom_pvp = random.randint(1, 100)
+                # return render(request, "account/donation-send.html", {'error': 6})
+            else:
+                return render(request, "account/donation-send.html", {'error': 6})
+        from .libstripe import ShStripe
 
-    if custom_pvp == None:
-        if "shidix.es" in domain:
-            custom_pvp = random.randint(1, 100)
-            # return render(request, "account/donation-send.html", {'error': 6})
+        stripe = None
+        if "fundec.capsulae.org" in domain:
+            stripe = ShStripe(setting.STRIPE_REAL_SECRET_KEY, domain)
         else:
-            return render(request, "account/donation-send.html", {'error': 6})
-    from .libstripe import ShStripe
+            stripe = ShStripe(settings.STRIPE_TEST_SECRET_KEY, domain)
 
-    stripe = None
-    if "fundec.capsulae.org" in domain:
-        stripe = ShStripe(setting.STRIPE_REAL_SECRET_KEY, domain)
-    else:
-        stripe = ShStripe(settings.STRIPE_TEST_SECRET_KEY, domain)
+        expire_date = datetime.today() + timedelta(days=duration[period])
+        code = str(uuid.uuid4())
+        desc = f"Donación personalizada {labels[period]} {code}"
+        up = UserPayment.objects.create(user=user, amount=custom_pvp, expire_date=expire_date, code=code, desc=desc)  
 
-    expire_date = datetime.today() + timedelta(days=duration[period])
-    code = str(uuid.uuid4())
-    if request.user.is_authenticated:
-        up = UserPayment.objects.create(user=request.user, amount=custom_pvp, expire_date=expire_date, code=code, desc=f"Donación personalizada {labels[period]} {code}")  
-    else:
-        up = UserPayment.objects.create(user=User.objects.get(username='admin'), amount=custom_pvp, expire_date=expire_date, code=code, desc=f"Donación personalizada {labels[period]} {code}")
-    
-    suscription_url = stripe.create_fundec_suscription_url(custom_pvp * 100, up.code, period=period)
-    return redirect(suscription_url)
-    
+        #if request.user.is_authenticated:
+        #    up = UserPayment.objects.create(user=request.user, amount=custom_pvp, expire_date=expire_date, code=code, desc=f"Donación personalizada {labels[period]} {code}")  
+        #else:
+        #    up = UserPayment.objects.create(user=User.objects.get(username='admin'), amount=custom_pvp, expire_date=expire_date, code=code, desc=f"Donación personalizada {labels[period]} {code}")
+        
+        suscription_url = stripe.create_fundec_suscription_url(custom_pvp * 100, up.code, period=period)
+        return redirect(suscription_url)
+        
     
 
 
