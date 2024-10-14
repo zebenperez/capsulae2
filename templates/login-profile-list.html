@@ -1,6 +1,5 @@
 <input type="hidden" id="profile" name="profile" value="1" />
 
-{% comment %}
 <div class="profile-selects">
 	<div class="form-group profile">
 	    <label for="profile"> Perfil </label>
@@ -29,4 +28,3 @@
     $("#profile").change(function(){ var id = $(this).find(":selected").val(); showPlan(id); });
     showPlan("{{profile_list.first.id}}");
 </script>
-{% endcomment %}

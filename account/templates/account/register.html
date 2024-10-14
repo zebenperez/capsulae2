@@ -6,8 +6,8 @@
 		<form action="/account/signup/" method="post" enctype="multipart/form-data" name="frmRegister" id="frmRegister" class="p-3">
 		    {% csrf_token %}
 
-			<div class="row m-1" style="border: 1px solid red;">
-			    <div class="form-group" style="border: 1px solid blue;">
+			<div class="row m-1">
+			    <div class="form-group">
 				<label for="name">(*) Nombre</label>
 				<input type="text" id="name" name="name" class="form-control" title="Nombre" required/>
 			    </div>
@@ -91,7 +91,7 @@
                             required/> </div><br/>
 					(*) Campos obligatorios
 
-				    {% get_profile_select %}
+                    {#{% get_profile_select %}#}
 
 				    <br/>
 				    <div class="acceptCheck small">

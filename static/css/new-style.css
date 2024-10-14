@@ -73,6 +73,10 @@ img {
 	margin: auto;
 }
 
+.small-text {
+	font-size: 1.125rem;; 
+}
+
 p{
 	font-size:15px;
 	line-height:24px;
@@ -185,7 +189,6 @@ header{
 	display: grid; 
 	grid-template-columns: 20% 30% 50%; 
 	align-items: center;	
-/*	border:1px solid red;*/
 }
 
 .banner{
@@ -449,7 +452,8 @@ h1.login {
 	border-bottom: 11px solid #f3bd19;
 }
 
-button#btn-register-send.submitBnt.register {
+button#btn-register-send.submitBnt.register,
+button#btn-donation-send.submitBnt.register {
 	background:#f3bd19;
 	font-family: 'Montserrat', sans-serif;
 	color:#fff;
@@ -487,25 +491,11 @@ select.form-control {
 	background:#fff;
 }
 .perfiles .container{
-	padding-top:50px ;
 	padding-bottom:59px ;
 }
 .perfiles .heading {
 	padding-bottom:111px;
 }
-
-.perfil-box .expertiesico {
-/*	width: 20%; 
-	display: inline-block;
-	*/
-}
-.perfil-box .expertiesdesc {
-/*	width: 72%; 
-	display: inline-block; 
-	vertical-align:top;
-	margin-left: 5%;*/
-}
-
 .expertiesico {
 	padding:10px 0;
 	margin-bottom:58px;
@@ -694,7 +684,6 @@ select.form-control {
 	margin-right:3%;
 	margin-bottom:30px;
 	outline:none;
-	width: 90%;
 }
 .conForm input.noMarr{
 	margin-right:0px;
@@ -1241,7 +1230,7 @@ a.link {
 		padding-bottom:20px;
 	}
 	.perfiles .container{
-		padding-top: 200px ;
+		padding-top: 50px ;
 	}
 
 	.perfil-box .expertiesico {
@@ -1356,6 +1345,51 @@ a.link {
 .topnav .icon {
   display: none;
 }
+
+
+/********* Donations *********/
+
+button.btn-plan {
+	border: 2px solid #f3bd19;
+	background: white;
+	color: #f3bd19;
+	font-weight: 600;
+	text-transform:uppercase;
+}
+button.btn-active,
+button.btn-plan:hover {
+	border: 2px solid #f3bd19;
+	background: #f3bd19;
+	color: #fff;
+}
+
+button.btn.btn-success.btn-donation,
+input#custom-donation.form-control {
+	background: white;
+	box-shadow: 2px 2px 20px 0 rgba(0,0,0,.09);
+	border: none;
+	padding: 50px;
+	width:100%;
+	color: #1f1e1e;
+	font-size: 3.125rem;
+	font-weight: 300;
+	letter-spacing: -2px;
+}
+
+.donation-card input {
+	border-width:  0 0 2px 0;
+	border-color: black;
+	border-radius: 0;
+}
+
+input.custom::placeholder {
+	font-size: 1.575rem;
+}
+
+.btn-warning {
+    border: 3px solid #f3bd19 !important;
+}
+
 
 @media screen and (max-width: 600px) {
 	.topnav a:not(:first-child) {

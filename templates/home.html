@@ -49,9 +49,10 @@
                                 <li class="nav-item"> <a href="#wrapper" class="active">Inicio</a> </li>
                                 <li class="nav-item"> <a href="#perfiles">Perfiles</a> </li>
                                 <li class="nav-item"> <a href="#planes">Planes</a> </li>
+                                <li class="nav-item"> <a href="#donation">Donaciones</a> </li>
                                 <li class="nav-item"> <a href="#contact">Contacto</a> </li>
                             </ul>
-                        </div>
+
                         {% include "home-login.html" %}
                    </div>
                 </nav>
@@ -70,9 +71,12 @@
         <!--register start-->
         {% include "account/register.html" %}
 
+        <!--contribute start-->
+        {% include "account/donations.html" %}
+
         <!--contact start-->
         {% include "home-contact.html" %}
-  
+
         <!--footer start-->
         <section class="footer" id="footer">
             <div class="container">

@@ -2,9 +2,15 @@ from django.conf import settings
 
 import stripe
 
+def show_exc(e):
+    import sys
+    exc_type, exc_obj, exc_tb = sys.exc_info()
+    return ("ERROR ===:> [%s in %s:%d]: %s" % (exc_type, exc_tb.tb_frame.f_code.co_filename, exc_tb.tb_lineno, str(e)))
+
 class ShStripe:
-    def __init__(self, api_key=""):
+    def __init__(self, api_key="", domain_name="capsulae2.shidix.es"):
         self.api_key = api_key
+        self.domain_name = domain_name
         try:
             self.return_url = settings.STRIPE_RETURN_URL
             self.success_url = settings.STRIPE_SUCCESS_URL
@@ -58,5 +64,60 @@ class ShStripe:
         except stripe.error.StripeError as e:
             print(f"Error verifying Stripe payment intent: {e}")
             return None
+
+    def get_subscription(self, subscription_id):
+        stripe.api_key = self.api_key
+        try:
+            subscription = stripe.Subscription.retrieve(subscription_id)
+            return subscription
+        except stripe.error.StripeError as e:
+            print(f"Error getting Stripe subscription: {e}")
+            return None
+
+    def get_product(self, product_id):
+        stripe.api_key = self.api_key
+        try:
+            product = stripe.Product.retrieve(product_id)
+            return product
+        except stripe.error.StripeError as e:
+            print(f"Error getting Stripe product: {e}")
+            return None
+        
+    def create_fundec_suscription_url(self, pvp, myuuid, period="month"):
+        print(f"Creating Stripe subscription for {pvp} {period}")
+        stripe.api_key = self.api_key
+        try:
+            product = stripe.Product.create(
+                name=f"Donación personalizada {myuuid}",
+                type="service",                
+            )
+
+            price = stripe.Price.create(
+                unit_amount=pvp,
+                currency="eur",
+                recurring={"interval": period},
+                product=product.id,
+            )
+
+            session = stripe.checkout.Session.create(
+                payment_method_types=["card"],
+                line_items=[
+                    {
+                        "price": price.id,
+                        "quantity": 1,
+
+                    },
+                ],
+                mode="subscription",
+                billing_address_collection='required',
+
+                success_url=f"https://{self.domain_name}/account/payment-stripe-verify/{{CHECKOUT_SESSION_ID}}/",
+                cancel_url=f"https://{self.domain_name}/account/payment-error/",
+            )
+
+            return f"{session.url}"
+        except stripe.error.StripeError as e:
+            print(f"Error creating Stripe subscription: {e}")
+            return f"https://{self.domain_name}/account/payment-error/"
 
 

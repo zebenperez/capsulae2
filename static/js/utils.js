@@ -167,7 +167,6 @@ $.expr[":"].contains = $.expr.createPseudo(function(arg) { return function (elem
 
 $(document).ready(()=>{
     $("body").on("click", "#btn-register-send", function(e){
-        console.log("--1--");
         e.preventDefault();
         //e.stopPropagation();
 
@@ -182,9 +181,6 @@ $(document).ready(()=>{
                 isOk = false;
             }
         });
-	console.log ($("#email1").val());
-        console.log("--2--");
-	console.log ($("#email2").val());
         if (!isEmail($("#email1").val()) || $("#email1").val() != $("#email2").val())
         {
             msg += "Los correos electrónicos no coinciden. <br/>";
@@ -201,4 +197,46 @@ $(document).ready(()=>{
         else
             $("#frmRegister").submit();
     });
+
+    $("body").on("click", "#btn-donation-send", function(e){
+        e.preventDefault();
+
+        var obj = $(this);
+        var msg = "";
+        var isOk = true;
+
+        obj.find('input').each(function(){
+            if (($(this).prop("name").indexOf('csrf') == -1) && ($(this).prop("name") != "tos"))
+            {
+                msg += "<br/> El campo " + $(this).prop('title') + " es requirido";
+                isOk = false;
+            }
+        });
+        if ($("#plan").val() == "")
+        {
+            msg += "Debe seleccionar un Plan. <br/>";
+            isOk = false;
+        }
+        if ($("#donation-amount").val() == "")
+        {
+            msg += "Debe seleccionar una cantidad. <br/>";
+            isOk = false;
+        }
+        if (!isEmail($("#email-d1").val()) || $("#email-d1").val() != $("#email-d2").val())
+        {
+            msg += "Los correos electrónicos no coinciden. <br/>";
+            isOk = false;
+        }
+        if (!$("#tos-d").prop("checked"))
+        {
+            msg += "<br/> Debe aceptar las condiciones de uso.";
+            isOk = false;
+        }
+
+        if (!isOk)
+            $("#div-donation-errors").html(msg).show();
+        else
+            $("#frmDonation").submit();
+    });
+
 });

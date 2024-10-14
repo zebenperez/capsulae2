@@ -191,3 +191,6 @@ LOGGING = {
     },
 }
 
+STRIPE_TEST_SECRET_KEY = "sk_test_51PhcNxRoZVlu63Sfbj4IXF9YBurdnpDkC0pjxr5fdCWeNzpdz6lVdT5xZXjYCa3O7zdKequs5kZQgUMpX8MkPB6z00LmcMegFf"
+
+STRIPE_REAL_SECRET_KEY="sk_test_51PhcNxRoZVlu63Sfbj4IXF9YBurdnpDkC0pjxr5fdCWeNzpdz6lVdT5xZXjYCa3O7zdKequs5kZQgUMpX8MkPB6z00LmcMegFf"

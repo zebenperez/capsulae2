@@ -31,7 +31,7 @@
                 {% else %}
                     <div class="card-header text-white text-center"> <div class="row"> <div class="col-lg-10 offset-lg-1 col-12">
                         {% trans 'Pago procesado' %}</div> </div> </div>
-                    <div class="card-body text-center p-3"> Su pago, por un importe de {{obj.amount}} se ha procesado correctamente.
+                    <div class="card-body text-center p-3"> Su pago, por un importe de {{obj.amount|floatformat:2}}&euro; se ha procesado correctamente.
                         <br/> Le recordamos que su pago expira el {{obj.expire_date|date:"d-m-Y"}}
 	                    <div class="col-lg-4 offset-lg-4 text-center pt-5 pb-3"> <a class="btn btn-primary payment w-100 py-3" 
                             href="{% url "pharma-index" %}"> <strong>{% trans "ACCEDER" %}</strong></a></div>

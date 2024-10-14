@@ -172,9 +172,24 @@ class Profile(models.Model):
         verbose_name = "Perfil"
         verbose_name_plural="Perfiles"
 
+class Plan(models.Model):
+    active = models.BooleanField(verbose_name="Activo", default=False)
+    days = models.IntegerField(verbose_name="Días", blank=True, default=0)
+    amount = models.FloatField(verbose_name="Cantidad", blank=True, default=0)
+    name = models.CharField(verbose_name="Nombre", max_length=150, blank=True, null=True, default="")
+    desc = models.TextField(verbose_name="Descripción", blank=True, null=True, default="")
+    payment_link = models.CharField(verbose_name="Enlace de pago", max_length=250, blank=True, null=True, default="")
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name="plans")
+
+    class Meta:
+        verbose_name = "Plan"
+        verbose_name_plural="Planes"
+
 class UserProfile(models.Model):
+    amount = models.FloatField(verbose_name="Pago mensual", blank=True, default=0)
     profile = models.ForeignKey(Profile, on_delete=models.SET_NULL, null=True, related_name="users")
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="profiles")
+    plan = models.ForeignKey(Plan, on_delete=models.SET_NULL, related_name="profiles", null=True)
 
     class Meta:
         verbose_name = "Perfil de usuario"
@@ -191,18 +206,5 @@ class UserPayment(models.Model):
     class Meta:
         verbose_name = "Pago de usuario"
         verbose_name_plural="Pagos de usuarios"
-
-class Plan(models.Model):
-    active = models.BooleanField(verbose_name="Activo", default=False)
-    days = models.IntegerField(verbose_name="Días", blank=True, default=0)
-    amount = models.FloatField(verbose_name="Cantidad", blank=True, default=0)
-    name = models.CharField(verbose_name="Nombre", max_length=150, blank=True, null=True, default="")
-    desc = models.TextField(verbose_name="Descripción", blank=True, null=True, default="")
-    payment_link = models.CharField(verbose_name="Enlace de pago", max_length=250, blank=True, null=True, default="")
-    profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name="plans")
-
-    class Meta:
-        verbose_name = "Plan"
-        verbose_name_plural="Planes"
 
 

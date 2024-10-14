@@ -27,4 +27,8 @@ urlpatterns = [
     path('employees/form/', views.employee_form, name='employee-form'),
     path('employees/remove/', views.employee_remove, name='employee-remove'),
     path('employees/journeys/', views.employee_journeys, name='employee-journeys'),
+
+    #------------------------- DONACIONES --------------------
+    path('donations/send/', views.donation_send, name='donation-send'),
+    path('donation-custom/', views.donation_custom, name='donation-custom'),
 ]

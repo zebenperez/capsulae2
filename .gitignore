@@ -131,3 +131,6 @@ dmypy.json
 collect_static
 media
 migrations
+*.deprecated
+logs.txt
+*.sh
