@@ -246,7 +246,7 @@ def payment_stripe_verify(request, code):
     domain = request.META['HTTP_HOST']
     stripe = None
     if "capsulae.org" in domain:
-        stripe = ShStripe(setting.STRIPE_REAL_SECRET_KEY, domain)
+        stripe = ShStripe(settings.STRIPE_REAL_SECRET_KEY, domain)
     else:
         stripe = ShStripe(settings.STRIPE_TEST_SECRET_KEY, domain)
     session = stripe.get_session(code)
@@ -435,7 +435,7 @@ def donation_custom(request):
 
         stripe = None
         if "capsulae.org" in domain:
-            stripe = ShStripe(setting.STRIPE_REAL_SECRET_KEY, domain)
+            stripe = ShStripe(settings.STRIPE_REAL_SECRET_KEY, domain)
         else:
             stripe = ShStripe(settings.STRIPE_TEST_SECRET_KEY, domain)
 
