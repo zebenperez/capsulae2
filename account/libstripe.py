@@ -8,7 +8,7 @@ def show_exc(e):
     return ("ERROR ===:> [%s in %s:%d]: %s" % (exc_type, exc_tb.tb_frame.f_code.co_filename, exc_tb.tb_lineno, str(e)))
 
 class ShStripe:
-    def __init__(self, api_key="", domain_name="capsulae2.shidix.es"):
+    def __init__(self, api_key="", domain_name="capsulae.org"):
         self.api_key = api_key
         self.domain_name = domain_name
         try:

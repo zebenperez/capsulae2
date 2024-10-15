@@ -245,7 +245,7 @@ def payment_stripe_verify(request, code):
     # Get domainname from request
     domain = request.META['HTTP_HOST']
     stripe = None
-    if "fundec.capsulae.org" in domain:
+    if "capsulae.org" in domain:
         stripe = ShStripe(setting.STRIPE_REAL_SECRET_KEY, domain)
     else:
         stripe = ShStripe(settings.STRIPE_TEST_SECRET_KEY, domain)
@@ -434,7 +434,7 @@ def donation_custom(request):
         from .libstripe import ShStripe
 
         stripe = None
-        if "fundec.capsulae.org" in domain:
+        if "capsulae.org" in domain:
             stripe = ShStripe(setting.STRIPE_REAL_SECRET_KEY, domain)
         else:
             stripe = ShStripe(settings.STRIPE_TEST_SECRET_KEY, domain)
