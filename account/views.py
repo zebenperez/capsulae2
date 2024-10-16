@@ -266,7 +266,15 @@ def payment_stripe_verify(request, code):
             return render(request, "account/payment-confirm.html", {'error': True})
             
         else:
-            code = session.client_reference_id
+            code = ""
+            try:
+                product = stripe.get_product(session.display_items[0].product)
+                if "Donación" in product.name:
+                    code = product.name.split(' ')[2]
+                else:
+                    code = session.client_reference_id
+            except:
+                code = session.client_reference_id
             up = UserPayment.objects.filter(code=code).last()
             if up != None:
                 up.pay_date = datetime.now()
@@ -412,12 +420,21 @@ def donation_custom(request):
     custom_pvp = get_int(request.POST.get('custom-pvp',None))
     period_days = request.POST.get('period', "")
     user = User.objects.get(username=request.POST.get("user", ""))
+
+    from .libstripe import ShStripe
+    stripe = None
+    if "capsulae.org" in domain:
+        stripe = ShStripe(settings.STRIPE_REAL_SECRET_KEY, domain)
+    else:
+        stripe = ShStripe(settings.STRIPE_TEST_SECRET_KEY, domain)
+
     
     if period_days == "0":
         plan = get_or_none(Plan, request.POST.get('plan', ""))
         expire_date = datetime.today() + timedelta(days=plan.days)
         up = UserPayment.objects.create(user=user,amount=custom_pvp,expire_date=expire_date,code=get_random_str(128),desc="Donación única")
-        return redirect(f"{plan.payment_link}?client_reference_id={up.code}")
+        donation_url = stripe.create_fundec_donation_once_url(custom_pvp * 100, up.code)
+        return redirect(donation_url)
     else:
         periods = {"30": "month", "365": "year", "7": "week", "1": "day", "180": "semiannual", "90": "quarter"}
         labels = {"month": "mensual", "year": "anual", "week": "semanal", "day": "diario", "semiannual": "semestral", "quarter": "trimestral"}
@@ -431,13 +448,8 @@ def donation_custom(request):
                 # return render(request, "account/donation-send.html", {'error': 6})
             else:
                 return render(request, "account/donation-send.html", {'error': 6})
-        from .libstripe import ShStripe
 
-        stripe = None
-        if "capsulae.org" in domain:
-            stripe = ShStripe(settings.STRIPE_REAL_SECRET_KEY, domain)
-        else:
-            stripe = ShStripe(settings.STRIPE_TEST_SECRET_KEY, domain)
+
 
         expire_date = datetime.today() + timedelta(days=duration[period])
         code = str(uuid.uuid4())

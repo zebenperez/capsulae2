@@ -83,6 +83,34 @@ class ShStripe:
             print(f"Error getting Stripe product: {e}")
             return None
         
+    def create_fundec_donation_once_url(self, pvp, myuuid):
+        print(f"Creating Stripe payment for {pvp}")
+        stripe.api_key = self.api_key
+        try:
+            session = stripe.checkout.Session.create(
+                payment_method_types=["card"],
+                line_items=[
+                    {
+                        "price_data": {
+                            "currency": "eur",
+                            "product_data": {
+                                "name": f"Donación única {myuuid}",
+                            },
+                            "unit_amount": pvp,
+                        },
+                        "quantity": 1,
+                    },
+                ],
+                mode="payment",
+                success_url=f"https://{self.domain_name}/account/payment-stripe-verify/{{CHECKOUT_SESSION_ID}}/",
+                cancel_url=f"https://{self.domain_name}/account/payment-error/",
+            )
+
+            return f"{session.url}"
+        except stripe.error.StripeError as e:
+            print(f"Error creating Stripe payment: {e}")
+            return f"https://{self.domain_name}/account/payment-error/"
+        
     def create_fundec_suscription_url(self, pvp, myuuid, period="month"):
         print(f"Creating Stripe subscription for {pvp} {period}")
         stripe.api_key = self.api_key
@@ -109,7 +137,7 @@ class ShStripe:
                     },
                 ],
                 mode="subscription",
-                billing_address_collection='required',
+                # billing_address_collection='required',
 
                 success_url=f"https://{self.domain_name}/account/payment-stripe-verify/{{CHECKOUT_SESSION_ID}}/",
                 cancel_url=f"https://{self.domain_name}/account/payment-error/",
