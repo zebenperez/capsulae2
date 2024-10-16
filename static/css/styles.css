@@ -991,7 +991,7 @@ i.fas.fa-home:hover, i.far.fa-folder-open:hover, i.fas.fa-users:hover, i.fas.fa-
     flex-basis: 99.5%;
     padding-top: 15px;
     padding-bottom: 3.5rem;
-    height: 99vh;
+    min-height: 99vh;
 }
 
 div#cover.image.special {

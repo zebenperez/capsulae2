@@ -38,7 +38,7 @@
 
 			    {% get_profile_select %}
 
-			    <div class="acceptCheck small">
+			    <div class="acceptCheck small mt-5 p-0">
 				<input type="checkbox" id="tos" name="tos"/> 
 				<label> Acepto las <a class="ark pointer" data-url="{% url "privacy-policy" %}" data-target-modal="common-modal"> 
 				    condiciones de uso</a> </label>
@@ -88,22 +88,26 @@
 		    		</div>
 		    		<div class="form-group">
 					    <input type="text" id="province" name="province" class="form-control" title="Provincia" placeholder="(*) Provincia" 
-                            required/> </div><br/>
-					(*) Campos obligatorios
+                            required/> </div>
+
+        			<div class="required-fields">(*) Campos obligatorios</div>
 
                     {#{% get_profile_select %}#}
 
-				    <br/>
-				    <div class="acceptCheck small">
+				    <div class="acceptCheck small mt-5 p-0">
 					    <input type="checkbox" id="tos" name="tos"/> 
-					    <label>Acepto las <a class="ark pointer" style="color:blue;" data-url="{% url "privacy-policy" %}" 
-                            data-target-modal="common-modal"> condiciones de uso</a> </label><br/>
+                        {%comment%}
+					    <label>Acepto las <a class="ark pointer" data-url="{% url "privacy-policy" %}" 
+                            data-target-modal="common-modal"> condiciones de uso</a> </label>
+                        {%endcomment%}
+                        <label>
+                            Acepto las <a class="ark pointer" href="https://fundec.org/cms/politica/" target="_blank"> condiciones de uso</a></label>
 				    </div>
 				    <div class="">
 					    <script src='https://www.google.com/recaptcha/api.js'></script>
 					    <div class="g-recaptcha" data-sitekey="6Lex26gUAAAAAAz2BSZPNuHpj5-84MYnkIzvsTy4"></div>
-				    </div><br/>
-				    <div class=""> <button id="btn-register-send" class="submitBnt register"> Reg&iacute;strame</button> </div>
+				    </div>
+				    <div class="mt-5"> <button id="btn-register-send" class="submitBnt register"> Reg&iacute;strame</button> </div>
 				    <div id="div-errors" class="alert-msg hideClass"></div>
 			    </div>
 		    </div>

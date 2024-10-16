@@ -20,7 +20,10 @@
             50 <span class="small-text">€</span> </button> </div> 
         <div class="col-lg-3 col-12 donation-card"> 
             <input type="text" class="form-control custom" id="custom-donation" value="" placeholder="Otra cantidad"/> </div> 
+	<div class="col-lg-12 text-center mb-3 mt-5">De su aportación se puede deducir:&nbsp; <span class="deduction" id="div-deduction"></span></div>
     </div>
+    <br/>
+    <br/>
     <br/>
     <input type="hidden" id="plan-d" name="plan-d" value="" />
     <input type="hidden" id="amount-d" name="amount-d" value="" />
@@ -42,6 +45,7 @@
         $(".btn-donation").each(function(){
             $(this).removeClass("btn-warning");
         })
+        calculateDeduction();
         setTimeout(() => {obj.addClass("btn-warning")}, 100);
         e.preventDetault();
     });
@@ -51,6 +55,28 @@
         $(".btn-donation").each(function(){
             $(this).removeClass("btn-warning");
         })
+        calculateDeduction();
         e.preventDetault();
     });
+
+    function calculateDeduction() {
+        // Obtener el valor de la donación
+        var donation = parseFloat($("#amount-d").val());
+
+        // Validar si el valor introducido es un número
+        if (isNaN(donation) || donation <= 0) { $("#div-deduction").html("Por favor, introduce una cantidad válida."); return; }
+
+        // Calcular la deducción en base a las reglas proporcionadas
+        var deduction = 0;
+        if (donation <= 250) { deduction = donation * 0.80; } 
+        else { deduction = 250 * 0.80 + (donation - 250) * 0.40; }
+
+        // Mostrar el resultado
+        $("#div-deduction").html(` <strong>${deduction.toFixed(2)} € `);
+        /*document.getElementById('resultado').innerHTML = `
+            <p>Cantidad donada: <strong>${donation.toFixed(2)} €</strong></p>
+            <p>Deducción fiscal: <strong>${deduction.toFixed(2)} €</strong></p>
+            <p>Coste final: <strong>${(donation - deduction).toFixed(2)} €</strong></p>
+        `;*/
+    }
 </script>

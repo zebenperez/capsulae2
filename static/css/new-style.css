@@ -178,6 +178,18 @@ h4.subHeading{
 	margin-top:20px;
 }
 
+.required-fields {
+	margin-top: -20px !important;
+	font-style:italic;
+	font-size: 0.8rem;
+	color: #666;
+}
+
+.hideClass {
+	display:none;
+}
+
+
 /*----------------------------------------------------
 	3. Header Part
 ------------------------------------------------------*/
@@ -324,11 +336,6 @@ header{
   color:#fff;
 }
 */
-
-
-.hideClass {
-	display:none;
-}
 
 
 /*
@@ -482,6 +489,13 @@ select.form-control {
 	display: grid; 
 	grid-template-columns: 5% 95%; 
 	text-align: left;
+}
+.acceptCheck a {
+	color: #f3bd19;
+	text-decoration: none;
+}
+.acceptCheck a:hover {
+	color: #b060cf;
 }
 
 /*----------------------------------------------------
@@ -1384,6 +1398,11 @@ input#custom-donation.form-control {
 
 input.custom::placeholder {
 	font-size: 1.575rem;
+}
+
+span.deduction {
+	border: 2px solid #f3bd19;
+	padding: 15px 50px 15px 50px;
 }
 
 .btn-warning {
