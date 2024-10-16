@@ -21,6 +21,7 @@
                 <div class="col-lg-6 col-12 conForm form-group">
                     <input type="text" id="email-d2" name="email-d2" class="form-control" title="Confirmación de correo" 
                     placeholder="(*) Confirma email &nbsp;" required/> </div>
+                <div class="required-fields">(*) Campos obligatorios</div>
                     {%comment%}
                     <div class="form-group">
                         <input type="text" id="address" name="address" class="form-control" title="Dirección" placeholder="(*) Dirección" 
@@ -31,18 +32,20 @@
                         <input type="text" id="province" name="province" class="form-control" title="Provincia" placeholder="(*) Provincia" 
                             required/> </div>
                     {%endcomment%}
-                <br/>
-                <div class="acceptCheck small">
+                <div class="acceptCheck small mt-5 p-0">
                     <input type="checkbox" id="tos-d" name="tos-d"/> 
-                    <label>Acepto las <a class="ark pointer" style="color:blue;" data-url="{% url "privacy-policy" %}" 
+                    {%comment%}
+                    <label>Acepto las <a class="ark pointer" data-url="{% url "privacy-policy" %}" 
                         data-target-modal="common-modal"> condiciones de uso</a> </label><br/>
+                    {%endcomment%}
+                    <label>Acepto las <a class="ark pointer" href="https://fundec.org/cms/politica/" target="_blank"> condiciones de uso</a></label>
+                    <br/>
                 </div>
                 <div class="">
                     <script src='https://www.google.com/recaptcha/api.js'></script>
                     <div class="g-recaptcha" data-sitekey="6Lex26gUAAAAAAz2BSZPNuHpj5-84MYnkIzvsTy4"></div>
                 </div>
-                <div class="small">(*) Campos obligatorios</div>
-                <div class=""> <button id="btn-donation-send" class="submitBnt register"> Realizar donación</button> </div>
+                <div class="mt-5"> <button id="btn-donation-send" class="submitBnt register"> Realizar donación</button> </div>
                 <div id="div-donation-errors" class="alert-msg hideClass"></div>
             </div>
         </form>
