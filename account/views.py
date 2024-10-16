@@ -428,7 +428,6 @@ def donation_custom(request):
     else:
         stripe = ShStripe(settings.STRIPE_TEST_SECRET_KEY, domain)
 
-    
     if period_days == "0":
         plan = get_or_none(Plan, request.POST.get('plan', ""))
         expire_date = datetime.today() + timedelta(days=plan.days)
@@ -448,8 +447,6 @@ def donation_custom(request):
                 # return render(request, "account/donation-send.html", {'error': 6})
             else:
                 return render(request, "account/donation-send.html", {'error': 6})
-
-
 
         expire_date = datetime.today() + timedelta(days=duration[period])
         code = str(uuid.uuid4())
