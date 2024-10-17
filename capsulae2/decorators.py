@@ -10,6 +10,13 @@ def group_required(*group_names):
         def _arguments_wrapper(request, *args, **kwargs) :
             logger.info("[{}]: \"{}\"".format(request.user, request.path_info))
             if request.user.is_authenticated:
+                #Admin
+                if request.user.is_superuser:
+                    return f(request, *args, **kwargs)
+                #Solo donante
+                if bool(request.user.groups.filter(name__in=["donor"])) and request.user.groups.count() == 1:
+                    return f(request, *args, **kwargs)
+                #Managers y Empleados
                 if not check_user_payment(request.user):
                     #logout(request)
                     return redirect('account-payment-error')

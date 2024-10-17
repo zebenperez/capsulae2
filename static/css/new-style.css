@@ -394,12 +394,13 @@ header{
 }
 
 input#username.form-control, input#password.form-control, input#email.form-control  {
-	background-color: white !important;
-	border: 1px solid black;
-	border-radius: 0;
-	width:90%;
-	height: 30px;
-	font-size: 11px;
+	background-color:#fff !important;
+	border:solid 1px #dbdbdb !important;
+	color:#000;
+	padding: 10px 15px !important;
+	border:none;
+	margin-bottom:10px;
+	outline:none;
 }
 
 .btn.submitBnt.form-control {
@@ -430,11 +431,10 @@ input#username.form-control, input#password.form-control, input#email.form-contr
 
 }
 .recover-pass button {
-    background: #f3bd19;
-    font-weight: 600;
+    background: #fff;
+    color: #f3bd19 ;
+    border:1px solid #f3bd19;
     font-size: 0.8rem !important;
-    padding: 0;
-    color: #fff;
     border-radius: 0;
 
 }
@@ -459,8 +459,8 @@ h1.login {
 	border-bottom: 11px solid #f3bd19;
 }
 
-button#btn-register-send.submitBnt.register,
-button#btn-donation-send.submitBnt.register {
+button.submitBnt.register,
+button.submitBnt.register {
 	background:#f3bd19;
 	font-family: 'Montserrat', sans-serif;
 	color:#fff;
@@ -474,7 +474,7 @@ button#btn-donation-send.submitBnt.register {
 	border:none !important;
 	width: 100%;
 }
-button#btn-register-send.submitBnt.register:hover {
+button.submitBnt.register:hover {
 	background:#b060cf;
 	cursor: pointer;
 }
@@ -490,10 +490,12 @@ select.form-control {
 	grid-template-columns: 5% 95%; 
 	text-align: left;
 }
+.a-pass,
 .acceptCheck a {
 	color: #f3bd19;
 	text-decoration: none;
 }
+.a-pass:hover,
 .acceptCheck a:hover {
 	color: #b060cf;
 }
@@ -666,12 +668,12 @@ select.form-control {
 	padding-top:98px ;
 	padding-bottom:50px ;
 	text-align:left;
+	max-width: 100% !important;
 }
 .contactDetails h3{
 	font-size:20px;
 	font-weight:600;
 	text-transform:uppercase;
-	padding-bottom:20px;
 	color:#4f525a;
 }
 .contactDetails p{
@@ -693,7 +695,7 @@ select.form-control {
 	background:#fff;
 	border:solid 1px #dbdbdb !important;
 	color:#000;
-	padding:15px 30px;
+	padding: 10px 15px !important;
 	border:none;
 	margin-right:3%;
 	margin-bottom:30px;
@@ -1264,6 +1266,15 @@ a.link {
 	.conForm .submitBnt{
 		width: 100%; 
 	}
+	
+	button.btn.btn-success.btn-donation,
+	input#custom-donation.form-control 
+	{
+		padding: 50px;
+		font-size: 3.125rem;
+		font-weight: 300;
+	}
+
 
 }
 
@@ -1363,12 +1374,19 @@ a.link {
 
 /********* Donations *********/
 
+.grl-block {
+	box-shadow: 2px 2px 20px 0 rgba(0,0,0,.09);
+	border:1px solid #ccc;
+	border-radius: 0.5rem;
+}
+
 button.btn-plan {
 	border: 2px solid #f3bd19;
 	background: white;
 	color: #f3bd19;
 	font-weight: 600;
 	text-transform:uppercase;
+	width: 100%;
 }
 button.btn-active,
 button.btn-plan:hover {
@@ -1382,12 +1400,18 @@ input#custom-donation.form-control {
 	background: white;
 	box-shadow: 2px 2px 20px 0 rgba(0,0,0,.09);
 	border: none;
-	padding: 50px;
+	/*padding: 50px;*/
+	padding: 20px;
 	width:100%;
 	color: #1f1e1e;
 	font-size: 3.125rem;
 	font-weight: 300;
 	letter-spacing: -2px;
+}
+
+.g-recaptcha {
+	width:120%;
+	text-align:center;
 }
 
 .donation-card input {
@@ -1397,14 +1421,21 @@ input#custom-donation.form-control {
 }
 
 input.custom::placeholder {
-	font-size: 1.575rem;
+	font-size: 1rem;
+	letter-spacing: -1px;
 }
 
-span.deduction {
-	border: 2px solid #f3bd19;
+.deduction {
+	background: #f7f1f9;
 	padding: 15px 50px 15px 50px;
+	border-radius: 0.175rem;
+	color: #6f2c89;
+	font-size: 0.95rem;
 }
 
+span.result {
+	font-size: 1.2rem;
+}
 .btn-warning {
     border: 3px solid #f3bd19 !important;
 }

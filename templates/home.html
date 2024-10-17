@@ -1,120 +1,22 @@
+{% extends 'base-home.html' %}
 {% load i18n static %}
 
-<!DOCTYPE html>
-<html class="no-js" lang="en"><!--<![endif]-->
-    <head>
-        <title>Fundec</title>
-        <meta charset="UTF-8" />
-        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+{% block central_content %}
+	<div class="banner d-none d-lg-block" id="banner"> <div class="slide"><img src="/static/imgs/bg-slider.jpg" alt="bg-slider"> </div> </div>
 
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <!--main style-->
-        <link rel="stylesheet" type="text/css" media="screen" href="/static/css/new-style.css">
+    <!--perfiles start -->
+    {% include "home-profiles.html" %}
+          
+    <!--planes start-->
+    {% include "home-plans.html" %}
+          
+    <!--register start-->
+    {% include "account/register.html" %}
 
-        <!-- font icon css style-->
-        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" 
-            integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
-        <script src="https://code.jquery.com/jquery-3.6.1.min.js" integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" 
-            crossorigin="anonymous"></script>
+    <!--contribute start-->
+    {#{% include "account/donations.html" %}#}
 
-	    <!-- Bootstrap core CSS -->
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
-            integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" 
-            integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    <!--contact start-->
+    {% include "home-contact.html" %}
+{% endblock central_content %}
 
-
-        <style>html{scroll-behavior:smooth}</style>
-    </head>
-
-    <!--<body onLoad="load()" onUnload="GUnload()">-->
-    <body>
-        <header class="qba">
-            <div class="menu sticky-top m-0">
-                <nav class="navbar navbar-expand-lg navbar-dark topnav">
-                    <div class="container-fluid">
-		 	<div class="row m-0 d-flex align-items-center">
-		 		<div class="col-lg-10 col-10">
-					<a class="navbar-brand p-0" href="#"><img src="/static/imgs/logo-w.png" alt="Logo CAPSULAE" width="270px"></a>
-				</div>
-		 		<div class="col-lg-2 col-2">
-					<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" 
-					    aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-					    <span class="navbar-toggler-icon"></span>
-					</button>
-				</div>
-			</div>
-                        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                                <li class="nav-item"> <a href="#wrapper" class="active">Inicio</a> </li>
-                                <li class="nav-item"> <a href="#perfiles">Perfiles</a> </li>
-                                <li class="nav-item"> <a href="#planes">Planes</a> </li>
-                                <li class="nav-item"> <a href="#donation">Donaciones</a> </li>
-                                <li class="nav-item"> <a href="#contact">Contacto</a> </li>
-                            </ul>
-
-                        {% include "home-login.html" %}
-                   </div>
-                </nav>
-            </div>
-
-       
-	        <div class="banner d-none d-lg-block" id="banner"> <div class="slide"><img src="/static/imgs/bg-slider.jpg" alt="bg-slider"> </div> </div>
-        </header>
-  
-        <!--perfiles start -->
-        {% include "home-profiles.html" %}
-              
-        <!--planes start-->
-        {% include "home-plans.html" %}
-              
-        <!--register start-->
-        {% include "account/register.html" %}
-
-        <!--contribute start-->
-        {% include "account/donations.html" %}
-
-        <!--contact start-->
-        {% include "home-contact.html" %}
-
-        <!--footer start-->
-        <section class="footer" id="footer">
-            <div class="container">
-                <ul>
-                    <li><a href="#"><i class="fab fa-twitter"></i></a></li>
-                    <li><a href="#"><i class="fab fa-facebook-f"></i></a></li>
-                    <li><a href="#"><i class="fab fa-linkedin"></i></a></li>
-                </ul>
-                <p>© 2023 capsulae.org. Todos los derechos reservados.<br>
-                Diseño creado por <a href="https://www.shidix.com" target="_blank">Shidix Technologies</a></p>
-            </div>
-                <p class="text-center"><a href="#wrapper" class="gototop"><i class="fa fa-chevron-up fa-2x"></i></a></p>
-        </section>
-    </div>
-
-    <script>
-        function setFocus(div){ 
-            var obj = $("#"+div);
-            obj.focus();
-            obj.css('border-color', 'blue');
-            obj.prop('style', 'border: 1px solid green !important');
-            setTimeout(function(){obj.prop('style', 'border: 1px solid #dbdbdb !important');}, 1000);
-        }
-
-        $(".menuItem").click(function(){
-            $(".menuItem").removeClass("active");
-            $(this).addClass("active");
-        });
-
-	    function myFunction() {
-	        var x = document.getElementById("myTopnav");
-	        if (x.className === "topnav") { x.className += "responsive"; } else { x.className = "topnav"; }
-	    }
-	</script>
-
-
-        <!-- Start Style Switcher -->
-        <div class="switcher"></div>
-        <!-- End Style Switcher -->
-    </body>
-</html>

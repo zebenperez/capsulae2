@@ -261,6 +261,7 @@ def payment_stripe_verify(request, code):
             if up != None:
                 up.pay_date = datetime.now()
                 up.cancel = False
+                up.confirm = True
                 up.save()
                 return render(request, "account/payment-confirm.html", {'error': False, 'obj': up})
             return render(request, "account/payment-confirm.html", {'error': True})
@@ -356,6 +357,9 @@ def employee_journeys(request):
 '''
     Contributions
 '''
+def donations(request):
+    return render (request, "account/donations.html", {})
+
 def donor_create_user(email, password, name, cif):
     user = User.objects.create_user(email, email, password)
     user.first_name = name
@@ -368,6 +372,9 @@ def donor_add_group(user):
     manager_group.user_set.add(user)
 
 def donor_create_userprofile(profile, user, plan, amount):
+    um, created = UserMenu.objects.get_or_create(user=user)
+    for menu in profile.menus.all():
+        um.menus.add(menu)
     return UserProfile.objects.create(profile=profile, user=user, plan=plan, amount=amount)
 
 def donation_send(request):

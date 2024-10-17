@@ -37,14 +37,14 @@ from capsulae2.capsulae_lib import check_user_payment
 #        return False
 #    return True
 
-@group_required("admins","managers","employee")
+@group_required("admins","managers","employee", "donor")
 def index(request):
-    if  not check_user_payment(request.user):
-        if request.user.is_superuser:
-            return(redirect('/admin/'))
-        else:
-            logout(request)
-        return redirect('pharma-payment-error')
+#    if  not check_user_payment(request.user):
+#        if request.user.is_superuser:
+#            return(redirect('/admin/'))
+#        else:
+#            logout(request)
+#        return redirect('pharma-payment-error')
 #    if not check_user_payment(request.user):
 #        logout(request)
 #        return redirect('pharma-payment-error')

@@ -29,6 +29,7 @@ urlpatterns = [
     path('employees/journeys/', views.employee_journeys, name='employee-journeys'),
 
     #------------------------- DONACIONES --------------------
+    path('donations/', views.donations, name='donations'),
     path('donations/send/', views.donation_send, name='donation-send'),
     path('donation-custom/', views.donation_custom, name='donation-custom'),
 ]
