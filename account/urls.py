@@ -31,4 +31,5 @@ urlpatterns = [
     #------------------------- DONACIONES --------------------
     path('donations/send/', views.donation_send, name='donation-send'),
     path('donation-custom/', views.donation_custom, name='donation-custom'),
+    path('test/', views.test),
 ]

@@ -195,6 +195,8 @@ class UserProfile(models.Model):
         verbose_name = "Perfil de usuario"
 
 class UserPayment(models.Model):
+    donation = models.BooleanField(verbose_name="Donación", default=False)
+    confirm = models.BooleanField(verbose_name="Confirmación", default=False)
     cancel = models.BooleanField(verbose_name="Cancelado", default=False)
     amount = models.FloatField(verbose_name="Pago", blank=True, default=0)
     pay_date = models.DateField(verbose_name="Fecha de pago", default=datetime.now)

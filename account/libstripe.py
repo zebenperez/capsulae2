@@ -82,23 +82,37 @@ class ShStripe:
         except stripe.error.StripeError as e:
             print(f"Error getting Stripe product: {e}")
             return None
+
+    def get_product_checkout(self, code):
+        stripe.api_key = self.api_key
+        try:
+            id_product = stripe.checkout.Session.list_line_items(code, limit=1)['data'][0]['price']['product']
+            return self.get_product(id_product)
+        except stripe.error.StripeError as e:
+            print(f"Error getting Stripe product checkout: {e}")
+            return None
         
     def create_fundec_donation_once_url(self, pvp, myuuid):
         print(f"Creating Stripe payment for {pvp}")
         stripe.api_key = self.api_key
         try:
+            product = stripe.Product.create(
+                name=f"Donación única' {myuuid}",
+                type="service",                
+            )
+            price = stripe.Price.create(
+                unit_amount=pvp,
+                currency="eur",
+                product=product.id,
+            )
+
             session = stripe.checkout.Session.create(
                 payment_method_types=["card"],
                 line_items=[
                     {
-                        "price_data": {
-                            "currency": "eur",
-                            "product_data": {
-                                "name": f"Donación única {myuuid}",
-                            },
-                            "unit_amount": pvp,
-                        },
+                        "price": price.id,
                         "quantity": 1,
+
                     },
                 ],
                 mode="payment",
@@ -111,9 +125,16 @@ class ShStripe:
             print(f"Error creating Stripe payment: {e}")
             return f"https://{self.domain_name}/account/payment-error/"
         
-    def create_fundec_suscription_url(self, pvp, myuuid, period="month"):
+    def create_fundec_subscription_url(self, pvp, myuuid, period="month"):
         print(f"Creating Stripe subscription for {pvp} {period}")
         stripe.api_key = self.api_key
+        interval_count = 1
+        if (period == "semiannual"):
+            period = "month"
+            interval_count = 6
+        if (period == "quarter"):
+            period = "month"
+            interval_count = 3
         try:
             product = stripe.Product.create(
                 name=f"Donación personalizada {myuuid}",
@@ -123,7 +144,7 @@ class ShStripe:
             price = stripe.Price.create(
                 unit_amount=pvp,
                 currency="eur",
-                recurring={"interval": period},
+                recurring={"interval": period, "interval_count": interval_count},
                 product=product.id,
             )
 
