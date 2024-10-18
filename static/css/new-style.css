@@ -1400,6 +1400,10 @@ input.custom::placeholder {
 	font-size: 1.575rem;
 }
 
+.row-deliver td a{
+    color: black;
+}
+
 span.deduction {
 	border: 2px solid #f3bd19;
 	padding: 15px 50px 15px 50px;
@@ -1434,3 +1438,5 @@ span.deduction {
     text-align: left;
   }
 }
+
+
