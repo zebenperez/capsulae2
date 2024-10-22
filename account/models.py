@@ -181,6 +181,10 @@ class Plan(models.Model):
     payment_link = models.CharField(verbose_name="Enlace de pago", max_length=250, blank=True, null=True, default="")
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name="plans")
 
+    def __str__(self):
+        return self.name
+
+
     class Meta:
         verbose_name = "Plan"
         verbose_name_plural="Planes"

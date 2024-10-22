@@ -1425,8 +1425,13 @@ input.custom::placeholder {
 	letter-spacing: -1px;
 }
 
-.deduction {
-	background: #f7f1f9;
+.row-deliver td a{
+    color: black;
+}
+
+span.deduction {
+	/*background: #f7f1f9;*/
+	border: 2px solid #f3bd19;
 	padding: 15px 50px 15px 50px;
 	border-radius: 0.175rem;
 	color: #6f2c89;
@@ -1465,3 +1470,5 @@ span.result {
     text-align: left;
   }
 }
+
+
