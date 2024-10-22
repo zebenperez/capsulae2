@@ -63,6 +63,7 @@
         <div class="container"> 
 		<form action="/account/signup/" method="post" enctype="multipart/form-data" name="frmRegister" id="frmRegister" class="p-3">
 		    {% csrf_token %}
+		    <input type="hidden" id="profile" name="profile" value="1" />
             <!--contact form start-->
             <div class="row w-100 m-0">
                 <div class="col-lg-4 col-12">

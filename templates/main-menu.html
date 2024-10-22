@@ -33,6 +33,10 @@
             <li class="nav-item"><a class="nav-link " href="{%url "notes-index"%}">
                 <i class="fa fa-calendar-alt"></i> {%trans "Agenda"%}</a></li><hr/>
         {% endif %}
+        {% if user|have_menu:"DON"%}
+            <li class="nav-item"><a class="nav-link " href="{%url "donation-index"%}">
+                <i class="fa fa-hand-holding-usd"></i> {%trans "Donaciones"%}</a></li><hr/>
+        {% endif %}
     {% endif %}
     </ul>
 {% else %}

@@ -37,7 +37,7 @@ from capsulae2.capsulae_lib import check_user_payment
 #        return False
 #    return True
 
-@group_required("admins","managers","employee", "donor")
+@group_required("admins","managers","employee","donor")
 def index(request):
 #    if  not check_user_payment(request.user):
 #        if request.user.is_superuser:

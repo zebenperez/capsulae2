@@ -8,7 +8,7 @@ def show_exc(e):
     return ("ERROR ===:> [%s in %s:%d]: %s" % (exc_type, exc_tb.tb_frame.f_code.co_filename, exc_tb.tb_lineno, str(e)))
 
 class ShStripe:
-    def __init__(self, api_key="", domain_name="capsulae2.shidix.es"):
+    def __init__(self, api_key="", domain_name="capsulae.org"):
         self.api_key = api_key
         self.domain_name = domain_name
         try:
@@ -82,10 +82,59 @@ class ShStripe:
         except stripe.error.StripeError as e:
             print(f"Error getting Stripe product: {e}")
             return None
+
+    def get_product_checkout(self, code):
+        stripe.api_key = self.api_key
+        try:
+            id_product = stripe.checkout.Session.list_line_items(code, limit=1)['data'][0]['price']['product']
+            return self.get_product(id_product)
+        except stripe.error.StripeError as e:
+            print(f"Error getting Stripe product checkout: {e}")
+            return None
         
-    def create_fundec_suscription_url(self, pvp, myuuid, period="month"):
+    def create_fundec_donation_once_url(self, pvp, myuuid):
+        print(f"Creating Stripe payment for {pvp}")
+        stripe.api_key = self.api_key
+        try:
+            product = stripe.Product.create(
+                name=f"Donación única' {myuuid}",
+                type="service",                
+            )
+            price = stripe.Price.create(
+                unit_amount=pvp,
+                currency="eur",
+                product=product.id,
+            )
+
+            session = stripe.checkout.Session.create(
+                payment_method_types=["card"],
+                line_items=[
+                    {
+                        "price": price.id,
+                        "quantity": 1,
+
+                    },
+                ],
+                mode="payment",
+                success_url=f"https://{self.domain_name}/account/payment-stripe-verify/{{CHECKOUT_SESSION_ID}}/",
+                cancel_url=f"https://{self.domain_name}/account/payment-error/",
+            )
+
+            return f"{session.url}"
+        except stripe.error.StripeError as e:
+            print(f"Error creating Stripe payment: {e}")
+            return f"https://{self.domain_name}/account/payment-error/"
+        
+    def create_fundec_subscription_url(self, pvp, myuuid, period="month"):
         print(f"Creating Stripe subscription for {pvp} {period}")
         stripe.api_key = self.api_key
+        interval_count = 1
+        if (period == "semiannual"):
+            period = "month"
+            interval_count = 6
+        if (period == "quarter"):
+            period = "month"
+            interval_count = 3
         try:
             product = stripe.Product.create(
                 name=f"Donación personalizada {myuuid}",
@@ -95,7 +144,7 @@ class ShStripe:
             price = stripe.Price.create(
                 unit_amount=pvp,
                 currency="eur",
-                recurring={"interval": period},
+                recurring={"interval": period, "interval_count": interval_count},
                 product=product.id,
             )
 
@@ -109,7 +158,7 @@ class ShStripe:
                     },
                 ],
                 mode="subscription",
-                billing_address_collection='required',
+                # billing_address_collection='required',
 
                 success_url=f"https://{self.domain_name}/account/payment-stripe-verify/{{CHECKOUT_SESSION_ID}}/",
                 cancel_url=f"https://{self.domain_name}/account/payment-error/",

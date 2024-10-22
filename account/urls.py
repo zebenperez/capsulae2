@@ -1,5 +1,5 @@
 from django.urls import path
-from . import views
+from . import views, donation_views
 
 urlpatterns = [
     path('signup/', views.signup, name='account-signup'),
@@ -32,4 +32,9 @@ urlpatterns = [
     path('donations/', views.donations, name='donations'),
     path('donations/send/', views.donation_send, name='donation-send'),
     path('donation-custom/', views.donation_custom, name='donation-custom'),
+    path('test/', views.test),
+
+    path('donations/index/', donation_views.donations_index, name='donation-index'),
+    path('donations/edit/', donation_views.donation_edit, name='donation-edit'),
+    path('donations/remove/', donation_views.donation_remove, name='donation-remove'),
 ]
