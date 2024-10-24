@@ -3,69 +3,23 @@
 {% load i18n static account_tags %}
 
 {% block central_content %}
-
     {% if error == 0 %}
         <div class="row"> <div class="col-12">
             <div class="jumbotron text-center">
-                <div class="info">{% trans "Bienvenido a Capsulae, " %} <strong>{{user.first_name}}</strong></div>
-                <div class="mt-5">Confirma que desea realizar su donación por un importe de <strong>{{up.amount}} €</strong>
-                    de forma "{{up.plan.name}}" </div>
+                <div class="info">{% trans "Bienvenido a Capsulae, " %} <strong>{{donation.name}}</strong></div>
+                <div class="mt-5">Confirma que desea realizar su donación por un importe de <strong>{{donation.amount}} €</strong>
+                    de forma "{{donation.plan}}" </div>
                 <div class="mt-5">
-                    {%comment%}
-                    <a class="btn btn-primary payment w-50 py-3" href="{% url "account-payment-send" up.plan.id %}">
-                        <strong>{% trans "CONFIRMAR DONACIÓN" %}</strong></a>
-                    {%endcomment%}
                     <form action="{%url "donation-custom"%}" method="post" enctype="multipart/form-data" name="frmRegister" id="frmRegister" 
                         class="p-3">
                         {% csrf_token %}
-                        <input type="hidden" id="custom-pvp" name="custom-pvp" value="{{up.amount}}" />
-                        <input type="hidden" id="period" name="period" value="{{up.plan.days}}" />
-                        <input type="hidden" id="plan" name="plan" value="{{up.plan.id}}" />
-                        <input type="hidden" id="user" name="user" value="{{user.username}}" />
+                        <input type="hidden" id="donation" name="donation" value="{{donation.id}}" />
+                        <input type="hidden" id="custom-pvp" name="custom-pvp" value="{{donation.amount}}" />
+                        <input type="hidden" id="period" name="period" value="{{donation.plan_days}}" />
                         <button class="btn btn-primary payment w-50 py-3"><strong>{% trans "CONFIRMAR DONACIÓN" %}</strong></button>
                     </form>
                 </div>
                 <div class="mt-5"><strong>{% trans "¡Gracias por su confianza!" %}</strong></div>
-                <div class="mt-5"><a href="{% url "pharma-index" %}" class="link">{% trans "Volver" %}</a></div> 
-            </div>
-        </div> </div>
-    {% elif error == 1 %}
-        <div class="row"> <div class="col-12">
-            <div class="jumbotron text-center">
-                <div class="info">{% trans 'CIF ya registrado: ' %} <strong>{{user.first_name}}</strong></div>
-                <div class="mt-5">Para realizar una nueva donación, modificar una existente o darse de baja debe acceder a su cuenta.</div>
-                <div class="mt-5"><a href="{% url "pharma-index" %}" class="link">{% trans "Volver" %}</a></div> 
-            </div>
-        </div> </div>
-    {% elif error == 2 %}
-        <div class="row"> <div class="col-12">
-            <div class="jumbotron text-center">
-                <div class="info">{% trans 'Correo electrónico ya registrado: ' %} <strong>{{user.first_name}}</strong></div>
-                <div class="mt-5">Para realizar una nueva donación, modificar una existente o darse de baja debe acceder a su cuenta.</div>
-                <div class="mt-5"><a href="{% url "pharma-index" %}" class="link">{% trans "Volver" %}</a></div> 
-            </div>
-        </div> </div>
-    {% elif error == 3 %}
-        <div class="row"> <div class="col-12">
-            <div class="jumbotron text-center"> 
-                <div class="info">{% trans 'Los correos electrónicos no coinciden' %}</div>
-                <div class="mt-5">{% trans 'Por favor rellene de nuevo el formulario' %}</div>
-                <div class="mt-5"><a href="{% url "pharma-index" %}" class="link">{% trans "Volver" %}</a></div> 
-            </div>
-        </div> </div>
-    {% elif error == 4 %}
-        <div class="row"> <div class="col-12">
-            <div class="jumbotron text-center"> 
-                <div class="info">{% trans 'No se ha encontrado el plan indicado' %}</div>
-                <div class="mt-5">{% trans 'Disculpe las molestias' %}</div>
-                <div class="mt-5"><a href="{% url "pharma-index" %}" class="link">{% trans "Volver" %}</a></div> 
-            </div>
-        </div> </div>
-     {% elif error == 5 %}
-        <div class="row"> <div class="col-12">
-            <div class="jumbotron text-center"> 
-                <div class="info">{% trans 'No se ha encontrado el perfil indicado' %}</div>
-                <div class="mt-5">{% trans 'Discule las molestias' %}</div>
                 <div class="mt-5"><a href="{% url "pharma-index" %}" class="link">{% trans "Volver" %}</a></div> 
             </div>
         </div> </div>

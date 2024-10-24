@@ -190,16 +190,16 @@ class Plan(models.Model):
         verbose_name_plural="Planes"
 
 class UserProfile(models.Model):
-    amount = models.FloatField(verbose_name="Pago mensual", blank=True, default=0)
+    #amount = models.FloatField(verbose_name="Pago mensual", blank=True, default=0)
     profile = models.ForeignKey(Profile, on_delete=models.SET_NULL, null=True, related_name="users")
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="profiles")
-    plan = models.ForeignKey(Plan, on_delete=models.SET_NULL, related_name="profiles", null=True)
+    #plan = models.ForeignKey(Plan, on_delete=models.SET_NULL, related_name="profiles", null=True)
 
     class Meta:
         verbose_name = "Perfil de usuario"
 
 class UserPayment(models.Model):
-    donation = models.BooleanField(verbose_name="Donación", default=False)
+    #donation = models.BooleanField(verbose_name="Donación", default=False)
     confirm = models.BooleanField(verbose_name="Confirmación", default=False)
     cancel = models.BooleanField(verbose_name="Cancelado", default=False)
     amount = models.FloatField(verbose_name="Pago", blank=True, default=0)
@@ -212,5 +212,20 @@ class UserPayment(models.Model):
     class Meta:
         verbose_name = "Pago de usuario"
         verbose_name_plural="Pagos de usuarios"
+
+class Donation(models.Model):
+    confirm = models.BooleanField(verbose_name="Confirmación", default=False)
+    amount = models.FloatField(verbose_name="Pago", blank=True, default=0)
+    pay_date = models.DateField(verbose_name="Fecha de pago", default=datetime.now)
+    code = models.CharField(verbose_name="Stripe code", max_length=250, blank=True, null=True, default="")
+    name = models.CharField(verbose_name="Nombre", max_length=250, blank=True, null=True, default="")
+    cif = models.CharField(verbose_name="NIF", max_length=250, blank=True, null=True, default="")
+    email = models.CharField(verbose_name="Correo electrónico", max_length=250, blank=True, null=True, default="")
+    plan = models.CharField(verbose_name="Plan", max_length=250, blank=True, null=True, default="")
+    plan_days = models.IntegerField(verbose_name="Días", blank=True, default=0)
+
+    class Meta:
+        verbose_name = "Donación"
+        verbose_name_plural="Donaciones"
 
 

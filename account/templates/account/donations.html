@@ -7,26 +7,20 @@
     <section class="contactDetails" id="donation">
         <div class="container mt-5"> 
             <div class="row">
-                <div class="col-12">
-                    <div class="row"> <div class="col-lg-5 col-12"> <h1 class="login">Donaciones</h1> </div> </div>
-                </div>
+                <div class="col-12"> <div class="row"> <div class="col-lg-5 col-12"> <h1 class="login">Donaciones</h1> </div> </div> </div>
             </div>
 
-		<div class="row">
-			<div class="col-12"> <p>
-			    <div style="width:100%">
-				    <div class="ql-align-justify p-3" style="background: #812c7c; border-radius: 5px; color:white;-webkit-box-shadow: 0px 10px 13px -7px #000000, -4px 5px 12px -3px rgba(0,0,0,0); box-shadow: 0px 10px 13px -7px #000000, -4px 5px 12px -3px rgba(0,0,0,0);">
-					<p style="color: white;"><strong>Con tu participación en las actividades de la Fundación consigues que ésta sea una realidad, con una historia y un futuro, con un programa de actividades y proyectos que crean comunidad y justicia social</strong>
-					<br />Los donantes personas físicas pueden deducir de la cuota íntegra del IRPF, con un límite del 10% de la base liquidable, el 80% de los primeros 150€ donados y el 35% del resto (o 40% a partir del tercer año, si cada año la cantidad donada a la misma fundación es igual o superior), como deducción estatal.
-					<br />Los donantes personas jurídicas pueden deducir la cuota íntegra del Impuesto de Sociedades, con un límite del 10% de la base imponible, un 35% del importe donado (o un 40% a partir del tercer año, si cada año la cantidad donada a la misma fundación es igual o superior). Puedes consultarlo en <a href="https://sede.agenciatributaria.gob.es/" target="_blank" style="color:#ffc127;">www.aeat.es</a>
-					<br />Si deseas realizar una transferencia bancaria, puedes hacerlo en esta cuenta: ES05 3076 0230 2127 0154 6323</p>
-				</div>
-			</div>
-		</div>
+            <br/>
+		    <div class="row"> <div class="col-12">{%include "account/donations-text.html"%}</div> </div>
 
             <br/>
+            <div class="row p-2 mt-3"> <div class="col-12">{%include "account/donations-form.html"%}</div> </div>
+        </div>
+    </section> 
+    <script> $(".menu-item").removeClass("active"); $("#menu-donations").addClass("active"); </script>
+{% endblock central_content %}
 
-            <div class="row p-2 mt-3">
+                {%comment%}
                 <div class="col-lg-4 col-12">
                     <div class="grl-block pt-3 m-1">
                         <h3 class="text-center">Ya soy donante</h3>
@@ -58,58 +52,6 @@
                         </div>
                     </div>
                 </div>
+                {%endcomment%}
 
-                <div class="col-lg-8 col-12">
-                        <div class="grl-block pt-3 m-1">
-                            <h3 class="text-center">Soy un nuevo donante</h3>
-                            <form action="{%url "donation-send"%}" method="post" enctype="multipart/form-data" name="frmDonation" id="frmDonation" 
-                                class="">
-                                {% csrf_token %}
-                                <!--contact form start-->
-                                {#<div class="row w-100 m-0"> <div class="col-lg-5 col-12"> <h1 class="login">Donaciones</h1> </div> </div>#}
-
-                                {% get_donation_select %}
-
-                                <div class="row m-0">
-                                    <div class="col-lg-6 col-12 conForm form-group">
-                                        <input type="text" id="name-d" name="name-d" class="form-control" title="Nombre" placeholder="(*) Nombre" required/> 
-                                    </div>
-                                    <div class="col-lg-6 col-12 conForm form-group">
-                                        <input type="text" id="cif-d" name="cif-d" class="form-control" title="CIF" placeholder="(*) CIF/NIF" required/> 
-                                    </div>
-                                    <div class="col-lg-6 col-12 conForm form-group">
-                                        <input type="text" id="email-d1" name="email-d1" class="form-control" title="Correo electrónico" 
-                                        placeholder="(*) Email&nbsp;" required/> </div>
-                                    <div class="col-lg-6 col-12 conForm form-group">
-                                        <input type="text" id="email-d2" name="email-d2" class="form-control" title="Confirmación de correo" 
-                                        placeholder="(*) Confirma email &nbsp;" required/> </div>
-                                    <div class="required-fields">(*) Campos obligatorios</div>
-                                    <div class="acceptCheck small mt-3 p-0">
-                                        <input type="checkbox" id="tos-d" name="tos-d"/> 
-                                        {%comment%}
-                                        <label>Acepto las <a class="ark pointer" data-url="{% url "privacy-policy" %}" 
-                                            data-target-modal="common-modal"> condiciones de uso</a> </label><br/>
-                                        {%endcomment%}
-                                        <label>
-                                            Acepto las <a class="ark pointer" href="https://fundec.org/cms/politica/" target="_blank"> condiciones de uso</a>
-                                        </label>
-                                        <br/>
-                                    </div>
-                                </div>
-                                <div class="row m-0">
-                                    <div class="col-lg-4 col-12 text-center">
-                                        <script src='https://www.google.com/recaptcha/api.js'></script>
-                                        <div class="g-recaptcha" data-sitekey="6Lex26gUAAAAAAz2BSZPNuHpj5-84MYnkIzvsTy4"></div>
-                                    </div>
-                                    <div class="col-lg-7 offset-lg-1 col-12"> <button id="btn-donation-send" class="submitBnt register">Realizar donación</button> </div>
-                                    <div id="div-donation-errors" class="alert-msg hideClass"></div>
-                                </div>
-                            </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </section> 
-    <script> $(".menu-item").removeClass("active"); $("#menu-donations").addClass("active"); </script>
-{% endblock central_content %}
 

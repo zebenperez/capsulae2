@@ -12,6 +12,7 @@ from capsulae2.commons import get_random_str, get_param, get_or_none, get_int, g
 from shifts2.models import Journey
 from .email_lib import send_register_email, send_new_password_email
 from .models import *
+from .libstripe import ShStripe
 
 from datetime import datetime, timedelta
 import random, string
@@ -242,7 +243,7 @@ def payment_stripe_success(request, code):
     return render(request, "account/payment-confirm.html", {'error': False, 'obj': up})
 
 def payment_stripe_verify(request, code):
-    from .libstripe import ShStripe
+    #from .libstripe import ShStripe
 
     # Get domainname from request
     domain = request.META['HTTP_HOST']
@@ -266,8 +267,13 @@ def payment_stripe_verify(request, code):
                 up.confirm = True
                 up.save()
                 return render(request, "account/payment-confirm.html", {'error': False, 'obj': up})
+            don = Donation.objects.filter(code=code).last()
+            if don != None:
+                up.pay_date = datetime.now()
+                up.confirm = True
+                up.save()
+                return render(request, "account/payment-confirm-donation.html", {'error': False, 'obj': don})
             return render(request, "account/payment-confirm.html", {'error': True})
-            
         else:
             code = ""
             try:
@@ -287,8 +293,13 @@ def payment_stripe_verify(request, code):
                 up.confirm = True
                 up.save()
                 return render(request, "account/payment-confirm.html", {'error': False, 'obj': up})
-            else:
-                return render(request, "account/payment-confirm.html", {'error': True})
+            don = Donation.objects.filter(code=code).last()
+            if don != None:
+                up.pay_date = datetime.now()
+                up.confirm = True
+                up.save()
+                return render(request, "account/payment-confirm-donation.html", {'error': False, 'obj': don})
+            return render(request, "account/payment-confirm.html", {'error': True})
     else:
         code = session.client_reference_id
         up = UserPayment.objects.filter(code=code).last()
@@ -296,7 +307,6 @@ def payment_stripe_verify(request, code):
             up.cancel = True
             up.save()
             return render(request, "account/payment-confirm.html", {'error': True})
-
         return render(request, "account/payment-confirm.html", {'error': True})
 
 
@@ -373,23 +383,6 @@ def employee_journeys(request):
 def donations(request):
     return render (request, "account/donations.html", {})
 
-def donor_create_user(email, password, name, cif):
-    user = User.objects.create_user(email, email, password)
-    user.first_name = name
-    user.last_name = cif
-    user.save()
-    return user 
-
-def donor_add_group(user):
-    manager_group = Group.objects.get(name='donor')
-    manager_group.user_set.add(user)
-
-def donor_create_userprofile(profile, user, plan, amount):
-    um, created = UserMenu.objects.get_or_create(user=user)
-    for menu in profile.menus.all():
-        um.menus.add(menu)
-    return UserProfile.objects.create(profile=profile, user=user, plan=plan, amount=amount)
-
 def donation_send(request):
     name = request.POST.get('name-d','')
     cif = request.POST.get('cif-d','')
@@ -399,41 +392,22 @@ def donation_send(request):
     amount = request.POST.get('amount-d','')
     msg = ""
 
-    user = User.objects.filter(last_name=cif).first()
-    if user != None:
-        return render (request, "account/donation-send.html", {"error": 1, "user": user})
-    user = User.objects.filter(email=email).first()
-    if user != None:
-        return render (request, "account/donation-send.html", {"error": 2, "user": user})
-    if (email != confirmedemail):
-        return render (request, "account/donation-send.html", {"error": 3})
-    plan = get_or_none(Plan, plan_id)
-    if plan == None:
-        return render (request, "account/donation-send.html", {"error": 4})
-    profile = Profile.objects.filter(code="donation").first()
-    if profile == None:
-        return render (request, "account/donation-send.html", {"error": 5})
-
-    #if validate_captcha(request):
     try:
-        password = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(8))
-        user = donor_create_user(email, password, name, cif)
-        donor_add_group(user)
-        up = donor_create_userprofile(profile, user, plan, amount)
-        #signup_create_userpayment(user)
-        #send_register_email(request.META['HTTP_HOST'], useractivate.activate_key, [email])
-        return render (request, "account/donation-send.html", {"error": 0, "user": user, "up": up})
+        plan = get_or_none(Plan, plan_id)
+        plan_name = plan.name if plan != None else "-"
+        don = Donation.objects.create(amount=amount, code=get_random_str(128), name=name, cif=cif, email=email, plan=plan_name, plan_days=plan.days)
+        return render (request, "account/donation-send.html", {"error": 0, "donation": don})
     except Exception as e:
         print(e)
         return render(request, 'error_exception.html', {'exc':show_exc(e)})
+
 
 def donation_custom(request):
     domain = request.META['HTTP_HOST']
     custom_pvp = get_int(request.POST.get('custom-pvp',None))
     period_days = request.POST.get('period', "")
-    user = User.objects.get(username=request.POST.get("user", ""))
+    donation = get_or_none(Donation, request.POST.get("donation", ""))
 
-    from .libstripe import ShStripe
     stripe = None
     if "capsulae.org" in domain:
         stripe = ShStripe(settings.STRIPE_REAL_SECRET_KEY, domain)
@@ -441,10 +415,7 @@ def donation_custom(request):
         stripe = ShStripe(settings.STRIPE_TEST_SECRET_KEY, domain)
 
     if period_days == "0":
-        plan = get_or_none(Plan, request.POST.get('plan', ""))
-        expire_date = datetime.today() + timedelta(days=plan.days)
-        up = UserPayment.objects.create(user=user,amount=custom_pvp,expire_date=expire_date,code=get_random_str(128),desc="Donación única",donation=True)
-        donation_url = stripe.create_fundec_donation_once_url(custom_pvp * 100, up.code)
+        donation_url = stripe.create_fundec_donation_once_url(custom_pvp * 100, donation.code)
         return redirect(donation_url)
     else:
         periods = {"30": "month", "365": "year", "7": "week", "1": "day", "180": "semiannual", "90": "quarter"}
@@ -456,26 +427,15 @@ def donation_custom(request):
         if custom_pvp == None:
             if "shidix.es" in domain:
                 custom_pvp = random.randint(1, 100)
-                # return render(request, "account/donation-send.html", {'error': 6})
             else:
                 return render(request, "account/donation-send.html", {'error': 6})
 
-        expire_date = datetime.today() + timedelta(days=duration[period])
-        code = str(uuid.uuid4())
-        desc = f"Donación personalizada {labels[period]} {code}"
-        up = UserPayment.objects.create(user=user, amount=custom_pvp, expire_date=expire_date, code=code, desc=desc, donation=True)  
-
-        #if request.user.is_authenticated:
-        #    up = UserPayment.objects.create(user=request.user, amount=custom_pvp, expire_date=expire_date, code=code, desc=f"Donación personalizada {labels[period]} {code}")  
-        #else:
-        #    up = UserPayment.objects.create(user=User.objects.get(username='admin'), amount=custom_pvp, expire_date=expire_date, code=code, desc=f"Donación personalizada {labels[period]} {code}")
-        
-        subscription_url = stripe.create_fundec_subscription_url(custom_pvp * 100, up.code, period=period)
+        subscription_url = stripe.create_fundec_subscription_url(custom_pvp * 100, donation.code, period=period)
         return redirect(subscription_url)
 
 def test(request):
     return HttpResponse("OK")
-    from .libstripe import ShStripe
+    #from .libstripe import ShStripe
     domain = request.META['HTTP_HOST']
     stripe = None
     if "capsulae.org" in domain:
@@ -491,3 +451,106 @@ def test(request):
     else:
         code = "ERROR"
     return HttpResponse(code)
+
+#def donor_create_user(email, password, name, cif):
+#    user = User.objects.create_user(email, email, password)
+#    user.first_name = name
+#    user.last_name = cif
+#    user.save()
+#    return user 
+#
+#def donor_add_group(user):
+#    manager_group = Group.objects.get(name='donor')
+#    manager_group.user_set.add(user)
+#
+#def donor_create_userprofile(profile, user, plan, amount):
+#    um, created = UserMenu.objects.get_or_create(user=user)
+#    for menu in profile.menus.all():
+#        um.menus.add(menu)
+#    return UserProfile.objects.create(profile=profile, user=user, plan=plan, amount=amount)
+#
+#def donation_send(request):
+#    name = request.POST.get('name-d','')
+#    cif = request.POST.get('cif-d','')
+#    email = request.POST.get('email-d1','')
+#    confirmedemail = request.POST.get('email-d2','')
+#    plan_id = request.POST.get('plan-d','')
+#    amount = request.POST.get('amount-d','')
+#    msg = ""
+#
+#    user = User.objects.filter(last_name=cif).first()
+#    if user != None:
+#        return render (request, "account/donation-send.html", {"error": 1, "user": user})
+#    user = User.objects.filter(email=email).first()
+#    if user != None:
+#        return render (request, "account/donation-send.html", {"error": 2, "user": user})
+#    if (email != confirmedemail):
+#        return render (request, "account/donation-send.html", {"error": 3})
+#    plan = get_or_none(Plan, plan_id)
+#    if plan == None:
+#        return render (request, "account/donation-send.html", {"error": 4})
+#    profile = Profile.objects.filter(code="donation").first()
+#    if profile == None:
+#        return render (request, "account/donation-send.html", {"error": 5})
+#
+#    #if validate_captcha(request):
+#    try:
+#        password = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(8))
+#        user = donor_create_user(email, password, name, cif)
+#        donor_add_group(user)
+#        up = donor_create_userprofile(profile, user, plan, amount)
+#        #signup_create_userpayment(user)
+#        #send_register_email(request.META['HTTP_HOST'], useractivate.activate_key, [email])
+#        return render (request, "account/donation-send.html", {"error": 0, "user": user, "up": up})
+#    except Exception as e:
+#        print(e)
+#        return render(request, 'error_exception.html', {'exc':show_exc(e)})
+#def donation_custom(request):
+#    domain = request.META['HTTP_HOST']
+#    custom_pvp = get_int(request.POST.get('custom-pvp',None))
+#    period_days = request.POST.get('period', "")
+#    user = User.objects.get(username=request.POST.get("user", ""))
+#
+#    from .libstripe import ShStripe
+#    stripe = None
+#    if "capsulae.org" in domain:
+#        stripe = ShStripe(settings.STRIPE_REAL_SECRET_KEY, domain)
+#    else:
+#        stripe = ShStripe(settings.STRIPE_TEST_SECRET_KEY, domain)
+#
+#    if period_days == "0":
+#        plan = get_or_none(Plan, request.POST.get('plan', ""))
+#        expire_date = datetime.today() + timedelta(days=plan.days)
+#        #up = UserPayment.objects.create(user=user,amount=custom_pvp,expire_date=expire_date,code=get_random_str(128),desc="Donación única",donation=True)
+#        up = UserPayment.objects.create(user=user,amount=custom_pvp,expire_date=expire_date,code=get_random_str(128),desc="Donación única")
+#        donation_url = stripe.create_fundec_donation_once_url(custom_pvp * 100, up.code)
+#        return redirect(donation_url)
+#    else:
+#        periods = {"30": "month", "365": "year", "7": "week", "1": "day", "180": "semiannual", "90": "quarter"}
+#        labels = {"month": "mensual", "year": "anual", "week": "semanal", "day": "diario", "semiannual": "semestral", "quarter": "trimestral"}
+#        duration = {"month": 30, "year": 365, "week": 7, "day": 1, "semiannual": 180, "quarter": 90}
+#
+#        period = periods[period_days]
+#
+#        if custom_pvp == None:
+#            if "shidix.es" in domain:
+#                custom_pvp = random.randint(1, 100)
+#                # return render(request, "account/donation-send.html", {'error': 6})
+#            else:
+#                return render(request, "account/donation-send.html", {'error': 6})
+#
+#        expire_date = datetime.today() + timedelta(days=duration[period])
+#        code = str(uuid.uuid4())
+#        desc = f"Donación personalizada {labels[period]} {code}"
+#        #up = UserPayment.objects.create(user=user, amount=custom_pvp, expire_date=expire_date, code=code, desc=desc, donation=True)  
+#        up = UserPayment.objects.create(user=user, amount=custom_pvp, expire_date=expire_date, code=code, desc=desc)  
+#
+#        #if request.user.is_authenticated:
+#        #    up = UserPayment.objects.create(user=request.user, amount=custom_pvp, expire_date=expire_date, code=code, desc=f"Donación personalizada {labels[period]} {code}")  
+#        #else:
+#        #    up = UserPayment.objects.create(user=User.objects.get(username='admin'), amount=custom_pvp, expire_date=expire_date, code=code, desc=f"Donación personalizada {labels[period]} {code}")
+#        
+#        subscription_url = stripe.create_fundec_subscription_url(custom_pvp * 100, up.code, period=period)
+#        return redirect(subscription_url)
+#
+

@@ -10,8 +10,10 @@
     <div class="col-6 mt-3 p-2">
         <div class="greybox-xlg p-2">
             {% trans "Plan" %}
-            <select class="form-control autosave" id="plan" name="plan" data-url="{%url "autosave_field"%}" data-target="div-notification">
-                {%for item in plan_list%}<option value="{{item.id}}" {%if item.id == obj.plan.id%}selected{%endif%}>{{item.name}}</span>{%endfor%}
+            <select class="form-control autosave" id="plan" name="plan" 
+                data-model-name="account.userprofile" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" data-target="div-notification">
+                <option value="">-- Seleccione la duración de su donación --</option>
+                {%for item in plan_list%}<option value="{{item.id}}" {%if item.id == obj.plan.id%}selected{%endif%}>{{item.name}}</option>{%endfor%}
             </select>
         </div>
     </div>
@@ -26,7 +28,11 @@
 </div>
 
 <div class="d-flex justify-content-end">
+    <button type="button" class="btn btn-sm save" data-bs-dismiss="modal" onclick="location.href='/account/donations/index/'">
+        {% trans "Save" %}</button>
+    {%comment%}
     <button type="button" class="btn btn-sm ark save" data-bs-dismiss="modal" data-url="{% url "donation-index" %}"
-        data-target="div-container">{% trans "Save" %}</button>
+        data-target="div-main-donations">{% trans "Save" %}</button>
+    {%endcomment%}
 </div>
 

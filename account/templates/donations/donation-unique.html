@@ -1,0 +1,26 @@
+{% load i18n %}
+
+
+<div class="d-flex justify-content-end"> <button type="button" class="btn btn-lg" data-bs-dismiss="modal" title="{% trans "Close" %}">
+    <i class="fas fa-times"></i></button> </div>
+
+<h2>{% trans 'Donación única' %}</h2>
+
+<form action="{%url "donation-unique-send"%}" method="post" enctype="multipart/form-data" name="frmDonation" id="frmDonation" class="p-3">
+    {% csrf_token %}
+    <input type="hidden" id="user" name="user" value="{{user.username}}" />
+ 
+    <div class="row justify-center">
+        <div class="col-12 mt-3 p-2">
+            <div class="greybox-xlg p-2">
+                {%trans "Cantidad"%} <input type="text" class="form-control" id="amount" name="amount" value="{{obj.amount|floatformat}}" />
+            </div>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-end">
+        <button type="button" class="btn btn-sm save" data-bs-dismiss="modal" onclick="$('#frmDonation').submit()">
+            {% trans "Realizar Donación" %}</button>
+    </div>
+</form>
+

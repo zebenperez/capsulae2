@@ -9,6 +9,9 @@ class CompanyAdmin(admin.ModelAdmin):
 class ConfigAdmin(admin.ModelAdmin):
     list_display = ("key", "value",)
 
+class DonationAdmin(admin.ModelAdmin):
+    list_display = ("pay_date", "name", "cif", "email", "plan", "amount", "confirm")
+
 class MenuAdmin(admin.ModelAdmin):
     list_display = ("code", "name",)
 
@@ -27,10 +30,12 @@ class UserProfileAdmin(admin.ModelAdmin):
     list_display = ("user", "profile")
 
 class UserPaymentAdmin(admin.ModelAdmin):
-    list_display = ("user", "amount", "pay_date", "expire_date", "confirm", "donation")
+    #list_display = ("user", "amount", "pay_date", "expire_date", "confirm", "donation")
+    list_display = ("user", "amount", "pay_date", "expire_date", "confirm")
 
 admin.site.register(Config, ConfigAdmin)
 admin.site.register(Company, CompanyAdmin)
+admin.site.register(Donation, DonationAdmin)
 admin.site.register(Menu, MenuAdmin)
 admin.site.register(Plan, PlanAdmin)
 admin.site.register(Profile, ProfileAdmin)
