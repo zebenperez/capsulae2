@@ -1,7 +1,7 @@
 {% load i18n static account_tags %}
 
 <div class="grl-block pt-3 m-1">
-    <h3 class="text-center">Soy un nuevo donante</h3>
+    {#<h3 class="text-center">Soy un nuevo donante</h3>#}
     <form action="{%url "donation-send"%}" method="post" enctype="multipart/form-data" name="frmDonation" id="frmDonation" class="">
         {% csrf_token %}
         <!--contact form start-->
