@@ -53,6 +53,7 @@ class Organization(models.Model):
     class Meta:
         verbose_name = "Organización"
         verbose_name_plural = "Organizaciones"
+        ordering = ["name"]
 
 class OrganizationAddress(models.Model):
     same_place = models.BooleanField(verbose_name="Mismo lugar", default=True)

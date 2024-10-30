@@ -60,7 +60,8 @@ def evolutionary_referral_form(request, history_num, evolutionary_id=None, view=
     context = {'view': bool(view)}
     context['patient'] = patient
     context['company'] = Company.objects.filter(manager=patient.id_user).first()
-    context['org_list'] = Organization.objects.all()
+    #context['org_list'] = Organization.objects.all()
+    context['org_list'] = Organization.objects.filter(comp=context["company"])
     if evolutionary_id != None:
         ev = Evolutionary.objects.get(pk=evolutionary_id)
         #print(ev.matter)
