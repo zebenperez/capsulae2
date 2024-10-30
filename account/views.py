@@ -113,7 +113,8 @@ def signup(request):
                 context = {'user':user, 'useractivate':useractivate, 'error_code':1}
         except Exception as e:
             print(e)
-            return render(request, 'error_exception.html', {'exc':show_exc(e)})
+            context = {'error_code':4}
+            #return render(request, 'error_exception.html', {'exc':show_exc(e)})
         #else:
         #    context = {'error_msg': 'Error de validación del captcha' }
     else:
