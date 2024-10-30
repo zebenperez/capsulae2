@@ -193,7 +193,7 @@ class UserProfile(models.Model):
     #amount = models.FloatField(verbose_name="Pago mensual", blank=True, default=0)
     profile = models.ForeignKey(Profile, on_delete=models.SET_NULL, null=True, related_name="users")
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="profiles")
-    #plan = models.ForeignKey(Plan, on_delete=models.SET_NULL, related_name="profiles", null=True)
+    plan = models.ForeignKey(Plan, on_delete=models.SET_NULL, related_name="profiles", null=True)
 
     class Meta:
         verbose_name = "Perfil de usuario"

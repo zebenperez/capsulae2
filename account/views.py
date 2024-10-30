@@ -76,8 +76,9 @@ def signup_create_comp(dic, user):
 
 def signup_create_userprofile(dic, user):
     prof = get_or_none(Profile, dic["profile"])
+    plan = get_or_none(Plan, dic["plan"])
     if prof != None:
-        pu, created = UserProfile.objects.get_or_create(user=user, profile=prof)
+        pu, created = UserProfile.objects.get_or_create(user=user, profile=prof, plan=plan)
         um, created = UserMenu.objects.get_or_create(user=user)
         for menu in prof.menus.all():
             um.menus.add(menu)
@@ -218,8 +219,10 @@ def payment_error(request):
             return render(request, 'error_exception.html', {'exc': 'Organización o Empresa no encontrada!'})
         register = check_account_datas(comp)
         up = UserPayment.objects.filter(user=request.user, cancel=False).order_by('-expire_date').first()
-        plan_list = Plan.objects.filter(profile__id=1).order_by("amount")
-        return render(request, "account/error-payments.html", {'payment': up, 'register': register, 'obj': comp, 'plan_list': plan_list})
+        user_profile = UserProfile.objects.filter(user=request.user).first()
+        return render(request, "account/error-payments.html", {'payment': up, 'register': register, 'obj': comp, 'user_profile': user_profile})
+        #plan_list = Plan.objects.filter(profile__id=1).order_by("amount")
+        #return render(request, "account/error-payments.html", {'payment': up, 'register': register, 'obj': comp, 'plan_list': plan_list})
     return redirect("pharma-index")
 
 #@group_required("admins", "managers")

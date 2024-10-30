@@ -13,9 +13,6 @@ def group_required(*group_names):
                 #Admin
                 if request.user.is_superuser:
                     return f(request, *args, **kwargs)
-                #Solo donante
-                if bool(request.user.groups.filter(name__in=["donor"])) and request.user.groups.count() == 1:
-                    return f(request, *args, **kwargs)
                 #Managers y Empleados
                 if not check_user_payment(request.user):
                     #logout(request)

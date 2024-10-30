@@ -140,8 +140,8 @@ h4.subHeading{
 
 .heading{
 	text-align:left;
-	padding-top:45px;
-	padding-bottom:45px;
+/*	padding-top:45px;*/
+/*	padding-bottom:45px;*/
 }
 .heading .container{
 	padding-top:0px !important;
@@ -551,14 +551,28 @@ select.form-control {
 
 .planes {
 	background-color: #d5e0c0;
-	width: 80%;
+    width: 80% !important;
+/*
 	min-height: 200px;
+*/
 	margin: auto;
 	margin-bottom: 25px;
 	text-align: center;
 }
+h4.plans {
+    color: #fff;
+    border-bottom: 1px solid #323641;
+    padding-bottom: 5px;
+	font-size: 1rem;
+    font-weight: 600;
+}
+h4.plans span {
+    background: #323641;
+    padding: 5px 15px 5px 15px;
+}
+
 .plan-text {
-	border-bottom: 10px solid #d5e0c0;
+/*	border-bottom: 10px solid #d5e0c0;*/
 	background-color: #fff;
 	font-size: 0.9rem;
 	padding: 10px;
@@ -571,7 +585,7 @@ select.form-control {
 .plan-box-4 { border-top: 5px solid #913f8b; }
 .plan-box-1, .plan-box-2, .plan-box-3, .plan-box-4 {
 	width: 244px; 
-	min-height: 200px;
+/*	min-height: 200px;*/
 	margin: 1%;
 	display: inline-block;
 }
