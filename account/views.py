@@ -9,8 +9,9 @@ import uuid
 
 from capsulae2.decorators import group_required
 from capsulae2.commons import get_random_str, get_param, get_or_none, get_int, get_float, show_exc
+from capsulae2.email_lib import send_register_email, send_new_password_email
 from shifts2.models import Journey
-from .email_lib import send_register_email, send_new_password_email
+#from .email_lib import send_register_email, send_new_password_email
 from .models import *
 from .libstripe import ShStripe
 

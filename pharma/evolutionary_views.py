@@ -10,6 +10,7 @@ from datetime import datetime, timedelta
 
 from capsulae2.decorators import group_required
 from capsulae2.commons import get_or_none, get_param, show_exc
+from capsulae2.email_lib import send_derivation_email
 
 from account.models import Company
 from community.models import Organization
@@ -103,7 +104,8 @@ def evolutionary_send_form(request):
                 html = "{}{}<br/><br/>".format(html, val)
                 link = "Puede ver la hoja de derivación a través de <a href='{}'>este enlace</a>".format(request.build_absolute_uri(reverse('evolutionary-referral-form', kwargs={'history_num':patient.n_historial, 'evolutionary_id': ev.id})))
                 html = "{}{}".format(html, link)
-                send_mail('Derivación de paciente', 'Derivación de paciente', 'info@capsulae.org', [org_list[1]], html_message=html)
+                #send_mail('Derivación de paciente', 'Derivación de paciente', 'info@capsulae.org', [org_list[1]], html_message=html)
+                send_derivation_email([org_list[1]], html)
             else:
                 msg = "ERROR: email not found!"
     except Exception as e:

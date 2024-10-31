@@ -15,9 +15,10 @@ from django.views.decorators.csrf import csrf_exempt
 
 from capsulae2.decorators import group_required
 from capsulae2.commons import get_or_none, get_param, show_exc, user_in_group
+from capsulae2.email_lib import send_new_password_email
 from pharma.models import Pacientes
 from account.models import Company, Profile, UserProfile, UserMenu
-from account.email_lib import send_new_password_email
+#from account.email_lib import send_new_password_email
 from .models import PatientFcoc, PatientFci, PatientActivity, PatientOrg, Procedure
 from .models import Organization, OrganizationAddress, OrganizationInfo, OrganizationSocial, OrganizationResource
 
