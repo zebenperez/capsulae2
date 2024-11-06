@@ -459,7 +459,6 @@ h1.login {
 	border-bottom: 11px solid #f3bd19;
 }
 
-button.submitBnt.register,
 button.submitBnt.register {
 	background:#f3bd19;
 	font-family: 'Montserrat', sans-serif;
@@ -473,10 +472,12 @@ button.submitBnt.register {
 	text-transform:uppercase;
 	border:none !important;
 	width: 100%;
+    height: 74px;
 }
 button.submitBnt.register:hover {
 	background:#b060cf;
 	cursor: pointer;
+    height: 74px;
 }
 
 select.form-control {
@@ -489,6 +490,7 @@ select.form-control {
 	display: grid; 
 	grid-template-columns: 5% 95%; 
 	text-align: left;
+    padding: 15px 0;
 }
 .a-pass,
 .acceptCheck a {
@@ -1424,7 +1426,7 @@ input#custom-donation.form-control {
 }
 
 .g-recaptcha {
-	width:120%;
+/*	width:120%;*/
 	text-align:center;
 }
 
@@ -1483,6 +1485,17 @@ span.result {
     display: block;
     text-align: left;
   }
+  .acceptCheck {
+	display: grid; 
+	grid-template-columns: 5% 95%; 
+	text-align: left;
+/*    border:1px solid blue;*/
+    line-height: 5;
+   } 
+
+    button.submitBnt.register {
+      margin: 10px 0 10px 0;
+    }
 }
 
 
