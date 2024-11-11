@@ -11,12 +11,14 @@
     </div>
     <div class="col-lg-1 col-1 text-end">
         <div class="dropdown">
-            <a class="pt-3" type="button" id="dropdownProfile" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-ellipsis-h"></i></a>
+            <a class="pt-3" type="button" id="dropdownProfile" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fas fa-ellipsis-h"></i></a>
             <div class="dropdown-menu user-dropdown" aria-labelledby="dropdownProfile">
                 <ul class="m-0">
                     <li>
-                        <button type="button" class="btn btn-sm ark" data-url="{%url "patient-complement-form"%}" data-target-modal="common-modal" 
-                            data-patient_id="{{obj.id}}"> <i class="fas fa-plus"></i> {% trans 'Crear Complemento' %}</button> 
+                        <button type="button" class="btn btn-sm ark" data-url="{%url "patient-complement-form"%}" 
+                            data-target-modal="common-modal" data-patient_id="{{obj.id}}"> <i class="fas fa-plus"></i> 
+                            {% trans 'Crear Complemento' %}</button> 
                     </li><div class="dropdown-divider"></div>
                     <li>
                         <a class="btn btn-sm" href="{%url "patient-summary" obj.id%}" target="_blank"> 
@@ -36,13 +38,13 @@
                             <i class="fas fa-print"></i> {% trans 'Imprimir Etiquetas' %}</a> 
                     </li><div class="dropdown-divider"></div>
                     <li>
-                        <button type="button" class="btn btn-sm ark" data-url="{%url "patient-timeline"%}" data-target-modal="common-modal" 
-                            data-patient_id="{{obj.id}}"> <i class="fas fa-chart-line"></i> {% trans 'Ver Cronología' %}</button> 
+                        <button type="button" class="btn btn-sm ark" data-url="{%url "patient-timeline"%}" 
+                            data-target-modal="common-modal" data-patient_id="{{obj.id}}"> <i class="fas fa-chart-line"></i> 
+                            {% trans 'Ver Cronología' %}</button> 
                     </li>
-                </ul>                                                                                                                       
+                </ul>
             </div>
         </div>
-
     </div>
 </div>
 {#<div id="medication-list" class="hide">{% include "patient/treatments/medication-list.html" %}</div>#}
@@ -111,29 +113,32 @@
                             <div class="col-4 text-right">
                                 {% if obj.patient_telegram.all.count > 0 %}
                                     <a class="btn btn-xs ark p-2" data-url="{% url 'patient-telegram-treatment-notification' %}" 
-                                        data-target-modal="common-modal" data-obj_id="{{item.id}}" title="Enviar notificación de recogida">
-                                        <i class="fab fa-telegram"></i> </a>
+                                        data-target-modal="common-modal" data-obj_id="{{item.id}}" 
+                                        title="Enviar notificación de recogida"> <i class="fab fa-telegram"></i> </a>
                                 {% endif %}
 
                                 {% if comp %}
-                                    <a class="btn btn-sm ark" title="{%trans 'Edit treatment'%}" data-url="{%url "patient-complement-form" %}"
-                                        data-target-modal="common-modal" data-obj_id="{{item.id}}" data-patient_id="{{obj.id}}"> 
+                                    <a class="btn btn-sm ark" title="{%trans 'Edit treatment'%}" 
+                                        data-url="{%url "patient-complement-form" %}" data-target-modal="common-modal" 
+                                        data-obj_id="{{item.id}}" data-patient_id="{{obj.id}}"> 
                                         <i class="fas fa-edit"></i></a>&nbsp; &nbsp;
                                 {% else %}
-                                    <a class="btn btn-sm ark" title="{%trans 'Edit treatment'%}" data-url="{%url "patient-treatment-form" %}"
-                                        data-target-modal="common-modal" data-obj_id="{{item.id}}" data-patient_id="{{obj.id}}"> 
+                                    <a class="btn btn-sm ark" title="{%trans 'Edit treatment'%}" 
+                                        data-url="{%url "patient-treatment-form" %}" data-target-modal="common-modal" 
+                                        data-obj_id="{{item.id}}" data-patient_id="{{obj.id}}"> 
                                         <i class="fas fa-edit"></i></a>&nbsp; &nbsp;
                                 {% endif %}
 
                                 <a class="btn btn-sm ark" data-url="{%url "patient-treatment-soft-remove"%}" data-obj_id="{{item.id}}" 
-                                    data-target="div-container" title="{% trans 'Remove' %}" 
-                                    data-confirm="{% trans "Are you sure to desactivate this element?" %}"> <i class="fas fa-trash-alt"></i></a>
-                                    &nbsp;
+                                    data-target="div-container" title="{% trans 'Desactivar' %}" 
+                                    data-confirm="{% trans "Are you sure to desactivate this element?" %}"> 
+                                    <i class="fas fa-minus-square"></i></a> &nbsp;
 
                                 {% if request.user|in_group:"admins" %}
                                     <a class="btn btn-sm ark" data-url="{%url "patient-treatment-remove"%}" data-obj_id="{{item.id}}" 
                                         data-target="div-container" title="{% trans 'Remove' %}" 
-                                        data-confirm="{% trans "Are you sure to remove this element?" %}"> <i class="fas fa-trash"></i></a>
+                                        data-confirm="{% trans "Are you sure to remove this element?" %}"> 
+                                        <i class="fas fa-trash"></i></a>
                                 {% endif %}
                             </div>
                         </div>
