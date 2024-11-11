@@ -21,7 +21,7 @@ from .evolutionary_models import Evolutionary
 '''
     Evolutionary
 '''
-@group_required("admins",)
+@group_required("admins", "managers")
 def evolutionary_form(request):
     try:
         patient = get_or_none(Pacientes, request.GET["patient_id"])
@@ -34,7 +34,7 @@ def evolutionary_form(request):
         print(e)
         return render(request, 'error_exception.html', {'exc':show_exc(e)})
 
-@group_required("admins",)
+@group_required("admins", "managers")
 def evolutionary_remove(request):
     try:
         evo = get_or_none(Evolutionary, request.GET["obj_id"])
