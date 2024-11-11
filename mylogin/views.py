@@ -78,7 +78,7 @@ def remote_auth(request):
         return HttpResponse("Sorry. You are not authorized")
     except Exception as e:
         print (show_exc(e))
-        return HttpResponse("Sorry. You are not authorized")
+        return HttpResponse("Sorry. You are not authorized (Error: {})".format(e))
 
 @check_remote_auth
 def remote_test(request, username=None):
