@@ -118,6 +118,9 @@ urlpatterns = [
     path('patients/diagnoses/remove/', diagnoses_views.patient_diagnoses_remove, name='patient-diagnoses-remove'),
     path('patients/diagnoses/search/', diagnoses_views.patient_diagnoses_search, name='patient-diagnoses-search'),
 
+    #------------------------- DISPENSATIONS --------------------
+    path('patients/dispensations/', views.patient_dispensations, name='patient-dispensations'),
+
     #---------------------- AUTO -----------------------
     path('autosave_field/', auto_views.autosave_field, name='autosave_field'),
     path('autoremove_obj/', auto_views.autoremove_obj, name='autoremove_obj'),
