@@ -1,0 +1,25 @@
+{% load i18n %}
+
+<div class="text-center">
+    <strong>ATCs:</strong>
+    <button class="btn" onclick="showATC([])">Todo</button>
+    {% for atc, list in atc_list.items %}
+        <button class="btn" onclick="showATC({{list}})">{{atc}}</button>
+    {% endfor %}
+</div>
+<br/> <br/>
+<script>
+    function showATC(list)
+    {
+        if (list.length == 0)
+            $(".row-item").show();
+        else
+        {
+            $(".row-item").hide();
+            for (let i = 0; i < list.length; i++) {
+                $("."+list[i]).show();
+            }   
+        }
+    }
+</script>
+

@@ -1,0 +1,41 @@
+{% load i18n %}
+
+
+<div class="d-flex justify-content-end"> <button type="button" class="btn btn-lg" data-bs-dismiss="modal" title="{% trans "Close" %}">
+    <i class="fas fa-times"></i></button> </div>
+
+<div class="card">
+    <div class="card-header"> {% trans 'Datos de la dispensación' %} </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-6">
+                <strong>{% trans "Datos generales" %}</strong> <hr/>
+                <div class="row"><div class="col-4">{%trans "Fecha"%}: </div><div class="col-8"> {{item.date}} </div></div>
+                <div class="row"><div class="col-4">{%trans "Hora"%}: </div><div class="col-8"> {{item.time}} </div></div>
+                <div class="row"><div class="col-4">{%trans "Código"%}: </div><div class="col-8"> {{item.code}} </div></div>
+                <div class="row"><div class="col-4">{%trans "Nombre"%}: </div><div class="col-8"> {{item.name}} </div></div>
+                <div class="row"><div class="col-4">{%trans "Unidades"%}: </div><div class="col-8"> {{item.units}} </div></div>
+                <div class="row"><div class="col-4">{%trans "PVP"%}: </div><div class="col-8"> {{item.pvp}} </div></div>
+                <div class="row"><div class="col-4">{%trans "PVP facturación"%}: </div>
+                    <div class="col-8"> {{item.bill_pvp}} </div></div>
+                <div class="row"><div class="col-4">{%trans "Precio"%}: </div><div class="col-8"> {{item.amount}} </div></div>
+                <div class="row"><div class="col-4">{% trans "Fecha de inicio" %}: </div>
+                    <div class="col-8"> {{item.ini_date}} </div></div>
+                <div class="row"><div class="col-4">{%trans "Fecha de fin"%}: </div><div class="col-8"> {{item.end_date}} </div></div>
+                <div class="row"><div class="col-4">{%trans "Número"%}: </div><div class="col-8"> {{item.num}} </div></div>
+            </div>
+            <div class="col-md-6">
+                <strong>{% trans "Datos de prescripción" %}</strong> <hr/>
+                <div class="row"><div class="col-4">{%trans "Código"%}: </div><div class="col-8"> {{item.pre_code}} </div></div>
+                <div class="row"><div class="col-4">{%trans "Próxima Fecha"%}: </div>
+                    <div class="col-8"> {{item.next_date}} </div></div>
+                <div class="row"><div class="col-4">{%trans "Nombre"%}: </div><div class="col-8"> {{item.pre_name}} </div></div>
+                <div class="row"><div class="col-4">{%trans "PVP"%}: </label> </div><div class="col-8"> {{item.pre_pvp}} </div></div>
+                <div class="row"><div class="col-4">{%trans "PVP facturación"%}: </div>
+                    <div class="col-8"> {{item.pre_bill_pvp}} </div></div>
+                <div class="row"><div class="col-4">{%trans "Precio"%}: </div><div class="col-8"> {{item.pre_amount}} </div></div>
+            </div>
+        </div>
+    </div>
+</div>
+

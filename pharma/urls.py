@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views, views_account, auto_views, spd_views, evolutionary_views as evo_views, treatment_views as t_views, params_views
-from . import telegram_views, diagnoses_views
+from . import telegram_views, diagnoses_views, dispensations_views
 
 urlpatterns = [
     path('index/', views.index, name='pharma-index'),
@@ -120,6 +120,8 @@ urlpatterns = [
 
     #------------------------- DISPENSATIONS --------------------
     path('patients/dispensations/', views.patient_dispensations, name='patient-dispensations'),
+    path('patients/dispensations/view/', dispensations_views.dispensations_view, name='patient-dispensations-view'),
+    path('patients/dispensations/remove/', dispensations_views.dispensations_remove, name='patient-dispensations-remove'),
 
     #---------------------- AUTO -----------------------
     path('autosave_field/', auto_views.autosave_field, name='autosave_field'),
