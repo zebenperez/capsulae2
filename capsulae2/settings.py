@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'community',
     'shifts2',
     'agenda',
+    'dispensations',
 ]
 
 MIDDLEWARE = [

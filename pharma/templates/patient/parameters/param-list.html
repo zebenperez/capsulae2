@@ -3,6 +3,8 @@
 
 <div class="row spd-tab">
     <div class="col-12 text-end">
+        <button type="button" class="btn btn-sm ark new" data-url="{%url "patient-params-print"%}" data-target-modal="common-modal" 
+            data-patient_id="{{obj.id}}"> <i class="fas fa-print"></i> {% trans 'Generar Informe' %}</button> 
         <button type="button" class="btn btn-sm ark new" data-url="{%url "patient-params-form"%}" data-target-modal="common-modal" 
             data-patient_id="{{obj.id}}"> <i class="fas fa-plus"></i> {% trans 'Crear Parámetros' %}</button> 
     </div>

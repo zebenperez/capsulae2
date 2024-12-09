@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views, views_account, auto_views, spd_views, evolutionary_views as evo_views, treatment_views as t_views, params_views
-from . import telegram_views, diagnoses_views, dispensations_views
+from . import telegram_views, diagnoses_views
 
 urlpatterns = [
     path('index/', views.index, name='pharma-index'),
@@ -47,6 +47,8 @@ urlpatterns = [
     path('patients/procedure/', views.patient_procedure, name='patient-procedure'),
     path('patients/procedure-form/', views.patient_procedure_form, name='patient-procedure-form'),
     path('patients/procedure-remove/', views.patient_procedure_remove, name='patient-procedure-remove'),
+
+    path('patients/dispensations/', views.patient_dispensations, name='patient-dispensations'),
 
     #------------------------- TREATMENT --------------------
     path('patients/treatment/', views.patient_treatment, name='patient-treatment'),
@@ -98,6 +100,8 @@ urlpatterns = [
     path('patients/params-form/', params_views.patient_params_form, name='patient-params-form'),
     path('patients/params-form-tab/', params_views.patient_params_form_tab, name='patient-params-form-tab'),
     path('patients/params-remove/', params_views.patient_params_remove, name='patient-params-remove'),
+    path('patients/params-print/', params_views.patient_params_print, name='patient-params-print'),
+    path('patients/params-print-pdf/', params_views.patient_params_print_pdf, name='patient-params-print-pdf'),
 
     #------------------------- TELEGRAM --------------------
     path('patients/telegram/', views.patient_telegram, name='patient-telegram'),
@@ -117,11 +121,6 @@ urlpatterns = [
     path('patients/diagnoses/form/', diagnoses_views.patient_diagnoses_form, name='patient-diagnoses-form'),
     path('patients/diagnoses/remove/', diagnoses_views.patient_diagnoses_remove, name='patient-diagnoses-remove'),
     path('patients/diagnoses/search/', diagnoses_views.patient_diagnoses_search, name='patient-diagnoses-search'),
-
-    #------------------------- DISPENSATIONS --------------------
-    path('patients/dispensations/', views.patient_dispensations, name='patient-dispensations'),
-    path('patients/dispensations/view/', dispensations_views.dispensations_view, name='patient-dispensations-view'),
-    path('patients/dispensations/remove/', dispensations_views.dispensations_remove, name='patient-dispensations-remove'),
 
     #---------------------- AUTO -----------------------
     path('autosave_field/', auto_views.autosave_field, name='autosave_field'),

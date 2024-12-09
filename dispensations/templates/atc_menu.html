@@ -1,0 +1,24 @@
+{% load i18n pharmatags %}
+
+<div class="text-center">
+    <strong>ATCs:</strong>
+    <button onclick="showATC([])">Todo</button>
+    {% for atc, list in atc_list.items %}
+        <button onclick="showATC({{list}})">{{atc}}</button>
+    {% endfor %}
+</div>
+<br/> <br/>
+<script>
+    function showATC(list)
+    {
+        if (list.length == 0)
+            $(".disp-row").show();
+        else
+        {
+            $(".disp-row").hide();
+            for (let i = 0; i < list.length; i++) {
+                $("."+list[i]).show();
+            }   
+        }
+    }
+</script>

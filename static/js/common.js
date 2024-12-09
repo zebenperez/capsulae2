@@ -235,6 +235,7 @@ function submitForm(frm, target)
 
 function uploadMulti(obj, url, target, obj_id, field, folder, token)
 {
+    setWait();
     var data = new FormData();
     $.each(obj[0].files, function(i, file) {
         data.append("file", file);
@@ -265,6 +266,7 @@ function uploadMulti(obj, url, target, obj_id, field, folder, token)
             }
         },
         error : function(e){alert("Error: "+e.responseText);},
+        complete : function(){unsetWait();}
     });
 }
 

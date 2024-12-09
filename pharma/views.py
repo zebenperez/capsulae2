@@ -13,22 +13,22 @@ import os, csv
 from capsulae2.decorators import group_required
 from capsulae2.commons import get_or_none, get_param, show_exc
 from capsulae2.settings import MEDIA_ROOT
+from capsulae2.capsulae_lib import check_user_payment
 #from account.models import Company, UserPayment
 from account.models import Company
 from lopd.models import LOPDConsents
 from community.models import Organization, PatientOrg, Procedure, PatientProcedure
 from medication.medication_lib import get_medication
 from medication.models import PresentationsPrescriptionsAempsCache as AempsCache
+from dispensations.models import Dispensation
 from .models import Pacientes, Paises, Etnia, PatientOrigin
 from .spd_models import Pillbox
 from .treatment_models import Tratamiento, MedicamentoTratamiento, ComplementoTratamiento
 from .evolutionary_models import Evolutionary
-from .dispensations_models import Dispensation
 from .allergy_models import AlergiasExcipientes, AlergiasPrincipios, Excipientesedo, PrincipiosActivos
 from .common_lib import LOPD_LIMIT, PILLBOX_ADVISE, get_config_value
 from .pharma_lib import get_values_to_interactions_print, get_values_to_summary_print
 from .telegram_models import TelegramUserChat
-from capsulae2.capsulae_lib import check_user_payment
 
 
 #def check_user_payment(user):

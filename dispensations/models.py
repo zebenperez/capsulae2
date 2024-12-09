@@ -1,6 +1,6 @@
 from django.db import models
 from datetime import datetime
-from .models import Pacientes
+from pharma.models import Pacientes
 
 
 '''

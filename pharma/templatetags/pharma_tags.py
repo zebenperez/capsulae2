@@ -73,6 +73,14 @@ def get_lopd_url(doc):
         return doc.url
     return "https://capsulae.org/{}".format(doc.url)
 
+@register.filter
+def value_for_key(dictionary, key):
+    try:
+        return dictionary.get(str(key))
+    except Exception as e:
+        #print(e)
+        return getattr(dictionary, str(key))
+
 '''
     Simple Tags
 '''

@@ -1,0 +1,22 @@
+{% load i18n common_tags %}
+
+<div class="card">
+    <div class="card-header">
+        <div class="row">
+            <div class="col-xs-8"><i class="fa fa-file"></i>&nbsp; {%trans 'Subir fichero de farmatic (.xls)'%}</div>
+            <div class="col-xs-4"></div>
+        </div>
+    </div>  
+    <div class="card-body">
+        <label for ="file_farmatic" class="btn btn-sm new"> 
+            <i class="fas fa-upload"></i><span class="d-none d-sm-block">{%trans "Elegir"%}&nbsp;{%trans "Archivo"%}</span></label>
+        <input type="file" class="multiupload d-none" name="file_farmatic" id="file_farmatic" 
+            data-url="{%url 'patient-farmatic-upload'%}" data-target="div-farmatic" data-obj-id="" data-field="" data-folder="" 
+            data-csrf-token="{{ csrf_token }}" multiple/>
+ 
+        {% if msg and msg != "" %}
+            <br/><br/><div id="import-info"> <h4> Resultado de la importación </h4> {{msg|safe}} </div> 
+        {% endif %}
+    </div>
+</div>
+

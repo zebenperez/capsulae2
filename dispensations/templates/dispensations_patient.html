@@ -1,0 +1,73 @@
+{% load i18n pharmatags dispensations_tags %}
+
+<div class="row">
+	<div class="col-xs-12">
+	<div class="panel panel-primary" id="cap-panel-dispensations">
+		<div class="panel-heading">
+			<div class="row">
+				<div class="col-xs-8"> {% trans 'Dispensaciones' %} </div>
+				<div class="col-xs-4 text-right"> </div>
+			</div>
+		</div>
+		<div class="panel-body">
+			<div class="col-xs-12">
+                {% atc_menu paciente.dispensations.all %}
+            </div>
+			<div class="col-xs-12">
+				{% if paciente.dispensations.all|length > 0 %}
+				    {% if paciente.id_user == request.user %}
+                    <table class="table table-bordered">
+					    <thead >
+					        <tr class="info">
+                                <th>{% trans "Fecha" %}</th>
+                                <th>{% trans "Próxima" %}</th>
+                                {#<th>{% trans "Hora" %}</th>#}
+                                {#<th>{% trans "Código" %}</th>#}
+                                <th>{% trans "Nombre" %}</th>
+                                <th>{% trans "Uds" %}</th>
+                                <th>{% trans "PVP" %}</th>
+                                <th>{% trans "Aport" %}</th>
+                                <th></th> 
+                            </tr> 
+                        </thead>
+					    <tbody>
+						    {% for item in paciente.dispensations.all %}
+						        <tr class="disp-row {{item.code}}" id="disp_{{ item.pk }}">
+							        <td>{{item.date|date:"d-m-Y"}}</td>
+							        <td>{%if item.next_date|date:"d-m-Y" == "01-01-1"%} --- {%else%} {{item.next_date|date:"d-m-Y"}} {%endif%}</td>
+							        {#<td>{{item.time}}</td>#}
+							        {#<td>{{item.code}}</td>#}
+							        <td>({{item.code}}) {{item.name}}</td>
+							        <td>{{item.units}}</td>
+							        <td>{{item.pvp}}</td>
+							        <td>{{item.amount}}</td>
+							        <td width="18%">
+                                        {% if not item.is_in_treatments %}
+                                            <a href="#search_anchor" class="btn btn-success btn-sm ga-ajax-load" title="{%trans "Crear tratamiento"%}"
+                                                onclick="add_code_medic('{{item.code}}', '{{item.name}}');$(this).hide()">
+                                                <i class="fa fa-plus"></i></a>
+                                        {% endif %}
+
+                                        <a href="{% url 'dispensation_view' item.pk %}" class="btn btn-info btn-sm ga-ajax-load" 
+                                            data-ga-target="#cap-panel-view-dispensation" title="{% trans "Ver dispensación" %}">
+                                            <i class="fa fa-eye"></i></a>
+ 
+                                        <a href="{% url 'dispensation_delete' paciente.pk item.pk %}" 
+                                            class="btn btn-danger ga-ajax-load-confirm btn-sm" 
+								            data-ga-show-errors="true" data-ga-confirm-message="¿ Seguro que desea eliminar el documento ?"
+								            data-ga-target="#cap-panel-dispensations"><i class="fa fa-trash"></i></a>
+                                    </td>
+						        </tr>
+						    {% endfor %}
+					    </tbody>
+				    </table>	
+				    {% endif %}
+				{% else %}
+				    <div class="alert alert-info">{% trans "No hay dispensaciones" %}</div>
+				{% endif %}
+			</div>
+		</div>
+	</div>
+	</div>
+</div>
+
