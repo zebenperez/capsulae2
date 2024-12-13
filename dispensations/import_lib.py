@@ -4,10 +4,7 @@ from django.contrib.auth.models import User, Group
 from pharma.models import Pacientes
 from .models import *
 
-import datetime
-import csv
-import xlrd
-import pandas as pd
+import datetime, csv, xlrd, random, string, pandas as pd
 
 def get_date(date, time=""):
     try:
@@ -17,6 +14,29 @@ def get_date(date, time=""):
             return datetime.datetime.strptime("{}".format(date), "%Y-%m-%d")
     except Exception as e:
         return datetime.datetime.min
+
+def get_born_date(cip):
+    try:
+        if len(cip) == 16:
+            year_cip = cip[4:6]
+            month_cip = cip[6:8]
+            day_cip = cip[8:10]
+            limit_year = 2000 - datetime.datetime.now().year
+            year = "19%s" % year_cip if int(year_cip) > limit_year else "20%s" % year_cip
+            day = str(int(day_cip) - 40).zfill(2) if int(day_cip) > 39 else day_cip
+            if int(month_cip) > 0 and int(month_cip) < 13 and int(day) > 0 and int(day) < 32:
+                return "%s-%s-%s" % (year, month_cip, day)
+    except Exception as e:
+        print(e)
+    return datetime.datetime.min
+
+def get_sex(cip):
+    try:
+        if len(cip) == 16:
+            return "M" if int(cip[8:10]) > 39 else "H"
+    except Exception as e:
+        print(e)
+    return ""
 
 def get_json_date(val):
     try:

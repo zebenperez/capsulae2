@@ -76,54 +76,58 @@ def patient_params_remove(request):
         return render(request, 'error_exception.html', {'exc':show_exc(e)})
 
 @group_required("admins","managers")
-def patient_params_print(request):
+def patient_params_print(request, patient_id):
     try:
-        obj = get_or_none(Pacientes, request.GET["patient_id"])
-        return render(request, "patient/parameters/pick-plots-to-print.html", {'obj': obj})
-    except Exception as e:
-        return render(request, 'error_exception.html', {'exc':show_exc(e)})
-
-@group_required("admins","managers")
-def patient_params_print_pdf(request):
-    context = {'request': request}
-    try:
-        paciente = Pacientes.objects.get(pk=get_param(request.GET, "patient_id"))
-
-        now = datetime.now()
-        e_date = now + relativedelta(months=+1)
-        start_date = "%s-%s-01" % (now.year, now.month)
-        end_date = "%s-%s-01" % (e_date.year, e_date.month)
-        #next_month = now.month if now.month < 12 else 0
-        #year = now.year if now.month < 12 else now.year +1
-        #end_date = "%s-%s-01" % (year, next_month + 1)
-
-        #start_date = request.GET.get('start_date', start_date)
-        #end_date = request.GET.get('end_date', end_date)
-        context['paciente'] = paciente
-        #TABLE_SIZE = 25
-        #registros = BloodPressure.objects.filter(date__range=[start_date, end_date], patient=paciente).order_by("-date")[:TABLE_SIZE]
-        item_list = BloodPressure.objects.filter(patient=paciente).order_by("-date")
-        context['registros'] = item_list
-        #num_regs = len(registros)
-        #if num_regs < TABLE_SIZE:
-        #    end_range = TABLE_SIZE - (num_regs + 1)
-        #    context['range'] = range(0, end_range)
-        # plots
-        plots_get = request.GET.getlist("items[]", [])
-        plots = []
-        for item in plots_get:
-            #obj={'key':item,'label':request.GET.get("{}_label".format(item),""),'color':request.GET.get("{}_color".format(item),"")}
-            label = get_param(request.GET, "{}_label".format(item))
-            color = get_param(request.GET,"{}_color".format(item))
-            plots.append({'key': item, 'label': label, 'color': color})
-        context['plots'] = plots
-
+        #obj = get_or_none(Pacientes, request.GET["patient_id"])
+        obj = get_or_none(Pacientes, patient_id)
+        item_list = BloodPressure.objects.filter(patient=obj).order_by("-date")
+        context = {'paciente': obj, 'registros': item_list}
         return render(request, "patient/parameters/params-print.html", context)
+        #return render(request, "patient/parameters/pick-plots-to-print.html", {'obj': obj})
     except Exception as e:
-        #context['error'] = "Ha habido un error al mostrar la tabla %s " % (str(e))
-        print(str(e))
         return render(request, 'error_exception.html', {'exc':show_exc(e)})
 
+#@group_required("admins","managers")
+#def patient_params_print_pdf(request):
+#    context = {'request': request}
+#    try:
+#        paciente = Pacientes.objects.get(pk=get_param(request.GET, "patient_id"))
+#
+#        now = datetime.now()
+#        e_date = now + relativedelta(months=+1)
+#        start_date = "%s-%s-01" % (now.year, now.month)
+#        end_date = "%s-%s-01" % (e_date.year, e_date.month)
+#        #next_month = now.month if now.month < 12 else 0
+#        #year = now.year if now.month < 12 else now.year +1
+#        #end_date = "%s-%s-01" % (year, next_month + 1)
+#
+#        #start_date = request.GET.get('start_date', start_date)
+#        #end_date = request.GET.get('end_date', end_date)
+#        context['paciente'] = paciente
+#        #TABLE_SIZE = 25
+#        #registros = BloodPressure.objects.filter(date__range=[start_date, end_date], patient=paciente).order_by("-date")[:TABLE_SIZE]
+#        item_list = BloodPressure.objects.filter(patient=paciente).order_by("-date")
+#        context['registros'] = item_list
+#        #num_regs = len(registros)
+#        #if num_regs < TABLE_SIZE:
+#        #    end_range = TABLE_SIZE - (num_regs + 1)
+#        #    context['range'] = range(0, end_range)
+#        # plots
+#        plots_get = request.GET.getlist("items[]", [])
+#        plots = []
+#        for item in plots_get:
+#            #obj={'key':item,'label':request.GET.get("{}_label".format(item),""),'color':request.GET.get("{}_color".format(item),"")}
+#            label = get_param(request.GET, "{}_label".format(item))
+#            color = get_param(request.GET,"{}_color".format(item))
+#            plots.append({'key': item, 'label': label, 'color': color})
+#        context['plots'] = plots
+#
+#        return render(request, "patient/parameters/params-print.html", context)
+#    except Exception as e:
+#        #context['error'] = "Ha habido un error al mostrar la tabla %s " % (str(e))
+#        print(str(e))
+#        return render(request, 'error_exception.html', {'exc':show_exc(e)})
+#
 #    html = ""
 #    if 'print_report' in request.GET:
 #        html = "registro_tension_print.html"

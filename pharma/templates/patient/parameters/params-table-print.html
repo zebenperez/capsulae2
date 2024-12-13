@@ -1,15 +1,15 @@
 
-<table id="register">
+<table id="register" class="register w-100">
 	<thead>
-        <th>FECHA</th>
-        <th>HORA </th>
+        <th>Fecha</th>
+        <th>Hora </th>
         <th>PA Máx<br>(mmHg)</th>
         <th>PA Mín<br>(mmHg)</th>
-        <th>PULSO</th>
-        <th>PESO</th>
-        <th>GLUCEMIA</th>
-        <th>FRAMINGHAM</th>
-        <th style="border-right: 1px solid #478a00">OBSERVACIONES</th>
+        <th>Pulso</th>
+        <th>Peso</th>
+        <th>Glucemia</th>
+        {%comment%} <th>Framingham</th> {%endcomment%}
+        <th tyle="border-right: 1px solid #478a00">Observaciones</th>
     </thead>
 	<tbody>
 	    {% for item in registros %}
@@ -21,7 +21,8 @@
                 <td>{{ item.hearth_rate|default_if_none:""}} </td>
                 <td>{{ item.weight|default_if_none:"" }} </td>
                 <td>{{ item.glucose|default_if_none:""}} </td>
-                <td>{{ item.framingham|default_if_none:""}} </td>
+                {%comment%}  <td>{{ item.framingham|default_if_none:""}} </td> {%endcomment%}
+
                 <td>{{ item.observations|default_if_none:""}} </td>
             </tr>
         {% endfor %}

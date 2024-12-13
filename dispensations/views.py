@@ -99,7 +99,7 @@ def farmatic_upload(request):
     try:
         file_list = request.FILES.getlist('file')
         for f in file_list:
-            #print(f)
+            print(f)
             msg = set_dispensations_farmatic(comp, get_json_datas_farmatic(f))
     except Exception as e:
         msg = "ERROR: {}".format(e)

@@ -1,0 +1,328 @@
+body{
+	display: flex;
+	width: 100%;
+	flex-direction: column;
+	align-items: center;
+	justify-content_:center;
+	background-color: dimgrey !important;
+	font-family: sans-serif;
+	font-size: 90%;
+	-webkit-print-color-adjust: exact;
+	color-adjust: exact;
+}
+
+
+/* ------------------------------
+ *  GENERAL STRUCTURE
+ *  ------------------------------*/
+
+.page-wrapper{
+	margin-left: 10mm;
+	margin-right: 10mm;
+/*	border: 1px solid red;*/
+}
+
+.page{
+	width: 210mm;
+	height: 297mm;
+	background-color: white;
+	border: 1px solid dimgrey;
+}
+
+.page-infinite{
+	width: 210mm;
+	background-color: white;
+	border: 1px solid #56575e;
+    border-radius: 5px;
+    margin: 10px 0 10px 0;
+}
+
+
+/* ------------------------------
+ *  HEADER
+ *  ------------------------------*/
+
+.header{
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 15pt;
+}
+
+.header .fundec-logo{
+	max-width:  4cm;
+	max-height: 3cm;
+}
+
+.header .company-logo{
+	max-width: 6cm;
+	max-height: 3cm;
+}
+
+.header .company-logo img{
+	max-width:  100%;
+	max-height: 100%;
+	object-fit: contain;
+}
+
+.patient_qr_code {
+    font-size: 0.8rem;
+}
+.patient_qr_code.text-center img {
+    width:1.3cm; 
+    height:1.3cm;
+}
+
+
+/* ------------------------------
+ *  TABLE
+ *  ------------------------------*/
+
+table.register th {
+    font-size: 10pt;
+    padding: 6px 10px;
+	box-sizing: border-box;
+    border-top: 1px solid #ccc;
+    background-color: #f3e6f1; 
+}
+table.register tr {
+    border-width: 0 1px 1px 1px;
+    border-color:  #ccc;
+}
+table.register td {
+    font-size: 10pt;
+    padding: 6px 10px;
+}
+
+/* ------------------------------
+ *  TOOLS
+ *  ------------------------------*/
+
+.print-btn-container{
+	position: absolute;
+	top:10px;
+	right: 10px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	padding: 10px;
+
+}
+
+.print-btn{
+	padding: 5px 10px;
+	border-radius: 5px;
+	display: flex;
+	justify-content: flex-start;
+	align-items: center;
+	background-color: var(--light-color);
+	transition: background-color 200ms ease-out;
+}
+
+.print-btn:hover{
+	background-color: var(--main-color);
+	color: white;
+	cursor:pointer;
+}
+
+
+/* ------------------------------
+ *  GENERAL ELEMENTS
+ *  ------------------------------*/
+
+h2.main-title{
+    color: #814496;
+	font-size: 12pt;
+	font-weight: 600;
+	text-align: center;
+	text-transform:uppercase;
+	margin-bottom: 1.5rem;
+}
+
+h4 {
+    color: #b1c800;
+	font-size: 12pt;
+	font-weight: 600;
+}
+
+.row.content {
+    line-height: 2;
+    font-size: 10pt;
+}
+
+.intro-register {
+    color: #444444;
+    font-size: 11pt;
+    text-align: justify;
+}
+.greybox-sm.register {
+    color: #832b7f;
+	font-size: 10pt;
+}
+
+.greybox-sm {
+    color: #333;
+	font-size: 10pt;
+}
+
+.label{
+   font-weight: bold;
+   font-size: 8pt;
+/*   margin-top: 10pt;*/
+}
+
+
+input.form-control,
+select.form-control,
+textarea.form-control {
+   color: #71777d;
+   font-size: 10pt;
+   margin-top: 5px;
+}
+
+.bg-section {
+    background-color: #f8ddf6; 
+    color: #923e8b; 
+    font-size: 10pt; 
+    line-height:2.5;
+}
+
+.head-data {
+    align-items: center;
+    border:2px solid white;
+}
+
+.label-b {
+   font-size: 9pt;
+}
+.label-b,
+.print-input{
+	border: none;
+	padding: 4px 8px;
+	box-sizing: border-box;
+    background-color: #f8f9fa; 
+}
+
+
+.print-input-lg{
+	padding: 10px;
+	margin-top: 5px;
+	margin-bottom: 5px;
+
+}
+
+.print-textarea{
+	border: 1px solid silver;
+	width: 100%;
+ 	/*min-height: 3rem;*/
+    min-height: 2cm;
+	resize: none;
+	font-family: sans-serif;
+	background-color: var(--light-color);
+}
+
+.print-input:focus,
+.print-textarea:focus{
+	outline: 1px solid var(--main-color);
+}
+
+
+/* ------------------------------
+ *  SIGNATRUE
+ *  ------------------------------*/
+.signature-canvas{
+	margin-top: 2pt;
+	width: 6cm;
+	height: 2cm;
+	margin-bottom: 2pt;
+	background-color: var(--light-color);
+
+}
+
+
+/* ------------------------------
+ *  FOOTER
+ *  ------------------------------*/
+
+.footer{
+	display: flex;
+	justify-content: center;
+	flex-direction : column;
+	align-items: center;
+	font-weight: light;
+	color: var(--main-color);
+}
+
+.footer *{
+	font-family: sans-serif;
+	font-weight: light;
+	font-size: 9pt;
+}
+
+
+.footer .data {
+	width: 100%;
+}
+
+.footer .company{
+	font-weight: bolder;
+}
+
+.footer address,
+.footer .company{
+	text-align: center;
+}
+
+.footer .contact-info{
+	display: flex;
+	justify-content: center;
+	align-items: space-evenly;
+	box-sizing: border-box;
+}
+
+.footer .phone{
+	margin-right: 10px;
+}
+
+@media screen{
+	.page-wrapper {
+		margin-top: 1cm;
+		margin-bottom: 1cm;
+		margin-left: 2cm;
+		margin-right: 2cm;
+	}
+
+	.signature-canvas{
+		border: 1px solid silver;
+	}
+
+}
+
+@media print {
+	@page {
+		size: A4 portrait;
+	}
+
+	body, html{
+		-webkit-print-color-adjust: exact;
+		color-adjust: exact;
+		background-color: transparent;
+		min-height: auto;
+
+	}
+
+	.page{
+		width: 210mm;
+		height: 287mm;
+		background-color: white;
+		border: none;
+	}
+
+	.print-input,
+	.print-textarea,
+	.signature-canvas{
+		border: none;
+		background-color: transparent;
+	}
+
+}

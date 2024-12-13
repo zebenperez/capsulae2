@@ -100,8 +100,8 @@ urlpatterns = [
     path('patients/params-form/', params_views.patient_params_form, name='patient-params-form'),
     path('patients/params-form-tab/', params_views.patient_params_form_tab, name='patient-params-form-tab'),
     path('patients/params-remove/', params_views.patient_params_remove, name='patient-params-remove'),
-    path('patients/params-print/', params_views.patient_params_print, name='patient-params-print'),
-    path('patients/params-print-pdf/', params_views.patient_params_print_pdf, name='patient-params-print-pdf'),
+    path('patients/params-print/<int:patient_id>', params_views.patient_params_print, name='patient-params-print'),
+    #path('patients/params-print-pdf/', params_views.patient_params_print_pdf, name='patient-params-print-pdf'),
 
     #------------------------- TELEGRAM --------------------
     path('patients/telegram/', views.patient_telegram, name='patient-telegram'),
