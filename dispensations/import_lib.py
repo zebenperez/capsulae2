@@ -229,7 +229,8 @@ def set_dispensations_json(values, patient):
         kwargs["pre_pvp"] = values["pre_pvp"]
         kwargs["pre_bill_pvp"] = values["pre_bill_pvp"]
         kwargs["pre_amount"] = values["pre_amount"]
-        kwargs["next_date"] = get_date(values["next_date"])
+        kwargs["next_date"] = values["next_date"]
+        #kwargs["next_date"] = get_date(values["next_date"])
         obj, created = Dispensation.objects.get_or_create(**kwargs)
         return obj
     return None
