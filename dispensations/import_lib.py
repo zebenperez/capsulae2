@@ -208,10 +208,17 @@ def set_patient_json(values, user):
     return obj
 
 def set_dispensations_json(values, patient):
+    print("--1--")
+    print(patient.id)
+    print("{} {}".format(patient.nombre, patient.apellido))
+    print(values)
+    print(get_date(values["date"]))
+    print(get_date(values["ini_date"]))
+    print(get_date(values["end_date"]))
     if patient != None:
         kwargs = {'patient': patient}
         #kwargs["date"] = get_date(values["date"], values["time"])
-        kwargs["date"] = get_date(values["date"])
+        kwargs["date"] = values["date"]
         kwargs["code"] = values["code"]
         kwargs["name"] = values["name"]
         kwargs["order"] = values["order"]
@@ -219,8 +226,10 @@ def set_dispensations_json(values, patient):
         kwargs["pvp"] = values["pvp"]
         kwargs["bill_pvp"] = values["bill_pvp"]
         kwargs["amount"] = values["amount"]
-        kwargs["ini_date"] = get_date(values["ini_date"])
-        kwargs["end_date"] = get_date(values["end_date"])
+        kwargs["ini_date"] = values["ini_date"]
+        kwargs["end_date"] = values["end_date"]
+        #kwargs["ini_date"] = get_date(values["ini_date"])
+        #kwargs["end_date"] = get_date(values["end_date"])
         #kwargs["num"] = values["num"]
         kwargs["pre_code"] = values["pre_code"]
         kwargs["pre_name"] = values["pre_name"]
