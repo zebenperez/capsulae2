@@ -208,13 +208,6 @@ def set_patient_json(values, user):
     return obj
 
 def set_dispensations_json(values, patient):
-    print("--1--")
-    print(patient.id)
-    print("{} {}".format(patient.nombre, patient.apellido))
-    print(values)
-    print(get_date(values["date"]))
-    print(get_date(values["ini_date"]))
-    print(get_date(values["end_date"]))
     if patient != None:
         kwargs = {'patient': patient}
         #kwargs["date"] = get_date(values["date"], values["time"])
