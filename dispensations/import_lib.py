@@ -42,7 +42,8 @@ def get_json_date(val):
     try:
         return xlrd.xldate_as_datetime(float(val), 0)
     except:
-        return ""
+        return datetime.datetime.min
+        #return ""
 
 def get_json_datas(f, ods=False):
     from pyexcel_ods import get_data
@@ -114,7 +115,7 @@ def get_json_datas(f, ods=False):
                 node["pre_pvp"] = sh.cell_value(rowx=rx, colx=16)
                 node["pre_bill_pvp"] = sh.cell_value(rowx=rx, colx=17)
                 node["pre_amount"] = sh.cell_value(rowx=rx, colx=18)
-                node["next_date"] = sh.cell_value(rowx=rx, colx=29)
+                node["next_date"] = get_json_date(sh.cell_value(rowx=rx, colx=29))
 
                 node["name"] = sh.cell_value(rowx=rx, colx=19)
                 node["cip"] = sh.cell_value(rowx=rx, colx=20)
