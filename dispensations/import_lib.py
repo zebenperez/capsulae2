@@ -99,7 +99,10 @@ def get_json_datas(f, ods=False):
                 node = {}
                 #node["date"] = sh.cell_value(rowx=rx, colx=0)
                 #node["time"] = sh.cell_value(rowx=rx, colx=1)
-                node["date"] = get_json_date(sh.cell_value(rowx=rx, colx=1))
+                time = get_json_date(sh.cell_value(rowx=rx, colx=1))
+                node["date"] = get_json_date(sh.cell_value(rowx=rx, colx=0))
+                node["date"] = node["date"].replace(hour=time.hour, minute=time.minute)
+                #node["time"] = get_json_date(sh.cell_value(rowx=rx, colx=1))
                 node["code"] = sh.cell_value(rowx=rx, colx=3)
                 node["treatment"] = sh.cell_value(rowx=rx, colx=4)
                 node["order"] = sh.cell_value(rowx=rx, colx=5)
@@ -210,11 +213,13 @@ def set_patient_json(values, user):
 
 def set_dispensations_json(values, patient):
     if patient != None:
+        #print(patient.nombre)
+        #print(values)
         kwargs = {'patient': patient}
         #kwargs["date"] = get_date(values["date"], values["time"])
         kwargs["date"] = values["date"]
         kwargs["code"] = values["code"]
-        kwargs["name"] = values["name"]
+        kwargs["name"] = values["treatment"]
         kwargs["order"] = values["order"]
         kwargs["units"] = values["units"]
         kwargs["pvp"] = values["pvp"]
@@ -278,4 +283,11 @@ def set_dispensations_json(values, patient):
 #        obj.next_date = get_date(row[29])
 #        obj.save()
 
+#'''
+#    LOGS
+#'''
+#def write_log(folder, file_name, msg):
+#    path = get_path("media/dispensations/{}/".format(folder))
+#    log_path = "{}{}.txt".format(path, file_name)
+#    write_in_file(log_path, "{}\n".format(msg))
 

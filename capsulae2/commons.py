@@ -6,6 +6,7 @@ import json
 import string
 import random
 import unicodedata
+import os
 
 
 '''
@@ -111,5 +112,4 @@ def validate_captcha(request):
         return True
     else:
         return False
-
 

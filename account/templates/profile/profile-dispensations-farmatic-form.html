@@ -8,14 +8,21 @@
         </div>
     </div>  
     <div class="card-body">
-        <label for ="file_farmatic" class="btn btn-sm new"> 
-            <i class="fas fa-upload"></i><span class="d-none d-sm-block">{%trans "Elegir"%}&nbsp;{%trans "Archivo"%}</span></label>
-        <input type="file" class="multiupload d-none" name="file_farmatic" id="file_farmatic" 
-            data-url="{%url 'patient-farmatic-upload'%}" data-target="div-farmatic" data-obj-id="" data-field="" data-folder="" 
-            data-csrf-token="{{ csrf_token }}" multiple/>
- 
-        {% if msg and msg != "" %}
-            <br/><br/><div id="import-info"> <h4> Resultado de la importación </h4> {{msg|safe}} </div> 
+        {% if conf == "" or conf == "END" %}
+            <label for ="file_farmatic" class="btn btn-sm new"> 
+                <i class="fas fa-upload"></i><span class="d-none d-sm-block">{%trans "Elegir"%}&nbsp;{%trans "Archivo"%}</span></label>
+            <input type="file" class="multiupload d-none" name="file_farmatic" id="file_farmatic" 
+                data-url="{%url 'patient-farmatic-upload'%}" data-target="div-farmatic" data-obj-id="" data-field="" data-folder="" 
+                data-csrf-token="{{ csrf_token }}" multiple/>
+     
+            {% if msg and msg != "" %}
+                <br/><br/><div id="import-info"> <h4> Resultado de la importación </h4> {{msg|safe}} </div> 
+            {% endif %}
+        {% else %}
+            <i class="fas fa-spinner fa-spin"></i>
+            {% trans "Importando: "%} {{conf}}
+            <button id="btn-reload" class="hide ark" data-url="{% url "profile-view-import" %}" data-target="div-farmatic"></button>
+            <script>setTimeout(()=>{$("#btn-reload").click();}, 5000);</script>
         {% endif %}
     </div>
 </div>

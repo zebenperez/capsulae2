@@ -14,47 +14,60 @@
                     <h4>{% trans "Datos generales" %}</h4>
                     <hr/>
 			        <div class="row">
-                        <div class="col-md-4"> <label for="id_m" class="control-label  requiredField"> {% trans "Fecha" %}: </label> </div>
+                        <div class="col-md-4"> 
+                            <label for="id_m" class="control-label  requiredField"> {% trans "Fecha" %}: </label> </div>
                         <div class="col-md-8"> {{item.date}} </div> 
                     </div>
+                    {%comment%}
 			        <div class="row">
-                        <div class="col-md-4"> <label for="id_m" class="control-label  requiredField"> {% trans "Hora" %}: </label> </div>
+                        <div class="col-md-4"> 
+                            <label for="id_m" class="control-label  requiredField"> {% trans "Hora" %}: </label> </div>
                         <div class="col-md-8"> {{item.time}} </div> 
                     </div>
+                    {%endcomment%}
 			        <div class="row">
-                        <div class="col-md-4"> <label for="id_m" class="control-label  requiredField"> {% trans "Código" %}: </label> </div>
+                        <div class="col-md-4"> 
+                            <label for="id_m" class="control-label  requiredField"> {% trans "Código" %}: </label> </div>
                         <div class="col-md-8"> {{item.code}} </div> 
                     </div>
 			        <div class="row">
-                        <div class="col-md-4"> <label for="id_m" class="control-label  requiredField"> {% trans "Nombre" %}: </label> </div>
+                        <div class="col-md-4"> 
+                            <label for="id_m" class="control-label  requiredField"> {% trans "Nombre" %}: </label> </div>
                         <div class="col-md-8"> {{item.name}} </div> 
                     </div>
 			        <div class="row">
-                        <div class="col-md-4"> <label for="id_m" class="control-label  requiredField"> {% trans "Unidades" %}: </label> </div>
+                        <div class="col-md-4"> 
+                            <label for="id_m" class="control-label  requiredField"> {% trans "Unidades" %}: </label> </div>
                         <div class="col-md-8"> {{item.units}} </div> 
                     </div>
 			        <div class="row">
-                        <div class="col-md-4"> <label for="id_m" class="control-label  requiredField"> {% trans "PVP" %}: </label> </div>
+                        <div class="col-md-4"> 
+                            <label for="id_m" class="control-label  requiredField"> {% trans "PVP" %}: </label> </div>
                         <div class="col-md-8"> {{item.pvp}} </div> 
                     </div>
 			        <div class="row">
-                        <div class="col-md-4"> <label for="id_m" class="control-label  requiredField"> {% trans "PVP facturación" %}: </label> </div>
+                        <div class="col-md-4"> 
+                            <label for="id_m" class="control-label  requiredField"> {% trans "PVP facturación" %}: </label> </div>
                         <div class="col-md-8"> {{item.bill_pvp}} </div> 
                     </div>
 			        <div class="row">
-                        <div class="col-md-4"> <label for="id_m" class="control-label  requiredField"> {% trans "Precio" %}: </label> </div>
+                        <div class="col-md-4"> 
+                            <label for="id_m" class="control-label  requiredField"> {% trans "Precio" %}: </label> </div>
                         <div class="col-md-8"> {{item.amount}} </div> 
                     </div>
 			        <div class="row">
-                        <div class="col-md-4"> <label for="id_m" class="control-label  requiredField"> {% trans "Fecha de inicio" %}: </label> </div>
+                        <div class="col-md-4"> 
+                            <label for="id_m" class="control-label  requiredField"> {% trans "Fecha de inicio" %}: </label> </div>
                         <div class="col-md-8"> {{item.ini_date}} </div> 
                     </div>
 			        <div class="row">
-                        <div class="col-md-4"> <label for="id_m" class="control-label  requiredField"> {% trans "Fecha de fin" %}: </label> </div>
+                        <div class="col-md-4"> 
+                            <label for="id_m" class="control-label  requiredField"> {% trans "Fecha de fin" %}: </label> </div>
                         <div class="col-md-8"> {{item.end_date}} </div> 
                     </div>
 			        <div class="row">
-                        <div class="col-md-4"> <label for="id_m" class="control-label  requiredField"> {% trans "Número" %}: </label> </div>
+                        <div class="col-md-4"> 
+                            <label for="id_m" class="control-label  requiredField"> {% trans "Número" %}: </label> </div>
                         <div class="col-md-8"> {{item.num}} </div> 
                     </div>
                 </div>
@@ -62,27 +75,33 @@
                     <h4>{% trans "Datos de prescripción" %}</h4>
                     <hr/>
 			        <div class="row">
-                        <div class="col-md-4"> <label for="id_m" class="control-label  requiredField"> {% trans "Código" %}: </label> </div>
+                        <div class="col-md-4"> 
+                            <label for="id_m" class="control-label  requiredField"> {% trans "Código" %}: </label> </div>
                         <div class="col-md-8"> {{item.pre_code}} </div> 
                     </div>
 			        <div class="row">
-                        <div class="col-md-4"> <label for="id_m" class="control-label  requiredField"> {% trans "Próxima Fecha" %}: </label> </div>
+                        <div class="col-md-4"> 
+                            <label for="id_m" class="control-label  requiredField"> {% trans "Próxima Fecha" %}: </label> </div>
                         <div class="col-md-8"> {{item.next_date}} </div> 
                     </div>
 			        <div class="row">
-                        <div class="col-md-4"> <label for="id_m" class="control-label  requiredField"> {% trans "Nombre" %}: </label> </div>
+                        <div class="col-md-4"> 
+                            <label for="id_m" class="control-label  requiredField"> {% trans "Nombre" %}: </label> </div>
                         <div class="col-md-8"> {{item.pre_name}} </div> 
                     </div>
 			        <div class="row">
-                        <div class="col-md-4"> <label for="id_m" class="control-label  requiredField"> {% trans "PVP" %}: </label> </div>
+                        <div class="col-md-4"> 
+                            <label for="id_m" class="control-label  requiredField"> {% trans "PVP" %}: </label> </div>
                         <div class="col-md-8"> {{item.pre_pvp}} </div> 
                     </div>
 			        <div class="row">
-                        <div class="col-md-4"> <label for="id_m" class="control-label  requiredField"> {% trans "PVP facturación" %}: </label> </div>
+                        <div class="col-md-4"> 
+                            <label for="id_m" class="control-label  requiredField"> {% trans "PVP facturación" %}: </label> </div>
                         <div class="col-md-8"> {{item.pre_bill_pvp}} </div> 
                     </div>
 			        <div class="row">
-                        <div class="col-md-4"> <label for="id_m" class="control-label  requiredField"> {% trans "Precio" %}: </label> </div>
+                        <div class="col-md-4"> 
+                            <label for="id_m" class="control-label  requiredField"> {% trans "Precio" %}: </label> </div>
                         <div class="col-md-8"> {{item.pre_amount}} </div> 
                     </div>
                 </div>

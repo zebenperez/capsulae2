@@ -10,6 +10,8 @@ import uuid
 from capsulae2.decorators import group_required
 from capsulae2.commons import get_random_str, get_param, get_or_none, get_int, get_float, show_exc
 from capsulae2.email_lib import send_register_email, send_new_password_email
+from capsulae2.logs_lib import get_logs, get_log
+from pharma.common_lib import get_config_value
 from shifts2.models import Journey
 #from .email_lib import send_register_email, send_new_password_email
 from .models import *
@@ -206,7 +208,19 @@ def reactivate(request, activation_key):
 @group_required("admins", "managers")
 def profile_view(request):
     comp = Company.objects.filter(manager=request.user).first()
-    return render(request, "profile/profile-view.html", {'obj': comp})
+    log_list = get_logs(comp.id)
+    return render(request, "profile/profile-view.html", {'obj': comp, 'conf': get_config_value("IMPORT_UNYCOP"), 'log_list':log_list})
+
+@group_required("admins", "managers")
+def profile_view_import(request):
+    return render(request, "profile/profile-dispensations-form.html", {'conf':get_config_value("IMPORT_UNYCOP")})
+
+@group_required("admins", "managers")
+def profile_view_dispensation_log(request):
+    file_name = get_param(request.GET, "file_name")
+    comp = Company.objects.filter(manager=request.user).first()
+    content = get_log(file_name, comp.id)
+    return render(request, "profile/profile-dispensations-log.html", {'content': content.replace("\n", "<br/>")})
 
 '''
     Payments
