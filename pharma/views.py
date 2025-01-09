@@ -215,7 +215,7 @@ def patient_view(request, patient_id):
 @group_required("admins","managers")
 def patient_form(request):
     patient = get_or_none(Pacientes, get_param(request.GET, "obj_id"))
-    return render(request, "patient/patient-form.html", {'obj': patient, 'country_list': Paises.objects.all(), 'etnia_list': Etnia.objects.all()})
+    return render(request, "patient/patient-personal.html", {'obj': patient, 'country_list': Paises.objects.all(), 'etnia_list': Etnia.objects.all()})
 
 @group_required("admins","managers")
 def patient_treatment(request):

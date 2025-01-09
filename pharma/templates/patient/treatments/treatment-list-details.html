@@ -1,0 +1,97 @@
+{% load i18n static common_tags %}
+
+<div class="row toolbar-search pt-2 pb-2 m-0">
+    <div class="col-lg-1 col-1"><i class="fas fa-search"></i></div>
+    <div class="col-lg-10 col-10">
+        <input type="text" class="form-control form-control-dark w-100 ark_change" name="s-name" id="s-name" 
+           placeholder="{% trans 'Añadir tratamiento a partir del historial, Nombre o CIP' %}" 
+           data-url="{% url "patient-treatment-medication-search" %}" 
+           {#data-target="medication-list" data-patient_id="{{obj.id}}" data-show="medication-list"/>#}
+           data-target-modal="common-modal" data-patient_id="{{obj.id}}" data-show="medication-list"/>
+    </div>
+    <div class="col-lg-1 col-1 text-end"> {% include "patient/treatments/treatment-list-actions.html" %} </div>
+</div>
+{#<div id="medication-list" class="hide">{% include "patient/treatments/medication-list.html" %}</div>#}
+
+<div class="row spd-tab">
+    <div class="col-12 text-end">
+        <button class="btn btn-sm check-row new" data-row="row-item" data-active="True"> 
+            <i class="fas fa-eye-open"></i> {%trans 'Activos'%}</button> |
+		<button class="btn btn-sm check-row new" data-row="row-item" data-active="False"> 
+            <i class="fas fa-eye-open"></i> {%trans 'No Activos'%}</button> | 
+		<button class="btn btn-sm check-row new" data-row="row-item" data-active=""> 
+            <i class="fas fa-eye-open"></i> {%trans 'Todos'%}</button> 
+    </div>
+</div>
+
+<table class="table table-striped table-hover">
+    <thead>
+        <tr class="small small">
+            <th class="row main-th">
+                <div class="col-8"> {% trans 'Nombre' %} </div>
+                {#<div class="col-3"> {% trans 'ATC' %} </div>#}
+                <div class="col-4">
+                    <div class="row">
+                        <div class="col-2"> <img src="{% static "imgs/desayuno.jpg" %}" style="width:20px"/> </div>
+                        <div class="col-2"> <img src="{% static "imgs/comida.jpg" %}" style="width:20px"/> </div>
+                        <div class="col-2"> <img src="{% static "imgs/cena.jpg" %}" style="width:20px"/> </div>
+                        <div class="col-2"> <img src="{% static "imgs/noche.jpg" %}" style="width:20px"/> </div>
+                        <div class="col-4"></div>
+                    </div>
+                </div>
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in obj.tratamientos.all %}
+            {% with comp=item.is_complement %}
+            <tr class="small row-item {%if item.activo == False%}hide{%endif%}" data-active="{{item.activo}}" id="row_{{item.id}}">
+                <td class="row {%if comp%}text-primary{%endif%}">
+                    <div class="col-8">{{ item.name }} {%if not comp%}| {{item.atcs_last}}{%endif%}</div>
+                    {#<div class="col-3">{{ item.atcs }}</div>#}
+                    <div class="col-4">
+                        <div class="row">
+                            <div class="col-2">{{ item.m }}</div>
+                            <div class="col-2">{{ item.t }}</div>
+                            <div class="col-2">{{ item.n }}</div>
+                            <div class="col-2">{{ item.o }}</div>
+                            <div class="col-4 text-right">
+                                {% if obj.patient_telegram.all.count > 0 %}
+                                    <a class="btn btn-xs ark p-2" data-url="{% url 'patient-telegram-treatment-notification' %}" 
+                                        data-target-modal="common-modal" data-obj_id="{{item.id}}" 
+                                        title="Enviar notificación de recogida"> <i class="fab fa-telegram"></i> </a>
+                                {% endif %}
+
+                                {% if comp %}
+                                    <a class="btn btn-sm ark" title="{%trans 'Edit treatment'%}" 
+                                        data-url="{%url "patient-complement-form" %}" data-target-modal="common-modal" 
+                                        data-obj_id="{{item.id}}" data-patient_id="{{obj.id}}"> 
+                                        <i class="fas fa-edit"></i></a>&nbsp; &nbsp;
+                                {% else %}
+                                    <a class="btn btn-sm ark" title="{%trans 'Edit treatment'%}" 
+                                        data-url="{%url "patient-treatment-form" %}" data-target-modal="common-modal" 
+                                        data-obj_id="{{item.id}}" data-patient_id="{{obj.id}}"> 
+                                        <i class="fas fa-edit"></i></a>&nbsp; &nbsp;
+                                {% endif %}
+
+                                <a class="btn btn-sm ark" data-url="{%url "patient-treatment-soft-remove"%}" data-obj_id="{{item.id}}" 
+                                    data-target="div-container" title="{% trans 'Desactivar' %}" 
+                                    data-confirm="{% trans "Are you sure to desactivate this element?" %}"> 
+                                    <i class="fas fa-minus-square"></i></a> &nbsp;
+
+                                {% if request.user|in_group:"admins" %}
+                                    <a class="btn btn-sm ark" data-url="{%url "patient-treatment-remove"%}" data-obj_id="{{item.id}}" 
+                                        data-target="div-container" title="{% trans 'Remove' %}" 
+                                        data-confirm="{% trans "Are you sure to remove this element?" %}"> 
+                                        <i class="fas fa-trash"></i></a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            {% endwith %}
+        {% endfor %}
+    </tbody>
+</table>
+
