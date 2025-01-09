@@ -8,9 +8,12 @@
 {% if user|have_menu:"DISP" %}
 <br/>
 <div class="card">
-    <div class="card-header" onclick="$('#disp-body').slideToggle()"><i class="fa fa-barcode"></i> {% trans "Dispensaciones" %}</div>
-    <div class="card-body hide" id="disp-body">{%include "patient/dispensations/dispensations-list.html"%}</div>
+    <div class="card-header" onclick="$('#btn-load-disp').click();$('#disp-body').slideToggle();">
+        <i class="fa fa-barcode"></i> {% trans "Dispensaciones" %}</div>
+    <div class="card-body hide" id="disp-body">{#{%include "patient/dispensations/dispensations-list.html"%}#}</div>
 </div>
+<button id="btn-load-disp" class="ark" data-url="{% url "patient-dispensations" %}" data-target="disp-body" data-obj_id="{{obj.id}}"
+    style="display:none"></button>
 {% endif %}
 
 
