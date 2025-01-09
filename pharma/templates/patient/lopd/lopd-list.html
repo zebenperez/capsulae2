@@ -29,7 +29,8 @@
             <tr class="small" id="row_{{item.id}}">
                 <td class="row">
 			{#<div class="col-9"><a href="{{item.document.url}}" target="_blank">{{ item.document.name }}</a></div>#}
-                    <div class="col-9"><a href="{{item.document|get_lopd_url}}" target="_blank">{{ item.document.name }}</a></div>
+                    <div class="col-9"> <a class="text-primary" href="{{item.document|get_lopd_url}}" target="_blank">
+			{{ item.document.name }}</a></div>
                     <div class="col-2">{{ item.date|date:"d-m-Y" }}</div>
                     <div class="col-1 text-right">
                         {%comment%}

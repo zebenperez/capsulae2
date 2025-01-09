@@ -68,10 +68,11 @@ def get_patients(user):
 
 @register.filter
 def get_lopd_url(doc):
-    media_path = os.path.abspath(os.path.join(MEDIA_ROOT, doc.url))
-    if os.path.exists(media_path):
-        return doc.url
-    return "https://capsulae.org/{}".format(doc.url)
+    #media_path = os.path.abspath(os.path.join(MEDIA_ROOT, doc.url))
+    #if os.path.exists(media_path):
+    #    return doc.url
+    url = doc.url[7:] if doc.url.count("media") > 1 else doc.url
+    return "https://capsulae.org/{}".format(doc.url[7:])
 
 @register.filter
 def value_for_key(dictionary, key):
