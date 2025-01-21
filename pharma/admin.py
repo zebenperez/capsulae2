@@ -12,6 +12,7 @@ class TelegramUserChatAdmin(admin.ModelAdmin):
 class PacientesAdmin(admin.ModelAdmin):
     list_display = ('n_historial', 'id_user')
     search_fields = ('n_historial', 'id_user__email', 'id_user__first_name', 'id_user__last_name')
+    list_filter = ('id_user',)
 
 admin.site.register(Config, ConfigAdmin)
 admin.site.register(TelegramUserChat, TelegramUserChatAdmin)

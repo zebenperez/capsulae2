@@ -1,0 +1,24 @@
+{% load i18n %}
+
+
+{% for book in obj.books.all %}
+    <div class="row justify-center">
+        <div class="col-3"> <div class="greybox-sm p-1"> {% trans "ISBN" %}
+            <input type="text" class="form-control autosave" id="isbn" name="isbn" value="{{book.isbn}}" 
+                title="{{book.isbn}}" data-model-name="bibliomecum.biblioreceiptbook" data-obj-id="{{book.id}}" 
+                data-url="{%url "autosave_field"%}" data-target="div-notification" /> <span id="isbn__msg"></span>
+        </div> </div>
+
+        <div class="col-8"> <div class="greybox-sm p-1"> {% trans "Nombre" %}
+            <input type="text" class="form-control autosave" id="name" name="name" value="{{book.name}}" 
+                title="{{book.name}}" data-model-name="bibliomecum.biblioreceiptbook" data-obj-id="{{book.id}}" 
+                data-url="{%url "autosave_field"%}" data-target="div-notification" /> <span id="name__msg"></span>
+        </div> </div>
+
+        <div class="col-1"> <div class="greybox-sm p-1"> 
+            <a class="btn btn-sm ark p-2" data-url="{%url "bibliomecum-receipts-isbn-remove"%}" data-obj_id="{{book.id}}" 
+                data-target="div-isbn" title="{% trans 'Borrar' %}" 
+                data-confirm="{% trans "Esta seguro/a de que desea borrar este elemento?" %}"> <i class="fas fa-trash"></i></a>
+        </div> </div>
+    </div>
+{% endfor %}

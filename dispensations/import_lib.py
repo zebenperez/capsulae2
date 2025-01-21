@@ -138,7 +138,9 @@ def get_json_datas_farmatic(f):
             i += 1
         else:
             node = {}
-            node["date"] = "{} {}".format(sh.cell_value(rowx=rx, colx=0), sh.cell_value(rowx=rx, colx=1))
+            #node["date"] = "{} {}".format(sh.cell_value(rowx=rx, colx=0), sh.cell_value(rowx=rx, colx=1))
+            date = datetime.datetime.strptime("{} {}".format(sh.cell_value(rowx=rx, colx=0), sh.cell_value(rowx=rx, colx=1)), "%d/%m/%y %H:%M")
+            node["date"] = date.strftime("%Y-%m-%d %H:%M")
             node["name"] = sh.cell_value(rowx=rx, colx=2)
             node["cip"] = sh.cell_value(rowx=rx, colx=3)
             #Tratamiento
@@ -150,10 +152,15 @@ def get_json_datas_farmatic(f):
             node["pre_code"] = sh.cell_value(rowx=rx, colx=10)
             node["pre_name"] = sh.cell_value(rowx=rx, colx=11)
             #T.A.
-            node["units"] = sh.cell_value(rowx=rx, colx=12)
-            node["pvp"] = sh.cell_value(rowx=rx, colx=13)
-            node["bill_pvp"] = sh.cell_value(rowx=rx, colx=14)
-            node["next_date"] = sh.cell_value(rowx=rx, colx=15)
+            node["units"] = sh.cell_value(rowx=rx, colx=13)
+            node["pvp"] = sh.cell_value(rowx=rx, colx=14)
+            node["bill_pvp"] = sh.cell_value(rowx=rx, colx=15)
+            #node["next_date"] = sh.cell_value(rowx=rx, colx=16)
+            node["next_date"] = ""
+            next_date = sh.cell_value(rowx=rx, colx=16)
+            if next_date != "":
+                ndate = datetime.datetime.strptime("{}".format(next_date), "%d/%m/%Y")
+                node["next_date"] = ndate.strftime("%Y-%m-%d %H:%M")
             #Vendedor
             #Maquina
             node["nif"] = ""
@@ -213,8 +220,8 @@ def set_patient_json(values, user):
 
 def set_dispensations_json(values, patient):
     if patient != None:
-        #print(patient.nombre)
-        #print(values)
+        print(patient.nombre)
+        print(values)
         kwargs = {'patient': patient}
         #kwargs["date"] = get_date(values["date"], values["time"])
         kwargs["date"] = values["date"]
@@ -225,8 +232,10 @@ def set_dispensations_json(values, patient):
         kwargs["pvp"] = values["pvp"]
         kwargs["bill_pvp"] = values["bill_pvp"]
         kwargs["amount"] = values["amount"]
-        kwargs["ini_date"] = values["ini_date"]
-        kwargs["end_date"] = values["end_date"]
+        if "ini_date" in values and values["ini_date"] != "":
+            kwargs["ini_date"] = values["ini_date"]
+        if "end_date" in values and values["end_date"] != "":
+            kwargs["end_date"] = values["end_date"]
         #kwargs["ini_date"] = get_date(values["ini_date"])
         #kwargs["end_date"] = get_date(values["end_date"])
         #kwargs["num"] = values["num"]
@@ -235,7 +244,8 @@ def set_dispensations_json(values, patient):
         kwargs["pre_pvp"] = values["pre_pvp"]
         kwargs["pre_bill_pvp"] = values["pre_bill_pvp"]
         kwargs["pre_amount"] = values["pre_amount"]
-        kwargs["next_date"] = values["next_date"]
+        if "next_date" in values and values["next_date"] != "":
+            kwargs["next_date"] = values["next_date"]
         #kwargs["next_date"] = get_date(values["next_date"])
         obj, created = Dispensation.objects.get_or_create(**kwargs)
         return obj

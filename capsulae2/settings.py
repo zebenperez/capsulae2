@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'shifts2',
     'agenda',
     'dispensations',
+    'bibliomecum',
 ]
 
 MIDDLEWARE = [

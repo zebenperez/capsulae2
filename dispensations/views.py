@@ -12,6 +12,7 @@ from .models import Dispensation
 from .import_lib import get_json_datas, get_json_datas_farmatic, set_patient_json, set_dispensations_json
 
 IMPORT_KEY = "IMPORT_UNYCOP"
+IMPORT_FARMATIC_KEY = "IMPORT_FARMATIC"
 
 '''
     Dispensations
@@ -50,8 +51,8 @@ def set_dispensations_farmatic(comp, file_name, datas):
         return False
     msg = ""
     cip = ""
-    conf = get_or_create_config_value(IMPORT_KEY)
-    set_config_value(IMPORT_KEY, "START")
+    conf = get_or_create_config_value(IMPORT_FARMATIC_KEY)
+    set_config_value(IMPORT_FARMATIC_KEY, "START")
     for idx, item in enumerate(datas["dispensations"]):
         try:
             patient = set_patient_json(item, comp.manager)
@@ -66,12 +67,12 @@ def set_dispensations_farmatic(comp, file_name, datas):
                 msg = "-- ERROR importando dispensación {}".format(item["code"]) 
             else:
                 msg = "-- Dispensación {}:".format(disp.code)
-            set_config_value(IMPORT_KEY, "{} {}".format(patient.nombre, patient.apellido))
+            set_config_value(IMPORT_FARMATIC_KEY, "{} {}".format(patient.nombre, patient.apellido))
         except Exception as e:
             print(e)
             msg = "ERROR con el paciente {}".format(item["cip"])
         write_log(msg, file_name, comp.id)
-    set_config_value(IMPORT_KEY, "END")
+    set_config_value(IMPORT_FARMATIC_KEY, "END")
     return msg
 
 @group_required("admins", "managers")
@@ -135,6 +136,7 @@ def farmatic_upload_back(comp, f):
         thread = threading.Thread(target=set_dispensations_farmatic, args=(comp, file_name, datas))
         thread.start()
     except Exception as e:
+        print(e)
         write_log("{}".format(str(e)), file_name, comp.id)
     #write_log(comp.id, file_name, "--- FINALIZANDO IMPORTACIÓN ---")
  

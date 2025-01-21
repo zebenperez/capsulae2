@@ -14,6 +14,7 @@ urlpatterns = [
     #------------------------- PROFILE --------------------
     path('profile/view/', views.profile_view, name='profile-view'),
     path('profile/view/import/', views.profile_view_import, name='profile-view-import'),
+    path('profile/view/import-farmatic/', views.profile_view_import_farmatic, name='profile-view-import-farmatic'),
     path('profile/view/dispensation-log/', views.profile_view_dispensation_log, name='profile-view-dispensation-log'),
 
     #------------------------- PAYMENTS --------------------

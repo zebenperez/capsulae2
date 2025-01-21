@@ -8,7 +8,7 @@
         </div>
     </div>  
     <div class="card-body">
-        {% if conf == "" or conf == "END" %}
+        {% if conf_far == "" or conf_far == "END" %}
             <label for ="file_farmatic" class="btn btn-sm new"> 
                 <i class="fas fa-upload"></i><span class="d-none d-sm-block">{%trans "Elegir"%}&nbsp;{%trans "Archivo"%}</span></label>
             <input type="file" class="multiupload d-none" name="file_farmatic" id="file_farmatic" 
@@ -20,8 +20,9 @@
             {% endif %}
         {% else %}
             <i class="fas fa-spinner fa-spin"></i>
-            {% trans "Importando: "%} {{conf}}
-            <button id="btn-reload" class="hide ark" data-url="{% url "profile-view-import" %}" data-target="div-farmatic"></button>
+            {% trans "Importando: "%} {{conf_far}}
+            <button id="btn-reload" class="hide ark" data-url="{% url "profile-view-import-farmatic" %}" 
+                data-target="div-farmatic"></button>
             <script>setTimeout(()=>{$("#btn-reload").click();}, 5000);</script>
         {% endif %}
     </div>

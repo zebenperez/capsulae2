@@ -50,6 +50,8 @@ urlpatterns = [
 
     path('patients/dispensations/', views.patient_dispensations, name='patient-dispensations'),
 
+    path('patients/bibliomecum/', views.patient_bibliomecum, name='patient-bibliomecum'),
+
     #------------------------- TREATMENT --------------------
     path('patients/treatment/', views.patient_treatment, name='patient-treatment'),
     path('patients/treatment-form/', t_views.patient_treatment_form, name='patient-treatment-form'),

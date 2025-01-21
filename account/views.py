@@ -209,11 +209,16 @@ def reactivate(request, activation_key):
 def profile_view(request):
     comp = Company.objects.filter(manager=request.user).first()
     log_list = get_logs(comp.id)
-    return render(request, "profile/profile-view.html", {'obj': comp, 'conf': get_config_value("IMPORT_UNYCOP"), 'log_list':log_list})
+    context = {'obj':comp,'conf':get_config_value("IMPORT_UNYCOP"),'conf_far':get_config_value("IMPORT_FARMATIC"),'log_list':log_list}
+    return render(request, "profile/profile-view.html", context)
 
 @group_required("admins", "managers")
 def profile_view_import(request):
     return render(request, "profile/profile-dispensations-form.html", {'conf':get_config_value("IMPORT_UNYCOP")})
+
+@group_required("admins", "managers")
+def profile_view_import_farmatic(request):
+    return render(request, "profile/profile-dispensations-farmatic-form.html", {'conf_far':get_config_value("IMPORT_FARMATIC")})
 
 @group_required("admins", "managers")
 def profile_view_dispensation_log(request):

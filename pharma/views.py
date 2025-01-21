@@ -267,6 +267,11 @@ def patient_dispensations(request):
     patient = get_or_none(Pacientes, get_param(request.GET, "obj_id"))
     return render(request, "patient/dispensations/dispensations-list.html", {'obj': patient})
 
+@group_required("admins","managers")
+def patient_bibliomecum(request):
+    patient = get_or_none(Pacientes, get_param(request.GET, "obj_id"))
+    return render(request, "bibliomecum/receipts-list.html", {'obj': patient})
+
 
 '''
     Patient Org

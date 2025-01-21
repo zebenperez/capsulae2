@@ -1,0 +1,210 @@
+{% load i18n static %}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="UTF-8">
+	<title>{% trans "Bibliomecum Receta para "%} {{ obj.patient.history_number }}</title>
+	<link rel="stylesheet" href="{% static 'community/css/colors.css' %}">
+	<link rel="stylesheet" href="{% static 'community/css/documents.css' %}">
+	<link rel="stylesheet" href="{% static 'community/css/referral-form.css' %}">
+	<script src="{% static 'community/js/referral-form.js' %}"></script>
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" 
+        integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.min.js" 
+        integrity="sha384-ODmDIVzN+pFdexxHEHFBQH3/9/vQ9uori45z4JjnFsRydbmQbmL5t1tQ0culUzyK" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js" 
+        integrity="sha384-A3rJD856KowSb7dwlZdYEkO39Gagi7vIsF0jrRAoQmDKKtQBHUuLZ9AsSv4jD4Xa" crossorigin="anonymous"></script>
+
+    <style>
+        .print-btn-container {
+            position: fixed !important; 
+            top:0 !important;
+            left:0;
+        }
+        .page-infinite {
+            letter-spacing: -1px;
+            /*width: auto !important;*/
+            width: 100% !important;
+            border:1px solid white !important;
+        }
+        .page-wrapper {
+        }
+        .content {
+        }
+        .main-color {
+            color: #834598;
+        }
+        .second-color {
+            color: #f54844;
+        }
+        .bg-light {
+            background: #fff !important;
+        }
+        .x-small {
+            font-size: 10px !important;
+        }
+        .div-receipt {
+            border-left: 15px solid #834598;
+            border-right: 15px solid #834598;
+        }
+        .custom-h3{
+            color: #814496;
+        }
+        .custom-box{
+            padding: 5px;
+        }
+        .custom-th{
+            color: #814496;
+            border-bottom: 1px solid #999;;
+            border-color: #814496;
+            padding-bottom:10px;
+        }
+        .custom-td{
+            color: #814496;
+            padding-top:10px;
+            padding-bottom:10px;
+        }
+        .h-top {
+            height: 50px;
+            line-height: 50px;
+            align-items: center;
+        }
+        .h-top .h-left {
+            background-color: #f8f6fb;
+            color: #834598;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        .h-top .h-center {
+            background-color: #834598;
+            color: #ffffff;
+            font-size: 1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .h-top .h-right {
+            background-color: #f8f6fb;
+        }
+        .data-info {
+            background-color: #f8f6fb;
+        }
+        .b-dotted { border: 2px dotted #f54844; }
+        .b-bt-dotted { border-bottom: 1px dotted #f54844; }
+        .b-tp-red { border-top: 1px solid #f54844; }
+        .b-bt-red { border-bottom: 1px solid #f54844; }
+        .b-lf-red { border-left: 1px solid #f54844; }
+        .b-rt-red { border-right: 1px solid #f54844; }
+
+        .lh { line-height: 15px;}
+        .h-100 { height: 100px !important;}
+        .h-150 { height: 150px !important;}
+        .h-200 { height: 200px !important;}
+    @page {
+        size: 11in 8.5in;
+        margin-bottom: 0.75in;
+        margin-left: 0.9in;
+        margin-right: 0.9in;
+        margin-top: 0.75in;	
+    }
+
+    </style>
+</head>
+<body>
+    <div class="print-btn-container"> 
+        <a class="print-btn" id="print-btn" onclick="window.print()"> &#128424; {% trans "Imprimir" %}</a> 
+    </div>
+	<div class="page-infinite">
+		<div class="page-wrapper">
+            <div class="header"> 
+                <div class="fundec-logo"> <img src="{% static 'community/images/fundec-logo.png' %}" alt="Fundec"/> </div> 
+                <div class="company-logo"> 
+                    {% if company.image %}
+                        <img src="{{company.image.url}}" alt="{{company.name}}" style="height:60px"/> 
+                    {% else %}
+                        <img src="{% static 'community/images/capsulae-logo.png' %}" alt="Capsulae"/> 
+                    {% endif %}
+                </div>
+            </div>
+            <br/><br/>
+			<div class="content">
+				<h2 class="main-title"> {% trans "Receta" %}</h2>
+            
+                <div id="div-receipt" class="div-receipt">
+                    <div class="row h-top m-0">
+                        <div class="col-4 custom-box b-bt-red h-left text-center p-0">Sistema de Catalización Lectora</div>
+                        <div class="col-4 custom-box b-bt-red h-center text-center p-0">Receta Literaria Oficial</div>
+                        <div class="col-4 custom-box b-bt-red h-right text-center p-0">
+                            <img src="{% static 'community/images/fundec-logo.png' %}" alt="Fundec" width="60%"/></div>
+                    </div>
+                    <div class="row b-bt-red m-0">
+                        <div class="col-4 custom-box h-100 data-info main-color b-tp-red small"><strong>Diagnóstico y/o Medicamentos administrados</strong></div>
+                        <div class="col-4 custom-box data-info second-color b-tp-red b-lf-red small text-center">
+                            <div class="bg-light"><strong>Duración del tratamiento</strong></div></div>
+                        <div class="col-4 custom-box data-info main-color b-tp-red b-lf-red small lh"><strong>Datos del paciente<br />
+                            <span class="x-small">(nombre, apellidos, fecha de nacimiento, número de carnet)</strong></span>
+                        </div>
+                    </div>
+                    <div class="row m-0">
+                        <div class="col-4 custom-box data-info lh b-rt-red h-150 second-color">
+                            <div class="bg-light"><strong>PRESCRIPCIÓN</strong><br />
+                            <span class="x-small">Consignar la obra recomendada. Título y autor</span></div>
+                        </div>
+
+                        <div class="col-4 custom-box h-100 b-bt-red second-color"><div class="text-center"><strong>POSOLOGÍA</strong></div>
+                            <div class="row x-small m-0 mt-2">
+                                <div class="col-3 b-bt-dotted"></div>
+                                <div class="col-6 b-bt-dotted"></div>
+                                <div class="col-3 text-left">Capítulos</div>
+                            </div>
+                            <div class="row x-small m-0">
+                                <div class="col-3 text-left p-0">o bien</div>
+                                <div class="col-6 b-bt-dotted"></div>
+                                <div class="col-3 text-left">Páginas</div>
+                            </div>
+                            <div class="row x-small m-0">
+                                <div class="col-3 text-left p-0">Cada</div>
+                                <div class="col-6 b-bt-dotted"></div>
+                                <div class="col-3 text-left">Horas</div>
+                            </div>
+                        </div>
+                        <div class="col-4 custom-box data-info h-200 lh b-bt-red b-lf-red small second-color"><div class="bg-light">Advertencias para el lector</div></div>
+                    </div>
+                    <div class="row m-0">
+                        <div class="col-4 custom-box data-info h-150 b-dotted x-small second-color" style="margin-top: -50px;">
+                            <div class="bg-light">El tratamiento puede ser sustituido por:</div>
+                        </div>
+                        <div class="col-4 custom-box data-info b-bt-red small main-color" style="margin-top: -100px;"><strong>Advertencias al dispensador:</strong></div>
+                        <div class="col-4 custom-box data-info b-bt-red b-lf-red small main-color"><strong>Sello fecha y firma del prescriptor</strong></div>
+                    </div>
+                    <div class="row m-0">
+                        <div class="col-4 custom-box x-small second-color">
+                            El beneficiario puede retirar en la Biblioteca Municipal las lecturas prescritas<br/>
+                            El tratamiento es de uso personal pero puede ser transferido a personas con <br/>
+                            similares gustos o síntomas a los del usuario.
+                        </div>
+                        <div class="col-4 custom-box">Barcode</div>
+                        <div class="col-4 custom-box second-color small text-center">En caso de duda consulte a su bibliotecario</div>
+                    </div>
+                </div>
+
+			</div>
+            <div class="footer">
+	            <div class="data">
+		            <p class="company"> {{ company.name|default:"" }} </p>
+		            <address>
+			            {{ company.main_address|default:"" }} {{company.town|default:"" }},
+			            {{ company.postal_code|default:"" }} {{ company.province|default:"" }}
+		            </address>
+		            <div class="contact-info">
+                        {% if company.phone != "" %} <div class="phone"> tel: {{ company.phone }} </div> {% endif %}
+			            <div class="website"> {{ company.email }} </div>
+		            </div>
+	            </div>
+            </div>
+		</div>
+	</div>
+</body>
+</html>
