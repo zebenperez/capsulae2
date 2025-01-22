@@ -12,13 +12,35 @@
 <span id="div-notification"></span><br/>
 
 <div class="row justify-center">
-    <div class="col-6"> <div class="greybox-sm p-1"> {% trans "ATC" %}
+    <div class="col-6"> <div class="greybox-sm p-1">
+        <div class="row">
+            <div class="col-6">{% trans "ATC" %}</div>
+            <div class="col-6"><button class="btn" onclick="$('.atc-row').toggle();">{%trans "ATCs del paciente"%}</button></div>
+        </div>
+        {%for atc in obj.patient.tratamientos.all %}
+            <div class="row atc-row" style="display:none">
+                <div class="col-8">{{atc.atcs_last}}</div>
+                <div class="col-2"><button class="btn atc-btn" data-value="{{atc.atcs_last}}">{% trans "Seleccionar" %}</button></div>
+            </div>
+        {% endfor %}
+ 
         <input type="text" class="form-control autosave" id="atc" name="atc" value="{{obj.atc}}" 
 	        title="{{obj.atc}}" data-model-name="bibliomecum.biblioreceipt" data-obj-id="{{obj.id}}" 
             data-url="{%url "autosave_field"%}" data-target="div-notification" /> <span id="atc__msg"></span>
     </div> </div>
 
-    <div class="col-6"> <div class="greybox-sm p-1"> {% trans "CIAP" %}
+    <div class="col-6"> <div class="greybox-sm p-1"> 
+        <div class="row">
+            <div class="col-6">{% trans "CIAP" %}</div>
+            <div class="col-6"><button class="btn" onclick="$('.ciap-row').toggle();">{%trans "CIAPs del paciente"%}</button></div>
+        </div>
+        {%for ciap in obj.patient.diagnoses %}
+            <div class="row ciap-row" style="display:none">
+                <div class="col-8">{{ciap.cie_ciap.ciap}}</div>
+                <div class="col-2"> <button class="btn ciap-btn" data-value="{{ciap.cie_ciap.ciap}}">
+                    {% trans "Seleccionar" %}</button></div>
+            </div>
+        {% endfor %}
         <input type="text" class="form-control autosave" id="ciap" name="ciap" value="{{obj.ciap}}" 
 	        title="{{obj.ciap}}" data-model-name="bibliomecum.biblioreceipt" data-obj-id="{{obj.id}}" 
             data-url="{%url "autosave_field"%}" data-target="div-notification" /> <span id="ciap__msg"></span>
@@ -51,3 +73,15 @@
         data-target="div-container" data-obj_id="{{obj.patient.id}}">{% trans "Guardar" %}</button>
 </div>
 
+<script>
+    $(".ciap-btn").click(function(){
+        $('#ciap').val($(this).data('value'));
+        $('#ciap').change();
+        $('.ciap-row').hide()       
+    });
+    $(".atc-btn").click(function(){
+        $('#atc').val($(this).data('value'));
+        $('#atc').change();
+        $('.atc-row').hide()       
+    });
+</script>
