@@ -33,7 +33,7 @@
                         <a href="{#{% url "evolutionary-referral-form" obj.n_historial item.id True %}#}" class="btn btn-sm p-2"
                             target="_blank" rel="noopener noreferrer"><i class="fa fa-info"></i> </a>
                         {%endcomment%}
-                        <a class="btn btn-sm" href="{% url "bibliomecum-receipts-print" obj.id %}" target="_blank"> 
+                        <a class="btn btn-sm" href="{% url "bibliomecum-receipts-print" item.id %}" target="_blank"> 
                             <i class="fas fa-print"></i></a> 
                         <a class="btn btn-sm ark p-2" title="{%trans 'Editar receta'%}" data-url="{%url "bibliomecum-receipts-form" %}"
                             data-target-modal="common-modal" data-obj_id="{{item.id}}" data-patient_id="{{obj.id}}"

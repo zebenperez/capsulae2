@@ -140,17 +140,31 @@
                             <img src="{% static 'community/images/fundec-logo.png' %}" alt="Fundec" width="60%"/></div>
                     </div>
                     <div class="row b-bt-red m-0">
-                        <div class="col-4 custom-box h-100 data-info main-color b-tp-red small"><strong>Diagnóstico y/o Medicamentos administrados</strong></div>
+                        <div class="col-4 custom-box h-100 data-info main-color b-tp-red small">
+                            <strong>Diagnóstico y/o Medicamentos administrados</strong>
+                            <br/> {%trans "ATC"%}: <strong>{{obj.atc}}</strong>
+                            <br/> {%trans "CIAP"%}: <strong>{{obj.ciap}}</strong>
+                        </div>
                         <div class="col-4 custom-box data-info second-color b-tp-red b-lf-red small text-center">
                             <div class="bg-light"><strong>Duración del tratamiento</strong></div></div>
-                        <div class="col-4 custom-box data-info main-color b-tp-red b-lf-red small lh"><strong>Datos del paciente<br />
-                            <span class="x-small">(nombre, apellidos, fecha de nacimiento, número de carnet)</strong></span>
+                        <div class="col-4 custom-box data-info main-color b-tp-red b-lf-red small lh">
+                            <strong>Datos del paciente</strong><br />
+                            {#<span class="x-small">(nombre, apellidos, fecha de nacimiento, número de carnet)</strong></span>#}
+                            <br/> {%trans "Nombre"%}: <strong>{{obj.patient.nombre}} {{obj.patient.apellido}}</strong> 
+                            <br/> {%trans "Fecha de nacimiento"%}: <strong>{{obj.patient.fecha_nacimiento|date:"d-m-Y"}}</strong> 
+                            <br/> {%trans "NIF"%}: <strong>{{obj.patient.nif}}</strong>
                         </div>
                     </div>
                     <div class="row m-0">
                         <div class="col-4 custom-box data-info lh b-rt-red h-150 second-color">
-                            <div class="bg-light"><strong>PRESCRIPCIÓN</strong><br />
-                            <span class="x-small">Consignar la obra recomendada. Título y autor</span></div>
+                            <div class="bg-light">
+                                <strong>PRESCRIPCIÓN</strong><br />
+                                <span class="x-small">Consignar la obra recomendada. Título y autor</span>
+                                {% for book in obj.books.all %}
+                                    <br> {%trans "ISBN" %}: <strong>{{book.isbn}}</strong>
+                                    <br> {%trans "Título" %}: <strong>{{book.name}}</strong>
+                                {% endfor %}
+                            </div>
                         </div>
 
                         <div class="col-4 custom-box h-120 b-bt-red second-color"><div class="text-center"><strong>POSOLOGÍA</strong></div>

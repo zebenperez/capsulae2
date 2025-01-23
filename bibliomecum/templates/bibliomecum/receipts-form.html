@@ -11,6 +11,7 @@
 
 <span id="div-notification"></span><br/>
 
+{%comment%}
 <div class="row justify-center">
     <div class="col-6"> <div class="greybox-sm p-1">
         <div class="row">
@@ -46,6 +47,53 @@
             data-url="{%url "autosave_field"%}" data-target="div-notification" /> <span id="ciap__msg"></span>
     </div> </div>
 </div>
+{%endcomment%}
+
+<div class="row justify-center">
+    <div class="col-6"> <div class="greybox-sm p-1">
+        <div class="row spd-tab">
+            <div class="col-6"> <button class="btn" onclick="$('.atc-row').toggle();">{%trans "ATCs del paciente"%}</button> </div>
+            <div class="col-6 text-end">
+                <button type="button" class="btn btn-sm ark new" data-url="{%url "bibliomecum-receipts-atc-add"%}" 
+                    data-target="div-atc" data-obj_id="{{obj.id}}"> <i class="fas fa-plus"></i> {% trans 'Añadir ATC' %}</button> 
+            </div>
+        </div>
+        {%for atc in obj.patient.tratamientos.all %}
+            <div class="row atc-row" style="display:none">
+                <div class="col-2">{{atc.atcs_last}}</div>
+                <div class="col-9">{{atc.name}}</div>
+                <div class="col-1">
+                    <button class="btn atc-btn ark" data-url="{%url "bibliomecum-receipts-atc-add"%}" data-target="div-atc"
+                        data-obj_id="{{obj.id}}" data-atc="{{atc.atcs_last}}" data-name="{{atc.name}}" 
+                        onclick="$('.atc-row').hide()"><i class="fas fa-plus"></i></button>
+                </div>
+            </div>
+        {% endfor %}
+        <div id="div-atc">{% include "bibliomecum/receipts-atc-list.html" %}</div>
+    </div> </div>
+    <div class="col-6"> <div class="greybox-sm p-1">
+        <div class="row spd-tab">
+            <div class="col-6"> <button class="btn" onclick="$('.ciap-row').toggle();">{%trans "CIAPs del paciente"%}</button> </div>
+            <div class="col-6 text-end">
+                <button type="button" class="btn btn-sm ark new" data-url="{%url "bibliomecum-receipts-ciap-add"%}" 
+                    data-target="div-ciap" data-obj_id="{{obj.id}}"> <i class="fas fa-plus"></i> {% trans 'Añadir CIAP' %}</button> 
+            </div>
+        </div>
+        {%for ciap in obj.patient.diagnoses %}
+            <div class="row ciap-row" style="display:none">
+                <div class="col-2">{{ciap.cie_ciap.ciap}}</div>
+                <div class="col-9">{{ciap.cie_ciap.nombre}}</div>
+                <div class="col-1"> 
+                    <button class="btn ciap-btn ark" data-url="{%url "bibliomecum-receipts-ciap-add"%}" data-target="div-ciap"
+                        data-obj_id="{{obj.id}}" data-ciap="{{ciap.cie_ciap.ciap}}" data-name="{{ciap.cie_ciap.nombre}}" 
+                        onclick="$('.ciap-row').hide()"><i class="fas fa-plus"></i></button>
+                </div>
+            </div>
+        {% endfor %}
+        <div id="div-ciap">{% include "bibliomecum/receipts-ciap-list.html" %}</div>
+    </div> </div>
+</div>
+
 <div class="row spd-tab">
     <div class="col-12 text-end">
         <button type="button" class="btn btn-sm ark new" data-url="{%url "bibliomecum-receipts-isbn-add"%}" 
@@ -73,6 +121,7 @@
         data-target="div-container" data-obj_id="{{obj.patient.id}}">{% trans "Guardar" %}</button>
 </div>
 
+{%comment%}
 <script>
     $(".ciap-btn").click(function(){
         $('#ciap').val($(this).data('value'));
@@ -85,3 +134,4 @@
         $('.atc-row').hide()       
     });
 </script>
+{%endcomment%}
