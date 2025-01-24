@@ -12,4 +12,5 @@ urlpatterns = [
     path('bibliomecum/ciap-remove/', views.receipts_ciap_remove, name='bibliomecum-receipts-ciap-remove'),
     path('bibliomecum/remove/', views.receipts_remove, name='bibliomecum-receipts-remove'),
     path('bibliomecum/print/<int:obj_id>/', views.receipts_print, name='bibliomecum-receipts-print'),
+    path('bibliomecum/isbn-search/', views.isbn_search, name='bibliomecum-isbn-search'),
 ]

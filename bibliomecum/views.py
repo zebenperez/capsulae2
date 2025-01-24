@@ -5,6 +5,7 @@ from capsulae2.decorators import group_required
 from capsulae2.commons import get_or_none, get_param, show_exc, user_in_group
 from pharma.models import Pacientes
 from .models import BiblioReceipt, BiblioReceiptBook, BiblioReceiptAtc, BiblioReceiptCiap
+from .isbn_lib import isbn_search as isearch
 
 
 '''
@@ -98,6 +99,20 @@ def receipts_print(request, obj_id):
         obj = get_or_none(BiblioReceipt, obj_id)
         return render(request, "bibliomecum/receipts-print.html", {'obj': obj, 'comp': request.user.company})
     except Exception as e:
+        return render(request, 'error_exception.html', {'exc':show_exc(e)})
+
+@group_required("admins","managers")
+def isbn_search(request):
+    try:
+        obj = get_or_none(BiblioReceipt, get_param(request.POST, "obj_id"))
+        isbn = get_param(request.POST, "s_isbn")
+        isbn = isbn.replace('-','')
+        title = isearch(isbn)
+        if title != "":
+            book = BiblioReceiptBook.objects.create(receipt=obj, isbn=isbn, name=title)
+        return render(request, "bibliomecum/receipts-isbn-list.html", {'obj': obj})
+    except Exception as e:
+        print(e)
         return render(request, 'error_exception.html', {'exc':show_exc(e)})
 
 
