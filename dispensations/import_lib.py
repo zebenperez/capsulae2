@@ -175,10 +175,10 @@ def get_json_datas_farmatic(f):
     return datas
 
 
-def set_patient_datas(obj, nif, cip, name, user):
+def set_patient_datas(obj, nif, cip, name, user, unycop):
     obj.nif = nif
     obj.n_orden = ""
-    obj.fecha_nacimiento = get_born_date(cip)
+    obj.fecha_nacimiento = get_born_date(cip) if unycop else ""
     obj.cod_postal = 0
     obj.dieta = ""
     obj.facultativo = ""
@@ -208,14 +208,14 @@ def set_patient_datas(obj, nif, cip, name, user):
     obj.slug_address = ""
     obj.save()
 
-def set_patient_json(values, user):
+def set_patient_json(values, user, unycop=True):
     nif = values["nif"]
     cip = values["cip"]
     name = values["name"]
     obj = Pacientes.objects.filter(cip=cip, id_user=user).first()
     if obj == None and name != "" and cip != "":
         obj = Pacientes()
-        set_patient_datas(obj, nif, cip, name, user)
+        set_patient_datas(obj, nif, cip, name, user, unycop)
     return obj
 
 def set_dispensations_json(values, patient):

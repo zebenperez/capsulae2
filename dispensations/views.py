@@ -55,7 +55,7 @@ def set_dispensations_farmatic(comp, file_name, datas):
     set_config_value(IMPORT_FARMATIC_KEY, "START")
     for idx, item in enumerate(datas["dispensations"]):
         try:
-            patient = set_patient_json(item, comp.manager)
+            patient = set_patient_json(item, comp.manager, False)
             if patient == None:
                 msg = "ERROR con el paciente {}".format(item["cip"])
             elif patient.cip != cip:
