@@ -178,7 +178,8 @@ def get_json_datas_farmatic(f):
 def set_patient_datas(obj, nif, cip, name, user, unycop):
     obj.nif = nif
     obj.n_orden = ""
-    obj.fecha_nacimiento = get_born_date(cip) if unycop else ""
+    if unycop:
+        obj.fecha_nacimiento = get_born_date(cip)
     obj.cod_postal = 0
     obj.dieta = ""
     obj.facultativo = ""

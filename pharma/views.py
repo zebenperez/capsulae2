@@ -107,7 +107,7 @@ def patients(request):
 @group_required("admins","managers")
 def patient_list(request):
     start = int(request.GET["start"]) if "start" in request.GET else 0
-    end = int(request.GET["end"]) if "end" in request.GET else 50
+    end = int(request.GET["end"]) if "end" in request.GET else 10
     return render(request, "patients/patient-list.html", get_patient_context(request.user, "", start, end))
 
 @group_required("admins","managers")
