@@ -3,7 +3,8 @@
 <div class="row spd-tab">
     <div class="col-12 text-end">
         <button type="button" class="btn btn-sm ark new" data-url="{%url "bibliomecum-receipts-form"%}" 
-            data-target-modal="common-modal" data-patient_id="{{obj.id}}"> 
+            data-target="div-container" data-patient_id="{{obj.id}}"> 
+            {#data-target-modal="common-modal" data-patient_id="{{obj.id}}"> #}
             <i class="fas fa-plus"></i> {% trans 'Crear Receta' %}</button> 
     </div>
 </div>
@@ -36,7 +37,8 @@
                         <a class="btn btn-sm" href="{% url "bibliomecum-receipts-print" item.id %}" target="_blank"> 
                             <i class="fas fa-print"></i></a> 
                         <a class="btn btn-sm ark p-2" title="{%trans 'Editar receta'%}" data-url="{%url "bibliomecum-receipts-form" %}"
-                            data-target-modal="common-modal" data-obj_id="{{item.id}}" data-patient_id="{{obj.id}}"
+                            data-target="div-container" data-obj_id="{{item.id}}" data-patient_id="{{obj.id}}"
+                            {#data-target-modal="common-modal" data-obj_id="{{item.id}}" data-patient_id="{{obj.id}}"#}
                             title="{% trans "Editar" %}"> <i class="fas fa-edit"></i></a>
                         <a class="btn btn-sm ark p-2" data-url="{%url "bibliomecum-receipts-remove"%}" data-obj_id="{{item.id}}" 
                             data-target="div-container" title="{% trans 'Borrar' %}" 

@@ -35,6 +35,7 @@ class BiblioReceiptCiap(models.Model):
 
 class BiblioReceiptBook(models.Model):
     isbn = models.CharField(verbose_name="ISBN", max_length=100, blank=True, null=True, default="")
+    author = models.CharField(verbose_name="Autor", max_length=100, blank=True, null=True, default="")
     name = models.CharField(verbose_name="Nombre", max_length=100, blank=True, null=True, default="")
     receipt = models.ForeignKey(BiblioReceipt, verbose_name="Paciente", related_name="books", on_delete=models.CASCADE, null=True)
 

@@ -16,7 +16,7 @@ def isbn_search(isbn):
         obj = json.loads(decoded_text) # deserializes decoded_text to a Python object
         volume_info = obj["items"][0]
         #print(volume_info["volumeInfo"])
-        return volume_info["volumeInfo"]["title"]
+        return volume_info["volumeInfo"]["title"], volume_info["volumeInfo"]["authors"]
     except:
         return ""
 

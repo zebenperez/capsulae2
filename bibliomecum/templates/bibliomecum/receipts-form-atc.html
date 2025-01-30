@@ -1,0 +1,21 @@
+{% load i18n %}
+
+<div class="row spd-tab">
+    <div class="col-7">
+        <input type="text" class="form-control form-control-dark w-100 ark_change" name="s-name" id="s-name" 
+            placeholder="{% trans 'Añadir tratamiento a partir del historial, Nombre o CIP' %}" 
+            data-url="{% url "bibliomecum-atc-search" %}" data-target-modal="common-modal" data-obj_id="{{obj.id}}"/>
+    </div>
+    <div class="col-1 text-end"> <i class="fas fa-search"></i> </div>
+    <div class="col-4"> <button class="btn ark" data-url="{% url "bibliomecum-atc-patient" %}" data-target-modal="common-modal"
+        data-obj_id="{{obj.id}}">{%trans "ATCs del paciente"%}</button> </div>
+</div>
+<div id="div-atc">{% include "bibliomecum/receipts-atc-list.html" %}</div>
+
+{%comment%}
+<div class="col-4"> <button class="btn" onclick="$('.atc-row').toggle();">{%trans "ATCs del paciente"%}</button> </div>
+<button type="button" class="btn btn-sm ark new" data-url="{%url "bibliomecum-receipts-atc-add"%}" 
+    data-target="div-atc" data-obj_id="{{obj.id}}"> <i class="fas fa-plus"></i> {% trans 'Añadir ATC' %}</button> 
+{%endcomment%}
+
+

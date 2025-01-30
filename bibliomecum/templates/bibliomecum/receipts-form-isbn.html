@@ -1,0 +1,26 @@
+{% load i18n %}
+
+<form method="POST" action="{%url "bibliomecum-isbn-search"%}" id="frmIsbn">
+    {% csrf_token %}
+    <input type="hidden" id="obj_id" name="obj_id" value="{{obj.id}}"/>
+    <div class="row justify-center">
+        <div class="col-2"> {% trans "ISBN Search" %} </div>
+        <div class="col-8"> <div class="greybox-sm p-1"> 
+            <input type="text" class="form-control" id="s_isbn" name="s_isbn"/> 
+        </div> </div>
+        <div class="col-2"> 
+            <button id="btn-isbn" class="btn saveform" data-form="frmIsbn" data-target="div-isbn">
+                <i class="fas fa-search"></i></button>
+        </div>
+    </div>
+</form>
+
+<div class="row spd-tab">
+    <div class="col-12 text-end">
+        <button type="button" class="btn btn-sm ark new" data-url="{%url "bibliomecum-receipts-isbn-add"%}" 
+            data-target="div-isbn" data-obj_id="{{obj.id}}"> <i class="fas fa-plus"></i> {% trans 'Añadir ISBN' %}</button> 
+    </div>
+</div>
+<div id="div-isbn">{% include "bibliomecum/receipts-isbn-list.html" %}</div>
+
+

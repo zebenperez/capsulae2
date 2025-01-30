@@ -3,81 +3,32 @@
 
 <div class="row">
     <div class="col-11"> <h2><i class="fa fa-history"></i>&nbsp; {% trans 'Receta' %}</h2> </div>
+    {%comment%}
     <div class="col-1"> <div class="d-flex justify-content-end"> 
         <button type="button" class="btn btn-lg" data-bs-dismiss="modal" title="{% trans "Close" %}">
             <i class="fas fa-times"></i></button> 
     </div> </div>
+    {%endcomment%}
 </div>
 
 <span id="div-notification"></span><br/>
 
 <div class="row justify-center">
-    <div class="col-6"> <div class="greybox-sm p-1">
-        <div class="row spd-tab">
-            <div class="col-6"> <button class="btn" onclick="$('.atc-row').toggle();">{%trans "ATCs del paciente"%}</button> </div>
-            <div class="col-6 text-end">
-                <button type="button" class="btn btn-sm ark new" data-url="{%url "bibliomecum-receipts-atc-add"%}" 
-                    data-target="div-atc" data-obj_id="{{obj.id}}"> <i class="fas fa-plus"></i> {% trans 'Añadir ATC' %}</button> 
-            </div>
-        </div>
-        {%for atc in obj.patient.tratamientos.all %}
-            <div class="row atc-row" style="display:none">
-                <div class="col-2">{{atc.atcs_last}}</div>
-                <div class="col-9">{{atc.name}}</div>
-                <div class="col-1">
-                    <button class="btn atc-btn ark" data-url="{%url "bibliomecum-receipts-atc-add"%}" data-target="div-atc"
-                        data-obj_id="{{obj.id}}" data-atc="{{atc.atcs_last}}" data-name="{{atc.name}}" 
-                        onclick="$('.atc-row').hide()"><i class="fas fa-plus"></i></button>
-                </div>
-            </div>
-        {% endfor %}
-        <div id="div-atc">{% include "bibliomecum/receipts-atc-list.html" %}</div>
+    <div class="col-6"> <div class="card">
+        <div class="card-header">ATCs</div>
+        <div class="card-body">{% include "bibliomecum/receipts-form-atc.html" %} </div>
     </div> </div>
-    <div class="col-6"> <div class="greybox-sm p-1">
-        <div class="row spd-tab">
-            <div class="col-6"> <button class="btn" onclick="$('.ciap-row').toggle();">{%trans "CIAPs del paciente"%}</button> </div>
-            <div class="col-6 text-end">
-                <button type="button" class="btn btn-sm ark new" data-url="{%url "bibliomecum-receipts-ciap-add"%}" 
-                    data-target="div-ciap" data-obj_id="{{obj.id}}"> <i class="fas fa-plus"></i> {% trans 'Añadir CIAP' %}</button> 
-            </div>
-        </div>
-        {%for ciap in obj.patient.diagnoses %}
-            <div class="row ciap-row" style="display:none">
-                <div class="col-2">{{ciap.cie_ciap.ciap}}</div>
-                <div class="col-9">{{ciap.cie_ciap.nombre}}</div>
-                <div class="col-1"> 
-                    <button class="btn ciap-btn ark" data-url="{%url "bibliomecum-receipts-ciap-add"%}" data-target="div-ciap"
-                        data-obj_id="{{obj.id}}" data-ciap="{{ciap.cie_ciap.ciap}}" data-name="{{ciap.cie_ciap.nombre}}" 
-                        onclick="$('.ciap-row').hide()"><i class="fas fa-plus"></i></button>
-                </div>
-            </div>
-        {% endfor %}
-        <div id="div-ciap">{% include "bibliomecum/receipts-ciap-list.html" %}</div>
+    <div class="col-6"> <div class="card"> 
+        <div class="card-header">CIAPs</div>
+        <div class="card-body"> {% include "bibliomecum/receipts-form-ciap.html" %} </div> 
     </div> </div>
 </div>
 
-<form method="POST" action="{%url "bibliomecum-isbn-search"%}" id="frmIsbn">
-    {% csrf_token %}
-    <input type="hidden" id="obj_id" name="obj_id" value="{{obj.id}}"/>
-    <div class="row justify-center">
-        <div class="col-2"> {% trans "ISBN Search" %} </div>
-        <div class="col-8"> <div class="greybox-sm p-1"> 
-            <input type="text" class="form-control" id="s_isbn" name="s_isbn"/> 
-        </div> </div>
-        <div class="col-2"> 
-            <button id="btn-isbn" class="btn saveform" data-form="frmIsbn" data-target="div-isbn">
-                <i class="fas fa-search"></i></button>
-        </div>
-    </div>
-</form>
-
-<div class="row spd-tab">
-    <div class="col-12 text-end">
-        <button type="button" class="btn btn-sm ark new" data-url="{%url "bibliomecum-receipts-isbn-add"%}" 
-            data-target="div-isbn" data-obj_id="{{obj.id}}"> <i class="fas fa-plus"></i> {% trans 'Añadir ISBN' %}</button> 
-    </div>
+<div class="card mt-4"> 
+    <div class="card-header">ISBNs</div>
+    <div class="card-body"> {% include "bibliomecum/receipts-form-isbn.html" %} </div>
 </div>
-<div id="div-isbn">{% include "bibliomecum/receipts-isbn-list.html" %}</div>
+
 <div class="row justify-center">
     <div class="col-12"> <div class="greybox-sm p-1"> {% trans "Consejos de uso" %}
 	    <textarea class="form-control autosave" id="advices" name="advices" title="{{obj.advices}}" 
