@@ -80,6 +80,109 @@ def remote_auth(request):
         print (show_exc(e))
         return HttpResponse("Sorry. You are not authorized (Error: {})".format(e))
 
+'''
+    Remote LOPD
+'''
+from pharma.models import Pacientes
+from lopd.models import LOPDConsents
+def check_cip(request):
+    cip = request.GET["cip"] if "cip" in request.GET else ""
+    comp = request.GET["company"] if "company" in request.GET else ""
+    if cip != "" and comp != "":
+        p = Pacientes.objects.filter(cip=cip, id_user=comp).first()
+        if p != None:
+            dic = {"error": "false"}
+            lopd_list = []
+            lopd = LOPDConsents.objects.filter(paciente=p)
+            for l in lopd:
+                lopd_list.append(request.build_absolute_uri(l.document.url))
+            dic["id"] = p.id
+            dic["code"] = p.n_historial
+            dic["name"] = p.nombre
+            dic["surname"] = p.apellido
+            dic["nif"] = p.nif
+            dic["phone"] = p.telefono1
+            dic["lopd"] = lopd_list
+            return HttpResponse(json.dumps(dic))
+    return HttpResponse('{"error": "true", "msg": "User not found"}')
+
+@csrf_exempt
+def create_paciente(request):
+    try:
+        msg = ""
+        if "company" in request.GET:
+            user = User.objects.get(pk = request.GET["company"])
+            if "cip" in request.GET:
+                cip = request.GET["cip"]
+                p = Pacientes.objects.filter(cip=cip, id_user=user).first()
+                if p == None:
+                    p = Pacientes()
+                    p.fecha_nacimiento = datetime.datetime.min
+                    p.created_at = datetime.datetime.now()
+                    p.cod_postal = 0
+                    p.sexo = ""
+                    p.borrado = False
+                    p.fotografia = ""
+                    p.use_poli = ""
+                    p.n_historial = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(8))
+                    p.id_user = user
+                    p.nombre = request.GET["name"] if "name" in request.GET else ""
+                    p.apellido = request.GET["surname"] if "surname" in request.GET else ""
+                    p.nif = request.GET["nif"] if "nif" in request.GET else ""
+                    try:
+                        p.telefono1 = int(request.GET["phone"])
+                    except:
+                        p.telefono1 = 0
+                    p.cip = cip
+                    p.save()
+                dic = {"error": "false", "id": "%s" % p.id}
+                return HttpResponse(json.dumps(dic))
+            else:
+                msg = "CIP no reconocido"
+        else:
+            msg = "Empresa no reconocida"
+    except Exception as e:
+        msg = e
+        print(e)
+    return HttpResponse('{"error": "true", "msg": "%s"}' % msg)
+
+@csrf_exempt
+def update_paciente(request):
+    try:
+        msg = ""
+        if "cip" in request.GET:
+            cip = request.GET["cip"]
+            p = Pacientes.objects.filter(cip=cip).first()
+            if p != None:
+                p.nombre = request.GET["name"] if "name" in request.GET else ""
+                p.apellido = request.GET["surname"] if "surname" in request.GET else ""
+                p.nif = request.GET["nif"] if "nif" in request.GET else ""
+                p.telefono1 = request.GET["phone"] if "phone" in request.GET else ""
+                p.save()
+
+                dic = {"error": "false"}
+                lopd_list = []
+                lopd = LOPDConsents.objects.filter(paciente=p)
+                for l in lopd:
+                    lopd_list.append(request.build_absolute_uri(l.document.url))
+                dic["id"] = p.id
+                dic["code"] = p.n_historial
+                dic["name"] = p.nombre
+                dic["surname"] = p.apellido
+                dic["nif"] = p.nif
+                dic["phone"] = p.telefono1
+                dic["lopd"] = lopd_list
+                return HttpResponse(json.dumps(dic))
+        else:
+            msg = "CIP no reconocido"
+    except Exception as e:
+        msg = e
+        print(e)
+    return HttpResponse('{"error": "true", "msg": "%s"}' % msg)
+
+'''
+    Test
+'''
 @check_remote_auth
 def remote_test(request, username=None):
     return HttpResponse("OK")

@@ -15,10 +15,11 @@ def isbn_search(isbn):
         decoded_text = text.decode("utf-8")
         obj = json.loads(decoded_text) # deserializes decoded_text to a Python object
         volume_info = obj["items"][0]
-        #print(volume_info["volumeInfo"])
+        print(volume_info["volumeInfo"])
         authors = ""
-        for a in volume_info["volumeInfo"]["authors"]:
-            authors += "{},".format(a)
+        if "authors" in volume_info["volumeInfo"]:
+            for a in volume_info["volumeInfo"]["authors"]:
+                authors += "{},".format(a)
         return volume_info["volumeInfo"]["title"], authors[:-1]
     except:
         return ""
