@@ -62,9 +62,11 @@ def remote_auth(request):
     try:
         # authentication of the user, to check if it's active or None
         username = request.GET["username"] if "username" in request.GET else None
+        url = request.GET["url"] if "url" in request.GET else ""
         if username != None:
             user_auth = ExternalAuth.objects.get(username=username, domain=request.META['HTTP_HOST'])
             user = User.objects.get(username=user_auth.username)
+            user = User.objects.get(username=username)
             if user is not None and user_auth.request == user_auth.response:
                 if user.is_active:
                     user_auth.response = ''.join(random.choice(string.ascii_letters + string.digits) for x in range(128))
@@ -72,7 +74,13 @@ def remote_auth(request):
                     user_auth.update = datetime.datetime.now()
                     user_auth.save()
                     auth.login(request, user)
-                    print(f"USER {user_auth.localusername} authenticated in {user_auth.domain} as {user.username}")
+                    #print(f"USER {user_auth.localusername} authenticated in {user_auth.domain} as {user.username}")
+
+                    if url != "":
+                        name = url.split(":")[0];
+                        param_name = url.split(":")[1].split(".")[0]
+                        param_value = url.split(":")[1].split(".")[1]
+                        return redirect(reverse(name, kwargs={param_name: param_value}))
 
                     return redirect(reverse('pharma-index'))
         return HttpResponse("Sorry. You are not authorized")
@@ -85,6 +93,7 @@ def remote_auth(request):
 '''
 from pharma.models import Pacientes
 from lopd.models import LOPDConsents
+import json
 def check_cip(request):
     cip = request.GET["cip"] if "cip" in request.GET else ""
     comp = request.GET["company"] if "company" in request.GET else ""

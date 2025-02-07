@@ -28,6 +28,7 @@ urlpatterns = [
     path('community/', include('community.urls')),
     path('shifts/', include('shifts2.urls')),
     path('notes/', include('agenda.urls')),
+    path('lopd/', include('lopd.urls')),
     path('dispensations/', include('dispensations.urls')),
     path('bibliomecum/', include('bibliomecum.urls')),
 
