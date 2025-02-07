@@ -1,0 +1,22 @@
+{% extends "pwa-base.html" %}
+{% load static i18n %}
+
+{% block content%}
+    {%comment%}
+    <div class="col-2 tiny p-2"><strong>Bienvenid@</strong></div>
+    <div class="col-8 text-center"> <strong>{{user.employee.name}} </strong> </div>
+    <div class="col-2 text-center">
+        <strong><a class="btn btn-light btn-sm powericon" href="{% url 'pwa-logout' %}"><i class="fas fa-power-off"></i></a></strong>
+    </div>
+    {%endcomment%}
+    <div class="col-12 p-2 mt-3">
+        <div class="text-start my-2">
+            <p class="info text-center">{%trans "Actualmente se encuentra con el/la paciente: "%}</p>
+            <p class="name text-center">{{obj.full_name}}</p>
+            <p class="date text-center">{%trans "CIP: "%} {{obj.cip}}</p>
+        </div>
+        <br/>
+        <a href="{%url 'patient-lopd-generate-document2' obj.pk%}" class="btn btn-info w-100" target="_blank" 
+            title="{%trans "Firmar LOPD"%}"> {% trans "Firmar LOPD" %}</a>
+    </div>
+{% endblock %}

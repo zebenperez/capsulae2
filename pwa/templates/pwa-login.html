@@ -1,0 +1,25 @@
+{% extends "pwa-base-login.html" %}
+{% load static i18n %}
+
+{% block content %}
+    {% comment %}
+    <div class="row m-0 p-0"> <div class="status-bar-login col-4 offset-8 text-end py-2"><small id="conn-status">...</small> <i class='fas fa-wifi'></i></div> </div>
+    {% endcomment %}
+    <div class="col-12 my-5 py-3 text-center"> <img class="w-50" src="{% static 'images/logo-asistencia-canaria.png' %}"> </div>
+
+    <div class="col-8 offset-2 mt-2 p-2">
+        <form action="{% url 'pwa-login' %}" method="post">
+            {% csrf_token %}
+            <div class="row">
+                <div class="col-12 tiny">PIN</div>
+                <div class="col-12"> <input class="pin w-100 p-3" type="text" name="pin"> </div>
+                <input type="hidden" value="SZRf2QMpIfZHPEh0ib7YoDlnnDp5HtjDqbAw" name="control_key">
+            </div>
+            <div class="row mt-5">
+                <div class="col-12 mt-5"> <input type="submit" class="btn btn-success asm w-100 py-3" value="Entrar"> </div>
+            </div>
+        </form>
+        {% if msg and msg != "" %} <div class="alert alert-danger text-center">{{msg}}</div> {% endif %}
+    </div>
+{% endblock %}
+

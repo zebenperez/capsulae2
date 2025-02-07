@@ -25,6 +25,12 @@ class Config(models.Model):
 def get_historial():
     return ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(8))
 
+def upload_form_qr(instance, filename):
+    ascii_filename = str(filename.encode('ascii', 'ignore'))
+    instance.filename = ascii_filename
+    folder = "patients/qr/%s" % (instance.id)
+    return '/'.join(['%s' % (folder), datetime.now().strftime("%Y%m%d%H%M%S") + ascii_filename])
+
 class Pacientes(models.Model):
     n_orden = models.CharField(max_length=10)
     n_historial = models.CharField(max_length=8, unique=True, blank=True, null=True, verbose_name="Nº Hisotrial", default=get_historial)   # ***
@@ -60,6 +66,7 @@ class Pacientes(models.Model):
     otras_alergias = models.TextField(blank=True, null=True)
     activo = models.NullBooleanField(blank=True, null=True)
     use_poli = models.CharField(max_length=10, blank=True, null=True, default="")
+    qr = models.ImageField(upload_to=upload_form_qr, blank=True, verbose_name="QR", help_text="Select file to upload")
 
     id_user = models.ForeignKey(User, db_column='id_user', on_delete=models.SET_NULL, blank=True, null=True)  # owner
 

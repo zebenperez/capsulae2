@@ -12,6 +12,10 @@
         <div class="col-1 text-end">
             <button id="btn-edit" class="btn btn-sm toggle-edit new" data-class-name="input" data-text="{%trans "Edit"%}" 
                 data-text-alt="{%trans "Hecho"%}">{%trans "Edit"%} </button>
+            {% if obj.qr %}<img src="{{obj.qr.url}}" alt="qr"/>{%else%}
+                <button class="btn btn-sm ark" data-url="{% url "patient-qr-generate" %}" data-target="div-container" 
+                    data-obj_id="{{obj.id}}"> {% trans "Generar QR" %}</button>
+            {%endif%}
         </div>
     </div>
 </div>

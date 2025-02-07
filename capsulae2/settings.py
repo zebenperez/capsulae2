@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'agenda',
     'dispensations',
     'bibliomecum',
+    'pwa',
 ]
 
 MIDDLEWARE = [

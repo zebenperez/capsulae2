@@ -25,11 +25,13 @@ urlpatterns = [
     path('patients/view/<int:patient_id>', views.patient_view, name='patient-view'),
 
     path('patients/form/', views.patient_form, name='patient-form'),
+    path('patients/qr-generate/', views.patient_qr_generate, name='patient-qr-generate'),
 
     path('patients/lopd/', views.patient_lopd, name='patient-lopd'),
     path('patients/lopd-add', views.patient_lopd_add, name='patient-lopd-add'),
     path('patients/lopd-remove', views.patient_lopd_remove, name='patient-lopd-remove'),
     path('patients/lopd-generate-document/<int:patient_id>', views.patient_lopd_generate_document, name='patient-lopd-generate-document'),
+    path('patients/lopd-generate-document2/<int:patient_id>', views.patient_lopd_generate_document2, name='patient-lopd-generate-document2'),
     path('patients/lopd-generate-signed-document/<int:patient_id>', views.patient_lopd_generate_signed_document, name='patient-lopd-generate-signed-document'),
 
     path('patients/allergy/', views.patient_allergy, name='patient-allergy'),
