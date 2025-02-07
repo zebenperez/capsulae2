@@ -12,12 +12,17 @@
 
         <link rel="stylesheet" href="{% static 'css/lopd_consents.css' %}" media="screen"/>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-        <script src="{% static 'js/wgssSigCaptX.js' %}"></script>
-        <script src="{% static 'js/SigCaptX-Globals.js' %}"></script>
-        <script src="{% static 'js/base64.js' %}"></script>
-        <script src="{% static 'js/capsulaeSignature.js' %}"></script>
+        <script src="{% static 'js/jSignature.min.js' %}"></script>
 
         <style>
+            .signature-box{
+                display:inline-block; 
+                width:35% text-align:center; 
+                background-color:white; 
+                border: 1px solid black;
+                text-align: center;
+            }
+
             @media print{
                 form { display:none; }
                 #patient_signature_field { border:none !important; }
@@ -25,14 +30,28 @@
         </style>
     </head>
     <body>
+    {%comment%}
+        AAAAAAAAAA
+	<div id="signature"></div>
+	<script>
+	    $(document).ready(function() {
+	        $("#signature").jSignature()
+	    })
+	</script>
+    </body>
+    {%endcomment%}
         <div class="content" style="font-size:12pt">
             <div class="page" >
                 {% include "patient/lopd/lopd-consent-content.html"%}
-                <div style="display:inline-block; width:35% text-align:center; background-color: white;">
+                <div class="signature-box">
+	                <div id="signature"></div>
+                    <button class="btn btn-sm sign-capture-btn new" id="reset_signature">Limpiar</button> 
+                    {%comment%}
                     <canvas id="patient_signature_field" style="border: 1px solid lightgray; min-height:3em;"></canvas>
                     <br>
                     <button class="btn btn-sm sign-capture-btn new" id="sign_patient_btn" data-target="#patient_signature_field" 
                         data-name="{{ patient.nombre }} {{ patient.apellido }}" data-input="#id_patient_signature">Firmar </button>
+                    {%endcomment%}
                 </div>
                 
                 <div>               
@@ -54,21 +73,42 @@
     </body>
     <script>
         $(document).ready(function() {
-            $('#guardar').on('click', function(e){
-                e.preventDefault();
-                e.stopPropagation();
-                console.log("sending");
-                console.log($('#id_professional_signature').val());
-                console.log("sended");
-                $('#signature_form').submit();
-            });
+	        var sigdiv = $("#signature").jSignature();
+	        //var sigdiv = $("#patient_signature_field").jSignature();
+			sigdiv.attr("heigth",120);
 
-            $('.check-btn').on('click', function(e){
-                e.stopPropagation();
-                let checked = ($(this).is(":checked")) ? "True": "False"
-                $($(this).data("target")).val(checked);
-                console.log(checked);
-            });
+			//var sigdivPro= $('#professional_signature_field').jSignature();
+			//sigdivPro.attr("height",120);
+	
+			$('#guardar').on('click', function(e){
+				e.preventDefault();
+				e.stopPropagation();
+				var datapair = sigdiv.jSignature("getData", "svgbase64") 
+				img_data=datapair[0] + "," + datapair[1];
+						
+				//var datapairpro = sigdivPro.jSignature("getData", "svgbase64")
+				//img_data_pro = datapairpro[0]+","+datapairpro[1];
+
+				$('#id_patient_signature').val(img_data);
+				//$('#id_professional_signature').val(img_data_pro);
+				$('#signature_form').submit();
+			});
+
+			$('#reset_signature').on('click', function(e){sigdiv.jSignature("reset");});
+
+            /*
+				$('#clean_patient').on('click', function(e){
+					e.stopPropagation();
+					e.preventDefault();
+					sigdiv.jSignature("reset");	
+				});
+				$('#clean_professional').on('click', function(e){
+					e.stopPropagation();
+					e.preventDefault();
+					sigdivPro.jSignature("reset");	
+
+				})
+            */
         });
     </script>
 </html>

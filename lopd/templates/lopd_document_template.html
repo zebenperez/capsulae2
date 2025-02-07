@@ -1,4 +1,4 @@
-{% load pharmatags  %}
+{% load static pharmatags %}
 <html>
 	<head>
 		<title>Consentimiento Informado  </title>
@@ -13,15 +13,7 @@
 		<script src="/pharma/js/wgssSigCaptX.js"></script>
 		<script src="/pharma/js/SigCaptX-Globals.js"></script>
 		<script src="/pharma/js/base64.js"></script>
-
-		{% comment %}
-		{% with path="/pharma/js/jsignature/"%}
-		<!--[if lt IE 9]>
-			<script type="text/javascript" src="{{path}}flashcanvas.js"></script>
-		<![endif]-->
-		{#	<script src="{{path}}jSignature.min.js"></script>#}
-		{% endwith%}
-		{% endcomment %}
+        <script src="{% static "js/capsulaeSignature.js" %}"></script>
 
         <style>
             @media print{
@@ -57,7 +49,6 @@
 			</div>
 		</div>
 	</body>
-	<script src="/pharma/js/capsulaeSignature.js"></script>
 	<script>
 		$(document).ready(function() {
 			$('#guardar').on('click', function(e){

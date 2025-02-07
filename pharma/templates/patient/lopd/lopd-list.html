@@ -3,8 +3,10 @@
 
 <div class="row">
     <div class="col-12 text-end">
-        <a href="{%url 'patient-lopd-generate-document' obj.pk%}" class="btn btn-sm new " target="_blank" title="{%trans "Firmar Documento"%}">
-            {% trans "Firmar documento" %}</a>
+        <a href="{%url 'patient-lopd-generate-document2' obj.pk%}" class="btn btn-sm new " target="_blank" 
+            title="{%trans "Firmar Documento"%}"> {% trans "Firmar documento" %}</a>
+        <a href="{%url 'patient-lopd-generate-document' obj.pk%}" class="btn btn-sm new " target="_blank" 
+            title="{%trans "Firmar Documento"%}"> {% trans "Firmar documento Tablet" %}</a>
         <button id="btn-edit" class="btn btn-sm toggle-btn new" data-target="div-upload" data-text="{%trans "Subir fichero"%}" 
             data-text-alt="{%trans "Hecho"%}"> {%trans "Subir fichero"%} </button>
     </div>

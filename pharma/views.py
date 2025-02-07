@@ -1,4 +1,5 @@
 from django.core.files import File
+from django.core.files.base import ContentFile
 #from django.contrib.auth import logout
 from django.db.models import Q
 from django.http import HttpResponse
@@ -11,8 +12,8 @@ from weasyprint import HTML, CSS
 import os, csv
 
 from capsulae2.decorators import group_required
-from capsulae2.commons import get_or_none, get_param, show_exc
-from capsulae2.settings import MEDIA_ROOT
+from capsulae2.commons import get_or_none, get_param, show_exc, generate_qr
+from capsulae2.settings import MEDIA_ROOT, PATIENT_URL, BASE_DIR 
 from capsulae2.capsulae_lib import check_user_payment
 #from account.models import Company, UserPayment
 from account.models import Company
@@ -210,12 +211,26 @@ def patient_evolutionaries_csv(request):
 def patient_view(request, patient_id):
     patient = get_or_none(Pacientes, patient_id)
     po, created = PatientOrigin.objects.get_or_create(patient=patient)
-    return render(request, "patient/patient-view.html", {'obj': patient, 'country_list': Paises.objects.all(), 'etnia_list': Etnia.objects.all()})
+    context = {'obj': patient, 'country_list': Paises.objects.all(), 'etnia_list': Etnia.objects.all()}
+    return render(request, "patient/patient-view.html", context)
 
 @group_required("admins","managers")
 def patient_form(request):
     patient = get_or_none(Pacientes, get_param(request.GET, "obj_id"))
-    return render(request, "patient/patient-personal.html", {'obj': patient, 'country_list': Paises.objects.all(), 'etnia_list': Etnia.objects.all()})
+    context = {'obj': patient, 'country_list': Paises.objects.all(), 'etnia_list': Etnia.objects.all()}
+    return render(request, "patient/patient-personal.html", context)
+
+@group_required("admins","managers")
+def patient_qr_generate(request):
+    obj = get_or_none(Pacientes, get_param(request.GET, "obj_id"))
+
+    url = "{}{}".format(PATIENT_URL, obj.id)
+    path = os.path.join(BASE_DIR, "static", "imgs", "logo-capsulae.jpg")
+    img_data = ContentFile(generate_qr(url, path))
+    obj.qr.save('qr_{}.png'.format(obj.id), img_data, save=True)
+
+    context = {'obj': obj, 'country_list': Paises.objects.all(), 'etnia_list': Etnia.objects.all()}
+    return render(request, "patient/patient-personal.html", context)
 
 @group_required("admins","managers")
 def patient_treatment(request):
@@ -647,9 +662,19 @@ def patient_lopd_generate_document(request, patient_id):
         context['company'] = request.user.company
     except Exception as e:
         print(e)
-
     return render(request, "patient/lopd/lopd-document-template.html", context)
 
+#@group_required("admins","managers")
+def patient_lopd_generate_document2(request, patient_id):
+    context={}
+
+    try:
+        patient = Pacientes.objects.get(pk=patient_id)
+        context['patient'] = patient
+        context['company'] = request.user.company
+    except Exception as e:
+        print(e)
+    return render(request, "patient/lopd/lopd-document-template2.html", context)
 
 def patient_lopd_generate_signed_document(request, patient_id):
     context = {}

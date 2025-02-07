@@ -1,5 +1,6 @@
 from django.apps import apps
 from django.conf import settings
+from PIL import Image
 import sys
 import datetime
 import json
@@ -7,6 +8,8 @@ import string
 import random
 import unicodedata
 import os
+import io
+import qrcode
 
 
 '''
@@ -112,4 +115,32 @@ def validate_captcha(request):
         return True
     else:
         return False
+
+def generate_qr(data, logo):
+    #qr = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_L, box_size=10, border=4)
+    qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_H)
+    qr.add_data(data)
+    qr.make(fit=True)
+
+    if logo != None and logo != "":
+        img = qr.make_image(fill_color="#000000", back_color="#ffffff").convert('RGB')
+
+        basewidth = 150
+        img_logo = Image.open(logo)
+        wpercent = (basewidth / float(img_logo.size[0]))
+        hsize = int((float(img_logo.size[1]) * float(wpercent)))
+        img_logo = img_logo.resize((basewidth, hsize))
+        #img_logo = img_logo.resize((basewidth, hsize), Image.ANTIALIAS)
+
+        pos = ((img.size[0] - img_logo.size[0]) // 2, (img.size[1] - img_logo.size[1]) // 2)
+        img.paste(img_logo, pos)
+    else:
+        img = qr.make_image(fill_color=color, back_color=color_back)
+
+    byteIO = io.BytesIO()
+    img.save(byteIO, format='PNG')
+    byteArr = byteIO.getvalue()
+
+    return byteArr
+
 
