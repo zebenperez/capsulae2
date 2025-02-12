@@ -16,7 +16,7 @@
 {% if user|have_menu:"LOPD" %}
 <br/>
 <div class="card">
-    <div class="card-header" onclick="$('#lopd-body').slideToggle()"><i class="fa fa-gavel"></i> {% trans "LOPD" %}</div>
+    <div class="card-header" onclick="$('#lopd-body').slideToggle()"><i class="fa fa-gavel"></i> {% trans "RGPD" %}</div>
     <div class="card-body hide" id="lopd-body">{%include "patient/lopd/lopd-list.html"%}</div>
 </div>
 {% endif %}

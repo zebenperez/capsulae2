@@ -5,19 +5,21 @@ from django.contrib.auth import login, logout
 from django.contrib.auth.models import User
 from datetime import datetime
 
-#from asm.decorators import group_required_pwa
+from capsulae2.decorators import group_required_pwa
 from capsulae2.commons import user_in_group, get_or_none
 from pharma.models import Pacientes
+from account.models import EmployeeProfile
 
 
-#@group_required_pwa("employees")
+#@group_required_pwa("employee", "admins")
+@group_required_pwa("employee")
 def index(request):
     try:
         return redirect(reverse('pwa-manager'))
     except:
         return redirect(reverse('pwa-login'))
 
-def pin_login(request):
+def pin_login(request, patient_id=""):
     CONTROL_KEY = "SZRf2QMpIfZHPEh0ib7YoDlnnDp5HtjDqbAw"
     msg = ""  
     if request.method == "POST":
@@ -28,10 +30,10 @@ def pin_login(request):
         if pin != None and control_key != None:
             if control_key == CONTROL_KEY:
                 try:
-                    emp = get_or_none(Employee, pin, "pin")
+                    emp = get_or_none(EmployeeProfile, pin, "pin")
                     login(request, emp.user)
                     request.session['pwa_app_session'] = True
-                    return redirect(reverse('pwa-employee'))
+                    return redirect(reverse('pwa-manager', kwargs={'patient_id': patient_id}))
                 except Exception as e:
                     msg = "Pin no válido"
                     print(e)
@@ -46,8 +48,11 @@ def pin_logout(request):
 '''
     MANAGERS
 '''
-#@group_required_pwa("employees")
+#@group_required_pwa("employee", "admins")
+#@group_required_pwa("employee")
 def manager_home(request, patient_id=""):
+    if not request.user.is_authenticated:
+        return redirect(reverse('pwa-login', kwargs={'patient_id': patient_id}))
     patient = get_or_none(Pacientes, patient_id)
     return render(request, "pwa/manager/home.html", {"obj": patient})
 
