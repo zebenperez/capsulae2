@@ -671,7 +671,8 @@ def patient_lopd_generate_document2(request, patient_id):
     try:
         patient = Pacientes.objects.get(pk=patient_id)
         context['patient'] = patient
-        context['company'] = request.user.company
+        context['company'] = patient.owner.company
+        #context['company'] = request.user.company
     except Exception as e:
         print(e)
     return render(request, "patient/lopd/lopd-document-template2.html", context)

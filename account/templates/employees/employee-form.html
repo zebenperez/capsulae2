@@ -4,7 +4,8 @@
 <div class="row">
     <div class="col-11"> <h2><i class="fa fa-history"></i>&nbsp; {% trans 'Modificar usuario' %}</h2> </div>
     <div class="col-1">
-        <div class="d-flex justify-content-end"> <button type="button" class="btn btn-lg" data-bs-dismiss="modal" title="{% trans "Close" %}">
+        <div class="d-flex justify-content-end"> 
+            <button type="button" class="btn btn-lg" data-bs-dismiss="modal" title="{% trans "Close" %}">
             <i class="fas fa-times"></i></button> </div>
     </div>
 </div>
@@ -16,10 +17,10 @@
         <div class="row">
             <div class="greybox-sm p-1">
                 {% trans "Nombre" %}
-                <input type="text" class="form-control autosave" id="first_name" name="first_name" value="{{obj.user.first_name|default:""}}" 
-                    title="{{obj.user.first_name}}" data-model-name="auth.user" data-obj-id="{{obj.user.id}}" 
-                    data-url="{%url "autosave_field"%}" data-target="div-notification" placeholder="Nombre de usuario..." /> 
-                    <span id="first_name__msg"></span>
+                <input type="text" class="form-control autosave" id="first_name" name="first_name" 
+                    value="{{obj.user.first_name|default:""}}" title="{{obj.user.first_name}}" data-model-name="auth.user" 
+                    data-obj-id="{{obj.user.id}}" data-url="{%url "autosave_field"%}" data-target="div-notification" 
+                    placeholder="Nombre de usuario..." /> <span id="first_name__msg"></span>
             </div>
         </div>
     </div>
@@ -27,7 +28,7 @@
         <div class="row">
             <div class="greybox-sm p-1">
                 {% trans "Nombre de usuario" %}
-                <input type="text" class="form-control autosave" id="username" name="username" value="{{obj.user.username|default:""}}" 
+                <input type="text" class="form-control autosave" id="username" name="username" value="{{obj.user.username|default:""}}"
                     title="{{obj.user.username}}" data-model-name="auth.user" data-obj-id="{{obj.user.id}}" 
                     data-url="{%url "autosave_field"%}" data-target="div-notification" placeholder="Nombre de usuario..." /> 
                     <span id="username__msg"></span>
@@ -42,6 +43,17 @@
                     title="{{obj.user.email}}" data-model-name="auth.user" data-obj-id="{{obj.id}}" 
                     data-url="{%url "autosave_field"%}" data-target="div-notification" placeholder="Correo electrónico..." /> 
                     <span id="email__msg"></span>
+            </div>
+        </div>
+    </div>
+    <div class="col-12">
+        <div class="row">
+            <div class="greybox-sm p-1">
+                {% trans "PIN" %}
+                <input type="text" class="form-control autosave" id="pin" name="pin" value="{{obj.pin|default:""}}" 
+                    title="{{obj.pin}}" data-model-name="account.employeeprofile" data-obj-id="{{obj.id}}" 
+                    data-url="{%url "autosave_field"%}" data-target="div-notification" placeholder="PIN..." /> 
+                    <span id="pin__msg"></span>
             </div>
         </div>
     </div>
