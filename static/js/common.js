@@ -674,8 +674,9 @@ $(document).ready(()=>{
             submitForm(frm, target);
             if (obj.data("update"))
                 $("#"+obj.data("update")).html($("#"+obj.data("update-val")).val())
-            e.preventDefault();
         }
+        e.preventDefault();
+        e.stopImmediatePropagation();
     });
 
     $("body").on("change", ".multiupload", function(e){

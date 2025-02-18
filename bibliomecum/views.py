@@ -8,7 +8,7 @@ from pharma.models import Pacientes
 from medication.medication_lib import get_medication
 from medication.models import CieCiap
 from .models import BiblioReceipt, BiblioReceiptBook, BiblioReceiptAtc, BiblioReceiptCiap
-from .isbn_lib import isbn_search as isearch
+from .isbn_lib import isbn_search as isearch, title_author_search as tasearch
 
 
 '''
@@ -48,6 +48,20 @@ def receipts_print(request, obj_id):
     ISBNs
 '''
 @group_required("admins","managers")
+def title_author_search(request):
+    try:
+        obj = get_or_none(BiblioReceipt, get_param(request.POST, "obj_id"))
+        title = get_param(request.POST, "title")
+        author = get_param(request.POST, "author")
+        title, author, isbn = tasearch(title, author)
+        if title != "":
+            book = BiblioReceiptBook.objects.create(receipt=obj, isbn=isbn, name=title, author=author)
+        return render(request, "bibliomecum/receipts-isbn-list.html", {'obj': obj})
+    except Exception as e:
+        print(e)
+        return render(request, 'error_exception.html', {'exc':show_exc(e)})
+
+@group_required("admins","managers")
 def isbn_search(request):
     try:
         obj = get_or_none(BiblioReceipt, get_param(request.POST, "obj_id"))
@@ -60,7 +74,6 @@ def isbn_search(request):
     except Exception as e:
         print(e)
         return render(request, 'error_exception.html', {'exc':show_exc(e)})
-
 
 @group_required("admins","managers")
 def receipts_isbn_add(request):

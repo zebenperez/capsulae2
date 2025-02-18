@@ -24,6 +24,30 @@ def isbn_search(isbn):
     except:
         return ""
 
+def title_author_search(title, author):
+    try:
+        base_api_link = "https://www.googleapis.com/books/v1/volumes?q=intitle:{}&inauthor:{}"
+
+        with urllib.request.urlopen(base_api_link.format(title, author)) as f:
+            text = f.read()
+
+        decoded_text = text.decode("utf-8")
+        obj = json.loads(decoded_text) # deserializes decoded_text to a Python object
+        volume_info = obj["items"][0]
+        #print(volume_info["volumeInfo"])
+        authors = ""
+        if "authors" in volume_info["volumeInfo"]:
+            for a in volume_info["volumeInfo"]["authors"]:
+                authors += "{},".format(a)
+        isbn = ""
+        if "industryIdentifiers" in volume_info["volumeInfo"]:
+            for a in volume_info["volumeInfo"]["industryIdentifiers"]:
+                isbn = a["identifier"]
+                break
+        return volume_info["volumeInfo"]["title"], authors[:-1], isbn
+    except:
+        return ""
+
 #def isbn_search_old(isbn):
 #    isbn = isbn.replace('-','')
 #    url = 'http://www.mcu.es/webISBN/tituloSimpleDispatch.do'
