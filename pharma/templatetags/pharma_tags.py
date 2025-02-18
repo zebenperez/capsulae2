@@ -2,7 +2,7 @@ from django import template
 from django.utils.safestring import mark_safe
 from datetime import datetime, timedelta
 
-from capsulae2.settings import BASE_DIR, MEDIA_ROOT
+from capsulae2.settings import BASE_DIR, MEDIA_ROOT, MAIN_URL, MEDIA_URL
 from pharma.models import Pacientes
 from pharma.spd_models import Pillbox
 from medication.models import FichaPrincipioActivo
@@ -72,7 +72,8 @@ def get_lopd_url(doc):
     #if os.path.exists(media_path):
     #    return doc.url
     url = doc.url[7:] if doc.url.count("media") > 1 else doc.url
-    return "https://capsulae.org/{}".format(doc.url[7:])
+    return "{}{}{}".format(MAIN_URL, MEDIA_URL, doc.url[7:])
+    #return "https://capsulae.org/{}".format(doc.url[7:])
 
 @register.filter
 def value_for_key(dictionary, key):
