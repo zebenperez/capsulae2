@@ -47,27 +47,32 @@ def receipts_print(request, obj_id):
 '''
     ISBNs
 '''
-@group_required("admins","managers")
-def title_author_search(request):
-    try:
-        obj = get_or_none(BiblioReceipt, get_param(request.POST, "obj_id"))
-        title = get_param(request.POST, "title")
-        author = get_param(request.POST, "author")
-        title, author, isbn = tasearch(title, author)
-        if title != "":
-            book = BiblioReceiptBook.objects.create(receipt=obj, isbn=isbn, name=title, author=author)
-        return render(request, "bibliomecum/receipts-isbn-list.html", {'obj': obj})
-    except Exception as e:
-        print(e)
-        return render(request, 'error_exception.html', {'exc':show_exc(e)})
+#@group_required("admins","managers")
+#def title_author_search(request):
+#    try:
+#        obj = get_or_none(BiblioReceipt, get_param(request.POST, "obj_id"))
+#        title = get_param(request.POST, "title")
+#        author = get_param(request.POST, "author")
+#        title, author, isbn = tasearch(title, author)
+#        if title != "":
+#            book = BiblioReceiptBook.objects.create(receipt=obj, isbn=isbn, name=title, author=author)
+#        return render(request, "bibliomecum/receipts-isbn-list.html", {'obj': obj})
+#    except Exception as e:
+#        print(e)
+#        return render(request, 'error_exception.html', {'exc':show_exc(e)})
 
 @group_required("admins","managers")
 def isbn_search(request):
     try:
         obj = get_or_none(BiblioReceipt, get_param(request.POST, "obj_id"))
         isbn = get_param(request.POST, "s_isbn")
-        isbn = isbn.replace('-','')
-        title, author = isearch(isbn)
+        title = get_param(request.POST, "title")
+        author = get_param(request.POST, "author")
+        if isbn != "":
+            isbn = isbn.replace('-','')
+            title, author = isearch(isbn)
+        else:
+            title, author, isbn = tasearch(title, author)
         if title != "":
             book = BiblioReceiptBook.objects.create(receipt=obj, isbn=isbn, name=title, author=author)
         return render(request, "bibliomecum/receipts-isbn-list.html", {'obj': obj})
