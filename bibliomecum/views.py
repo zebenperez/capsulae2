@@ -70,12 +70,15 @@ def isbn_search(request):
         author = get_param(request.POST, "author")
         if isbn != "":
             isbn = isbn.replace('-','')
-            title, author = isearch(isbn)
+            result_list = isearch(isbn)
+            #title, author = isearch(isbn)
         else:
-            title, author, isbn = tasearch(title, author)
-        if title != "":
-            book = BiblioReceiptBook.objects.create(receipt=obj, isbn=isbn, name=title, author=author)
-        return render(request, "bibliomecum/receipts-isbn-list.html", {'obj': obj})
+            result_list = tasearch(title, author)
+            #title, author, isbn = tasearch(title, author)
+        return render(request, "bibliomecum/receipts-search-results.html", {'receipt': obj, 'item_list': result_list})
+        #if title != "":
+        #    book = BiblioReceiptBook.objects.create(receipt=obj, isbn=isbn, name=title, author=author)
+        #return render(request, "bibliomecum/receipts-isbn-list.html", {'obj': obj})
     except Exception as e:
         print(e)
         return render(request, 'error_exception.html', {'exc':show_exc(e)})
@@ -84,7 +87,10 @@ def isbn_search(request):
 def receipts_isbn_add(request):
     try:
         obj = get_or_none(BiblioReceipt, get_param(request.GET, "obj_id"))
-        book = BiblioReceiptBook.objects.create(receipt=obj)
+        isbn = get_param(request.GET, "isbn")
+        title = get_param(request.GET, "title")
+        author = get_param(request.GET, "author")
+        book = BiblioReceiptBook.objects.create(receipt=obj, isbn=isbn, name=title, author=author)
         return render(request, "bibliomecum/receipts-isbn-list.html", {'obj': obj})
     except Exception as e:
         return render(request, 'error_exception.html', {'exc':show_exc(e)})

@@ -71,9 +71,10 @@ def get_lopd_url(doc):
     #media_path = os.path.abspath(os.path.join(MEDIA_ROOT, doc.url))
     #if os.path.exists(media_path):
     #    return doc.url
-    url = doc.url[7:] if doc.url.count("media") > 1 else doc.url
-    return "{}{}{}".format(MAIN_URL, MEDIA_URL, doc.url[7:])
+    #url = doc.url[7:] if doc.url.count("media") > 1 else doc.url
     #return "https://capsulae.org/{}".format(doc.url[7:])
+    url = doc.url.replace("media/", "") if "media" in doc.url else doc.url
+    return "{}{}{}".format(MAIN_URL, MEDIA_URL[:-1], url)
 
 @register.filter
 def value_for_key(dictionary, key):
