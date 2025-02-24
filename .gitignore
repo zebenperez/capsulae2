@@ -134,3 +134,4 @@ migrations
 *.deprecated
 logs.txt
 *.sh
+**.bak
