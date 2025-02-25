@@ -134,7 +134,9 @@
             
                 <div id="div-receipt" class="div-receipt">
                     <div class="row h-top m-0">
-                        <div class="col-6 custom-box b-bt-red h-left text-center p-0">Sistema de Catalización Lectora</div>
+                        <div class="col-6 custom-box b-bt-red h-left text-center p-0" style="margin-top:-20px">
+                            <img src="{% static "imgs/logo_biblio.jpeg" %}" alt="Logo bibliomecum" style="height:80px"/> 
+                            {#Sistema de Catalización Lectora#}</div>
                         <div class="col-3 custom-box b-bt-red h-center text-center p-0">Receta Literaria Oficial</div>
                         <div class="col-3 custom-box b-bt-red h-right text-center p-0">
                             <img src="{% static 'community/images/fundec-logo.png' %}" alt="Fundec" width="60%"/></div>
@@ -188,7 +190,9 @@
                             </div>
                         </div>
                         <div class="col-3 custom-box data-info h-250 lh b-bt-red b-lf-red small second-color">
-                            <div class="bg-light">Advertencias para el lector</div></div>
+                            <div class="bg-light">Advertencias para el lector</div>
+                            <br/><p>{{obj.advices}}</p>
+                        </div>
                     </div>
 
                     <div class="row m-0">
@@ -196,7 +200,9 @@
                             <div class="bg-light">El tratamiento puede ser sustituido por:</div>
                         </div>
                         <div class="col-3 custom-box data-info b-bt-red small main-color" style="margin-top: -80px;">
-                            <strong>Advertencias al dispensador:</strong></div>
+                            <strong>Advertencias al dispensador:</strong>
+                            <br/><br/><p>{{obj.contras}}</p>
+                        </div>
                         <div class="col-3 custom-box data-info b-bt-red b-lf-red small main-color">
                             <strong>Fecha y firma del prescriptor</strong></div>
                     </div>

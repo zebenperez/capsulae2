@@ -30,14 +30,14 @@
 </div>
 
 <div class="row justify-center">
-    <div class="col-12"> <div class="greybox-sm p-1"> {% trans "Consejos de uso" %}
+    <div class="col-12"> <div class="greybox-sm p-1"> {% trans "Advertencias para el lector" %}
 	    <textarea class="form-control autosave" id="advices" name="advices" title="{{obj.advices}}" 
         	data-model-name="bibliomecum.biblioreceipt" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
 	        data-target="div-notification">{{obj.advices}}</textarea> <span id="advices__msg"></span>
     </div> </div>
 </div>
 <div class="row justify-center">
-    <div class="col-12"> <div class="greybox-sm p-1"> {% trans "Contraindicaciones" %}
+    <div class="col-12"> <div class="greybox-sm p-1"> {% trans "Advertencias para el dispensador" %}
 	    <textarea class="form-control autosave" id="contras" name="contras" title="{{obj.contras}}" 
         	data-model-name="bibliomecum.biblioreceipt" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
 	        data-target="div-notification">{{obj.contras}}</textarea> <span id="contras__msg"></span>
