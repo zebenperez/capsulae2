@@ -11,24 +11,40 @@
 
 {% for item in obj.biblio_receipts.all %}
 
-    <div class="row row-list-item m-2">
-	<div class="col-2 p-3"> <strong> <i class="fa fa-calendar"></i> {% trans "Fecha" %}</strong> <br/ > {{ item.date|date:"d-m-Y"|default_if_none:"--" }}</div>
-	<div class="col-2 offset-8 p-3 text-right">
-            <a class="btn btn-sm" href="{% url "bibliomecum-receipts-print" item.id %}" target="_blank"> 
-                <i class="fas fa-print"></i></a> 
-            <a class="btn btn-sm ark p-3" title="{%trans 'Editar receta'%}" data-url="{%url "bibliomecum-receipts-form" %}"
-                data-target="div-container" data-obj_id="{{item.id}}" data-patient_id="{{obj.id}}"
-                title="{% trans "Editar" %}"> <i class="fas fa-edit"></i></a>
-            <a class="btn btn-sm ark p-3" data-url="{%url "bibliomecum-receipts-remove"%}" data-obj_id="{{item.id}}" 
-                data-target="div-container" title="{% trans 'Borrar' %}" 
-                data-confirm="{% trans "Esta seguro/a de que desea borrar este elemento?" %}">
-                <i class="fas fa-trash"></i></a>
-        </div>
-	<hr/>
-	<div class="col-6 p-3"> <strong> <i class="fa fa-pills"></i> {% trans "Medicamentos" %}</strong> <br/ > {% for ra in item.atcs.all %} - {{ra.name}}<br/> {% endfor %}	</div>
-	<div class="col-6 p-3"> <strong> <i class="fa fa-barcode"></i> {% trans "Tratamientos" %}</strong> <br/ > {% for ra in item.atcs.all %} - {{ra.name}}<br/> {% endfor %}	</div>
-	<div class="col-12 p-3"> <strong> <i class="fas fa-book"></i> {% trans "Libros" %} </strong> <br />{% for book in item.books.all %} -<span style="font-style: oblique;"> {{book.name}}</span> ({{book.isbn}})<br/> {% endfor %} </div>
-    </div>
+    <div class="card">
+	    <div class="card-header">
+    		<div class="row">
+				<div class="col-10"> <strong> <i class="fa fa-calendar"></i> {% trans "Fecha" %}</strong> 
+					{{ item.date|date:"d-m-Y"|default_if_none:"--" }} </div>
+				<div class="col-2 text-right">
+            		<a class="btn btn-sm" href="{% url "bibliomecum-receipts-print" item.id %}" target="_blank"> 
+                		<i class="fas fa-print"></i></a> 
+	            	<a class="btn btn-sm ark" title="{%trans 'Editar receta'%}" data-url="{%url "bibliomecum-receipts-form" %}"
+    	            	data-target="div-container" data-obj_id="{{item.id}}" data-patient_id="{{obj.id}}"
+        	        	title="{% trans "Editar" %}"> <i class="fas fa-edit"></i></a>
+            		<a class="btn btn-sm ark" data-url="{%url "bibliomecum-receipts-remove"%}" data-obj_id="{{item.id}}" 
+                		data-target="div-container" title="{% trans 'Borrar' %}" 
+                		data-confirm="{% trans "Esta seguro/a de que desea borrar este elemento?" %}">
+	                	<i class="fas fa-trash"></i></a>
+    	    	</div>
+	    	</div>
+	    </div>
+		
+	    <div class="card-body">
+    		<div class="row row-list-item">
+				<div class="col-6"> <strong> <i class="fa fa-pills"></i> {% trans "Medicamentos" %}</strong> 
+					<br/ > {% for ra in item.atcs.all %} - {{ra.name}}<br/> {% endfor %}	</div>
+				<div class="col-6"> <strong> <i class="fa fa-barcode"></i> {% trans "Tratamientos" %}</strong> 
+					<br/ > {% for ra in item.atcs.all %} - {{ra.name}}<br/> {% endfor %}	</div>
+				<div class="col-12 mt-3"> <strong> <i class="fas fa-book"></i> {% trans "Libros" %} </strong> <br />
+					{% for book in item.books.all %} 
+						- <span style="font-style: oblique;"> {{book.name}}</span> ({{book.isbn}})<br/> 
+					{% endfor %} 
+				</div>
+    		</div>
+    	</div> 
+	</div>
+	<br/>
 
 {% endfor %}
 
