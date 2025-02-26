@@ -132,6 +132,7 @@
 			<div class="content">
 				<h2 class="main-title"> {% trans "Receta" %}</h2>
             
+                {% with books=obj.books.all %}
                 <div id="div-receipt" class="div-receipt">
                     <div class="row h-top m-0">
                         <div class="col-6 custom-box b-bt-red h-left text-center p-0" style="margin-top:-20px">
@@ -162,13 +163,12 @@
                         <div class="col-6 custom-box data-info lh b-rt-red h-150- second-color">
                             <div class="bg-light">
                                 <div class="mb-1"><strong>PRESCRIPCIÓN</strong>
-                                    <br/> <span class="x-small">Consignar la obra recomendada. Título y autor</span> </div>
-                                {% for book in obj.books.all %}
-                                    <br> {%trans "ISBN" %}: <strong>{{book.isbn}}</strong>
-                                    <br> {%trans "Título" %}: <strong>{{book.name}}</strong>
-                                    <br/>
-                                {% endfor %}
-                                <br/><br/><br/><br/>
+                                    <br/> <small>Consignar la obra recomendada. Título y autor</small> </div>
+                                {#{% for book in obj.books.all %}#}
+                                <br/> {%trans "ISBN" %}: &nbsp;<strong>{{books.0.isbn}}</strong>
+                                <br/><br/> {%trans "Título" %}: &nbsp;<strong>{{books.0.name}}</strong>
+                                <br/><br/> {%trans "Autor" %}: &nbsp;<strong>{{books.0.author}}</strong>
+                                {#{% endfor %}#}
                             </div>
                         </div>
                         <div class="col-3 custom-box h-200 b-bt-red second-color">
@@ -198,6 +198,14 @@
                     <div class="row m-0">
                         <div class="col-6 custom-box data-info h-150 b-dotted x-small second-color" style="margin-top: -50px;">
                             <div class="bg-light">El tratamiento puede ser sustituido por:</div>
+
+                            {% for book in books %}
+                                {% if forloop.counter > 1 and  forloop.counter < 4 %}
+                                    <br> {%trans "ISBN" %}: <strong>{{book.isbn}}</strong>
+                                    <br> {%trans "Título" %}: <strong>{{book.name}}</strong>
+                                    <br> {%trans "Autor" %}: <strong>{{book.author}}</strong>
+                                {% endif %}
+                            {% endfor %}
                         </div>
                         <div class="col-3 custom-box data-info b-bt-red small main-color" style="margin-top: -80px;">
                             <strong>Advertencias al dispensador:</strong>
@@ -217,7 +225,7 @@
                         <div class="col-3 custom-box second-color small text-center">En caso de duda consulte a su bibliotecario</div>
                     </div>
                 </div>
-
+                {% endwith %}
 			</div>
             <div class="footer">
 	            <div class="data">
