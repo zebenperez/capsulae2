@@ -35,7 +35,7 @@
 				<div class="col-6"> <strong> <i class="fa fa-pills"></i> {% trans "Medicamentos" %}</strong> 
 					<br/ > {% for ra in item.atcs.all %} - {{ra.name}}<br/> {% endfor %}	</div>
 				<div class="col-6"> <strong> <i class="fa fa-barcode"></i> {% trans "Tratamientos" %}</strong> 
-					<br/ > {% for ra in item.atcs.all %} - {{ra.name}}<br/> {% endfor %}	</div>
+					<br/ > {% for ra in item.ciaps.all %} - {{ra.name}}<br/> {% endfor %}	</div>
 				<div class="col-12 mt-3"> <strong> <i class="fas fa-book"></i> {% trans "Libros" %} </strong> <br />
 					{% for book in item.books.all %} 
 						- <span style="font-style: oblique;"> {{book.name}}</span> ({{book.isbn}})<br/> 
