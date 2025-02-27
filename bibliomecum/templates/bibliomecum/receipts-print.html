@@ -42,6 +42,12 @@
         .x-small {
             font-size: 10px !important;
         }
+        .sm-small {
+            font-size: 13px !important;
+        }
+        .l-big {
+            font-size: 18px !important;
+        }
         .div-receipt {
             border-left: 15px solid #834598;
             border-right: 15px solid #834598;
@@ -135,21 +141,21 @@
                 {% with books=obj.books.all %}
                 <div id="div-receipt" class="div-receipt">
                     <div class="row h-top m-0">
-                        <div class="col-6 custom-box b-bt-red h-left text-center p-0" style="margin-top:-20px">
+                        <div class="col-7 custom-box b-bt-red h-left text-center p-0" style="margin-top:-20px">
                             <img src="{% static "imgs/logo_biblio.jpeg" %}" alt="Logo bibliomecum" style="height:80px"/> 
                             {#Sistema de Catalización Lectora#}</div>
-                        <div class="col-3 custom-box b-bt-red h-center text-center p-0">Receta Literaria Oficial</div>
+                        <div class="col-2 custom-box b-bt-red h-center text-center p-0">Receta Literaria Oficial</div>
                         <div class="col-3 custom-box b-bt-red h-right text-center p-0">
                             <img src="{% static 'community/images/fundec-logo.png' %}" alt="Fundec" width="60%"/></div>
                     </div>
 
                     <div class="row b-bt-red m-0">
-                        <div class="col-6 custom-box h-100- data-info main-color b-tp-red small">
+                        <div class="col-7 custom-box h-100- data-info main-color b-tp-red small">
                             <div class="mb-1"><strong>Diagnóstico y/o Medicamentos administrados</strong></div>
                             <br/> <strong>{% for item in obj.atcs.all %} {{item.name}}<br/> {% endfor %}</strong>
                             <br/> <strong>{% for item in obj.ciaps.all %} {{item.name}}<br/> {% endfor %}</strong>
                         </div>
-                        <div class="col-3 custom-box data-info second-color b-tp-red b-lf-red small text-center">
+                        <div class="col-2 custom-box data-info second-color b-tp-red b-lf-red small text-center">
                             <div class="bg-light"><strong>Duración del tratamiento</strong></div></div>
                         <div class="col-3 custom-box data-info main-color b-tp-red b-lf-red small lh">
                             <strong>Datos del paciente</strong><br />
@@ -160,7 +166,7 @@
                     </div>
 
                     <div class="row m-0">
-                        <div class="col-6 custom-box data-info lh b-rt-red h-150- second-color">
+                        <div class="col-7 custom-box data-info lh b-rt-red h-150- second-color l-big">
                             <div class="bg-light">
                                 <div class="mb-1"><strong>PRESCRIPCIÓN</strong>
                                     <br/> <small>Consignar la obra recomendada. Título y autor</small> </div>
@@ -171,7 +177,7 @@
                                 {#{% endfor %}#}
                             </div>
                         </div>
-                        <div class="col-3 custom-box h-200 b-bt-red second-color">
+                        <div class="col-2 custom-box h-200 b-bt-red second-color">
                             <div class="text-center"><strong>POSOLOGÍA</strong></div>
                             <div class="row small m-0 mt-1">
                                 <div class="col-3 b-bt-dotted"></div>
@@ -196,18 +202,18 @@
                     </div>
 
                     <div class="row m-0">
-                        <div class="col-6 custom-box data-info h-150 b-dotted x-small second-color" style="margin-top: -50px;">
+                        <div class="col-7 custom-box data-info h-150 b-dotted sm-small second-color" style="margin-top: -50px;">
                             <div class="bg-light">El tratamiento puede ser sustituido por:</div>
 
                             {% for book in books %}
                                 {% if forloop.counter > 1 and  forloop.counter < 4 %}
-                                    <br> {%trans "ISBN" %}: <strong>{{book.isbn}}</strong>
+                                    {%trans "ISBN" %}: <strong>{{book.isbn}}</strong>
                                     <br> {%trans "Título" %}: <strong>{{book.name}}</strong>
                                     <br> {%trans "Autor" %}: <strong>{{book.author}}</strong>
                                 {% endif %}
                             {% endfor %}
                         </div>
-                        <div class="col-3 custom-box data-info b-bt-red small main-color" style="margin-top: -80px;">
+                        <div class="col-2 custom-box data-info b-bt-red small main-color" style="margin-top: -80px;">
                             <strong>Advertencias al dispensador:</strong>
                             <br/><br/><p>{{obj.contras}}</p>
                         </div>
