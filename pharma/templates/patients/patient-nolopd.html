@@ -1,0 +1,8 @@
+{% load i18n pharma_tags %}
+<div class="row line small pt-2 pb-2 row-item {%if item.activo == False%}hide{%endif%}" id="row_{{item.id}}" 
+data-active="{{item.is_active}}" style="margin:0;">
+    <div class="col-12 text-center">
+        Paciente sin la LOPD firmada <br>
+        <img src="data:image/png;base64,{{ qrcode }}" alt="QR Code" style="width: 400px; height:400px;">
+    </div>
+</div>
