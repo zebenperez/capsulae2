@@ -128,6 +128,14 @@ class Pacientes(models.Model):
         self.slug_address = Pacientes.slugify_address(self.domicilio)
         super(Pacientes, self).save(*args, **kwargs)
 
+    @property
+    def lopd_signed(self):
+        from lopd.models import LOPDConsents
+        try:
+            return LOPDConsents.objects.filter(paciente=self).exists()
+        except:
+            False
+
     class Meta:
         db_table = 'pacientes'
         verbose_name = 'paciente'
