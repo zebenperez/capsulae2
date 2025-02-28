@@ -135,10 +135,13 @@ def generate_qr(data, logo):
         pos = ((img.size[0] - img_logo.size[0]) // 2, (img.size[1] - img_logo.size[1]) // 2)
         img.paste(img_logo, pos)
     else:
+        color = "#000000"
+        color_back = "#ffffff"
         img = qr.make_image(fill_color=color, back_color=color_back)
 
     byteIO = io.BytesIO()
     img.save(byteIO, format='PNG')
+    byteIO.seek(0)
     byteArr = byteIO.getvalue()
 
     return byteArr

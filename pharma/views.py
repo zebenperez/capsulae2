@@ -7,6 +7,8 @@ from django.shortcuts import render, redirect, reverse
 from django.template.loader import render_to_string
 
 from datetime import datetime, timedelta
+from io import BytesIO
+
 from weasyprint import HTML, CSS
 
 import os, csv
@@ -62,7 +64,7 @@ def home(request):
 '''
     Patients
 '''
-def get_patients(user, search_value="", start=0, end=50):
+def get_patients(user, search_value="", start=0, end=50, lopd_signed=True):
     #filters_to_search = ["n_historial__icontains", "nombre__icontains", "apellido__icontains", "cip__icontains"]
     filters_to_search = ["n_historial__icontains", "cip__icontains"]
 
@@ -85,20 +87,23 @@ def get_patients(user, search_value="", start=0, end=50):
     lopd_patient_ids = LOPDConsents.objects.all().distinct().values_list('paciente', flat=True)
     lopd_list = list(Pacientes.objects.filter(full_query).filter(id__in=lopd_patient_ids)[start:end])
 
-    # Pacientes sin lopd firmada pero creados en los últimos 15 días
-    try:
-        lopd_limit = int(get_config_value("LOPD_{}".format(user.id), LOPD_LIMIT))
-    except:
-        lopd_limit = LOPD_LIMIT
-    limit = datetime.today() - timedelta(days=lopd_limit)
-    date_list = list(Pacientes.objects.filter(full_query).exclude(id__in=lopd_patient_ids).filter(created_at__gte=limit))
+    if lopd_signed:
+        # Pacientes sin lopd firmada pero creados en los últimos 15 días
+        try:
+            lopd_limit = int(get_config_value("LOPD_{}".format(user.id), LOPD_LIMIT))
+        except:
+            lopd_limit = LOPD_LIMIT
+        limit = datetime.today() - timedelta(days=lopd_limit)
+        date_list = list(Pacientes.objects.filter(full_query).exclude(id__in=lopd_patient_ids).filter(created_at__gte=limit))
 
-    return date_list + lopd_list
+        return date_list + lopd_list
+    else:
+        return list(Pacientes.objects.filter(full_query).exclude(id__in=lopd_patient_ids)[start:end])
 
-def get_patient_context(user, search_value="", start=0, end=50):
+def get_patient_context(user, search_value="", start=0, end=50, lopd_signed=True):
     if (search_value == ""):
-        return {'items': get_patients(user, search_value, start, end), 'start': (start+end), 'end': (end+end)}
-    return {'items': get_patients(user, search_value, start, end),}
+        return {'items': get_patients(user, search_value, start, end), 'start': (start+end), 'end': (end+end), 'lopd_signed': lopd_signed}
+    return {'items': get_patients(user, search_value, start, end, lopd_signed),}
 
 @group_required("admins","managers")
 def patients(request):
@@ -111,10 +116,30 @@ def patient_list(request):
     end = int(request.GET["end"]) if "end" in request.GET else 10
     return render(request, "patients/patient-list.html", get_patient_context(request.user, "", start, end))
 
+@group_required("admins", "managers")
+def patient_list_nolopd(request):
+    start = int(request.GET["start"]) if "start" in request.GET else 0
+    end = int(request.GET["end"]) if "end" in request.GET else 10
+    return render(request, "patients/patient-list.html", get_patient_context(request.user, "", start, end, False))
+
 @group_required("admins","managers")
 def patient_search(request):
+    import base64
     search_value = get_param(request.GET, "s-name")
-    return render(request, "patients/patient-list.html", get_patient_context(request.user, search_value))
+    list_users = get_patient_context(request.user, search_value)
+    if list_users["items"] != []:
+        return render(request, "patients/patient-list.html", list_users)
+    else:
+        list_users = get_patient_context(request.user, search_value, lopd_signed=False)
+        print(list_users)
+        if (len(list_users["items"]) == 1):
+            url_abs = request.build_absolute_uri(reverse('patient-lopd-generate-document2', kwargs={'patient_id': list_users["items"][0].id}))
+            qrcode = generate_qr("{}".format(url_abs), "")
+            qrcode_base64 = base64.b64encode(qrcode).decode()
+            return render(request, "patients/patient-nolopd.html", {'qrcode': qrcode_base64})
+        else:
+            list_users["items"] = []
+            return render(request, "patients/patient-list.html",list_users)
 
 @group_required("admins","managers")
 def patient_new(request):
