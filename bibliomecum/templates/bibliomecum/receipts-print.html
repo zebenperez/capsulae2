@@ -115,7 +115,9 @@
         margin-right: 0.9in;
         margin-top: 0.75in;	
     }
-
+    @media print {
+        .page, .page-break { break-after: page; }
+    }
     </style>
 </head>
 <body>
@@ -137,101 +139,13 @@
             <br/><br/>
 			<div class="content">
 				<h2 class="main-title"> {% trans "Receta" %}</h2>
-            
-                {% with books=obj.books.all %}
-                <div id="div-receipt" class="div-receipt">
-                    <div class="row h-top m-0">
-                        <div class="col-7 custom-box b-bt-red h-left text-center p-0" style="margin-top:-20px">
-                            <img src="{% static "imgs/logo_biblio.jpeg" %}" alt="Logo bibliomecum" style="height:80px"/> 
-                            {#Sistema de Catalización Lectora#}</div>
-                        <div class="col-2 custom-box b-bt-red h-center text-center p-0">Receta Literaria Oficial</div>
-                        <div class="col-3 custom-box b-bt-red h-right text-center p-0">
-                            <img src="{% static 'community/images/fundec-logo.png' %}" alt="Fundec" width="60%"/></div>
-                    </div>
-
-                    <div class="row b-bt-red m-0">
-                        <div class="col-7 custom-box h-100- data-info main-color b-tp-red small">
-                            <div class="mb-1"><strong>Diagnóstico y/o Medicamentos administrados</strong></div>
-                            <br/> <strong>{% for item in obj.atcs.all %} {{item.name}}<br/> {% endfor %}</strong>
-                            <br/> <strong>{% for item in obj.ciaps.all %} {{item.name}}<br/> {% endfor %}</strong>
-                        </div>
-                        <div class="col-2 custom-box data-info second-color b-tp-red b-lf-red small text-center">
-                            <div class="bg-light"><strong>Duración del tratamiento</strong></div></div>
-                        <div class="col-3 custom-box data-info main-color b-tp-red b-lf-red small lh">
-                            <strong>Datos del paciente</strong><br />
-                            <br/> {%trans "Nombre"%}: <strong>{{obj.patient.nombre}} {{obj.patient.apellido}}</strong> 
-                            <br/> {%trans "Fecha de nacimiento"%}: <strong>{{obj.patient.fecha_nacimiento|date:"d-m-Y"}}</strong> 
-                            <br/> {%trans "NIF"%}: <strong>{{obj.patient.nif}}</strong>
-                        </div>
-                    </div>
-
-                    <div class="row m-0">
-                        <div class="col-7 custom-box data-info lh b-rt-red h-150- second-color l-big">
-                            <div class="bg-light">
-                                <div class="mb-1"><strong>PRESCRIPCIÓN</strong>
-                                    <br/> <small>Consignar la obra recomendada. Título y autor</small> </div>
-                                {#{% for book in obj.books.all %}#}
-                                <br/> {%trans "ISBN" %}: &nbsp;<strong>{{books.0.isbn}}</strong>
-                                <br/><br/> {%trans "Título" %}: &nbsp;<strong>{{books.0.name}}</strong>
-                                <br/><br/> {%trans "Autor" %}: &nbsp;<strong>{{books.0.author}}</strong>
-                                {#{% endfor %}#}
-                            </div>
-                        </div>
-                        <div class="col-2 custom-box h-200 b-bt-red second-color">
-                            <div class="text-center"><strong>POSOLOGÍA</strong></div>
-                            <div class="row small m-0 mt-1">
-                                <div class="col-3 b-bt-dotted"></div>
-                                <div class="col-6 b-bt-dotted"></div>
-                                <div class="col-3 text-left">Capítulos</div>
-                            </div>
-                            <div class="row small m-0">
-                                <div class="col-3 text-left p-0">o bien</div>
-                                <div class="col-6 b-bt-dotted"></div>
-                                <div class="col-3 text-left">Páginas</div>
-                            </div>
-                            <div class="row small m-0 ">
-                                <div class="col-3 text-left p-0">Cada</div>
-                                <div class="col-6 b-bt-dotted"></div>
-                                <div class="col-3 text-left">Horas</div>
-                            </div>
-                        </div>
-                        <div class="col-3 custom-box data-info h-250 lh b-bt-red b-lf-red small second-color">
-                            <div class="bg-light">Advertencias para el lector</div>
-                            <br/><p>{{obj.advices}}</p>
-                        </div>
-                    </div>
-
-                    <div class="row m-0">
-                        <div class="col-7 custom-box data-info h-150 b-dotted sm-small second-color" style="margin-top: -50px;">
-                            <div class="bg-light">El tratamiento puede ser sustituido por:</div>
-
-                            {% for book in books %}
-                                {% if forloop.counter > 1 and  forloop.counter < 4 %}
-                                    {%trans "ISBN" %}: <strong>{{book.isbn}}</strong>
-                                    <br> {%trans "Título" %}: <strong>{{book.name}}</strong>
-                                    <br> {%trans "Autor" %}: <strong>{{book.author}}</strong>
-                                {% endif %}
-                            {% endfor %}
-                        </div>
-                        <div class="col-2 custom-box data-info b-bt-red small main-color" style="margin-top: -80px;">
-                            <strong>Advertencias al dispensador:</strong>
-                            <br/><br/><p>{{obj.contras}}</p>
-                        </div>
-                        <div class="col-3 custom-box data-info b-bt-red b-lf-red small main-color">
-                            <strong>Fecha y firma del prescriptor</strong></div>
-                    </div>
-
-                    <div class="row m-0">
-                        <div class="col-6 custom-box x-small second-color">
-                            El beneficiario puede retirar en la Biblioteca Municipal las lecturas prescritas<br/>
-                            El tratamiento es de uso personal pero puede ser transferido a personas con <br/>
-                            similares gustos o síntomas a los del usuario.
-                        </div>
-                        <div class="col-3 custom-box text-center">{#Barcode#}</div>
-                        <div class="col-3 custom-box second-color small text-center">En caso de duda consulte a su bibliotecario</div>
-                    </div>
-                </div>
-                {% endwith %}
+                {% include "bibliomecum/receipts-print-receipt.html" %}         
+                <br/>
+                <div class="page-break"></div>
+                {% include "bibliomecum/receipts-print-receipt.html" %}         
+                <br/>
+                <div class="page-break"></div>
+                <img src="{% static 'imgs/marcador.png' %}" alt="Marcador"/> 
 			</div>
             <div class="footer">
 	            <div class="data">
