@@ -109,11 +109,11 @@
         .h-150 { height: 150px !important;}
         .h-200 { height: 200px !important;}
     @page {
-        size: 11in 8.5in;
-        margin-bottom: 0.75in;
+        /*size: 11in 8.5in;*/
+        margin-bottom: 0.50in;
         margin-left: 0.9in;
         margin-right: 0.9in;
-        margin-top: 0.75in;	
+        margin-top: 0.50in;	
     }
     @media print {
         .page, .page-break { break-after: page; }
@@ -121,11 +121,13 @@
     </style>
 </head>
 <body>
-    <div class="print-btn-container"> 
-        <a class="print-btn" id="print-btn" onclick="window.print()"> &#128424; {% trans "Imprimir" %}</a> 
-    </div>
+    <div class="print-btn-container-"> <a class="print-btn" id="print-btn" 
+        onclick="obj=document.getElementById('print-btn');obj.style.visibility='hidden';window.print();obj.style.visibility='visible'">
+            &#128424; {% trans "Imprimir" %}</a> </div>
+
 	<div class="page-infinite">
 		<div class="page-wrapper">
+            {%comment%}
             <div class="header"> 
                 <div class="fundec-logo"> <img src="{% static 'community/images/fundec-logo.png' %}" alt="Fundec"/> </div> 
                 <div class="company-logo"> 
@@ -137,11 +139,12 @@
                 </div>
             </div>
             <br/><br/>
+            {%endcomment%}
 			<div class="content">
-				<h2 class="main-title"> {% trans "Receta" %}</h2>
+                {#<h2 class="main-title"> {% trans "Receta" %}</h2>#}
                 {% include "bibliomecum/receipts-print-receipt.html" %}         
                 <br/>
-                <div class="page-break"></div>
+                {#<div class="page-break"></div>#}
                 {% include "bibliomecum/receipts-print-receipt.html" %}         
                 <br/>
                 <div class="page-break"></div>
