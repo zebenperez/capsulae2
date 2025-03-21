@@ -31,7 +31,7 @@ def pin_login(request, patient_id=""):
             if control_key == CONTROL_KEY:
                 try:
                     #Acceso de paciente
-                    pat = get_or_none(Pacientes, pin, "nif")
+                    pat = Pacientes.objects.filter(nif=pin).first()
                     if pat != None:
                         return redirect(reverse('pwa-patient', kwargs={'patient_id': pat.id}))
 
