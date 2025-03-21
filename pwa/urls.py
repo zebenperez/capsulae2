@@ -13,5 +13,10 @@ urlpatterns = [
     # MANAGERS
     path('manager/', views.manager_home, name="pwa-manager"),
     path('manager/<int:patient_id>/', views.manager_home, name="pwa-manager"),
+
+    # PATIENTS
+    path('patient/<int:patient_id>/', views.patient_home, name="pwa-patient"),
+    path('patient/books/<int:patient_id>/', views.patient_books, name="pwa-patient-books"),
+    path('patient/books/print/<int:patient_id>/', views.patient_books_print, name="pwa-patient-books-print"),
 ]
 

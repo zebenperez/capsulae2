@@ -1,0 +1,15 @@
+{% extends "pwa-base.html" %}
+{% load static i18n %}
+
+{% block content%}
+    <div class="p-2 text-end">
+        <strong><a class="btn btn-light btn-xl powericon" href="{%url 'pwa-logout'%}"><i class="fas fa-power-off"></i></a></strong>
+    </div>
+    <div class="huge p-2 text-center"><strong>Bienvenid@</strong></div>
+    <div class="p-2 text-center"> <strong>{{obj.nombre}} {{obj.apellido}}</strong> </div>
+    <div class="p-2 text-center"> {%trans "CIP: "%} {{obj.cip}}</div>
+    <div class="p-2 text-center mt-4"> 
+        <a class="btn border-primary text-primary w-100" href="{%url "pwa-patient-books" obj.id%}">
+            <i class="fas fa-book fa-3x"></i><br/>Libros recetados</a>
+    </div>
+{% endblock %}

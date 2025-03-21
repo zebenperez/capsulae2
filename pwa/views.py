@@ -30,6 +30,12 @@ def pin_login(request, patient_id=""):
         if pin != None and control_key != None:
             if control_key == CONTROL_KEY:
                 try:
+                    #Acceso de paciente
+                    pat = get_or_none(Pacientes, pin, "nif")
+                    if pat != None:
+                        return redirect(reverse('pwa-patient', kwargs={'patient_id': pat.id}))
+
+                    #Acceso de usuarios "pharma"
                     emp = get_or_none(EmployeeProfile, pin, "pin")
                     login(request, emp.user)
                     request.session['pwa_app_session'] = True
@@ -62,4 +68,26 @@ def manager_home(request, patient_id=None):
     else:
         patient  = None
     return render(request, "pwa/manager/home.html", {"obj": patient, "employee": employee})
+
+'''
+    PATIENTS
+'''
+def patient_home(request, patient_id):
+    patient = get_or_none(Pacientes, patient_id)
+    if patient == None:
+        return render(request, "pwa/pwa-error.html", {})
+    return render(request, "pwa/patient/home.html", {"obj": patient,})
+
+def patient_books(request, patient_id):
+    patient = get_or_none(Pacientes, patient_id)
+    if patient == None:
+        return render(request, "pwa/pwa-error.html", {})
+    return render(request, "pwa/patient/books.html", {"obj": patient,})
+
+def patient_books_print(request, patient_id):
+    patient = get_or_none(Pacientes, patient_id)
+    if patient == None:
+        return render(request, "pwa/pwa-error.html", {})
+    return render(request, "bibliomecum/receipts-print.html", {'obj': patient, 'comp': ''})
+
 

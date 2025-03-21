@@ -55,7 +55,7 @@ def title_author_search(title, author):
     try:
         base_api_link = "https://www.googleapis.com/books/v1/volumes?q=intitle:{}&inauthor:{}"
 
-        with urllib.request.urlopen(base_api_link.format(title.replace(" ", "+"), author.replace(" ", "+"))) as f:
+        with urllib.request.urlopen(base_api_link.format(title.replace(" ", "%20"), author.replace(" ", "%20"))) as f:
             text = f.read()
 
         decoded_text = text.decode("utf-8")
@@ -74,13 +74,28 @@ def title_author_search(title, author):
         print(e)
         return ""
 
-#def isbn_search_old(isbn):
-#    isbn = isbn.replace('-','')
-#    url = 'http://www.mcu.es/webISBN/tituloSimpleDispatch.do'
-#    url = 'http://www.cultura.gob.es/webISBN/tituloSimpleDispatch.do'
-#    payload = {'params.forzaQuery':'N','cache':'init','prev_layout':'busquedaisbn', 'layout':'busquedaisbn', 'language':'es','action':'Buscar', 'params.cdispo':'A','params.cisbnExt':isbn,"params.liConceptosExt[0].texto":'','params.orderByFormId':'2'}
-#    r=requests.post(url, data=payload, timeout=100)
-#    print(r.text)
-#    content = BS(r.text, "html.parser")
-#    results = content.find_all('div', {'class':'isbnResultado'})
-#    return results
+import requests
+def isbn_search_mcu(isbn):
+    isbn = isbn.replace('-','')
+    #url = 'http://www.mcu.es/webISBN/tituloSimpleDispatch.do'
+    url = 'http://www.cultura.gob.es/webISBN/tituloSimpleDispatch.do'
+    payload = {'params.forzaQuery':'N','cache':'init','prev_layout':'busquedaisbn', 'layout':'busquedaisbn', 'language':'es','action':'Buscar', 'params.cdispo':'A','params.cisbnExt':isbn,"params.liConceptosExt[0].texto":'','params.orderByFormId':'2'}
+    payload = {
+        'params.forzaQuery':'N',
+        'params.cdispo':'A',
+        'params.cisbnExt':isbn,
+        "params.liConceptosExt[0].texto":'',
+        'params.orderByFormId':'2',
+        'language':'es',
+        'prev_layout':'busquedaisbn', 
+        'layout':'busquedaisbn'
+    }
+    print(payload)
+    r=requests.post(url, data=payload)
+    #r=requests.post(url, data=payload, timeout=100)
+    print("----")
+    print(r)
+    print(r.text)
+    content = BS(r.text, "html.parser")
+    results = content.find_all('div', {'class':'isbnResultado'})
+    return results

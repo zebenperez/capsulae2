@@ -8,7 +8,7 @@ from pharma.models import Pacientes
 from medication.medication_lib import get_medication
 from medication.models import CieCiap
 from .models import BiblioReceipt, BiblioReceiptBook, BiblioReceiptAtc, BiblioReceiptCiap
-from .isbn_lib import isbn_search as isearch, title_author_search as tasearch
+from .isbn_lib import isbn_search as isearch, title_author_search as tasearch, isbn_search_mcu
 
 
 '''
@@ -71,6 +71,7 @@ def isbn_search(request):
         if isbn != "":
             isbn = isbn.replace('-','')
             result_list = isearch(isbn)
+            #result_list_mcu = isbn_search_mcu(isbn)
             #title, author = isearch(isbn)
         else:
             result_list = tasearch(title, author)
@@ -151,9 +152,8 @@ def get_diagnoses(value):
 def ciap_search(request):
     obj = get_or_none(BiblioReceipt, get_param(request.GET, "obj_id"))
     search_value = get_param(request.GET, "value")
-    print("--1--")
-    print(search_value)
-    print(get_diagnoses(search_value))
+    #print(search_value)
+    #print(get_diagnoses(search_value))
     context = {'obj': obj, 'items': get_diagnoses(search_value)}
     return render(request, "bibliomecum/cie_ciap-list.html", context)
 
