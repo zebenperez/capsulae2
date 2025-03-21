@@ -8,6 +8,7 @@ from datetime import datetime
 from capsulae2.decorators import group_required_pwa
 from capsulae2.commons import user_in_group, get_or_none, show_exc
 from pharma.models import Pacientes
+from bibliomecum.models import BiblioReceipt
 from account.models import EmployeeProfile
 
 
@@ -31,7 +32,7 @@ def pin_login(request, patient_id=""):
             if control_key == CONTROL_KEY:
                 try:
                     #Acceso de paciente
-                    pat = Pacientes.objects.filter(nif=pin).first()
+                    pat = Pacientes.objects.filter(nif__iexact=pin).first()
                     if pat != None:
                         return redirect(reverse('pwa-patient', kwargs={'patient_id': pat.id}))
 
@@ -84,10 +85,12 @@ def patient_books(request, patient_id):
         return render(request, "pwa/pwa-error.html", {})
     return render(request, "pwa/patient/books.html", {"obj": patient,})
 
-def patient_books_print(request, patient_id):
+def patient_books_print(request, patient_id, receipt_id):
     patient = get_or_none(Pacientes, patient_id)
     if patient == None:
         return render(request, "pwa/pwa-error.html", {})
-    return render(request, "bibliomecum/receipts-print.html", {'obj': patient, 'comp': ''})
-
+    receipt = get_or_none(BiblioReceipt, receipt_id)
+    if receipt == None:
+        return render(request, "pwa/pwa-error.html", {})
+    return render(request, "bibliomecum/receipts-print.html", {'obj': receipt, 'comp': ''})
 

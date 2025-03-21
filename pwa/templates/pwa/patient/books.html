@@ -15,7 +15,7 @@
                 <div class=""><h3>Libros recetados</h3></div>
                 {% for i in item.books.all %} <div class="">{{i.name}} </div> {% endfor%}
                 <br/>
-            	<a class="btn btn-primary w-100" href="{% url "pwa-patient-books-print" obj.id %}" target="_blank"> 
+            	<a class="btn btn-primary w-100" href="{% url "pwa-patient-books-print" obj.id item.id %}" target="_blank"> 
                 	<i class="fas fa-print"></i> &nbsp; Imprimir receta</a> 
             </div>
         </div>

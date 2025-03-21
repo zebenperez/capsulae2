@@ -17,6 +17,6 @@ urlpatterns = [
     # PATIENTS
     path('patient/<int:patient_id>/', views.patient_home, name="pwa-patient"),
     path('patient/books/<int:patient_id>/', views.patient_books, name="pwa-patient-books"),
-    path('patient/books/print/<int:patient_id>/', views.patient_books_print, name="pwa-patient-books-print"),
+    path('patient/books/print/<int:patient_id>/<int:receipt_id>/', views.patient_books_print, name="pwa-patient-books-print"),
 ]
 
