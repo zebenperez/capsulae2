@@ -89,7 +89,7 @@ urlpatterns = [
     path('patients/spd/blister-qr-print/<int:pd_id>', spd_views.spd_blister_qr_print, name='spd-blister-qr-print'),
 
     path('patients/spd/search-by-qr/', spd_views.spd_search_by_qr, name='spd-search-by-qr'),
-    path('api/', spd_views.spd_simulator, name='spd-simulator'),
+    path('sim/api/', spd_views.spd_simulator, name='spd-simulator'),
 
     #------------------------- PATIENT EVOLUTIONARY --------------------
     path('patients/evolutionary/', views.patient_evolutionary, name='patient-evolutionary'),

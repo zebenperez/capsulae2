@@ -237,9 +237,11 @@
             $("#pillbox_deliver_button").click(function () {
                 let cadena = $("#pillbox_deliver_code").val();
                 let domainname = "https://" + window.location.hostname;
+                // Eliminar botones de accion
+                $("#actionButtons").empty();
 
                 $.ajax({
-                    url: domainname + "/pharma/api/", // URL de la API, agregar domainname
+                    url: domainname + "/pharma/sim/api/", // URL de la API, agregar domainname
 
                     type: "POST",
                     data: {
