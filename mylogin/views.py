@@ -126,8 +126,16 @@ def create_paciente(request):
                 p = Pacientes.objects.filter(cip=cip, id_user=user).first()
                 if p == None:
                     p = Pacientes()
-                    p.fecha_nacimiento = datetime.datetime.min
-                    p.created_at = datetime.datetime.now()
+                    try:
+                        now = datetime.datetime.now()
+                        current_year = int(now.strftime("%y"))
+                        year = int(cip[4:6])
+                        year = "19{}".format(year) if year > current_year else "20{}".format(year)
+                        p.fecha_nacimiento = datetime.datetime(int(year), int(cip[6:8]), int(cip[8:10]))
+                    except Exception as e:
+                        #print(e)
+                        p.fecha_nacimiento = datetime.datetime.min
+                    p.created_at = now
                     p.cod_postal = 0
                     p.sexo = ""
                     p.borrado = False
