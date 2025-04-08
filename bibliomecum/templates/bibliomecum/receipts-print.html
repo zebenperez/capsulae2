@@ -29,6 +29,10 @@
             /*width: auto !important;*/
             width: 100% !important;
             border:1px solid white !important;
+            margin: 0 !important;
+        }
+        .page-wrapper {
+            margin: 0px !important;
         }
         .main-color {
             color: #834598;
@@ -75,7 +79,7 @@
         .h-top {
             height: 50px;
             line-height: 50px;
-            align-items: center;
+           /*align-items: center;*/
         }
         .h-top .h-left {
             background-color: #f8f6fb;
@@ -110,10 +114,11 @@
         .h-200 { height: 200px !important;}
     @page {
         /*size: 11in 8.5in;*/
-        margin-bottom: 0.50in;
+       /* margin-bottom: 0.50in;*/
         margin-left: 0.9in;
         margin-right: 0.9in;
-        margin-top: 0.50in;	
+       /* margin-top: 0.50in;	*/
+
     }
     @media print {
         .page, .page-break { break-after: page; }
@@ -146,10 +151,9 @@
                 <br/>
                 {#<div class="page-break"></div>#}
                 {% include "bibliomecum/receipts-print-receipt.html" %}         
-                <br/>
-                <div class="page-break"></div>
-                <img src="{% static 'imgs/marcador.png' %}" alt="Marcador"/> 
+                <div class="page-break text-center"><img src="{% static 'imgs/marcador.png' %}" alt="Marcador" /> </div>
 			</div>
+            {% comment %}
             <div class="footer">
 	            <div class="data">
 		            <p class="company"> {{ company.name|default:"" }} </p>
@@ -163,6 +167,7 @@
 		            </div>
 	            </div>
             </div>
+            {% endcomment %}
 		</div>
 	</div>
 </body>
