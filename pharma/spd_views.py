@@ -2,6 +2,7 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.template.defaultfilters import slugify
+from django.views.decorators.csrf import csrf_exempt
 
 
 from weasyprint import HTML 
@@ -276,4 +277,41 @@ def spd_search_by_qr(request):
         print(e)
         json_response['error'] = "Bad request"
     return JsonResponse(json_response)
+
+@csrf_exempt
+def spd_simulator(request, api_key=None, pillbox_deliver_code=None):
+    try:
+        if request.method == 'POST':
+            pillbox_deliver_code = request.POST.get("pillbox_deliver_code")
+            api_key = request.POST.get("api_key")
+            if api_key != "1234":
+                return JsonResponse({"error": True, "error_msg": "Unauthorized"}, status=401)
+            pd = PillboxDeliver.objects.filter(code=pillbox_deliver_code).first()
+            if pd == None:
+                return JsonResponse({"error": True, "error_msg": "Not Found"}, status=404)
+            meds = pd.deliver_meds.all()
+            json_response = []
+            for med in meds:
+                treatment_spd = med.treatment
+                print (treatment_spd.treatment.name)
+                if treatment_spd.include_in_spd:
+                    treatment = Tratamiento.objects.get(pk=treatment_spd.treatment.id)
+                    json_response.append({
+                        'id': med.id,
+                        'treatment': med.treatment.treatment.name,
+                        'expiration_date': med.expiration_date.strftime("%Y-%m-%d"),
+                        'code': med.code,
+                        'cn': med.treatment.treatment.cn,
+                        'morning': treatment.m != 0,
+                        'lunch': treatment.t != 0,
+                        'dinner': treatment.n != 0,
+                        'others': treatment.o != 0,
+
+                    })
+            return JsonResponse(json_response, safe=False, status=200)
+        else:
+            return render(request, "patient/spd/spd-simulator.html")
+    except Exception as e:
+        print(show_exc(e))
+        return JsonResponse({"error": True, "error_msg": show_exc(e)}, status=500)
 
