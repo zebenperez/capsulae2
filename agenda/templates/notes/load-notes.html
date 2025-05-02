@@ -1,6 +1,61 @@
 {% load i18n static %}
 
 <script>
+    var calendarEl = document.getElementById('calendar');
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,timeGridDay,listMonth'
+        },
+        contentHeight: 1200,
+
+        initialDate: '{{today|date:"Y-m-d"}}',
+        navLinks: true, // can click day/week names to navigate views
+        dayMaxEvents: true,
+        {% if perms.create_events %}
+            dateClick: function(info) { if (stop == false) ajaxGet('{% url "notes-get-note" %}', {'date': info.dateStr}, "div-notes", "") },
+        {% endif %}
+        eventClick: function(info) { ajaxGet('{% url "notes-get-note" %}', {'obj_id': info.event.id}, "div-notes", "") },
+        events: [
+            {% for item in note_list%}
+                {
+                    id: '{{item.pk}}',
+                    title: '<span style="font-size:0.8em">{%if item.name != ""%}<b>{{item.name}}</b>{%else%}{{item.pk}}{%endif%}<br/> - {{item.employee_list}}</span>',
+                    start: '{{item.ini_date|date:"Y-m-d H:i"}}',
+                    end: '{{item.end_date|date:"Y-m-d H:i"}}',
+                    display: 'block',
+                },
+            {% endfor %}
+        ],
+            
+        eventBackgroundColor: '#ffc127',
+        eventBorderColor: '#ffc127',
+        eventContent: function(arg) {
+            return { html: arg.event.title.replaceAll("|", "<br/> - ") }
+        },
+    });
+    calendar.render();
+
+    $(".fc-today-button").click(function(){
+        var y = calendar.getDate().getYear();
+        var m = calendar.getDate().getMonth();
+        ajaxGet('{% url "notes-calendar" %}', {'year': (y-100), 'month':(m+1)}, "load-notes", "")
+    });
+    $(".fc-prev-button").click(function(){
+        var y = calendar.getDate().getYear();
+        var m = calendar.getDate().getMonth();
+        ajaxGet('{% url "notes-calendar" %}', {'year': (y-100), 'month':(m+1)}, "load-notes", "")
+    });
+    $(".fc-next-button").click(function(){
+        var y = calendar.getDate().getYear();
+        var m = calendar.getDate().getMonth();
+        ajaxGet('{% url "notes-calendar" %}', {'year': (y-100), 'month':(m+1)}, "load-notes", "")
+    });
+
+    $('#calendar').dblclick(function(e){ stop = true; setTimeout(function(){ stop = false}, 1000); e.preventDefault(); });
+ 
+    {%comment%}
     var ev_list = calendar.getEvents();
     for(let ev of ev_list) { ev.remove(); }
             
@@ -13,5 +68,6 @@
             display: 'block',
         });
     {% endfor %}
+   {%endcomment%}
 </script>
 
