@@ -24,7 +24,8 @@
                 <br/> {%trans "Nombre"%}: <strong>{{obj.patient.nombre}} {{obj.patient.apellido}}</strong> 
                 <br/> {%trans "Fecha de nacimiento"%}: <strong>{{obj.patient.fecha_nacimiento|date:"d-m-Y"}}</strong> 
                 <br/> {%trans "NIF"%}: <strong>{{obj.patient.nif}}</strong>
-                <br/> <div class="text-center"><img src="{{obj.patient.qr.url}}" alt="qr" width="40%"/></div>
+		<br/> <div class="text-center">
+			{%if obj.patient.qr%}<img src="{{obj.patient.qr.url}}" alt="qr" width="40%"/>{%endif%}</div>
             </div>
         </div>
 
