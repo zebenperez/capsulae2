@@ -21,7 +21,7 @@
             {% for item in note_list%}
                 {
                     id: '{{item.pk}}',
-                    title: '<span style="font-size:0.8em">{%if item.name != ""%}<b>{{item.name}}</b>{%else%}{{item.pk}}{%endif%}<br/> - {{item.employee_list}}</span>',
+                    title: '<div style="font-size:0.8em; overflow:hidden;">{%if item.name != ""%}<b>{{item.name}}</b>{%else%}{{item.pk}}{%endif%}<br/> - {{item.employee_list}}</div>',
                     start: '{{item.ini_date|date:"Y-m-d H:i"}}',
                     end: '{{item.end_date|date:"Y-m-d H:i"}}',
                     display: 'block',
