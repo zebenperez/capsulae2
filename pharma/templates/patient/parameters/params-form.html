@@ -7,22 +7,24 @@
 <h2>{% trans 'Editar parámetros' %}</h2>
 
 
+<div id="div-notification"></div>
+
 <div class="tabs mt-3">
-    <div class="tab-item active ark" data-url="{% url "patient-params-form-tab" %}" data-target="div-params-container" data-obj_id="{{obj.id}}"
-        data-tab="antropo"><span class="hide-mobile">&nbsp; {% trans "Antropo." %}</span></div>
-    <div class="tab-item ark" data-url="{% url "patient-params-form-tab" %}" data-target="div-params-container" data-obj_id="{{obj.id}}"
+    <div class="tab-item active ark" data-url="{% url "patient-params-form-tab" %}" data-target="div-params-container" 
+        data-obj_id="{{obj.id}}" data-tab="antropo"><span class="hide-mobile">&nbsp; {% trans "Antropo." %}</span></div>
+    <div class="tab-item ark" data-url="{%url "patient-params-form-tab"%}" data-target="div-params-container" data-obj_id="{{obj.id}}"
         data-tab="cardio"> <span class="hide-mobile">&nbsp; {% trans "Cardio." %}</span></div>
-    <div class="tab-item ark" data-url="{% url "patient-params-form-tab" %}" data-target="div-params-container" data-obj_id="{{obj.id}}"
+    <div class="tab-item ark" data-url="{%url "patient-params-form-tab"%}" data-target="div-params-container" data-obj_id="{{obj.id}}"
         data-tab="resp"> <span class="hide-mobile">&nbsp; {% trans "Respiratorios" %}</span></div>
-    <div class="tab-item ark" data-url="{% url "patient-params-form-tab" %}" data-target="div-params-container" data-obj_id="{{obj.id}}" 
+    <div class="tab-item ark" data-url="{%url "patient-params-form-tab"%}" data-target="div-params-container" data-obj_id="{{obj.id}}" 
         data-tab="endo"> <span class="hide-mobile">&nbsp; {% trans "Endocrinos" %}</span></div>
-    <div class="tab-item ark" data-url="{% url "patient-params-form-tab" %}" data-target="div-params-container" data-obj_id="{{obj.id}}"
+    <div class="tab-item ark" data-url="{%url "patient-params-form-tab"%}" data-target="div-params-container" data-obj_id="{{obj.id}}"
         data-tab="lipuric"> <span class="hide-mobile">&nbsp; {% trans "Perfil Lip-Uric" %}</span></div>
-    <div class="tab-item ark" data-url="{% url "patient-params-form-tab" %}" data-target="div-params-container" data-obj_id="{{obj.id}}"
+    <div class="tab-item ark" data-url="{%url "patient-params-form-tab"%}" data-target="div-params-container" data-obj_id="{{obj.id}}"
         data-tab="renal"> <span class="hide-mobile">&nbsp; {% trans "Func. Renal" %}</span></div>
-    <div class="tab-item ark" data-url="{% url "patient-params-form-tab" %}" data-target="div-params-container" data-obj_id="{{obj.id}}"
+    <div class="tab-item ark" data-url="{%url "patient-params-form-tab"%}" data-target="div-params-container" data-obj_id="{{obj.id}}"
         data-tab="hepa"> <span class="hide-mobile">&nbsp; {% trans "Func. Hepática" %}</span></div>
-    <div class="tab-item ark" data-url="{% url "patient-params-form-tab" %}" data-target="div-params-container" data-obj_id="{{obj.id}}"
+    <div class="tab-item ark" data-url="{%url "patient-params-form-tab"%}" data-target="div-params-container" data-obj_id="{{obj.id}}"
         data-tab="pain"> <span class="hide-mobile">&nbsp; {% trans "Dolor" %}</span></div>
 </div>
 
@@ -32,16 +34,17 @@
         <div class="greybox-sm p-1">
             {% trans "Fecha" %}
             <input type="text" class="form-control autosave" id="date" name="date" value="{{obj.date|date:"d-m-Y H:M"}}" 
-                title="{{obj.date}}" data-model-name="params.bloodpressure" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
-                data-target="div-notification"/> <span id="date__msg"></span>
+                title="{{obj.date}}" data-model-name="pharma.bloodpressure" data-obj-id="{{obj.id}}" 
+                data-url="{%url "autosave_field"%}" data-target="div-notification"/> <span id="date__msg"></span>
         </div>
     </div>
     <div class="col-12 text-left p-1">
         <div class="greybox-sm p-1">
             {% trans "Observaciones" %}
-            <input type="text" class="form-control autosave" id="observations" name="observations" value="{{obj.observations|default:""}}" 
-                title="{{obj.observations}}" data-model-name="params.bloodpressure" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
-                data-target="div-notification"/> <span id="observations__msg"></span>
+            <input type="text" class="form-control autosave" id="observations" name="observations" 
+                value="{{obj.observations|default:""}}" title="{{obj.observations}}" data-model-name="pharma.bloodpressure" 
+                data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" data-target="div-notification"/> 
+            <span id="observations__msg"></span>
         </div>
     </div>
 </div>
