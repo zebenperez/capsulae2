@@ -12,6 +12,9 @@ class ConfigAdmin(admin.ModelAdmin):
 class DonationAdmin(admin.ModelAdmin):
     list_display = ("pay_date", "name", "cif", "email", "plan", "amount", "confirm")
 
+class EmployeeProfileAdmin(admin.ModelAdmin):
+    list_display = ("user", "pin")
+
 class MenuAdmin(admin.ModelAdmin):
     list_display = ("code", "name",)
 
@@ -42,3 +45,4 @@ admin.site.register(Profile, ProfileAdmin)
 admin.site.register(UserMenu, UserMenuAdmin)
 admin.site.register(UserProfile, UserProfileAdmin)
 admin.site.register(UserPayment, UserPaymentAdmin)
+admin.site.register(EmployeeProfile, EmployeeProfileAdmin)
