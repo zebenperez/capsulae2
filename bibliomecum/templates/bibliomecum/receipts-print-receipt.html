@@ -58,17 +58,17 @@
                             <!--ROW ZONA DE PEGADO-->
                             <div class="row justify-content-center align-items-center">
                                 <div class="col py-3 ">
-                                    <h2 class="py-2 marcadeagua text-center border-lineas"> Esta lectura puede ser sustituida por</h2>
-                                    {% for book in books %}
-                                        {% if forloop.counter > 1 and  forloop.counter < 4 %}
-                                            <p>{%trans "ISBN" %}: <strong>{{book.isbn}}</strong><br/>
-                                            {%trans "Título" %}: <strong>{{book.name}}</strong><br/>
-                                            {%trans "Autor" %}: <strong>{{book.author}}</strong></p>
-                                        {% endif %}
-                                    {% endfor %}
-                                    <p><strong>DIAGNÓSTICOS</strong></p>
+                                    <h2 class="py-2 marcadeagua text-center border-lineas"> Esta lectura puede ser sustituida por
+                                        {% for book in books %}
+                                            {% if forloop.counter > 1 and  forloop.counter < 4 %}
+                                                <p>{%trans "ISBN" %}: <strong>{{book.isbn}}</strong><br/>
+                                                {%trans "Título" %}: <strong>{{book.name}}</strong><br/>
+                                                {%trans "Autor" %}: <strong>{{book.author}}</strong></p>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </h2>
+                                    <p><strong>DIAGNÓSTICOS Y/O MEDICAMENTOS ADMINISTRADOS</strong></p>
                                     <p> {% for atc in obj.atcs.all %} {{atc.name}}<br/> {% endfor %} </p>
-                                    <p><strong>MEDICAMENTOS ADMINISTRADOS</strong></p>
                                     <p> {% for ciap in obj.ciaps.all %} {{ciap.name}}<br/> {% endfor %} </p>
                                 </div>
                             </div>
