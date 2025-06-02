@@ -58,15 +58,18 @@
                             <!--ROW ZONA DE PEGADO-->
                             <div class="row justify-content-center align-items-center">
                                 <div class="col py-3 ">
-                                    <h2 class="py-2 marcadeagua text-center border-lineas">Esta lectura puede ser sustituida por</h2>
-                                    <p>DIAGNÓSTICO Y/O MEDICAMENTOS ADMINISTRADOS</p>
+                                    <h2 class="py-2 marcadeagua text-center border-lineas"> Esta lectura puede ser sustituida por</h2>
                                     {% for book in books %}
                                         {% if forloop.counter > 1 and  forloop.counter < 4 %}
-                                            <p>{%trans "ISBN" %}: <strong>{{book.isbn}}</strong></p>
-                                            <p>{%trans "Título" %}: <strong>{{book.name}}</strong></p>
-                                            <p>{%trans "Autor" %}: <strong>{{book.author}}</strong></p>
+                                            <p>{%trans "ISBN" %}: <strong>{{book.isbn}}</strong><br/>
+                                            {%trans "Título" %}: <strong>{{book.name}}</strong><br/>
+                                            {%trans "Autor" %}: <strong>{{book.author}}</strong></p>
                                         {% endif %}
                                     {% endfor %}
+                                    <p><strong>DIAGNÓSTICOS</strong></p>
+                                    <p> {% for atc in obj.atcs.all %} {{atc.name}}<br/> {% endfor %} </p>
+                                    <p><strong>MEDICAMENTOS ADMINISTRADOS</strong></p>
+                                    <p> {% for ciap in obj.ciaps.all %} {{ciap.name}}<br/> {% endfor %} </p>
                                 </div>
                             </div>
                         </div>
@@ -106,11 +109,10 @@
                         <div class="col pt-3">
                             <h3 class="mb-0">PRESCRITOR/A</h3>
                             <p>(Datos, firma)</p>
+                            <p>{{request.user.employee_profile.name}}</p>
                         </div>
                         <div class="col border-bottom border-left mb-5">
-                            <p>FECHA</p>
-                            <p class="mb-0"> &nbsp; &nbsp;  &nbsp; &nbsp;/   &nbsp; &nbsp; &nbsp; &nbsp; /  &nbsp; &nbsp;&nbsp; &nbsp;
-                            </p>
+                            <p><strong>FECHA</strong></p> <p class="mb-0"> {{obj.date|date:"d-m-Y"}} </p>
                             <div class="hr-fecha w-100 mb-3"></div>
                         </div>
                     </div>
