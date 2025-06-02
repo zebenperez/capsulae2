@@ -98,28 +98,28 @@ def signup(request):
     user = None
     useractivate = None
     if (email == confirmedemail):
-        #if validate_captcha(request):
-        try:
-            password = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(8))
-            if not User.objects.filter(username=email).exists():
-                user = signup_create_user(request.POST, email, password)
-                signup_add_group(user)
-                profile = EmployeeProfile.objects.create(user=user)
-                useractivate = signup_create_useractivate(user)
-                signup_create_comp(request.POST, user)
-                signup_create_userprofile(request.POST, user)
-                signup_create_userpayment(user)
-                send_register_email(request.META['HTTP_HOST'], useractivate.activate_key, [email])
-                context = {'user':user, 'useractivate':useractivate, 'error_code':0}
-            else:
-                user = User.objects.get(email=email)
-                context = {'user':user, 'useractivate':useractivate, 'error_code':1}
-        except Exception as e:
-            print(e)
-            context = {'error_code':4}
-            #return render(request, 'error_exception.html', {'exc':show_exc(e)})
-        #else:
-        #    context = {'error_msg': 'Error de validación del captcha' }
+        if validate_captcha(request):
+            try:
+                password = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(8))
+                if not User.objects.filter(username=email).exists():
+                    user = signup_create_user(request.POST, email, password)
+                    signup_add_group(user)
+                    profile = EmployeeProfile.objects.create(user=user)
+                    useractivate = signup_create_useractivate(user)
+                    signup_create_comp(request.POST, user)
+                    signup_create_userprofile(request.POST, user)
+                    signup_create_userpayment(user)
+                    send_register_email(request.META['HTTP_HOST'], useractivate.activate_key, [email])
+                    context = {'user':user, 'useractivate':useractivate, 'error_code':0}
+                else:
+                    user = User.objects.get(email=email)
+                    context = {'user':user, 'useractivate':useractivate, 'error_code':1}
+            except Exception as e:
+                print(e)
+                context = {'error_code':4}
+                #return render(request, 'error_exception.html', {'exc':show_exc(e)})
+        else:
+            context = {'error_msg': 'Error de validación del captcha' }
     else:
         context = {'error_code':2}
     return render (request, "account/signup.html", context)
