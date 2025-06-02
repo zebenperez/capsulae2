@@ -1,99 +1,141 @@
 {% load i18n static %}
 
 {% with books=obj.books.all %}
-    <div id="div-receipt" class="div-receipt">
-        <div class="row h-top m-0">
-            <div class="col-7 custom-box b-bt-red h-left text-center p-0">
-                <img src="{% static "imgs/logo_biblio.jpeg" %}" alt="Logo bibliomecum" /> 
-                {#Sistema de Catalización Lectora#}</div>
-            <div class="col-2 custom-box b-bt-red h-center text-center p-0">Receta Literaria Oficial</div>
-            <div class="col-3 custom-box b-bt-red h-right text-center p-0">
-                <img src="{% static 'community/images/fundec-logo.png' %}" alt="Fundec" width="60%"/></div>
-        </div>
-
-        <div class="row b-bt-red m-0">
-            <div class="col-7 custom-box h-100- data-info main-color b-tp-red small">
-                <div class="mb-1"><strong>Diagnóstico y/o Medicamentos administrados</strong></div>
-                <br/> <strong>{% for item in obj.atcs.all %} {{item.name}}<br/> {% endfor %}</strong>
-                <br/> <strong>{% for item in obj.ciaps.all %} {{item.name}}<br/> {% endfor %}</strong>
-            </div>
-            <div class="col-2 custom-box data-info second-color b-tp-red b-lf-red small text-center">
-                <div class="bg-light"><strong>Duración del tratamiento</strong></div></div>
-            <div class="col-3 custom-box data-info main-color b-tp-red b-lf-red small lh">
-                <strong>Datos del paciente</strong><br />
-                <br/> {%trans "Nombre"%}: <strong>{{obj.patient.nombre}} {{obj.patient.apellido}}</strong> 
-                <br/> {%trans "Fecha de nacimiento"%}: <strong>{{obj.patient.fecha_nacimiento|date:"d-m-Y"}}</strong> 
-                <br/> {%trans "NIF"%}: <strong>{{obj.patient.nif}}</strong>
-		<br/> <div class="text-center">
-			{%if obj.patient.qr%}<img src="{{obj.patient.qr.url}}" alt="qr" width="40%"/>{%endif%}</div>
-            </div>
-        </div>
-
-        <div class="row m-0">
-            <div class="col-7 custom-box data-info lh b-rt-red h-150- second-color l-big">
-                <div class="bg-light">
-                    <div class="mb-1"><strong>PRESCRIPCIÓN</strong>
-                        <br/> <small>Consignar la obra recomendada. Título y autor</small> </div>
-                    {#{% for book in obj.books.all %}#}
-                    <br/> {%trans "ISBN" %}: &nbsp;<strong>{{books.0.isbn}}</strong>
-                    <br/><br/> {%trans "Título" %}: &nbsp;<strong>{{books.0.name}}</strong>
-                    <br/><br/> {%trans "Autor" %}: &nbsp;<strong>{{books.0.author}}</strong>
-                    {#{% endfor %}#}
+        <!--COL CENTRAL-->
+        <div class="col" >
+            <!--row logos y titulo-->
+            <div class="row mb-0 align-items-center justify-content-center">
+                <div class="col-2 d-flex align-items-center">
+                    <img src="{% static "imgs/bibliomecum/fundec.png" %}" class="logo pl-2" alt="Logo Fundec">
+                </div>
+                <div class="header col-4 mt-3 "><h2 class="mb-0 py-2">RECETA LITERARIA</h2></div>
+    
+                <div class="col d-flex justify-content-end align-items-center">
+                    <img src="{% static "imgs/bibliomecum/bibliomecum.png" %}" class="logo pr-2" alt="Logo Bibliomecum">
                 </div>
             </div>
-            <div class="col-2 custom-box h-200 b-bt-red second-color">
-                <div class="text-center"><strong>POSOLOGÍA</strong></div>
-                <div class="row small m-0 mt-1">
-                    <div class="col-3 b-bt-dotted"></div>
-                    <div class="col-6 b-bt-dotted"></div>
-                    <div class="col-3 text-left">Capítulos</div>
+            <!--row linea-->
+            <div class="row"> <div class="hr"></div> </div>
+
+            <!--ROW TODO GENERICA-->
+            <div class="row">
+                <!--COL 1 PRESCRIPCION Y TRATAMIENTO-->
+                <div class="col-7 px-0 border-right">
+                    <!--ROW PRESCRIPCION Y TRATAMIENTO Y POSOLOGIA-->
+                    <div class="row m-0 ">
+                        <div class="col py-3 border-right">
+                            <h3>PRESCRIPCION </h3><br/>
+                            <p>Lectura del libro: <strong>{{books.0.isbn}}</strong></p>
+                            <p>Título: <strong>{{books.0.name}}</strong></p>
+                            <p>Autoría: <strong>{{books.0.author}}</strong></p>
+                        </div>
+                        <div class="col-4 px-0">
+                            <div class="row m-0 border-bottom"> <p class="pt-2 pb-3 pl-3">Duración del tratamiento:</p> </div>
+                            <div class="row m-0 flex-column">
+                                <p class="pb-3 pt-3 pl-3">Posología:</p>
+
+                                <div class="pl-3 pb-3 d-flex justify-content-end align-items-end">
+                                    <div class="col hr-form w-50"></div>
+                                    <div class=" col pl-3"><p class="mb-0">Páginas</p></div>
+                                </div>
+                                <div class="pl-3 pb-3 d-flex justify-content-end align-items-end">
+                                    <div class="col hr-form w-50"></div>
+                                    <div class=" col pl-3"><p class="mb-0">Capítulo</p></div>
+                                </div>
+
+                                <div class="pl-3 row align-items-end pb-3" >
+                                    <div class=" col-auto pl-3"><p class="mb-0">Cada:</p></div>
+                                    <div class="col hr-form w-50"></div>
+                                    <div class=" col pl-3"><p class="mb-0">horas</p></div>
+                                </div>
+                 
+                            </div>
+                        </div>
+                    </div>
+                    <div class="hr"></div>
+                    <div class="row m-0">
+                        <div class="col-7 border-right">
+                            <!--ROW ZONA DE PEGADO-->
+                            <div class="row justify-content-center align-items-center">
+                                <div class="col py-3 ">
+                                    <h2 class="py-2 marcadeagua text-center border-lineas">Esta lectura puede ser sustituida por</h2>
+                                    <p>DIAGNÓSTICO Y/O MEDICAMENTOS ADMINISTRADOS</p>
+                                    {% for book in books %}
+                                        {% if forloop.counter > 1 and  forloop.counter < 4 %}
+                                            <p>{%trans "ISBN" %}: <strong>{{book.isbn}}</strong></p>
+                                            <p>{%trans "Título" %}: <strong>{{book.name}}</strong></p>
+                                            <p>{%trans "Autor" %}: <strong>{{book.author}}</strong></p>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-5">
+                            <h3 class="pt-2 pb-5">Advertencias lectoras</h3>
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" >
+                                <label class="check mb-0">Leer con la luz adecuada</label>
+                            </div>
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" >
+                                <label class="check mb-0">No mezclar con pantallas</label>
+                            </div>
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" >
+                                <label class="check mb-0"> Mantener la atención lejos del aburrimiento </label>
+                            </div>
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" >
+                                <label class="check mb-0">Consultar al personal bibliotecario sobre efectos adversos</label>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="row small m-0">
-                    <div class="col-3 text-left p-0">o bien</div>
-                    <div class="col-6 b-bt-dotted"></div>
-                    <div class="col-3 text-left">Páginas</div>
-                </div>
-                <div class="row small m-0 ">
-                    <div class="col-3 text-left p-0">Cada</div>
-                    <div class="col-6 b-bt-dotted"></div>
-                    <div class="col-3 text-left">Horas</div>
+
+                <!--COL 2 PACIENTE-->
+                <div class="col-5 px-0">
+                    <div class="pt-3 px-3 pb-2">
+                        <h3 class="mb-0">PACIENTE</h3> <br/>
+                        {#<p>(Nombre. apellidos, año de nacimiento, número de identificación).</p>#}
+                        <p> {%trans "Nombre"%}: <strong>{{obj.patient.nombre}} {{obj.patient.apellido}}</strong></p>
+                        <p>{%trans "Fecha de nacimiento"%}: <strong>{{obj.patient.fecha_nacimiento|date:"d-m-Y"}}</strong></p>
+                        <p>{%trans "NIF"%}: <strong>{{obj.patient.nif}}</strong> </p>
+                    </div>
+                    <div class="hr"></div>
+                    <div class="d-flex pb-5">
+                        <div class="col pt-3">
+                            <h3 class="mb-0">PRESCRITOR/A</h3>
+                            <p>(Datos, firma)</p>
+                        </div>
+                        <div class="col border-bottom border-left mb-5">
+                            <p>FECHA</p>
+                            <p class="mb-0"> &nbsp; &nbsp;  &nbsp; &nbsp;/   &nbsp; &nbsp; &nbsp; &nbsp; /  &nbsp; &nbsp;&nbsp; &nbsp;
+                            </p>
+                            <div class="hr-fecha w-100 mb-3"></div>
+                        </div>
+                    </div>
+                    <div class="hr"></div>
+                    <div class="pt-3 px-3 pb-5">
+                        <h3 class="mb-0">BIBLIOTECA/LIBRERÍA</h3>
+                        <p>Fecha</p>
+                    </div>
                 </div>
             </div>
-            <div class="col-3 custom-box data-info h-250 lh b-bt-red b-lf-red small second-color">
-                <div class="bg-light">Advertencias para el lector</div>
-                <br/><p>{{obj.advices}}</p>
+            <!--row linea-->
+            <div class="row"> <div class="hr"></div> </div>
+            <!--row textos-->
+            <div class="row">
+                <div class="col-6 p-2">
+                    <p>La persona beneficiaria puede retirar el libro en cualquier biblioteca o librería adheridas al
+                    programa. El tratamiento es de uso personal pero puede ser transferido a personas con
+                    similares gustos.</p>
+                </div>
+                <div class="col-5 p-4">
+                    <h3 style="font-size: 20px;">Nota: Esta receta no será válida con espóilers o sin marcapáginas</h3>
+                </div>
             </div>
         </div>
 
-        <div class="row m-0">
-            <div class="col-7 custom-box data-info h-150 b-dotted sm-small second-color" style="margin-top: -50px;">
-                <div class="bg-light">El tratamiento puede ser sustituido por:</div>
 
-                {% for book in books %}
-                    {% if forloop.counter > 1 and  forloop.counter < 4 %}
-                        {%trans "ISBN" %}: <strong>{{book.isbn}}</strong>
-                        <br> {%trans "Título" %}: <strong>{{book.name}}</strong>
-                        <br> {%trans "Autor" %}: <strong>{{book.author}}</strong>
-                    {% endif %}
-                {% endfor %}
-            </div>
-            <div class="col-2 custom-box data-info b-bt-red small main-color" style="margin-top: -80px;">
-                <strong>Advertencias al dispensador:</strong>
-                <br/><br/><p>{{obj.contras}}</p>
-            </div>
-            <div class="col-3 custom-box data-info b-bt-red b-lf-red small main-color">
-                <strong>Fecha y firma del prescriptor</strong></div>
-        </div>
-
-        <div class="row m-0">
-            <div class="col-6 custom-box x-small second-color">
-                El beneficiario puede retirar en la Biblioteca Municipal las lecturas prescritas<br/>
-                El tratamiento es de uso personal pero puede ser transferido a personas con <br/>
-                similares gustos o síntomas a los del usuario.
-            </div>
-            <div class="col-3 custom-box text-center">{#Barcode#}</div>
-            <div class="col-3 custom-box second-color small text-center">En caso de duda consulte a su bibliotecario</div>
-        </div>
-    </div>
 {% endwith %}
 

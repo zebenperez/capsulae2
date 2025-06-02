@@ -9,6 +9,29 @@
 	<link rel="stylesheet" href="{% static 'community/css/documents.css' %}">
 	<link rel="stylesheet" href="{% static 'community/css/referral-form.css' %}">
 	<script src="{% static 'community/js/referral-form.js' %}"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="{% static 'js/jSignature.min.js' %}"></script>
+    <style>
+        .signature-grid{
+            display:grid; 
+            grid-template-columns:50% 50%;
+        }
+        .signature-box{
+            display: inline-block;
+            width:80%;
+            text-align:center;
+            background-color:white;
+            /*border: 1px solid black;*/
+            text-align: center;
+        }
+
+        {%comment%}
+        @media print{
+            form { display:none; }
+            #patient_signature_field { border:none !important; }
+        }
+        {%endcomment%}
+    </style>
 </head>
 <body>
     <form action="{% url "evolutionary-send-form" %}" method="POST"/>
@@ -17,7 +40,8 @@
     <input type="hidden" name="company" value="{{company.id}}"/>
     <div class="print-btn-container"> 
         <button type="submit" class="print-btn" id="print-btn"> &#9993; {% trans "Enviar por email" %}</button>
-        <a class="print-btn" id="print-btn" onclick="window.print()"> &#128424; {% trans "Imprimir" %}</a> 
+        <a class="print-btn" id="print-btn" onclick="$('#print-btn').hide();$(this).hide();window.print();"> 
+            &#128424; {% trans "Imprimir" %}</a> 
     </div>
 	<div class="page">
 		<div class="page-wrapper">
@@ -159,13 +183,19 @@
 					<textarea name="obs" class="observations-textarea print-textarea" {%if view%}disabled{%endif%}>{{observations|safe}}</textarea>
 				</div>
 
-				<div class="signature">
-                    <div class="label">  {% trans "Firma a " %} {% now "d/m/Y"%}</div>
-					<div> <input type="text" name="prof" class="professional print-input no-input" value="{{professional}}" 
-                        placeholder="Nombre del profesional" {%if view%}disabled{%endif%}/></div>
-					<div class="signature-container"> <div class="signature-canvas"> </div> </div>
-					{#<div class="professional"> {{ request.user.employee_profile.full_name }}<br> {% now "d/m/Y"%} </div>#}
-				</div>
+				<div class="signature-grid">
+                    <div class="signature_">
+                        <div class="label">  {% trans "Firma a " %} {% now "d/m/Y"%}</div>
+                        <div> <input type="text" name="prof" class="professional print-input no-input" value="{{professional}}" 
+                            placeholder="Nombre del profesional" {%if view%}disabled{%endif%}/></div>
+                       {#<div class="signature-container"> <div class="signature-canvas"> </div> </div>#}
+                        {#<div class="professional"> {{ request.user.employee_profile.full_name }}<br> {% now "d/m/Y"%} </div>#}
+                    </div>
+                    <div class="signature-box">
+                        <div id="sign"></div>
+                        <button class="btn btn-sm sign-capture-btn new" id="reset_signature">Limpiar</button>
+                    </div>
+                </div>
 			</div>
 
             <div class="footer">
@@ -185,6 +215,23 @@
 	</div>
     </form>
     <script>
+        $(document).ready(function() {
+            var sigdiv = $("#sign").jSignature();
+            sigdiv.attr("heigth",120);
+
+            /*$('#guardar').on('click', function(e){
+                e.preventDefault();
+                e.stopPropagation();
+                var datapair = sigdiv.jSignature("getData", "svgbase64")
+                img_data=datapair[0] + "," + datapair[1];
+
+                $('#id_patient_signature').val(img_data);
+                $('#signature_form').submit();
+            });*/
+
+            $('#reset_signature').on('click', function(e){sigdiv.jSignature("reset"); e.preventDefault(); e.stopImmediatePropagation();});
+        });
+
         function checkScale(obj)
         {
             var val = 0;
