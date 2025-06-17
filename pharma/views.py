@@ -652,15 +652,24 @@ def patient_allergy_principles_list_search(request):
 '''
 @group_required("admins","managers")
 def patient_lopd_add(request):
+    import unicodedata
+    from django.core.files.storage import FileSystemStorage
+
     try:
         obj_id = request.POST["obj_id"]
         signed_doc = request.FILES["file"]
 
+        upload_name = unicodedata.normalize('NFKD', signed_doc.name).encode('ascii', 'ignore').decode('ascii')
+        fs = FileSystemStorage()
+        filename = fs.save(upload_name, signed_doc)
+
         patient = get_or_none(Pacientes, obj_id)
         if patient != None:
-            lopd = LOPDConsents.objects.create(paciente = patient, document = signed_doc)
+            lopd = LOPDConsents.objects.create(paciente = patient, document = filename)
+            #lopd = LOPDConsents.objects.create(paciente = patient, document = signed_doc)
         return render(request, "patient/lopd/lopd-list.html", {'obj': patient})
     except Exception as e:
+        print(e)
         return render(request, 'error_exception.html', {'msg': str(e)})
 
 @group_required("admins","managers")

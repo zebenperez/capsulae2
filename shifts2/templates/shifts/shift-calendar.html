@@ -4,13 +4,14 @@
     <div class="toolbar-content">
 	    <h2 class="pathway b-right">
             {%trans 'Turnos'%}
-            <a class="ark pointer" data-url="{%url "shifts-check-updates"%}" data-target-modal="common-modal"><i class="fas fa-code-branch"></i></a>
-            <a class="ark pointer" data-url="{%url "shifts-check-log"%}" data-target-modal="common-modal"><i class="fas fa-list"></i></a>
+            <a class="ark pointer" data-url="{%url "shifts-check-updates"%}" data-target-modal="common-modal">
+                <i class="fas fa-code-branch"></i></a>
+            <a class="ark pointer" data-url="{%url "shifts-check-log"%}" data-target-modal="common-modal">
+                <i class="fas fa-list"></i></a>
         </h2>
         {% if perms.clone_shifts %}
-            <a class="btn btn-sm new" data-target="#shift-clone-modal" data-toggle="modal"> 
+            <a class="btn btn-sm new" data-bs-target="#shift-clone-modal" data-bs-toggle="modal"> 
                 <i class="fas fa-clone"></i>{% trans "Clonar turnos" %} </a>
-
         {% endif %}
         {% if perms.create_shifts %}
             <a class="btn btn-sm ark new" data-url="{% url "shifts-get-shift" %}" data-target="div-shifts"> 
