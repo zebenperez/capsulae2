@@ -7,7 +7,9 @@
             <div class="col-lg-1 col-1 patient-profile-left">
                 <div class="img"> <img src="/static/imgs/no-avatar.png" class="patient-profile-img"> </div>
             </div>
-            <div class="col-lg-11 col-10 col-offset-1">{{obj.name}}</div>
+            <div class="col-lg-11 col-11 col-offset-1 col-lg-offset-1">{{obj.name}}
+                <br><small><small>{{obj.uuid}}</small></small>
+            </div>
         </div>
     </div>
     <div id="div-container">{% include "profile/profile-form.html" %}</div>

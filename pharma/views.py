@@ -2,12 +2,13 @@ from django.core.files import File
 from django.core.files.base import ContentFile
 #from django.contrib.auth import logout
 from django.db.models import Q
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, reverse
 from django.template.loader import render_to_string
 
 from datetime import datetime, timedelta
 from io import BytesIO
+from django.views.decorators.csrf import csrf_exempt
 
 from weasyprint import HTML, CSS
 
@@ -21,6 +22,7 @@ from capsulae2.capsulae_lib import check_user_payment
 from account.models import Company
 from lopd.models import LOPDConsents
 from community.models import Organization, PatientOrg, Procedure, PatientProcedure
+from django.contrib.auth.models import User
 from medication.medication_lib import get_medication
 from medication.models import PresentationsPrescriptionsAempsCache as AempsCache
 from dispensations.models import Dispensation
@@ -766,5 +768,35 @@ def patient_lopd_generate_signed_document(request, patient_id):
             return response
 
     return HttpResponse(response)
+
+@csrf_exempt
+def patient_api_get_patients(request):
+    """
+    API endpoint to get patients for the company with uuid = POST.API_KEY.
+    """
+    try:
+        if request.method == "POST":
+            api_key = request.POST.get("api-key", None)
+            if api_key is None:
+                return JsonResponse({"error": "API_KEY is required"}, status=400)
+
+            company = Company.objects.filter(uuid=api_key).first()
+            if company is None:
+                return JsonResponse({"error": "Invalid API_KEY"}, status=404)
+
+            days_ago = int(request.POST.get("days_ago", 1))
+
+
+            users_in_company = company.users.all()
+            users_in_company = User.objects.filter(pk__in=users_in_company) | User.objects.filter(pk = company.manager.id)
+            patients_list = Pacientes.objects.filter(id_user__in=users_in_company, created_at__gte=datetime.now() - timedelta(days=days_ago)) | Pacientes.objects.filter(id_user__in=users_in_company, created_at__gte=datetime.now() - timedelta(days=days_ago))
+            patients_list = patients_list.filter(email__isnull=False).distinct()
+            patients_data = [patient.toJSON() for patient in patients_list]
+
+            return JsonResponse({"patients": patients_data}, status=200)
+    except Exception as e:
+        print(show_exc(e))
+        return JsonResponse({"error": "An error occurred"}, status=500)
+
 
 
