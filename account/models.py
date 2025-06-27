@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from django.db import models
+from uuid import uuid4
 
 from datetime import date, datetime, timedelta
 
@@ -51,7 +52,7 @@ class Company(models.Model):
     manager = models.OneToOneField(User, verbose_name="Manager", on_delete=models.SET_NULL, related_name="company", blank=True, null=True)
     users = models.ManyToManyField(User, verbose_name="Empleados", related_name="user_companies", blank=True)
     company_options = models.ManyToManyField(CompanyOptions, verbose_name="Opciones", related_name="options_company", blank=True)
-
+    uuid = models.UUIDField(default=uuid4, editable=False, unique=True)
 
     @staticmethod
     def get_by_user(user):
@@ -194,6 +195,15 @@ class UserProfile(models.Model):
     profile = models.ForeignKey(Profile, on_delete=models.SET_NULL, null=True, related_name="users")
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="profiles")
     plan = models.ForeignKey(Plan, on_delete=models.SET_NULL, related_name="profiles", null=True)
+
+    @property
+    def company(self):
+        company = None
+        try:
+            company = Company.objects.filter(users = self.user).first()
+        except Exception as e:
+            print(str(e))
+        return company
 
     class Meta:
         verbose_name = "Perfil de usuario"

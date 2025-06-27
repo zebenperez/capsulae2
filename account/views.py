@@ -2,7 +2,7 @@ from django.contrib.auth.models import User, Group
 #from django.core.mail import send_mail
 from django.shortcuts import render, redirect
 from django.contrib import auth
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.conf import settings
 import uuid
 
@@ -18,7 +18,7 @@ from .models import *
 from .libstripe import ShStripe
 
 from datetime import datetime, timedelta
-import random, string
+import random, string, json
 
 CAT_REGISTER = "Registro"
 
@@ -193,6 +193,7 @@ def reactivate(request, activation_key):
         useractivate.activate_key = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(128))
         useractivate.valid_date = date.today() + timedelta(days=7)
         useractivate.save()
+        email = user.email
         send_register_email(request.META['HTTP_HOST'], useractivate.activate_key, [email])
         #html_message = 'Gracias por tu inter&eacute;s en Capsulae. Para la activaci&oacute;n de la cuenta pincha <a href="http://%s/pharma/activate_account/%s/">aqu&iacute;</a>' % (request.META['HTTP_HOST'], useractivate.activate_key)
         #send_mail('Registro en Capsulae', 'Registro en Capsulae', 'info@shidix.com', [user.email], html_message=html_message)
@@ -271,6 +272,7 @@ def payment_stripe_verify(request, code):
 
     # Get domainname from request
     domain = request.META['HTTP_HOST']
+    
     stripe = None
     if "capsulae.org" in domain:
         stripe = ShStripe(settings.STRIPE_REAL_SECRET_KEY, domain)
@@ -300,6 +302,7 @@ def payment_stripe_verify(request, code):
             return render(request, "account/payment-confirm.html", {'error': True})
         else:
             code = ""
+            line_items = stripe.get_session_line_items(code)
             try:
                 product = stripe.get_product(line_items.data[0].price.product)
                 product = stripe.get_product_checkout(code)
@@ -456,6 +459,24 @@ def donation_custom(request):
 
         subscription_url = stripe.create_fundec_subscription_url(custom_pvp * 100, donation.code, period=period)
         return redirect(subscription_url)
+    
+def company_upgrade_uuid(request):
+    try:
+        if not request.user.is_authenticated:
+            return redirect("pharma-index")
+        if request.user.is_superuser:
+            comp_list = Company.objects.all()
+            for comp in comp_list:
+                if comp.uuid is None or len(comp.uuid) < 20 :
+                    comp.uuid = str(uuid.uuid4())
+                    comp.save()
+            return JsonResponse({"status": "OK", "message": "UUIDs updated for all companies."})
+    except Exception as e:
+        print(show_exc(e))
+        return redirect("pharma-index")
+    return redirect("pharma-index")
+    
+
 
 def test(request):
     return HttpResponse("OK")

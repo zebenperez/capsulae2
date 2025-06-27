@@ -38,6 +38,9 @@ urlpatterns = [
     path('donation-custom/', views.donation_custom, name='donation-custom'),
     path('test/', views.test),
 
+    #------------------------- COMPANIES --------------------
+    path('companies/upgrade-uuid/', views.company_upgrade_uuid, name='company-upgrade-uuid'),
+
     #path('donations/index/', donation_views.donations_index, name='donation-index'),
     #path('donations/edit/', donation_views.donation_edit, name='donation-edit'),
     #path('donations/remove/', donation_views.donation_remove, name='donation-remove'),

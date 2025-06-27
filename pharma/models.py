@@ -136,6 +136,27 @@ class Pacientes(models.Model):
         except:
             False
 
+    def toJSON(self):
+        return {
+            "id": self.id,
+            "n_orden": self.n_orden,
+            "n_historial": self.n_historial,
+            "nif": self.nif,
+            "fecha_nacimiento": self.fecha_nacimiento.strftime("%Y-%m-%d") if self.fecha_nacimiento else None,
+            "cip": self.cip,
+            "nombre": self.nombre,
+            "apellido": self.apellido,
+            "sexo": self.sexo,
+            "borrado": self.borrado,
+            "created_at": self.created_at.strftime("%Y-%m-%d %H:%M:%S") if self.created_at else None,
+            "updated_at": self.updated_at.strftime("%Y-%m-%d %H:%M:%S") if self.updated_at else None,
+            "cod_postal": self.cod_postal,
+            "domicilio": self.domicilio,
+            "slug_address": self.slug_address,
+            "telefono1": self.telefono1,
+            "email": self.email,
+        }            
+
     class Meta:
         db_table = 'pacientes'
         verbose_name = 'paciente'
