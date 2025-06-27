@@ -52,7 +52,7 @@ class Company(models.Model):
     manager = models.OneToOneField(User, verbose_name="Manager", on_delete=models.SET_NULL, related_name="company", blank=True, null=True)
     users = models.ManyToManyField(User, verbose_name="Empleados", related_name="user_companies", blank=True)
     company_options = models.ManyToManyField(CompanyOptions, verbose_name="Opciones", related_name="options_company", blank=True)
-    uuid = models.UUIDField(default=uuid4, editable=False, unique=True)
+    uuid = models.CharField(verbose_name='UUID', max_length=255, default='', unique=False)
 
     @staticmethod
     def get_by_user(user):
