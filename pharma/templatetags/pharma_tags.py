@@ -111,6 +111,11 @@ def get_atcs_for_print(dictionary, key, salto=True):
 '''
     Inclusion Tags
 '''
+@register.inclusion_tag('patient-list-index.html')
+def get_patient_list(user):
+    p_list = Pacientes.objects.filter(id_user=user).order_by('-id')[:10]
+    return {'item_list': p_list}
+ 
 @register.inclusion_tag('pillbox-list.html')
 def get_pillbox_list(user):
     now = datetime.now().date() - timedelta(days=365)
