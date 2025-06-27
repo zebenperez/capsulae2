@@ -20,7 +20,7 @@
 
         <tbody>
             {% for item in item_list %} 
-                <tr class="small row-deliver" id="row-{{item.id}}"> 
+                <tr class="small row-deliveri pointer" id="row-{{item.id}}" onclick="window.location='{%url "patient-view" item.id%}'">
                     <td>{{ item.n_historial }}</td>
                     <td>{{ item.full_name }} </td>
                     <td>{{ item.cip }}></td>
