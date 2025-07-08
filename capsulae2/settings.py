@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'dispensations',
     'bibliomecum',
     'pwa',
+    'actionlogs',
 ]
 
 MIDDLEWARE = [
