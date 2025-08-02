@@ -75,7 +75,7 @@ def patient_treatment_medication_search(request):
     patient_id = get_param(request.GET, "patient_id")
     search_value = get_param(request.GET, "value")
     context = {'patient_id': patient_id, 'items': get_medication(search_value)}
-    #context = {'patient_id': patient_id, 'items': get_medication_by_cn(search_value)}
+    context1 = {'patient_id': patient_id, 'items': get_medication_by_cn(search_value)}
     return render(request, "patient/treatments/medication-list.html", context)
 
 @group_required("admins","managers")
