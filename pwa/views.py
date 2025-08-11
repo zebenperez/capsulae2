@@ -27,6 +27,7 @@ def pin_login(request, patient_id=""):
         context =  {}
         msg = "Operación no permitida"
         pin = request.POST.get('pin', None)
+        patient = request.POST.get('patient', None)
         control_key = request.POST.get('control_key', None)
         if pin != None and control_key != None:
             if control_key == CONTROL_KEY:
@@ -40,8 +41,8 @@ def pin_login(request, patient_id=""):
                     emp = get_or_none(EmployeeProfile, pin, "pin")
                     login(request, emp.user)
                     request.session['pwa_app_session'] = True
-                    if patient_id != "":
-                        return redirect(reverse('pwa-manager', kwargs={'patient_id': patient_id}))
+                    if patient != None:
+                        return redirect(reverse('pwa-manager', kwargs={'patient_id': patient}))
                     else:
                         return redirect(reverse('pwa-manager'))
                 except Exception as e:
@@ -49,7 +50,7 @@ def pin_login(request, patient_id=""):
                     print(show_exc(e))
             else:
                 msg = "Bad control"
-    return render(request, "pwa-login.html", {'msg': msg})
+    return render(request, "pwa-login.html", {'patient': patient_id, 'msg': msg})
 
 def pin_logout(request):
     logout(request)
@@ -62,12 +63,16 @@ def pin_logout(request):
 #@group_required_pwa("employee")
 def manager_home(request, patient_id=None):
     if not request.user.is_authenticated:
-        return redirect(reverse('pwa-login', kwargs={'patient_id': patient_id}))
+        if patient_id != None:
+            return redirect(reverse('pwa-login', kwargs={'patient_id': patient_id}))
+        else:
+            return redirect(reverse('pwa-login', kwargs={}))
     employee = EmployeeProfile.objects.get(user=request.user)
+    patient  = None
     if patient_id != None:
-        patient = get_or_none(Pacientes, patient_id)
-    else:
-        patient  = None
+        pat = get_or_none(Pacientes, patient_id)
+        if employee.company != None and employee.company.manager == pat.id_user:
+            patient = pat
     return render(request, "pwa/manager/home.html", {"obj": patient, "employee": employee})
 
 '''
