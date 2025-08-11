@@ -40,8 +40,7 @@
     <input type="hidden" name="company" value="{{company.id}}"/>
     <div class="print-btn-container"> 
         <button type="submit" class="print-btn" id="print-btn"> &#9993; {% trans "Enviar por email" %}</button>
-        <a class="print-btn" id="print-btn" onclick="$('#print-btn').hide();$(this).hide();window.print();"> 
-            &#128424; {% trans "Imprimir" %}</a> 
+        <a class="print-btn" id="print-btn" onclick="setPrint();"> &#128424; {% trans "Imprimir" %}</a> 
     </div>
 	<div class="page">
 		<div class="page-wrapper">
@@ -180,7 +179,8 @@
 				<div class="observations">
                     <div class="label">
                         {% trans "Observaciones (consigne datos de la situación sociofamiliar, económica… que se consideren de interés)" %} </div>
-					<textarea name="obs" class="observations-textarea print-textarea" {%if view%}disabled{%endif%}>{{observations|safe}}</textarea>
+					<textarea id="obs" name="obs" class="observations-textarea print-textarea" 
+                        {%if view%}disabled{%endif%}>{{observations|safe}}</textarea>
 				</div>
 
 				<div class="signature-grid">
@@ -244,6 +244,13 @@
                 document.getElementById("metric-"+i).innerHTML = '';
             }
             document.getElementById("metric-"+val).innerHTML = '<div class="check-icon" id="check-icon">&#10004;</div>';
+        }
+
+        function setPrint(){
+            $('#obs').height('auto').height($('#obs').prop('scrollHeight'));
+            $('#print-btn').hide();
+            $(this).hide();
+            window.print();
         }
     </script>
 </body>
