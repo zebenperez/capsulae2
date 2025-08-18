@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'bibliomecum',
     'pwa',
     'actionlogs',
+    'books',
 ]
 
 MIDDLEWARE = [

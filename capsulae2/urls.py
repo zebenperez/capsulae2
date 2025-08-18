@@ -31,6 +31,7 @@ urlpatterns = [
     path('lopd/', include('lopd.urls')),
     path('dispensations/', include('dispensations.urls')),
     path('bibliomecum/', include('bibliomecum.urls')),
+    path('books/', include('books.urls')),
     path('pwa/', include('pwa.urls')),
 
     path('accounts/login/', auth_views.LoginView.as_view(template_name='home.html'), name='auth_login'),

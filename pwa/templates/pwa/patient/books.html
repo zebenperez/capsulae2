@@ -3,7 +3,32 @@
 
 {% block content%}
     {% for item in obj.biblio_receipts.all %}
-        <div class="card">
+
+    	<div class="row p-0 m-0">
+            <div class="col-12 recipe-header">
+    	       <div class="row py-1">
+	         <div class="col-6 py-2"><strong>Receta: {{item.date|date:"d-m-Y"}}</strong></div>
+ 	         <div class="col-6">
+ 		    <a class="btn btn-primary w-100 py-2" href="{% url "pwa-patient-books-print" obj.id item.id %}" target="_blank"> 
+                 	<i class="fas fa-print"></i> &nbsp; IMPRIMIR</a>
+ 	        </div>
+ 	      </div>
+ 	    </div>
+
+            <div class="col-12 recipe-body">
+                <div class=""><h3>Medicamentos asociados</h3></div>
+                {% for i in item.atcs.all %} <div class="">{{i.name}} </div> {% endfor%}
+                <br/>
+                <div class=""><h3>Diagnósticos asociados</h3></div>
+                {% for i in item.ciaps.all %} <div class="">{{i.name}} </div> {% endfor%}
+                <br/>
+                <div class=""><h3>Libros recetados</h3></div>
+                {% for i in item.books.all %} <div class="">{{i.name}} </div> {% endfor%}
+            </div>
+        </div>
+
+	{% comment %}
+        <div class="card p-0">
             <div class="card-header">Receta: {{item.date|date:"d-m-Y"}}</div>
             <div class="card-body">
                 <div class=""><h3>Medicamentos asociados</h3></div>
@@ -19,6 +44,7 @@
                 	<i class="fas fa-print"></i> &nbsp; Imprimir receta</a> 
             </div>
         </div>
+	{% endcomment %}
         <br/>
     {% endfor %}
 {% endblock %}

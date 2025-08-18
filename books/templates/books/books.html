@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block central_content %}
+    <div id="update-box">{% include "books/update-cache-box.html" %}</div>
+
+    <div class="row toolbar-search pt-2 pb-2 m-0">
+        <div class="col-1"><i class="fas fa-search"></i></div>
+        <div class="col-11">
+            <input type="text" class="autosearch form-control form-control-dark w-100" name="s-name" id="s-name" 
+               placeholder="{% trans 'Historial, Nombre o CIP' %}" data-url="{% url "books-search" %}" 
+               data-target="books-list" data-related="s-name" />
+        </div>
+    </div>
+    <div class="content mt-4">
+        <div class="toolbar-content">
+			<h2 class="pathway b-right">{% trans 'Libros' %} <span id="items-counter" class="badge badge-secondary">
+                {{items|length}}</span></h2>
+        </div>
+        <div id="books-list">{% include "books/books-list.html" %}</div>
+    </div>
+    {% include "common-modal.html" %}
+
+    <a id="btn-update" class="btn btn-xs hide ark" data-url="{%url "books-update-cache-box" %}" data-target="update-box"></a>
+    <script>
+        {#{% if update_params.is_running == "1" %}#}
+            function updateCache(){
+                console.log("--1--");
+                $("#btn-update").click();
+                setTimeout(updateCache, 20000);
+            }
+            updateCache();
+        {#{% endif %}#}
+    </script>
+{% endblock central_content %}

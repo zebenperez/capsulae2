@@ -2,17 +2,15 @@
 {% load static i18n %}
 
 {% block content%}
-    <div class="col-12 huge p-2 text-center"><strong>Bienvenid@</strong></div>
-    <div class="col-12 p-2 text-center"> <strong>{{employee.first_name}} </strong> </div>
-    <div class="col-12 p-2 text-center">
-        <strong><a class="btn btn-light btn-xl powericon" href="{% url 'pwa-logout' %}">
-            <i class="fas fa-power-off"></i></a></strong>
-    </div>
+    <div class="col-12 py-4 text-center"><h1 class="welcome">Bienvenid@</h1></div>
+    <div class="col-12 p-2 text-center"> <h2 class="fst-italic">{{employee.first_name}} </h2> </div>
     {% if obj is None %}
+        {%comment%}
         <div class="col-12 p-2 text-center">
             <strong><a class="btn btn-success btn-xl p-5" href="{% url 'notes-index' %}">
                 <i class="fas fa-sticky-note"></i> Notas</a></strong>
         </div>
+        {%endcomment%}
     {% else %}
         <div class="col-12 p-2 mt-3">
             <div class="text-start my-2">

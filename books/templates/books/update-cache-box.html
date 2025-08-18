@@ -1,0 +1,16 @@
+{% load i18n %}
+
+
+<div class="row" style="margin:0;">
+    {% if update_params.is_running != "1" %}
+        <div class="col-6 text-warning"> Last update: <small> {{update_params.last_update}} </small></div>
+        <div class="col-6 text-end">
+            <button type="button" class="btn btn-sm ark new" data-url="{%url "books-update-cache" %}" data-target="update-box"> 
+                <i class="fas fa-sync-alt"></i> Update</button>
+        </div>
+    {% else %}
+        <div class="col-12"><i class="fas fa-spinner fa-spin"></i> Runing... 
+            Pages: {{update_params.current_page}} de {{update_params.total_pages}}</div>
+    {% endif %}
+</div>
+
