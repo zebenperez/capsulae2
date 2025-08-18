@@ -41,7 +41,7 @@ def pin_login(request, patient_id=""):
                     emp = get_or_none(EmployeeProfile, pin, "pin")
                     login(request, emp.user)
                     request.session['pwa_app_session'] = True
-                    if patient != None:
+                    if patient != None and patient != "":
                         return redirect(reverse('pwa-manager', kwargs={'patient_id': patient}))
                     else:
                         return redirect(reverse('pwa-manager'))

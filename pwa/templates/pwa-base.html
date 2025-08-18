@@ -25,7 +25,11 @@
         <div class="container-fluid">
             <div class="header">
                 <div class="row m-0">
-                    <div class="col-12 text-center py-1"> <img class="logo" src="{% static 'imgs/logo-capsulae.png' %}"> </div>
+                    <div class="col-10 text-start py-3"> <img class="logo w-75" src="{% static 'imgs/logo-w.png' %}"/> </div>
+                    <div class="col-2 text-center py-3">
+                        <strong><a class="powericon" href="{% url 'pwa-logout' %}">
+                            <i class="fas fa-power-off"></i></a></strong>
+                    </div>
                     {%comment%}
                     <div class="col-4 offset-2 status-bar text-center"><small id="conn-status">...</small> <i class='fas fa-wifi'></i><br />
                         <span class="employee-name">{{user.employee.name}} </span> 
