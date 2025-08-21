@@ -63,6 +63,7 @@ def get_isbn_reg(isbn):
     url = "{}&identifier={}".format(DILVE_URL_REG, isbn)
     response = requests.get(url, {})
     xml_content = response.text  # Obtiene el XML como string
+    #print(xml_content)
     try:
         ns = {
             'onix': 'http://www.editeur.org/onix/2.1/reference',
@@ -90,10 +91,10 @@ def get_isbn_reg(isbn):
 
         # Iterar sobre todos los contribuyentes y filtrar por rol "B01" (autores)
         for contributor in root.findall('.//onix:Contributor', ns):
-            role = contributor.find('onix:ContributorRole', ns).text
-            if role == 'B01':  # Solo autores
-                name = contributor.find('onix:PersonNameInverted', ns).text
-                authors.append(name)
+            #role = contributor.find('onix:ContributorRole', ns).text
+            #if role == 'B01':  # Solo autores
+            name = contributor.find('onix:PersonNameInverted', ns).text
+            authors.append(name)
 
         # Serie y número en la serie
         try:
