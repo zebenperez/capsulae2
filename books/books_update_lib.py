@@ -130,7 +130,7 @@ def update_books_cache():
     total = 0
     total_editorial = 10000
     aup.set_total_pages(str(total_editorial))
-    current_page = aup.get_current_page()
+    current_page = get_int(aup.get_current_page())
     #for i in range(903, 904):
     for i in range(current_page, total_editorial):
         aup.set_current_page(str(i))
