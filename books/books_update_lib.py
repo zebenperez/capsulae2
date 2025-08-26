@@ -1,5 +1,5 @@
 from pharma.common_lib import get_config_value, get_or_create_config_value, set_config_value
-from capsulae2.commons import get_or_none
+from capsulae2.commons import get_or_none, get_int
 from datetime import datetime
 from .models import Book
 
