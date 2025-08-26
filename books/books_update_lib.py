@@ -26,6 +26,7 @@ class BookUpdateParams:
 
     def stop(self):
         set_config_value(self.is_running, 0)
+        self.set_current_page(0)
         self.set_last_update(datetime.now().strftime(DATE_FORMAT))
    
     def get_is_running(self):
@@ -129,8 +130,9 @@ def update_books_cache():
     total = 0
     total_editorial = 10000
     aup.set_total_pages(str(total_editorial))
+    current_page = aup.get_current_page()
     #for i in range(903, 904):
-    for i in range(total_editorial):
+    for i in range(current_page, total_editorial):
         aup.set_current_page(str(i))
         url = "{}&publisher={}".format(DILVE_URL, i)
         response = requests.get(url, {})
