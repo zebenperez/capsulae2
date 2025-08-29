@@ -147,7 +147,10 @@ def update_books_cache():
         for isbn_node in isbn_list:
             #j += 1
             isbn = isbn_node.find("ns:id", namespace).text
-            get_isbn_reg(isbn)
+            try:
+                get_isbn_reg(isbn)
+            except:
+                print("ERROR ISBN: {}".format(isbn))
         #total += j
         #print("Publisher {}: {} isbns".format(i, j))
 
