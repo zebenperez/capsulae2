@@ -1,5 +1,6 @@
 #from bs4 import BeautifulSoup as BS
 #import requests
+from books.models import Book
 
 import urllib.request
 import json
@@ -7,6 +8,38 @@ import json
 
 def datas_to_dict(isbn, title, author):
     return {"isbn": isbn, "author": author, "title": title}
+
+'''
+    LOCAL API
+'''
+def isbn_search_cache(isbn):
+    try:
+        book_list = Book.objects.filter(isbn=isbn)
+        result_list = []
+        for book in book_list:
+            result_list.append(datas_to_dict(book.isbn, book.title, book.authors))
+        return result_list 
+    except:
+        return []
+
+def ta_search_cache(title, author):
+    try:
+        if title == "" and author == "":
+            return []
+
+        kwargs = {}
+        if title != "":
+            kwargs["title__icontains"] = title
+        if author != "":
+            kwargs["authors__icontains"] = author
+        book_list = Book.objects.filter(**kwargs)
+        result_list = []
+        for book in book_list:
+            result_list.append(datas_to_dict(book.isbn, book.title, book.authors))
+        return result_list 
+    except:
+        return []
+
 
 '''
     GOOGLE API
