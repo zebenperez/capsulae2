@@ -8,7 +8,7 @@ from pharma.models import Pacientes
 from medication.medication_lib import get_medication
 from medication.models import CieCiap
 from .models import BiblioReceipt, BiblioReceiptBook, BiblioReceiptAtc, BiblioReceiptCiap
-from .isbn_lib import isbn_search as isearch, title_author_search as tasearch, isbn_search_mcu
+from .isbn_lib import isbn_search as isearch, title_author_search as tasearch, isbn_search_mcu, isbn_search_cache, ta_search_cache
 
 
 '''
@@ -70,11 +70,13 @@ def isbn_search(request):
         author = get_param(request.POST, "author")
         if isbn != "":
             isbn = isbn.replace('-','')
-            result_list = isearch(isbn)
+            result_list = isbn_search_cache(isbn)
+            #result_list = isearch(isbn)
             #result_list_mcu = isbn_search_mcu(isbn)
             #title, author = isearch(isbn)
         else:
-            result_list = tasearch(title, author)
+            result_list = ta_search_cache(title, author)
+            #result_list = tasearch(title, author)
             #title, author, isbn = tasearch(title, author)
         return render(request, "bibliomecum/receipts-search-results.html", {'receipt': obj, 'item_list': result_list})
         #if title != "":
