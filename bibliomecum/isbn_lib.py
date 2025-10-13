@@ -1,6 +1,7 @@
 #from bs4 import BeautifulSoup as BS
 #import requests
 from books.models import Book
+from books.books_update_lib import get_isbn_reg
 
 import urllib.request
 import json
@@ -16,8 +17,13 @@ def isbn_search_cache(isbn):
     try:
         book_list = Book.objects.filter(isbn=isbn)
         result_list = []
-        for book in book_list:
+        if len(book_list) == 0:
+            print("- NOT FOUND -")
+            book = get_isbn_reg(isbn)
             result_list.append(datas_to_dict(book.isbn, book.title, book.authors))
+        else:
+            for book in book_list:
+                result_list.append(datas_to_dict(book.isbn, book.title, book.authors))
         return result_list 
     except:
         return []
@@ -34,12 +40,44 @@ def ta_search_cache(title, author):
             kwargs["authors__icontains"] = author
         book_list = Book.objects.filter(**kwargs)
         result_list = []
+        #if len(book_list) == 0:
+        #    print("- NOT FOUND -")
+            #res = get_isbns_openlibrary(title, author=author)
+        #    print("--A--")
+        #    print(res)
+            
         for book in book_list:
             result_list.append(datas_to_dict(book.isbn, book.title, book.authors))
         return result_list 
     except:
         return []
 
+
+'''
+    OPEN LIBRARY
+'''
+def get_isbns_openlibrary(title, author=None, limit=50):
+    params = {
+        "title": title,
+        "limit": limit
+    }
+    if author:
+        params["author"] = author
+
+    url = "https://openlibrary.org/search.json"
+    r = requests.get(url, params=params, timeout=10)
+    r.raise_for_status()
+    data = r.json()
+
+    isbns = set()
+    for doc in data.get("docs", []):
+        print(doc)
+        for isbn in doc.get("isbn", []) or []:
+            clean = isbn.replace("-", "").strip()
+            if clean:
+                isbns.add(clean)
+
+    return sorted(isbns)
 
 '''
     GOOGLE API

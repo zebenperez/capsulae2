@@ -59,12 +59,13 @@ def save_book(isbn, title, subtitle, authors, serie, pub_code, pub_name):
     book.publisher_code = pub_code
     book.publisher_name = pub_name
     book.save()
+    return book
 
 def get_isbn_reg(isbn):
     url = "{}&identifier={}".format(DILVE_URL_REG, isbn)
     response = requests.get(url, {})
     xml_content = response.text  # Obtiene el XML como string
-    #print(xml_content)
+    print(xml_content)
     try:
         ns = {
             'onix': 'http://www.editeur.org/onix/2.1/reference',
@@ -80,9 +81,9 @@ def get_isbn_reg(isbn):
         isbn = product.find('.//onix:ProductIdentifier[onix:ProductIDType="03"]/onix:IDValue', ns).text
 
         # Título principal y subtítulo
-        title = product.find('.//onix:Title[onix:TitleType="01"]/onix:TitleText', ns).text
+        title = product.findall('.//onix:Title[onix:TitleType="01"]/onix:TitleText', ns)[-1].text
         try:
-            subtitle = product.find('.//onix:Title[onix:TitleType="01"]/onix:Subtitle', ns).text
+            subtitle = product.findall('.//onix:Title[onix:TitleType="01"]/onix:Subtitle', ns)[-1].text
         except:
             subtitle = ""
 
@@ -117,10 +118,12 @@ def get_isbn_reg(isbn):
         #print(f"Subtítulo: {subtitle}")
         #print(f"Autor: {authors}")
         #print(f"Serie: {series} (Número: {series_number})")
-        save_book(isbn, title, subtitle, authors, f"Serie: {series} (Número: {series_number})", pub_code, pub_name)
+        book = save_book(isbn, title, subtitle, authors, f"Serie: {series} (Número: {series_number})", pub_code, pub_name)
+        return book
     except Exception as e:
-        print(xml_content)
+        #print(xml_content)
         print (str(e))
+        return None
 
 def update_books_cache():
     aup = BookUpdateParams()
