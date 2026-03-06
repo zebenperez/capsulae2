@@ -42,7 +42,11 @@
     {%endcomment%}
         <div class="content" style="font-size:12pt">
             <div class="page" >
-                {% include "patient/lopd/lopd-consent-content.html"%}
+		{% if company.id == 9 %} {# FUNDEC #}
+                	{% include "patient/lopd/lopd-consent-content-fundec.html"%}
+		{% else %}
+                	{% include "patient/lopd/lopd-consent-content.html"%}
+		{% endif %}
                 <div class="signature-box">
 	                <div id="signature"></div>
                     <button class="btn btn-sm sign-capture-btn new" id="reset_signature">Limpiar</button> 
