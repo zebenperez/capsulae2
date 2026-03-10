@@ -52,6 +52,8 @@ INSTALLED_APPS = [
     'pwa',
     'actionlogs',
     'books',
+    'store',
+    'tpv',
 ]
 
 MIDDLEWARE = [

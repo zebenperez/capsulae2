@@ -89,6 +89,10 @@ urlpatterns = [
     path('patients/spd/blister-qr-print/<int:pd_id>', spd_views.spd_blister_qr_print, name='spd-blister-qr-print'),
 
     path('patients/spd/search-by-qr/', spd_views.spd_search_by_qr, name='spd-search-by-qr'),
+    path('patients/spd/sim/', spd_views.spd_sim, name='spd-sim'),
+    path('patients/spd/sim-clear/', spd_views.spd_sim_clear, name='spd-sim-clear'),
+    path('patients/spd/sim/json/', spd_views.spd_sim_json, name='spd-sim-json'),
+    path('patients/spd/sim/json-get/<int:comp>/', spd_views.spd_sim_json_get, name='spd-sim-json-get'),
     path('sim/api/', spd_views.spd_simulator, name='spd-simulator'),
 
     #------------------------- PATIENT EVOLUTIONARY --------------------
@@ -132,5 +136,6 @@ urlpatterns = [
 
     #---------------------- AUTO -----------------------
     path('autosave_field/', auto_views.autosave_field, name='autosave_field'),
+    path('autosave_fields/', auto_views.autosave_fields, name='autosave_fields'),
     path('autoremove_obj/', auto_views.autoremove_obj, name='autoremove_obj'),
 ]

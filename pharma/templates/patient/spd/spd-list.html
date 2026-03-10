@@ -37,7 +37,7 @@
                         </div>
                         <div class="col-2 p-2"><span class="text text-warning">{{ deliver.finish_date|sub_days:advice_days|date:"d-m-Y"}}</span></div>
                     {% endwith %}
-                    <div class="col-2 p-2 text-right">
+                    <div class="col-lg-2 col-12 p-2 text-center">
                         {% if obj.patient_telegram.all.count > 0 %}
                             <a class="btn btn-xs ark p-2" data-url="{% url 'patient-telegram-pillbox-deliver-notification' %}" 
                                 data-target-modal="common-modal" data-obj_id="{{obj.id}}" title="Enviar notificación de recogida">
@@ -53,12 +53,12 @@
                             title="{% trans "Editar" %}"> <i class="fas fa-edit"></i></a>
 
                         {%if item.active %} 
-						    <a class="btn btn-sm ark p-2" data-url="{% url 'spd-active-toggle' %}" data-target="div-container"
+			    <a class="btn btn-sm ark p-2" data-url="{% url 'spd-active-toggle' %}" data-target="div-container"
                                 data-obj_id="{{item.pk}}" title="{% trans "Desactivar SPD" %}"><i class="fas fa-times"></i></a>
-						{% else %} 
-						    <a class="btn btn-sm ark p-2" data-url="{% url 'spd-active-toggle' %}" data-target="div-container"
+			{% else %} 
+			    <a class="btn btn-sm ark p-2" data-url="{% url 'spd-active-toggle' %}" data-target="div-container"
                                 data-obj_id="{{item.pk}}" title="{% trans "Activar SPD" %}"><i class="fas fa-check"></i></a>
-						{%endif%}
+			{%endif%}
  
                         <a class="btn btn-sm ark p-2" data-url="{% url "spd-remove" %}" data-obj_id="{{item.id}}" data-target="div-container" 
                             title="{% trans 'Remove' %}" data-confirm="{% trans "Are you sure to remove this element?" %}">

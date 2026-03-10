@@ -1,0 +1,82 @@
+{% load i18n common_tags %}
+
+<span id="div-notification"></span>
+
+<div class="card">
+    <div class="card-body">
+        <div id="patient-container">
+            {# ----------------------------- STOCK FORM ---------------------------#}
+            <div class="row w-100 patient-data-body-2 p-1" style="margin:0;">
+                <div class="col-12 patient-data">
+
+                    <div class="row justify-center">
+                        <input type="hidden" name="product" id="product" value="{{obj.id}}"/>
+                        <div class="col-4">
+                            <div class="greybox-sm p-1">
+                                <input type="text" class="form-control autosave" id="quantity" name="quantity" value="" 
+                                    data-model-name="store.storeinflow" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+                                    data-target="" placeholder="Cantidad..." />
+                            </div>
+                        </div>
+                        <div class="col-2">
+                            <button type="button" class="btn btn-sm ark_new_obj save"
+                                data-url="{% url "product-stock" %}" data-target="div-container" data-obj_id="{{obj.id}}"
+                                data-url-save="{%url "autosave_fields"%}" data-args-save="quantity,product" 
+                                data-model-name="store.storeinflow"> {% trans "Dar de alta" %}</button>
+                        </div>
+                        <div class="col-4">
+                            <div class="greybox-sm p-1">
+                                <input type="text" class="form-control autosave" id="quantityo" name="quantity" value="" 
+                                    data-model-name="store.storeoutflow" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+                                    data-target="" placeholder="Cantidad..." />
+                            </div>
+                        </div>
+                        <div class="col-2">
+                            <button type="button" class="btn btn-sm ark_new_obj save"
+                                data-url="{% url "product-stock" %}" data-target="div-container" data-obj_id="{{obj.id}}"
+                                data-url-save="{%url "autosave_fields"%}" data-args-save="quantityo,product" 
+                                data-model-name="store.storeoutflow"> {% trans "Dar de baja" %}</button>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            {# ----------------------------- STOCK LIST ---------------------------#}
+            <hr/>
+            <div class="row mt-4">
+                <div class="col-5">{% trans "Cantidad" %}</div>
+                <div class="col-5">{% trans "Fecha" %}</div>
+                <div class="col-2"></div>
+            </div>
+            {% for pr in obj.inflows.all %}
+                <div class="row alert alert-success" id="row_{{pr.id}}">
+                    <div class="col-5">{{pr.quantity}}</div>
+                    <div class="col-5">{{pr.reception_date|date:"d-m-Y"}}</div>
+                    <div class="col-2">
+                        <a class="btn btn-sm autoremove" data-model-name="store.storeinflow" data-obj-id="{{pr.id}}" 
+                            data-url="{% url "autoremove_obj" %}" data-target="row_{{pr.id}}" title="{% trans 'Remove' %}"
+                            data-confirm="{% trans "Está suguro/a de que desea borrar este elemento?" %}">
+                            <i class="fas fa-trash"></i></a>
+                    </div>
+                </div>
+            {% endfor %}
+            {% for pr in obj.outflows.all %}
+                <div class="row alert alert-danger" id="row_{{pr.id}}">
+                    <div class="col-5">{{pr.quantity}}</div>
+                    <div class="col-5">{{pr.reception_date|date:"d-m-Y"}}</div>
+                    <div class="col-2">
+                        <a class="btn btn-sm autoremove" data-model-name="store.storeoutflow" data-obj-id="{{pr.id}}" 
+                            data-url="{% url "autoremove_obj" %}" data-target="row_{{pr.id}}" title="{% trans 'Remove' %}"
+                            data-confirm="{% trans "Está suguro/a de que desea borrar este elemento?" %}">
+                            <i class="fas fa-trash"></i></a>
+                    </div>
+                </div>
+            {% endfor %}
+
+        </div>
+    </div>
+</div>
+

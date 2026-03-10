@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% load i18n common_tags %}
+
+{% block central_content %}
+    <div class="row space-between center-vertical mb-2">
+        <div class="col-2">
+            <a class="btn btn-primray btn-labeled btn-sm {%current_exact "get-sales" days=365%}" href="{%url "get-sales" 365%}">
+                <i class="fas fa-search"></i><span class="d-none d-sm-block">{% trans "365 días" %}</span></a>
+        </div>
+        <div class="col-2">
+            <a class="btn btn-primray btn-labeled btn-sm {%current_exact "get-sales" days=180%}" href="{%url "get-sales" 180%}">
+                <i class="fas fa-search"></i><span class="d-none d-sm-block">{% trans "180 días" %}</span> </a>
+        </div>
+        <div class="col-2">
+            <a class="btn btn-primray btn-labeled btn-sm {%current_exact "get-sales" days=90%}" href="{%url "get-sales" 90%}">
+                <i class="fas fa-search"></i><span class="d-none d-sm-block">{% trans "90 días" %}</span> </a>
+        </div>
+        <div class="col-2">
+            <a class="btn btn-primray btn-labeled btn-sm {%current_exact "get-sales" days=30%}" href="{%url "get-sales" 30%}">
+                <i class="fas fa-search"></i><span class="d-none d-sm-block">{% trans "30 días" %}</span> </a>
+        </div>
+        <div class="col-2">
+            <a class="btn btn-primray btn-labeled btn-sm {%current_exact "get-sales" days=7%}" href="{%url "get-sales" 7%}">
+                <i class="fas fa-search"></i><span class="d-none d-sm-block">{% trans "Última semana" %}</span> </a>
+        </div>
+        <div class="col-2">
+            <a class="btn btn-primray btn-labeled btn-sm" href="{%url "tpv-index"%}">
+                <i class="fas fa-arrow-left"></i><span class="d-none d-sm-block">{% trans "Volver a TPV" %}</span></a>
+        </div>
+    </div>
+    <div class="panel-heading-orange text-white"> {% trans "Listado de ventas" %} </div>
+
+    <div class="panel-list"> 
+        <table class="table table-hover table-striped table-list">
+            <thead>
+                <tr>
+                    <th width="10%">Num</th>
+                    <th>Fecha</th>
+                    <th>Cliente</th>
+                    <th>Productos</th>
+                    <th>Pago</th>
+                    <th>Base</th>
+                    <th>Tax</th>
+                    <th>Descuento</th>
+                    <th colspan="2">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr >
+                    <td class="pt-3" title="{{item.hashinv}}"> {{item.number}} </td>
+                    <td class="pt-3"> {{item.date}}</td>
+                    <td class="pt-3"> {{item.client.code}}<br/>{{item.client_dni}}</td>
+                    {#<td class="pt-3"> {{item.client.code}}</td>#}
+                    {#<td class="pt-3"> {{item.get_quantity}}</td>#}
+                    <td class="pt-3"> 
+                        {% for line in item.lines.all  %} 
+                            {{line.product.name}} - {{line.units}} - <br/>
+                            <span class="text-warning">(Stock: {{line.product.in_stock|floatformat:"0"}} uds)</span> <br/>
+                        {% endfor %} 
+                    </td>
+                    <td class="pt-3"> {% if item.cash %} {% trans 'Efectivo' %} {% else %} {% trans 'Tarjeta' %}{% endif%}</td>
+                    <td class="pt-3"> {{item.get_base|floatformat:2}}</td>
+                    <td class="pt-3"> {{item.get_taxes|floatformat:2}}</td>
+                    <td class="pt-3"> {{item.get_discount|floatformat:2}}</td>
+                    <td class="pt-3"> {{item.total|floatformat:2}}</td>
+                    <td class="pt-3">
+                        {% if item.client or item.client_dni != "" %}
+                            <a href="{% url 'print-invoice-sale' item.hashinv %}" target="_blank" class="btn btn-sm">
+                                <i class="fa fa-edit"></i></a>
+                        {% else %}
+                            <button class="btn btn-sm ark" data-url="{%url "print-invoice-client"%}" data-target-modal="common-modal" 
+                                data-hashinv="{{item.hashinv}}"> <i class="fa fa-edit"></i></button>
+                        {% endif  %}
+
+                        <a href="{%url 'print-sale' item.hashinv%}" target="_blank" class="btn btn-sm"><i class="fa fa-print"></i></a>
+
+                        {% if forloop.counter == 1 %}
+                            <a href="{% url 'remove-sale' item.hashinv %}" class="btn btn-sm" 
+                                onclick="return confirm('Va a eliminar este item');"><i class="fa fa-trash"></i></a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% include "common-modal.html" %}
+{% endblock central_content %}

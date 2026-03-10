@@ -1,0 +1,12 @@
+{% load i18n %}
+
+<div class="col-lg-6 header-btns d-flex flex-row-reverse">
+    <a class="btn btn-outline-secondary sales" href="{% url 'zeta' %}">
+        <i class="fa fa-cash-register"></i>&nbsp;Zeta</a>
+    <a class="btn btn-outline-secondary sales pl-3 pr-3" href="{% url 'get-sales' %}">
+        <i class="fas fa-list"></i>&nbsp;Lista de ventas</a>
+    <a class="btn btn-outline-secondary sales pl-3 pr-3" href="{% url 'get-orders' %}">
+        <i class="fas fa-euro-sign"></i>&nbsp;Pedidos web (<span id="get-n-pendings">{{morders}}</span>)</a>
+</div>
+
+

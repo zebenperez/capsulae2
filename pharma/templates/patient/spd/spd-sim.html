@@ -1,0 +1,196 @@
+
+{% load i18n static %}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="UTF-8">
+	<link rel="stylesheet" href="{% static '/css/spd-sim.css' %}">
+</head>
+
+<div class="row box-container w-100 my-2 mx-0">
+    <!-- Panel de control -->
+    <div class="col-8"> <h2>Pastillero</h2> </div>
+    <div class="col-4"> 
+        <input type="text" class="form-control" id="spd_name" name="sdp_name" value="spd_com" 
+            onchange="$('.treat-json').data('spd_name', $(this).val())"/>
+    </div>
+    <div class="col-lg-6 col-6 panel-container" >
+        <div class="panel" id="controlPanel"></div>
+    </div>
+
+    <!-- Botones de acción -->
+    <div class="col-lg-6 col-6 buttons-container" id="actionButtons">
+        {% for med in response %}
+            <button class="btn btn-pills action-btn treat-btn my-1" id="treat-{{med.id}}"
+                data-morning="{{med.morning}}" data-lunch="{{med.lunch}}" data-dinner="{{med.dinner}}" data-others="{{med.others}}">
+                {{med.treatment}}</button>
+
+            <button class="ark treat-json" id="treat-json-{{med.id}}" data-url="{% url "spd-sim-json" %}" data-target="" 
+                style="display:none" data-values="" data-spd_name="spd_com"></button>
+        {% endfor %}
+    </div>
+
+    <div class="col-12 panel-container" >
+        <button class="btn btn-danger ark" id="clear-btn" data-url="{% url "spd-sim-clear" %}" data-target="" 
+            onclick="clearAll()"> {% trans "Terminar" %}</button>
+    </div>
+</div>
+
+<script>
+    // Función para apagar todos los botones
+    function clearAll() {
+        $(".control-btn").removeClass("btn-success").addClass("btn-danger").text("OFF");
+        $(".action-btn").removeClass("btn-warning").addClass("btn-secondary");
+    }
+
+    $(document).ready(function () {
+        const daysOfWeek = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
+        var headers = ["", "DESAYUNO", "ALMUERZO", "MERIENDA", "CENA"];
+        const rows = 7;
+        const cols = 4;
+        const panel = $("#controlPanel");
+
+        if ($(window).width() < 768) {
+            headers = ["", "Des", "Alm", "Mer", "Cena"];
+        }
+
+        // Agregar encabezados
+        headers.forEach(text => {
+            panel.append(`<div class="header">${text}</div>`);
+        });
+
+        // Agregar los días de la semana y los botones ON/OFF
+        for (let i = 0; i < rows; i++) {
+            panel.append(`<div class="day-label">${daysOfWeek[i]}</div>`);
+
+            for (let j = 0; j < cols; j++) {
+                panel.append(`<button id="btn-${i}-${j}" class="control-btn btn btn-danger">OFF</button>`);
+            }
+        }
+
+        // Evento click para los botones de la tabla
+        //$(".control-btn").click(function () {
+        //    $(this).toggleClass("btn-danger btn-success");
+        //    $(this).text($(this).hasClass("btn-success") ? "ON" : "OFF");
+        //});
+
+        // Función para encender/apagar botones específicos
+        function setButtonState(day, meal, state) {
+            let btn = $(`#btn-${day}-${meal}`);
+            if (state > 0) {
+                //btn.removeClass("btn-danger").addClass("btn-success").text(`ON - ${state}`);
+                btn.removeClass("btn-danger").addClass("btn-success").text(`${state}`);
+            } else {
+                btn.removeClass("btn-success").addClass("btn-danger").text("OFF");
+            }
+        }
+
+        // Función para apagar todos los botones
+        function resetAll() {
+            $(".control-btn").removeClass("btn-success").addClass("btn-danger").text("OFF");
+            $(".action-btn").removeClass("btn-warning").addClass("btn-secondary");
+        }
+
+        // Mostrar resolución en tiempo real
+        $("#show-resolution").click(function () {
+            let width = window.innerWidth;
+            let height = window.innerHeight;
+            $("#resolution-display").text(`Resolución: ${width} x ${height}`);
+        });
+
+        $(".treat-btn").click(function () {
+            if ($(this).css('background-color') === 'rgb(200, 200, 200)') 
+                if (!confirm("¿Ya ha usado este medicamento, desea usarlo de nuevo?"))
+                    return false;
+
+            resetAll();
+            $(this).addClass("btn-warning");
+    
+            var m = $(this).data("morning");
+            var l = $(this).data("lunch");
+            var d = $(this).data("dinner");
+            var o = $(this).data("others");
+            json_list = {'seg0': [], 'seg1': [], 'seg2': [], 'seg3': []}
+            for (let i = 0; i < 7; i++) {
+                setButtonState(i, 0, m);
+                setButtonState(i, 1, l);
+                setButtonState(i, 2, d);
+                setButtonState(i, 3, o);
+                json_list['seg0'].push(m);
+                json_list['seg1'].push(l);
+                json_list['seg2'].push(d);
+                json_list['seg3'].push(o);
+            }
+
+            var id = $(this).attr("id").split("-")[1];
+            let str = JSON.stringify(json_list);
+            $("#treat-json-"+id).data("values", str);
+            $("#treat-json-"+id).click();
+            $(this).css("background", "rgb(200, 200, 200)");
+        });
+
+        {%comment%}
+        {% for med in response %}
+            $("#treat-{{med.id}}").click(function () {
+                resetAll();
+                $(this).addClass("btn-warning");
+        
+                for (let i = 0; i < 7; i++) {
+                    setButtonState(i, 0, {{med.morning}});
+                    setButtonState(i, 1, {{med.lunch}});
+                    setButtonState(i, 2, {{med.dinner}});
+                    setButtonState(i, 3, {{med.others}});
+                }
+            });
+        {% endfor %}
+        {%endcomment%}
+
+        {%comment%}
+        $("#pillbox_deliver_button").click(function () {
+            let cadena = $("#pillbox_deliver_code").val();
+            let domainname = "https://" + window.location.hostname;
+            // Eliminar botones de accion
+            $("#actionButtons").empty();
+
+            $.ajax({
+                url: domainname + "/pharma/sim/api/", // URL de la API, agregar domainname
+
+                type: "POST",
+                data: {
+                    pillbox_deliver_code: cadena,
+                    api_key: "1234"
+                },
+                success: function (response) {
+                    json_response = response;
+                    resetAll();
+
+                    for (let item = 0; item < json_response.length; item++) {
+                        $('#actionButtons').append(`<button class="btn btn-secondary action-btn" id="treat-${json_response[item].id}">${json_response[item].treatment}</button>`);
+                        $(`#treat-${json_response[item].id}`).click(function () {
+                            resetAll();
+                            $(this).addClass("btn-warning");
+
+    
+                            for (let i = 0; i < 7; i++) {
+                                setButtonState(i, 0, json_response[item].morning);
+                                setButtonState(i, 1, json_response[item].lunch);
+                                setButtonState(i, 2, json_response[item].dinner);
+                                setButtonState(i, 3, json_response[item].others);
+                            }
+                        });
+                    }
+                },
+                error: function (error) {
+                    alert("Error al buscar el código del pastillero: " + error.error_msg);
+                    console.error(error);
+                }
+            });
+        });
+        {%endcomment%}
+
+    });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+

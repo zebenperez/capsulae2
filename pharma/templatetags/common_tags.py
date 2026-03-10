@@ -1,4 +1,5 @@
 from django.utils.safestring import mark_safe
+from django.urls import reverse
 from django import template
 
 from capsulae2.settings import BASE_DIR
@@ -54,6 +55,10 @@ def sub_days(date, sub_days):
     except Exception as e :
         return None
 
+@register.filter
+def jsfloat(value):
+    return str(value).replace(',','.')
+
 '''
     Simple Tags
 '''
@@ -66,6 +71,15 @@ def userqr_code(request, paciente):
     url.svg("%s%s%s"%(BASE_DIR, rpath, filename), scale=4)
     out="%s://%s/media/lopd_codebars/%s"%(request.scheme, request.get_host(), filename)
     return out
+
+@register.simple_tag(takes_context=True)
+def current_exact(context, url, **kwargs):
+    request = context['request']
+    reverseurl = reverse(url, kwargs=eval(str(kwargs)))
+    if reverseurl == request.get_full_path() :
+        return "active current"
+    else:
+        return ""
 
 '''
     Inclusion Tags

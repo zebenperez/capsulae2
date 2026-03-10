@@ -363,6 +363,37 @@ function activeEditor(obj) {
     CKEDITOR.replace(id).on('change', function(){$("#"+ref).html(this.getData()).change();});
 }
 
+function arkKeyUp(obj){
+    value = obj.val();
+    if (((obj.data("confirm")) && confirm(obj.data("confirm"))) || !(obj.data("confirm")))
+    {
+        url = obj.data("url");
+        var target = "";
+        var target_modal = "";
+        if (obj.data("target"))
+            target = obj.data("target");
+        if (obj.data("target-modal"))
+            target_modal = obj.data("target-modal");
+
+        var datas = {};
+        var args = obj.data();
+        for(var i in args)
+            if (i != "url")
+                datas[i] = args[i]
+        datas['value'] = value;
+        ajaxGet(url, datas, target, target_modal);
+    }
+
+}
+
+var delay = (function(){
+    var timer = 0;
+    return function(callback, ms){
+        clearTimeout (timer);
+        timer = setTimeout(callback, ms);
+    };
+})();
+
 $(document).ready(()=>{
     $("body").on("keyup", ".autosearch", function(e){
         var obj = $(this);
@@ -546,6 +577,73 @@ $(document).ready(()=>{
             e.preventDefault();
             e.stopImmediatePropagation();
         }
+    });
+
+    $("body").on("click", ".ark_new_obj", function(e){
+        var obj = $(this);
+        if (((obj.data("confirm")) && confirm(obj.data("confirm"))) || !(obj.data("confirm")))
+        {
+            url_save = obj.data("url-save");
+            model_name = obj.data("model-name");
+            args_save = obj.data("args-save").split(",");
+            data_save = {"model_name": model_name}
+            for(var i in args_save)
+            {
+                field = $("#"+args_save[i]);
+                value = field.val();
+                if (field.data("bool"))
+                    if (field.is(':checked'))
+                        value = "True";
+                    else
+                        value = "False";
+
+                data_save["field_"+field.attr("name")] = value;
+                //data_save["field_"+args_save[i]] = value;
+            }
+
+            ajaxGet(url_save, data_save, "", "");
+
+            setTimeout(function(){
+                url = obj.data("url");
+                var target = obj.data("target") ? obj.data("target") : "";
+                var target_modal = obj.data("target-modal") ? obj.data("target-modal") : "";
+
+                var datas = {};
+                var args = obj.data();
+                for(var i in args)
+                    if (i != "url")
+                        datas[i] = args[i]
+                ajaxGet(url, datas, target, target_modal);
+                if (obj.data("show"))
+                    $("#" + obj.data("show")).show();
+                if (obj.data("hide"))
+                    $("#" + obj.data("hide")).hide();
+            }, 1000);
+
+
+            e.preventDefault();
+            e.stopImmediatePropagation();
+        }
+    });
+
+    $("body").on("keyup", ".ark_keyup", function(e){
+        var obj = $(this);
+        if ((obj.val().length > 2) && (e.key != 'Enter'))
+        {
+            delay(function(){ arkKeyUp(obj); }, 1000);
+        }
+        else
+        {
+            var target = "";
+            var target_modal = "";
+            if (obj.data("target"))
+                target_empty = obj.data("target");
+            if (obj.data("target-modal"))
+                target_empty = obj.data("target-modal");
+            $('#'+target_empty).empty();
+
+        }
+        e.preventDefault();
     });
 
     $("body").on("change", ".autosave", function(e){

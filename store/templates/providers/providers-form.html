@@ -1,0 +1,77 @@
+{% load i18n %}
+
+
+<div class="row">
+    <div class="col-11"> <h2><i class="fa fa-history"></i>&nbsp; {% trans 'Proveedor' %}</h2> </div>
+    <div class="col-1">
+        <div class="d-flex justify-content-end"> 
+            <button type="button" class="btn btn-lg" data-bs-dismiss="modal" title="{% trans "Close" %}">
+            <i class="fas fa-times"></i></button> 
+        </div>
+    </div>
+</div>
+
+<div id="div-notification"></div>
+
+<div class="row justify-center">
+    <div class="col-4">
+        <div class="row">
+            <div class="greybox-sm p-1">
+                {% trans "Código" %}
+                <input type="text" class="form-control autosave" id="code" name="code" value="{{obj.code|default:""}}" 
+                    title="{{obj.code}}" data-model-name="store.provider" data-obj-id="{{obj.id}}" 
+                    data-url="{%url "autosave_field"%}" data-target="div-notification" placeholder="Código..." /> 
+                <span id="code__msg"></span>
+            </div>
+        </div>
+    </div>
+    <div class="col-8">
+        <div class="row">
+            <div class="greybox-sm p-1">
+                {% trans "Nombre" %}
+                <input type="text" class="form-control autosave" id="name" name="name" value="{{obj.name|default:""}}" 
+                    title="{{obj.name}}" data-model-name="store.provider" data-obj-id="{{obj.id}}" 
+                    data-url="{%url "autosave_field"%}" data-target="div-notification" placeholder="Nombre..." /> 
+                <span id="name__msg"></span>
+            </div>
+        </div>
+    </div>
+    <div class="col-4">
+        <div class="row">
+            <div class="greybox-sm p-1">
+                {% trans "Teléfono" %}
+                <input type="text" class="form-control autosave" id="phone" name="phone" value="{{obj.phone|default:""}}" 
+                    title="{{obj.phone}}" data-model-name="store.provider" data-obj-id="{{obj.id}}" 
+                    data-url="{%url "autosave_field"%}" data-target="div-notification" placeholder="Teléfono..." /> 
+                <span id="phone__msg"></span>
+            </div>
+        </div>
+    </div>
+    <div class="col-8">
+        <div class="row">
+            <div class="greybox-sm p-1">
+                {% trans "Correo electrónico" %}
+                <input type="text" class="form-control autosave" id="email" name="email" value="{{obj.email|default:""}}" 
+                    title="{{obj.email}}" data-model-name="store.provider" data-obj-id="{{obj.id}}" 
+                    data-url="{%url "autosave_field"%}" data-target="div-notification" placeholder="Correo electrónico..." /> 
+                <span id="email__msg"></span>
+            </div>
+        </div>
+    </div>
+
+    <input type="hidden" class="form-control autosave" id="company" name="company" value="{{request.user.company.id}}"/> 
+</div>
+
+<div class="d-flex justify-content-end">
+    <button type="button" class="btn btn-sm save" data-bs-dismiss="modal">{% trans "Cancelar" %}</button>
+    {% if obj %}
+        <button type="button" class="btn btn-sm ark save" data-bs-dismiss="modal" data-url="{% url "providers-list" %}"
+            data-target="providers-list">{% trans "Guardar" %}</button>
+    {% else %}
+        <button type="button" class="btn btn-sm ark_new_obj save" data-bs-dismiss="modal" data-url="{% url "providers-list" %}"
+            data-target="providers-list" data-url-save="{% url "autosave_fields" %}" data-args-save="code,name,phone,email,company"
+            data-model-name="store.provider">
+            {% trans "Guardar" %}</button>
+    {% endif %}
+</div>
+
