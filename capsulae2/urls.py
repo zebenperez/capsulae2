@@ -32,6 +32,8 @@ urlpatterns = [
     path('dispensations/', include('dispensations.urls')),
     path('bibliomecum/', include('bibliomecum.urls')),
     path('books/', include('books.urls')),
+    path('store/', include('store.urls')),
+    path('tpv/', include('tpv.urls')),
     path('pwa/', include('pwa.urls')),
 
     path('accounts/login/', auth_views.LoginView.as_view(template_name='home.html'), name='auth_login'),

@@ -1,0 +1,37 @@
+{% load i18n %}
+
+<div class="row block-options mb-2" style="border-bottom: 2px solid #e2e8f0;">
+    <div class="row options m-0 p-0 w-100">
+            <div class="col-3 div-option text-center -2 card-cash ark" data-target="none" 
+                data-url="{%url "change-method"%}" data-hashinv="{{invoice.hashinv}}" id="method" name="method"
+                data-value="no" > <i class="fa fa-credit-card"></i>&nbsp; Tarjeta
+            </div>
+            <div class="col-3 div-option option-on text-center -2 card-cash ark" 
+                data-target="none" data-url="{% url "change-method" %}" data-hashinv="{{invoice.hashinv}}" 
+                id="method" name="method" data-value="yes" > <i class="fa fa-coins"></i>&nbsp; Efectivo
+            </div>
+            {% if company.ispharma %}
+                <div class="col-3 div-option text-center -2 ark" data-url="{% url "change-regulated" %}" 
+                    data-target="none" data-hashinv="{{invoice.hashinv}}" id="regulated" name="regulated" 
+                    data-value="yes"> <i class="fa fa-list"></i>&nbsp; Receta
+                </div>
+                <div class="col-3 div-option text-center -2" data-url="{%url "change-regulated"%}"
+                    data-target="none" data-hashinv="{{invoice.hashinv}}" id="regulated" name="regulated" 
+                    data-value="no"> <i class="fa fa-coins"></i>&nbsp;  Venta Libre
+                </div>
+            {% endif %}
+     </div>
+     <div class="row form-group m-0 my-2 w-100" style="align-items: center;">
+            <div class="col-2">Entrega:</div>
+            <div class="col-3" style="background-color: #ededed;">
+                <input id="entrega" type="number" step="0.01" 
+                    onchange="calcula_cambio();" onkeyup="calcula_cambio();" 
+                    class="form-control text-right w-100" value="0.00" data-invoice="{{invoice.id}}" 
+                    data-url="{% url "save-paid-amount" %}" style="background-color: #ededed;"></div>
+            <div class="col-3 offset-1 text-right">Cambio:</div>
+            <div class="col-3 text-right change-div" style="background-color: #ededed; padding:12px;" id="change_returned">
+                <strong>{{0|floatformat:2}} &euro;</strong></div>
+        </div>
+
+</div>
+

@@ -44,13 +44,12 @@
 	font-size: 1.5rem !important;
 	width: 10%;
 	text-align: center;
-/*    border:1px solid black;*/
 }
 
 .stat-content-results, .stat-content {
 	display: inline-block;
 	margin-left:1%;
-    align-items: center;
+	align-items: center;
 }
 
 .stat-content-results {
@@ -90,11 +89,10 @@
 .stat-number.special {
 	width: 100%;
 }
-
+/*
 .stat-content {
 	width: 85%;
-/*    border:1px solid blue;*/
-}
+}*/
 
 .stat-content-bt {
 	display: inline-block;
@@ -103,28 +101,40 @@
 
 .stat-title {
     display: inline-block;
-    width: 65%;
+    /*width: 65%;*/
     vertical-align: top;
 /*    border:1px solid blue;*/
 }
 
+.titnumb {
+	display: grid; 
+	grid-template-columns: 80% 20%; 
+	align-items:center; 
+}
+
 span.count-title {
 	font-size: 1.1rem;
+	color: #000;
+	text-transform: uppercase;
 }
 
 .stat-text.small {
 	font-size: 0.9rem;
-    font-weight: 600;
-    line-height: 60px;
+	font-weight: 600;
+	line-height: 60px;
 }
 
 .stat-number {
 	display: inline-block;
 	font-size: 1.1rem;
-    font-weight: 600;
-    width: 30%;
-    text-align: right;
-/*    border:1px solid red;*/
+	font-weight: 600;
+	text-align: right;
+	color: #000;
+}
+
+.time-control {
+	display: grid;
+       	align-items: center;
 }
 
 .stat-box.bottom {
@@ -132,6 +142,42 @@ span.count-title {
     padding:0px;
 }
 
-.stat-widget-five {
-/*	border:1px solid red;*/
+
+button.btn.btn-start {
+	background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+	box-shadow: 0 4px 14px 0 rgba(16, 185, 129, 0.3);	
 }
+
+button.btn.btn-end {
+	background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+	box-shadow: 0 4px 14px 0 rgba(239, 68, 68, 0.3);
+}
+
+button.btn.btn-start,
+button.btn.btn-end {
+	opacity: 0.75;
+	--tw-text-opacity: 1;
+	color: rgb(255 255 255 / var(--tw-text-opacity, 1));
+	border-radius: 0.75rem;
+	justify-content: center;
+	align-items: center;
+	display: flex;
+	padding: 18px 32px;
+	font-size: 18px;
+	font-weight: 600;
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.icon-play, .icon-stop {
+	width: 20px;
+	height: 20px;
+	fill: currentColor;
+}
+
+
+@media screen and (max-width: 640px) {
+	span.count-title {
+		font-size: 0.9rem;
+	}
+}
+

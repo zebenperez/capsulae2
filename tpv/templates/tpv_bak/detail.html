@@ -1,0 +1,101 @@
+{% load i18n app_tags generictags %}
+<div class="flex flex-row-reverse space-between center-vertical mb-2">
+    <div class="tools">
+        <a class="btn-tools btn-primray btn-labeled btn-sm" href="{% url "get-orders" %}" >
+            <i class="fas fa-arrow-left"></i><span class="d-none d-sm-block">{% trans "Volver a Pedidos" %}</span></a>
+    </div>
+</div>
+<div class="panel-heading-orange text-white"> {% trans "Detalle para el pedido" %}&nbsp;{{item.hashinv}}</div>
+
+<div class="panel-list"> 
+    <div class="card w-100 mb-3">
+        <div class="card-header">{% trans 'Datos del cliente' %}</div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-2"><span class="small"><strong>{% trans 'Código' %}:</strong></span><br>{{item.client.code}}</div>
+                <div class="col-4"><span class="small"><strong>{% trans 'Nombre' %}:</strong></span><br>{{item.client.name}}</div>
+                <div class="col-4"><span class="small"><strong>{% trans 'Email' %}:</strong></span><br>{{item.client.email}}</div>
+                <div class="col-2"><span class="small"><strong>{% trans 'Teléfono' %}:</strong></span><br>{{item.client.phone}}</div>
+            </div>
+        </div>
+    </div>
+    <table class="table table-hover table-striped table-list">
+        <thead>
+            <tr>
+                <th>Ref</th>
+                <th>Fecha</th>
+                <th>Productos</th>
+                <th>Base</th>
+                <th>Tax</th>
+                <th>Descuento</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr >
+                <td class="pt-3" title="{{item.hashinv}}"> {{item.hashinv}} </td>
+                <td class="pt-3"> {{item.date}}</td>
+                <td class="pt-3"> {{item.get_quantity}}</td>
+                <td class="pt-3"> {{item.get_base|floatformat:2}}</td>
+                <td class="pt-3"> {{item.get_taxes|floatformat:2}}</td>
+                <td class="pt-3"> {{item.get_discount|floatformat:2}}</td>
+                <td class="pt-3" id="total-order"> {{item.total|floatformat:2}}</td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-hover table-striped table-list">
+        <tbody>
+            <tr>
+                <td class="pt-3 text-center" colspan="7">{% trans 'Artículos' %}</td>
+            </tr>
+            <tr>
+                <th>#</th>
+                <th>{% trans 'Unidades' %}</th>
+                <th>{% trans 'Code' %}</th>
+                <th colspan="3">{% trans 'Nombre' %}</th>
+                <th>{% trans 'PVP' %}</th>
+            </tr>
+            {% for line in item.lines.all %}
+            <tr class="align-middle">
+                <td class="align-middle">{{forloop.counter}}</td>
+                <td class="align-middle">{{line.units}}</td>
+                <td class="align-middle">{{line.product.code}}</td>
+                <td  class="align-middle" colspan="3">
+                    <a href="/media/{{line.product.picture}}" target="_blank" title="{% trans 'Click para zoom' %}"><img alt="{{ line.product.name }}" class="product-img" src="/media/{{line.product.picture}}" onerror='this.onerror=null;this.src="https://via.placeholder.com/250"' />
+                        {{line.product.name}}</a>
+                </td>
+                <td class="align-middle">{{line.total|floatformat:2}} &euro;</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div class="row mb-2">
+        <div class="col-4 text-center">
+            <a class="btn btn-warning p-3" href="{% url "ready-order" item.hashinv %}">
+                {% if not item.paid %}
+                    {% trans 'Procesar pedido' %}
+                {% else %}
+                    {% trans 'Reabrir pedido' %}
+                {%endif%}
+            </a>
+        </div>
+        <div class="col-4 text-center">
+            <a class="btn btn-success p-3" href="{% url "confirm-order" item.hashinv  1 %}">{% trans 'Pago en efectivo' %}</a> <br>
+            <input type="number" step="0.01" id="entrega" onchange="check_cambio(this);" onkeyup="check_cambio(this);" value="{{item.total|floatformat:2|jsfloat}}" class="p-1 mt-2 text-center fs-1 w-50"><br>
+            <h5 class="m-1"><span class="w-50">Devuelve <span id="devuelve">0.00</span></span></h5>
+        </div>
+        <div class="col-4 text-center">
+            <a class="btn btn-success p-3" href="{% url "confirm-order" item.hashinv 0 %}">{% trans 'Pago con tarjeta' %}</a>
+        </div>
+    </div>
+</div>
+    <script> 
+        function check_cambio(element) {
+            if ($(element).val().length > 0) {
+                $('#devuelve').html((parseFloat($(element).val()) - {{item.total|jsfloat}}).toFixed(2));
+            }
+            else {
+                $('#devuelve').html((0 - {{item.total|jsfloat}}).toFixed(2));
+            }
+        }
+    </script>

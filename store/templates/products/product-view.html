@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% load i18n common_tags %}
+
+{% block central_content %} 
+    <div class="content"> 
+        <div class="patient-data-title p-4">
+            <div class="col-1 patient-profile-left">
+                {% if obj.picture %} 
+                    <div class="img"> <img src="{{obj.picture.url}}" class="patient-profile-img"> </div> 
+                {% else %}
+                    <div class="img"> <img src="/static/imgs/no-avatar.png" class="patient-profile-img"> </div>
+                {% endif %}
+            </div>
+            <div class="col-9">[{{obj.code}}] {{obj.name}}</div>
+            <div class="col-2 text-end">
+                <small>
+                    <div class="row">
+                        <div class="col-6">{% trans "Unidades" %}:</div><div class="col-6">{{obj.get_stock}}</div>
+                        <div class="col-6">{% trans "Costo" %}:</div><div class="col-6">{{obj.last_cost}} €</div>
+                        <div class="col-6">{% trans "PVP" %}:</div><div class="col-6">{{obj.last_pvp}} €</div>
+                    </div>
+                </small>
+            </div>
+        </div>
+    </div>
+    <div class="tabs mt-3">
+        <div class="tab-item active ark text-center" data-url="{% url "product-datas" %}" data-target="div-container" 
+            data-obj_id="{{obj.id}}"> <i class="fa fa-book"></i><span class="hide-mobile"><br />{% trans "Datos" %}</span></div>
+        <div class="tab-item active ark text-center" data-url="{% url "product-prices" %}" data-target="div-container" 
+            data-obj_id="{{obj.id}}"> <i class="fa fa-coins"></i><span class="hide-mobile"><br />{% trans "Precios" %}</span></div>
+        <div class="tab-item active ark text-center" data-url="{% url "product-stock" %}" data-target="div-container" 
+            data-obj_id="{{obj.id}}"> <i class="fa fa-database"></i><span class="hide-mobile"><br />{% trans "Stock" %}</span></div>
+        {%comment%}
+        {% if user|have_menu:"DIA"%}
+            <div class="tab-item ark text-center" data-url="{% url "patient-diagnoses" %}" data-target="div-container" 
+                data-obj_id="{{obj.id}}"> <i class="fa fa-list"></i> <span class="hide-mobile"><br />
+                {% trans "Diagnósticos" %} ({{obj.diagnoses.all.count}})</span></div>
+        {% endif %}
+        {% if user|have_menu:"TRA"%}
+            <div class="tab-item ark text-center" data-url="{% url "patient-treatment" %}" data-target="div-container" 
+                data-obj_id="{{obj.id}}"> <i class="fa fa-barcode"></i> <span class="hide-mobile"><br />
+                {% trans "Tratamientos" %} ({{obj.get_active_treatments}})</span></div>
+        {% endif %}
+        {% if user|have_menu:"PARAM"%}
+            <div class="tab-item ark text-center" data-url="{% url "patient-params" %}" data-target="div-container" 
+                data-obj_id="{{obj.id}}"> <i class="fa fa-history"></i><span class="hide-mobile"><br />
+                {% trans "Parametros" %} ({{obj.blood_pressure.all.count}})</span></div>
+        {% endif %}
+        {% if user|have_menu:"SPD"%}
+            <div class="tab-item ark text-center" data-url="{% url "patient-spd" %}" data-target="div-container" 
+                data-obj_id="{{obj.id}}"> <i class="fa fa-pills"></i><span class="hide-mobile"><br />
+                {% trans "Pastilleros" %} ({{obj.get_active_pillboxes}})</span></div>
+        {% endif %}
+        {%endcomment%}
+    </div>
+
+    <div id="div-container">{% include "products/product-datas.html" %}</div>
+    
+    {% include "common-modal.html" %} 
+
+    <script>
+        $(".tab-item").click(function(){
+            $(".tab-item").removeClass("active");
+            $(this).addClass("active");
+        });
+    </script>
+{% endblock central_content %}

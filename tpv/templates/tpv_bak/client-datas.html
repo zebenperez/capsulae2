@@ -1,0 +1,21 @@
+{% load i18n app_tags generictags static %}
+
+
+<table class="table table-hover w-100 table-striped">
+    <thead>
+        <tr class="bg-dark text-white">
+            <th width="50%"><small>Nombre</small></th>
+            <th width="20%"><small>DNI</small></th>
+            <th width="20%"><small>Código</small></th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>{{client.name|default:''}}</td>
+            <td>{{client.dni|default:''}} </td>
+            <td>{{client.code|default:''}} </td>
+        </tr>
+        <tr> <td colspan="3">{{client.address|default:""}}</td> </tr>
+    </tbody>
+</table>
+

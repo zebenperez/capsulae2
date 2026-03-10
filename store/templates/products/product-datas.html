@@ -1,0 +1,19 @@
+{% load i18n common_tags %}
+
+<span id="div-notification"></span>
+
+<div class="card">
+    {#<div class="card-header">{% trans "Datos del producto" %}</div>#}
+    <div class="card-body">
+        <div id="patient-container">
+            <div class="row w-100 patient-data-body-2 p-1" style="margin:0;">
+                <div class="col-11 patient-data">{% include "products/product-form.html" %}</div>
+                <div class="col-1 text-end">
+                    <button id="btn-edit" class="btn btn-sm toggle-edit new" data-class-name="input" data-text="{%trans "Edit"%}" 
+                        data-text-alt="{%trans "Hecho"%}">{%trans "Edit"%} </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

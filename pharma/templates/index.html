@@ -1,16 +1,18 @@
 {% extends 'base.html' %}
-{% load i18n pharma_tags shifts2_tags agenda_tags common_tags %}
+{% load i18n pharma_tags shifts2_tags agenda_tags common_tags static %}
 
 {% block second_menu %}{#{% include 'web/second_menu.html' %}{% get_second_menu request.user %}#} {% endblock second_menu %}
 
 {% block central_content %}
 
-<div class="row">
+<div class="row m-0">
     {% if user|have_menu:"PAC"%}
-        <div class="col-12">
+
+	{% comment %}
+    	<div class="col-12">
             <div class="stat-box color-1"> 
                 <div class="stat-box-body p-0 m-0"> 
-                    <div class="stat-widget-five register-hours p-3 row" onclick="$('#div-patients').slideToggle()">
+                    <div class="row stat-widget-five register-hours p-3 m-0" onclick="$('#div-patients').slideToggle()">
                         <div class="col-1 shadowBox flat-color-2 p-2 text-center"><i class="fa fa-user large"></i></div>
                         <div class="col-11 stat-content pt-2">
                             <div class="stat-title"><span class="count-title">{% trans "Pacientes" %}</span></div>
@@ -21,15 +23,29 @@
                 </div> 
             </div>
         </div>
+	{% endcomment %}
+
+	<div class="col-12 stat-box color-1">
+	        <div class="row register-hours p-3 m-0" onclick="$('#div-patients').slideToggle()">
+			<div class="col-lg-2 col-1 shadowBox flat-color-2 p-2 text-center"><i class="fa fa-user large"></i></div>
+                        <div class="col-lg-10 col-9 p-2 titnumb">
+                            <div class="stat-title"><span class="count-title">{% trans "Pacientes" %}</span></div>
+                            <div class="stat-number">{{request.user|get_patients}}</div>
+			</div>
+		</div> 
+		<div class="hide" id="div-patients">{% get_patient_list request.user %}</div>
+	</div>
     {% endif %}
 </div>
     
 {% if user|have_menu:"SPD"%}
-    <div class="row">
-        <div class="col-12">
+    <div class="row m-0">
+
+	{% comment %}
+	<div class="col-12">
             <div class="stat-box color-2"> 
                 <div class="stat-box-body">
-                    <div class="stat-widget-five register-hours p-3 row" onclick="$('#div-spd').slideToggle()">
+                    <div class="row stat-widget-five register-hours p-3 m-0" onclick="$('#div-spd').slideToggle()">
                         <div class="col-1 shadowBox flat-color-2 p-2 text-center"><i class="fa fa-pills large"></i></div>
                         <div class="col-11 stat-content pt-2">
                             <div class="stat-title"><span class="count-title">{% trans "Pastilleros" %}</span></div>
@@ -40,11 +56,25 @@
                 </div> 
             </div>
         </div>
+	{% endcomment %}
+
+        <div class="col-12 stat-box color-2">
+               <div class="row register-hours p-3 m-0" onclick="$('#div-spd').slideToggle()">
+                   <div class="col-lg-2 col-1 shadowBox flat-color-2 p-2 text-center"><i class="fa fa-pills large"></i></div>
+                   <div class="col-lg-10 col-9 pt-2 titnumb">
+                       <div class="stat-title"><span class="count-title">{% trans "Pastilleros" %}</span></div>
+                       <div id="div-pillbox-number" class="stat-number"></div>
+                   </div>
+               </div>
+               <div class="hide" id="div-spd">{% get_pillbox_list request.user %}</div>
+        </div>
     </div>
 {% endif %}
 
 {% if user|have_menu:"TUR"%}
-    <div class="col-12">
+
+	{% comment %}
+	<div class="col-12">
         <div class="stat-box color-3"> 
             <div class="row register-hours p-3 m-0" onclick="$('#div-journeys').slideToggle()">
                 <div class="col-1 shadowBox flat-color-2 pt-2 text-center"><i class="fa fa-clock large"></i></div>
@@ -62,9 +92,28 @@
             <div id="div-journeys" class="hide">{% get_journey_list request.user %}</div>
         </div>
     </div>
+	{% endcomment %}
+
+    <div class="col-12 stat-box color-3">
+            <div class="row register-hours p-3 m-0" onclick="$('#div-journeys').slideToggle()">
+                <div class="col-lg-2 col-1 shadowBox flat-color-2 pt-2 text-center"><i class="fa fa-clock large"></i></div>
+             	<div class="col-lg-8 col-9 pt-2 titnumb"><div class="stait-title"><span class="count-title">{% trans "Control Horario" %}</span></div></div>
+	        <div class="col-lg-2 col-12 text-center time-control">
+		    {% if request.user|journey_started %}
+			<button class="btn btn-end w-100" href="{% url "shifts-journey-end" %}">
+			    <svg class="icon-stop" viewbox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2" /></svg> Finalizar Jornada</button>
+		    {% else %}
+			<button class="btn btn-start w-100" href="{% url "shifts-journey-start" %}">
+			    <svg class="icon-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"></path></svg> Iniciar Jornada</button>
+		    {% endif %}
+	    	</div>
+	    </div>
+            <div id="div-journeys" class="hide">{% get_journey_list request.user %}</div>
+    </div>
 
     {% if user|in_group:"admins" or user|in_group:"managers"%}
-        <div class="col-12">
+	{% comment %}
+    	<div class="col-12">
             <div class="stat-box color-3"> 
                 <div class="row register-hours p-3 m-0" onclick="$('#div-shifts').slideToggle()">
                     <div class="col-1 shadowBox flat-color-2 p-2 text-center"><i class="fa fa-calendar large"></i></div>
@@ -73,10 +122,24 @@
                 <div id="div-shifts" class="hide">{% get_journey_stats request.user %}</div>
             </div>
         </div>
+	{% endcomment %}
+
+        <div class="col-12 stat-box color-5">
+                <div class="row register-hours p-3 m-0" onclick="$('#div-shifts').slideToggle()">
+                    <div class="col-lg-2 col-1 shadowBox flat-color-2 p-2 text-center"><i class="fa fa-calendar large"></i></div>
+             	    <div class="col-lg-10 col-9 pt-2 titnumb">
+                    	<div class="stat-title"><span class="count-title">{% trans "Gestor de Turnos" %}</span></div>
+                   </div>
+                </div>
+                <div id="div-shifts" class="hide">{% get_journey_stats request.user %}</div>
+        </div>
+
     {% endif %}
 {% endif %}
 
 {% if user|have_menu:"AGE"%}
+	
+{% comment %}
     <div class="col-12">
         <div class="stat-box color-4"> 
             <div class="row register-hours p-3 m-0" onclick="$('#div-notes').slideToggle()">
@@ -85,6 +148,17 @@
             </div>
             <div id="div-notes" class="hide">{% get_note_list request.user %}</div>
         </div>
+    </div>
+{% endcomment %}
+
+    <div class="col-12 stat-box color-4">
+            <div class="row register-hours p-3 m-0" onclick="$('#div-notes').slideToggle()">
+                <div class="col-lg-2 col-1 shadowBox flat-color-2 p-2 text-center"><i class="fas fa-thumbtack large"></i></div>
+             	<div class="col-lg-10 col-9 pt-2 titnumb">
+                   <div class="stat-title"><span class="count-title">{% trans "Notas" %}</span></div>
+                </div>
+            </div>
+            <div id="div-notes" class="hide">{% get_note_list request.user %}</div>
     </div>
 {% endif %}
 

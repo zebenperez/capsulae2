@@ -1,18 +1,27 @@
 {% load i18n common_tags %}
 
 {% if request.user.is_authenticated %}
-    <div id="main" class="" style="margin:0;padding:0;">
-        <div class="row header sticky-top" style="margin:0;">
-            <div class="col-1 divbars-menu pt-3"><a href="#" class="menu-btn"><i class="fas fa-bars"></i></a></div>
-	        <div class="col-5 divLogo text-left">
+    <div id="main">
+
+        <div class="row main-header sticky-top m-0">
+            <div class="col-lg-1 col-1 divbars-menu pt-3"><a href="#" class="menu-btn"><i class="fas fa-bars"></i></a></div>
+	    
+	    {% comment %} -- PC Version -- {% endcomment %}
+	    <div class="col-lg-5 col-5 divLogo text-left d-none d-lg-block pt-3">
+                <a href="{% url "pharma-index" %}"><img src="/static/imgs/logo-capsulae.png" width="150px"></a></div>
+	    <div class="col-lg-5 col-5 d-none d-lg-block  text-end pt-1">
+		    <small class="fst-italic">{% trans "Bienvenido" %}</small><br/><small> {{request.user.first_name}} {{request.user.last_name}}</small></div>
+
+	    {% comment %} -- Mobile Version -- {% endcomment %}
+	    <div class="col-lg-5 col-4 divLogo text-left d-lg-none">
                 <a href="{% url "pharma-index" %}"><img src="/static/imgs/logo-capsulae.png" width="100px"></a></div>
-            <div class="col-5 text-end" style="padding-top:15px">
-                <small>{% trans "Bienvenido" %} {{request.user.first_name}} {{request.user.last_name}}</small>
-            </div>
-            <div class="col-1 divIcons justify-content-center">
-                <div class="dropdown profile-btn">
-                    <a class="ps-2 pe-2" type="button" id="dropdownProfile" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="fas fa-ellipsis-v ps-2 pe-2"></i> </a>
+            <div class="col-lg-5 col-6 d-lg-none text-end pt-3">
+		<small class="mob-name fst-italic"> {{request.user.first_name}} {{request.user.last_name}}</small></div>
+
+            <div class="col-lg-1 col-1 p-0">
+                <div class="dropdown profile-btn w-100">
+                    <a class="" type="button" id="dropdownProfile" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-ellipsis-v"></i> </a>
                     <div class="dropdown-menu user-dropdown" aria-labelledby="dropdownProfile">
                         <ul>
                             {% if request.user|in_group:"admins" or request.user|in_group:"managers" %}
@@ -25,6 +34,7 @@
                 </div>
             </div>
         </div>
+
     </div>
 {% endif %}
 

@@ -1,0 +1,64 @@
+{% load i18n common_tags %}
+
+<span id="div-notification"></span>
+
+<div class="card">
+    <div class="card-body">
+        <div id="patient-container">
+            {# ----------------------------- PRICE FORM ---------------------------#}
+            <div class="row w-100 patient-data-body-2 p-1" style="margin:0;">
+                <div class="col-12 patient-data">
+
+                    <div class="row justify-center">
+                        <div class="col-4">
+                            <div class="greybox-sm p-1"> {% trans "Precio" %}
+                                <input type="text" class="form-control autosave" id="amount" name="amount" value="" 
+                                    data-model-name="store.price" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+                                    data-target="" placeholder="Precio..." /> <span id="amount__msg"></span>
+                            </div>
+                        </div>
+                        <div class="col-4 offset-2">
+                            <div class="greybox-sm p-1"> {% trans "Es un precio de venta" %}
+                                <input type="checkbox" class="form-checkbox autosave" id="sale" name="sale" title="" 
+                                    data-model-name="store.price" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+                                    data-target="null" data-bool="True"/> <span id="sale__msg"></span>
+                            </div>
+                        </div>
+                        <input type="hidden" name="product" id="product" value="{{obj.id}}"/>
+                        <div class="col-2">
+                            <button type="button" class="btn btn-sm ark_new_obj save"
+                                data-url="{% url "product-prices" %}" data-target="div-container" data-obj_id="{{obj.id}}"
+                                data-url-save="{%url "autosave_fields"%}" data-args-save="amount,sale,product" 
+                                data-model-name="store.price"> {% trans "Guardar" %}</button>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            {# ----------------------------- PRICE LIST ---------------------------#}
+            <hr/>
+            <div class="row mt-4">
+                <div class="col-4">{% trans "Precio" %}</div>
+                <div class="col-4">{% trans "Fecha" %}</div>
+                <div class="col-3">{% trans "Venta" %}</div>
+                <div class="col-1"></div>
+            </div>
+            {% for pr in obj.prices.all %}
+                <div class="row" id="row_{{pr.id}}">
+                    <div class="col-4">{{pr.amount}}</div>
+                    <div class="col-4">{{pr.date|date:"d-m-Y"}}</div>
+                    <div class="col-3">{%if pr.sale%}<i class="fas fa-check"></i>{%else%}<i class="fas fa-times"></i>{%endif%}</div>
+                    <div class="col-1">
+                        <a class="btn btn-sm autoremove" data-model-name="store.price" data-obj-id="{{pr.id}}" 
+                            data-url="{% url "autoremove_obj" %}" data-target="row_{{pr.id}}" title="{% trans 'Remove' %}"
+                            data-confirm="{% trans "Está suguro/a de que desea borrar este elemento?" %}">
+                            <i class="fas fa-trash"></i></a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+

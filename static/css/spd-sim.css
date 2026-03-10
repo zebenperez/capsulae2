@@ -1,0 +1,144 @@
+
+body {
+	background-color: #f8f9fa;
+	font-family: Arial, sans-serif;
+}
+
+.box-container {
+	background: #f4f6f8;
+	border-radius: 6px;
+	padding: 10px;
+	text-align:left;
+	box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+	border:1px solid #e0e0e0;
+
+}
+
+.panel-container {
+	background-color: white;
+	padding: 20px;
+	border-radius: 10px;
+	box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+}
+
+.panel {
+	display: grid;
+	grid-template-columns: 150px repeat(4, 120px);
+	gap: 15px;
+}
+
+.day-label {
+	font-weight: bold;
+	font-size: 14px;
+	text-align: center;
+	align-self: center;
+}
+
+.control-btn {
+	width: 120px;
+	height: 50px;
+	font-size: 18px;
+	font-weight: bold;
+	border-radius: 8px;
+	transition: 0.3s;
+}
+
+.buttons-container {
+	display: inline-block;
+}
+
+.btn-danger {
+	background-color: #ea868f !important;
+	border: 1px solid #ea868f !important;
+}
+
+.btn-success {
+	background-color: #20c997 !important;
+	border: 1px solid #20c997 !important;
+}
+
+.btn.btn-pills {
+	background: #fff;
+	border-radius: 2px;
+	padding: 10px;
+	text-align:left;
+	color: #333;
+	box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.action-btn {
+	font-size: 14px;
+	width: 100%;
+	text-align:left;
+}
+
+.resolution-btn {
+	width: 80%;
+	max-width: 250px;
+	margin-top: 10px;
+}
+
+#resolution-display {
+	font-size: 16px;
+	margin-top: 5px;
+	font-weight: bold;
+}
+
+/* RESPONSIVE PARA TABLET 768x1024 */
+    @media (max-width: 1024px) {
+        .panel {
+            grid-template-columns: 120px repeat(4, 100px); /* Botones más pequeños en tablets */
+            gap: 10px;
+        }
+        .control-btn {
+            width: 90px;
+            height: 45px;
+            font-size: 14px;
+        }
+        .header {
+            font-size: 16px;
+            padding: 8px 0;
+        }
+        .day-label {
+            font-size: 16px;
+            padding-right: 5px;
+        }
+           }
+
+    @media (max-width: 480px) {
+        .panel {
+            grid-template-columns: 80px repeat(4, 70px); /* Reduce aún más los botones */
+            gap: 6px;
+        }
+
+        .control-btn {
+            width: 55px;
+            height: 35px;
+            font-size: 11px;
+        }
+
+        .header, .day-label {
+            font-size: 12px;
+        }
+
+        .header {
+            width:55px;
+        }
+
+        .panel-container {
+            width: 100%;
+        }
+
+        .buttons-container {
+            width: 100%;
+            gap: 6px;
+        }
+
+        .action-btn, .resolution-btn {
+		/*
+            font-size: 12px;
+            max-width: 200px;
+            padding: 6px;
+	    */
+        }
+    }
+

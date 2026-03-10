@@ -1,0 +1,144 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <title>Factura</title>
+        <style>
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                margin: 40px;
+                background: #f7f7f7;
+                color: #333;
+            }
+
+            .invoice-box {
+                max-width: 850px;
+                margin: auto;
+                background: white;
+                padding: 30px;
+                border: 1px solid #ccc;
+                box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            }
+
+            .invoice-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                border-bottom: 2px solid #e0e0e0;
+                padding-bottom: 15px;
+                margin-bottom: 20px;
+            }
+
+            .logo { height: 60px; }
+
+            .company-info { text-align: right; }
+
+            .invoice-details { margin-top: 20px; }
+
+            .invoice-details span {
+                display: block;
+                margin: 2px 0;
+            }
+
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 20px;
+            }
+
+            table th, table td {
+                padding: 12px;
+                border: 1px solid #ddd;
+                text-align: left;
+            }
+
+            table th { background-color: #f2f2f2; }
+
+            .total {
+                text-align: right;
+                margin-top: 20px;
+                font-size: 18px;
+                font-weight: bold;
+            }
+
+            .footer {
+                margin-top: 40px;
+                font-size: 12px;
+                text-align: center;
+                color: #777;
+            }
+
+            .print-button {
+                display: block;
+                text-align: center;
+                margin: 20px auto;
+            }
+
+            .print-button button {
+                background-color: #007bff;
+                color: white;
+                padding: 10px 20px;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+            }
+
+            @media print {
+                .print-button { display: none; }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="print-button"> <button onclick="window.print()">🖨️ Imprimir Factura</button> </div>
+
+        <div class="invoice-box">
+            <div class="invoice-header">
+                <img src="/media/uploads/products/logo-mulema.png" class="logo" alt="Logo empresa">
+                <div class="company-info">
+                <strong>Mulema</strong><br>
+                Cl. Fernández Navarro. Local 1B<br/>
+                Santa Cruz de Tenerife <br/>
+                CIF: 08875218R
+            </div>
+        </div>
+
+        <div class="invoice-details">
+            <span><strong>Factura Nº:</strong> 0-{{invoice.number}}</span>
+            <span><strong>Fecha:</strong> {{idate|date:'d/m/Y H:i'}}</span>
+            <span><strong>Cliente:</strong> {{invoice.client_name|default:''}}</span>
+            <span><strong>DNI:</strong> {{invoice.client_dni|default:''}}</span>
+            <span><strong>Dirección:</strong> {{invoice.client_addr|default:''}}</span>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Descripción</th>
+                    <th>Cantidad</th>
+                    <th>Precio Unitario</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for line in invoice.lines.all  %}
+                <tr>
+                    <td>{{line.product.name}}</td>
+                    <td>{{line.units}}</td>
+                    <td>{{line.unit_price|floatformat:2}}</td>
+                    <td>{{line.total|floatformat:2}}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="total"> Total a pagar: {{invoice.total|floatformat:2}} € </div>
+
+        <div class="footer">
+            Número de Cuenta: ES2030760230242450586827<br/> 
+            COMERCIANTE MINORISTA EXENTO DE IGIC<br/> 
+            <p>Le informamos que la información que nos facilita, será tratada con el fin de realizar pedidos y/o facturar servicios. Los datos solicitados, serán incorporados a un registro de actividades y tratamientos, cuyo responsable es Antonio Villafaina Barroso, y se conservarán mientras se mantenga la relación comercial o durante los años necesarios para cumplir con las obligaciones legales y tributarias establecidas. Los datos por Vd. aportados, no serán cedidos, salvo en caso de obligación legal. Asimismo, tiene derecho a ejercitar los derechos legalmente establecidos, tal y como se detalla en la información adicional que podrá consultar en mulema22afro@gmail.com .</p>
+        </div>
+    </body>
+</html>
+
