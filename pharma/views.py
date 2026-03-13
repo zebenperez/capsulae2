@@ -96,7 +96,7 @@ def get_patients(user, search_value="", start=0, end=50, lopd_signed=True):
     full_query &= Q(**{'id_user': user_id})
 
     # Pacientes compartidos
-    shared_list = [item.patient for item in PatientShared.objects.filter(user=user)]
+    shared_list = [item.patient for item in PatientShared.objects.filter(user__id=user_id)]
 
     # Pacientes con lopd firmada
     lopd_patient_ids = LOPDConsents.objects.all().distinct().values_list('paciente', flat=True)
