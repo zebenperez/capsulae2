@@ -292,7 +292,7 @@ def patient_spd(request):
     patient = get_or_none(Pacientes, get_param(request.GET, "obj_id"))
     return render(request, "patient/spd/spd-list.html", {'obj': patient, 'advice_days': PILLBOX_ADVISE})
 
-@group_required("admins","managers")
+@group_required("admins","managers","employee")
 def patient_evolutionary(request):
     patient = get_or_none(Pacientes, get_param(request.GET, "obj_id"))
     return render(request, "patient/evolutionary/evo-list.html", {'obj': patient})
