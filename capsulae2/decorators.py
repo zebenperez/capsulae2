@@ -19,6 +19,8 @@ def group_required(*group_names):
                     return redirect('account-payment-error')
                 if bool(request.user.groups.filter(name__in=group_names)) or request.user.is_superuser:
                     return f(request, *args, **kwargs)
+                else:
+                	return (render(request, "error_exception.html", {'exc':"This user have not permission to access to this section"}))
             return redirect('auth_login')
         return _arguments_wrapper
     return _method_wrapper

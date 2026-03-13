@@ -59,6 +59,10 @@ def sub_days(date, sub_days):
 def jsfloat(value):
     return str(value).replace(',','.')
 
+@register.filter
+def substr(text, pos):
+    return(text[pos:])
+
 '''
     Simple Tags
 '''

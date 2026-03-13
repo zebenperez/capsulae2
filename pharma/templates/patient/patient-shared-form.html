@@ -1,0 +1,33 @@
+{% load i18n %}
+
+
+<div class="row">
+    <div class="col-11"> <h2><i class="fa fa-history"></i>&nbsp; {% trans 'Modificar Organización' %}</h2> </div>
+    <div class="col-1">
+        <div class="d-flex justify-content-end"> 
+            <button type="button" class="btn btn-lg" data-bs-dismiss="modal" title="{% trans "Close" %}">
+                <i class="fas fa-times"></i></button> 
+        </div>
+    </div>
+</div>
+
+<form action="{% url 'patient-shared-save' %}" method="post" id="form-shared">
+    {%csrf_token%}
+    <input type="hidden" id="patient" name="patient" value="{{obj.id}}" />
+    <div class="row justify-center">
+        <div class="col-8">
+            <select class="form-control" id="comp" name="comp">
+                <option value="">-- {% trans "Seleccione una organización" %} --</option>
+                {% for comp in comp_list %} <option value="{{comp.id}}">{{comp.name}}</option> {% endfor%}
+            </select>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-end">
+        <button type="button" id="btn-send" class="btn btn-sm saveform" data-bs-dismiss="modal" data-form="form-shared"
+            data-target="patient-org-container">{% trans "Guardar" %}</button>
+
+        <button class="btn btn-sm cancel" data-bs-dismiss="modal"> {% trans "Cerrar" %}</a>
+    </div>
+</div>
+

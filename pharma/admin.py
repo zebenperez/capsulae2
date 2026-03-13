@@ -15,6 +15,14 @@ class PacientesAdmin(admin.ModelAdmin):
     list_filter = ('id_user',)
     list_per_page = 500
 
+class PatientSharedAdmin(admin.ModelAdmin):
+    list_display = ('patient', 'user')
+    list_filter = ('user',)
+    list_per_page = 500
+
+
 admin.site.register(Config, ConfigAdmin)
 admin.site.register(TelegramUserChat, TelegramUserChatAdmin)
 admin.site.register(Pacientes, PacientesAdmin)
+admin.site.register(PatientShared, PatientSharedAdmin)
+

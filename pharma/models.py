@@ -209,3 +209,12 @@ class Diagnosticos(models.Model):
         verbose_name = 'diagnostico'
         verbose_name_plural = 'diagnosticos'
 
+class PatientShared(models.Model):
+    patient = models.ForeignKey(Pacientes, verbose_name="Paciente", on_delete=models.SET_NULL, blank=True, null=True, related_name="comp_shared")
+    user = models.ForeignKey(User, verbose_name="Usuario", on_delete=models.SET_NULL, blank=True, null=True)
+
+    class Meta:
+        verbose_name ="Paciente compartido"
+        verbose_name_plural ="Pacientes compartidos"
+
+

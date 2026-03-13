@@ -49,6 +49,8 @@ urlpatterns = [
     path('patients/procedure/', views.patient_procedure, name='patient-procedure'),
     path('patients/procedure-form/', views.patient_procedure_form, name='patient-procedure-form'),
     path('patients/procedure-remove/', views.patient_procedure_remove, name='patient-procedure-remove'),
+    path('patients/procedure-file-add/', views.patient_procedure_file_add, name='patient-procedure-file-add'),
+    path('patients/procedure-file-remove/', views.patient_procedure_file_remove, name='patient-procedure-file-remove'),
 
     path('patients/dispensations/', views.patient_dispensations, name='patient-dispensations'),
 
@@ -72,6 +74,11 @@ urlpatterns = [
     path('patients/orgs/', views.patient_orgs, name='patient-orgs'),
     path('patients/orgs/form', views.patient_org_form, name='patient-org-form'),
     path('patients/orgs/remove', views.patient_org_remove, name='patient-org-remove'),
+
+    #------------------------- PATIENT SHARED --------------------
+    path('patients/shared/form', views.patient_shared_form, name='patient-shared-form'),
+    path('patients/shared/save', views.patient_shared_save, name='patient-shared-save'),
+    path('patients/shared/remove', views.patient_shared_remove, name='patient-shared-remove'),
 
     #------------------------- PATIENT SPD --------------------
     path('patients/spd/', views.patient_spd, name='patient-spd'),

@@ -21,12 +21,12 @@ from capsulae2.capsulae_lib import check_user_payment
 #from account.models import Company, UserPayment
 from account.models import Company
 from lopd.models import LOPDConsents
-from community.models import Organization, PatientOrg, Procedure, PatientProcedure
+from community.models import Organization, PatientOrg, Procedure, PatientProcedure, PatientProcedureDoc
 from django.contrib.auth.models import User
 from medication.medication_lib import get_medication
 from medication.models import PresentationsPrescriptionsAempsCache as AempsCache
 from dispensations.models import Dispensation
-from .models import Pacientes, Paises, Etnia, PatientOrigin
+from .models import Pacientes, Paises, Etnia, PatientOrigin, PatientShared
 from .spd_models import Pillbox
 from .treatment_models import Tratamiento, MedicamentoTratamiento, ComplementoTratamiento
 from .evolutionary_models import Evolutionary
@@ -66,6 +66,14 @@ def home(request):
 '''
     Patients
 '''
+def get_owner_id(user):
+    groups = user.groups.all().values_list('name', flat=True)
+    if "managers" in groups or "admins" in groups:
+        return user.id
+    elif "employee" in groups:
+        return user.employee_profile.company.manager.id
+    return None
+
 def get_patients(user, search_value="", start=0, end=50, lopd_signed=True):
     #filters_to_search = ["n_historial__icontains", "nombre__icontains", "apellido__icontains", "cip__icontains"]
     filters_to_search = ["n_historial__icontains", "cip__icontains"]
@@ -83,7 +91,12 @@ def get_patients(user, search_value="", start=0, end=50, lopd_signed=True):
             name_query |= Q(**{"apellido__icontains": search_list[0]})
         full_query |= name_query
 
-    full_query &= Q(**{'id_user': user.id})
+    #user_id = user.id
+    user_id = get_owner_id(user)
+    full_query &= Q(**{'id_user': user_id})
+
+    # Pacientes compartidos
+    shared_list = [item.patient for item in PatientShared.objects.filter(user=user)]
 
     # Pacientes con lopd firmada
     lopd_patient_ids = LOPDConsents.objects.all().distinct().values_list('paciente', flat=True)
@@ -92,13 +105,13 @@ def get_patients(user, search_value="", start=0, end=50, lopd_signed=True):
     if lopd_signed:
         # Pacientes sin lopd firmada pero creados en los últimos 15 días
         try:
-            lopd_limit = int(get_config_value("LOPD_{}".format(user.id), LOPD_LIMIT))
+            lopd_limit = int(get_config_value("LOPD_{}".format(user_id), LOPD_LIMIT))
         except:
             lopd_limit = LOPD_LIMIT
         limit = datetime.today() - timedelta(days=lopd_limit)
         date_list = list(Pacientes.objects.filter(full_query).exclude(id__in=lopd_patient_ids).filter(created_at__gte=limit))
 
-        return date_list + lopd_list
+        return date_list + lopd_list + shared_list
     else:
         return list(Pacientes.objects.filter(full_query).exclude(id__in=lopd_patient_ids)[start:end])
 
@@ -107,12 +120,12 @@ def get_patient_context(user, search_value="", start=0, end=50, lopd_signed=True
         return {'items': get_patients(user, search_value, start, end), 'start': (start+end), 'end': (end+end), 'lopd_signed': lopd_signed}
     return {'items': get_patients(user, search_value, start, end, lopd_signed),}
 
-@group_required("admins","managers")
+@group_required("admins","managers", "employee")
 def patients(request):
     return render(request, "patients/patients.html", {})
     #return render(request, "patients/patients.html", get_patient_context(request.user))
 
-@group_required("admins","managers")
+@group_required("admins","managers", "employee")
 def patient_list(request):
     start = int(request.GET["start"]) if "start" in request.GET else 0
     end = int(request.GET["end"]) if "end" in request.GET else 10
@@ -124,7 +137,7 @@ def patient_list_nolopd(request):
     end = int(request.GET["end"]) if "end" in request.GET else 10
     return render(request, "patients/patient-list.html", get_patient_context(request.user, "", start, end, False))
 
-@group_required("admins","managers")
+@group_required("admins", "managers", "employee")
 def patient_search(request):
     import base64
     search_value = get_param(request.GET, "s-name")
@@ -133,7 +146,7 @@ def patient_search(request):
         return render(request, "patients/patient-list.html", list_users)
     else:
         list_users = get_patient_context(request.user, search_value, lopd_signed=False)
-        print(list_users)
+        #print(list_users)
         if (len(list_users["items"]) == 1):
             url_abs = request.build_absolute_uri(reverse('patient-lopd-generate-document2', kwargs={'patient_id': list_users["items"][0].id}))
             qrcode = generate_qr("{}".format(url_abs), "")
@@ -234,14 +247,14 @@ def patient_evolutionaries_csv(request):
 '''
     Patient
 '''
-@group_required("admins","managers")
+@group_required("admins","managers","employee")
 def patient_view(request, patient_id):
     patient = get_or_none(Pacientes, patient_id)
     po, created = PatientOrigin.objects.get_or_create(patient=patient)
     context = {'obj': patient, 'country_list': Paises.objects.all(), 'etnia_list': Etnia.objects.all()}
     return render(request, "patient/patient-view.html", context)
 
-@group_required("admins","managers")
+@group_required("admins","managers","employee")
 def patient_form(request):
     patient = get_or_none(Pacientes, get_param(request.GET, "obj_id"))
     context = {'obj': patient, 'country_list': Paises.objects.all(), 'etnia_list': Etnia.objects.all()}
@@ -284,7 +297,7 @@ def patient_evolutionary(request):
     patient = get_or_none(Pacientes, get_param(request.GET, "obj_id"))
     return render(request, "patient/evolutionary/evo-list.html", {'obj': patient})
 
-@group_required("admins","managers")
+@group_required("admins","managers","employee")
 def patient_procedure(request):
     patient = get_or_none(Pacientes, get_param(request.GET, "obj_id"))
     return render(request, "patient/procedures/procedure-list.html", {'obj': patient})
@@ -346,6 +359,43 @@ def patient_org_remove(request):
         po.delete()
         return render(request, "patient/patient-orgs.html", {'obj': patient, 'advice_days': PILLBOX_ADVISE})
     except Exception as e:
+        return render(request, 'error_exception.html', {'exc':show_exc(e)})
+
+'''
+    Patient Shared
+'''
+@group_required("admins","managers")
+def patient_shared_form(request):
+    try:
+        obj = get_or_none(Pacientes, request.GET["patient_id"])
+        comp_list = Company.objects.all()
+        return render(request, "patient/patient-shared-form.html", {'obj': obj, 'comp_list': comp_list})
+    except Exception as e:
+        print(e)
+        return render(request, 'error_exception.html', {'exc':show_exc(e)})
+
+@group_required("admins","managers")
+def patient_shared_save(request):
+    try:
+        patient = get_or_none(Pacientes, get_param(request.POST, "patient"))
+        comp = get_or_none(Company, get_param(request.POST, "comp"))
+        PatientShared.objects.create(patient=patient, user=comp.manager)
+        return render(request, "patient/patient-orgs.html", {'obj': patient})
+        #return render(request, "patient/patient-shared-form.html", {'obj': obj, 'comp_list': comp_list})
+    except Exception as e:
+        print(e)
+        return render(request, 'error_exception.html', {'exc':show_exc(e)})
+
+@group_required("admins","managers")
+def patient_shared_remove(request):
+    try:
+        obj = get_or_none(PatientShared, get_param(request.GET, "obj_id"))
+        if obj != None:
+            patient = obj.patient
+            obj.delete()
+        return render(request, "patient/patient-orgs.html", {'obj': patient})
+    except Exception as e:
+        print(e)
         return render(request, 'error_exception.html', {'exc':show_exc(e)})
 
 
@@ -482,7 +532,7 @@ def patient_org_remove(request):
 '''
     Procedure
 '''
-@group_required("admins","managers")
+@group_required("admins","managers","employee")
 def patient_procedure_form(request):
     try:
         patient = get_or_none(Pacientes, get_param(request.GET, "patient_id"))
@@ -495,7 +545,7 @@ def patient_procedure_form(request):
         return render(request, 'error_exception.html', {'exc':show_exc(e)})
 
 
-@group_required("admins","managers")
+@group_required("admins","managers","employee")
 def patient_procedure_remove(request):
     try:
         obj = get_or_none(PatientProcedure, request.GET["obj_id"])
@@ -503,6 +553,34 @@ def patient_procedure_remove(request):
         obj.delete()
 
         return render(request, "patient/procedures/procedure-list.html", {'obj': patient})
+    except Exception as e:
+        return render(request, 'error_exception.html', {'exc':show_exc(e)})
+
+@group_required("admins","managers","employee")
+def patient_procedure_file_add(request):
+    try:
+        obj = get_or_none(PatientProcedure, request.POST["obj_id"])
+        if obj != None:
+            file_list = request.FILES.getlist('file')
+            for f in file_list:
+                obj_doc = PatientProcedureDoc.objects.create(procedure=obj)
+                obj_doc.doc = f
+                obj_doc.save()
+
+        return render(request, "patient/procedures/file-list.html", {"obj": obj,})
+    except Exception as e:
+        return render(request, 'error_exception.html', {'exc':show_exc(e)})
+
+@group_required("admins","managers","employee")
+def patient_procedure_file_remove(request):
+    try:
+        obj = get_or_none(PatientProcedureDoc, request.GET["obj_id"])
+        if obj != None:
+            procedure = obj.procedure
+            obj.doc.delete(save=False)
+            obj.delete()
+
+        return render(request, "patient/procedures/file-list.html", {"obj": procedure,})
     except Exception as e:
         return render(request, 'error_exception.html', {'exc':show_exc(e)})
 

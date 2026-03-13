@@ -139,4 +139,18 @@ class PatientProcedure(models.Model):
         verbose_name = "Paciente Tratamiento"
         verbose_name_plural = "Pacientes Tratamientos"
 
+def upload_procedure_file(instance, filename):
+    ascii_filename = str(filename.encode('ascii', 'ignore'))
+    instance.filename = ascii_filename
+    folder = "patients/procedures/%s" % (instance.id)
+    return '/'.join(['%s' % (folder), datetime.now().strftime("%Y%m%d%H%M%S") + ascii_filename])
+
+class PatientProcedureDoc(models.Model):
+    doc = models.FileField(upload_to=upload_procedure_file, blank=True, verbose_name="Fichero", help_text="Select file to upload")
+    procedure = models.ForeignKey(PatientProcedure, verbose_name="Trámite", on_delete=models.CASCADE, null=True, related_name="docs")
+
+    class Meta:
+        verbose_name = "Documento de trámite"
+        verbose_name_plural = "Documentos de tramite"
+
 
