@@ -15,13 +15,13 @@ from capsulae2.email_lib import send_derivation_email
 from account.models import Company
 from community.models import Organization
 from .models import Pacientes
-from .evolutionary_models import Evolutionary 
+from .evolutionary_models import Evolutionary, EvolutionaryDoc
 
 
 '''
     Evolutionary
 '''
-@group_required("admins", "managers")
+@group_required("admins", "managers", "employee")
 def evolutionary_form(request):
     try:
         patient = get_or_none(Pacientes, request.GET["patient_id"])
@@ -41,6 +41,34 @@ def evolutionary_remove(request):
         patient = evo.patient
         evo.delete()
         return render(request, "patient/evolutionary/evo-list.html", {'obj': patient})
+    except Exception as e:
+        return render(request, 'error_exception.html', {'exc':show_exc(e)})
+
+@group_required("admins","managers","employee")
+def evolutionary_file_add(request):
+    try:
+        obj = get_or_none(Evolutionary, request.POST["obj_id"])
+        if obj != None:
+            file_list = request.FILES.getlist('file')
+            for f in file_list:
+                obj_doc = EvolutionaryDoc.objects.create(evolutionary=obj)
+                obj_doc.doc = f
+                obj_doc.save()
+
+        return render(request, "patient/evolutionary/file-list.html", {"obj": obj,})
+    except Exception as e:
+        return render(request, 'error_exception.html', {'exc':show_exc(e)})
+
+@group_required("admins","managers","employee")
+def evolutionary_file_remove(request):
+    try:
+        obj = get_or_none(EvolutionaryDoc, request.GET["obj_id"])
+        if obj != None:
+            evol = obj.evolutionary
+            obj.doc.delete(save=False)
+            obj.delete()
+
+        return render(request, "patient/evolutionary/file-list.html", {"obj": evol,})
     except Exception as e:
         return render(request, 'error_exception.html', {'exc':show_exc(e)})
 

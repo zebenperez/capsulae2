@@ -79,6 +79,7 @@ urlpatterns = [
     path('patients/shared/form', views.patient_shared_form, name='patient-shared-form'),
     path('patients/shared/save', views.patient_shared_save, name='patient-shared-save'),
     path('patients/shared/remove', views.patient_shared_remove, name='patient-shared-remove'),
+    path('patients/shared/lopd/<int:obj_id>', views.patient_shared_lopd, name='patient-shared-lopd'),
 
     #------------------------- PATIENT SPD --------------------
     path('patients/spd/', views.patient_spd, name='patient-spd'),
@@ -110,6 +111,8 @@ urlpatterns = [
     path('patients/evolutionary/referral-form/<slug:history_num>/<int:evolutionary_id>/', evo_views.evolutionary_referral_form, name='evolutionary-referral-form'),
     path('patients/evolutionary/referral-form/<slug:history_num>/<int:evolutionary_id>/<slug:view>/', evo_views.evolutionary_referral_form, name='evolutionary-referral-form'),
     path('patients/evolutionary/send-form/', evo_views.evolutionary_send_form, name='evolutionary-send-form'),
+    path('patients/evolutionary/file-add/', evo_views.evolutionary_file_add, name='evolutionary-file-add'),
+    path('patients/evolutionary/file-remove/', evo_views.evolutionary_file_remove, name='evolutionary-file-remove'),
 
     #------------------------- PARAMETERS --------------------
     path('patients/params/', views.patient_params, name='patient-params'),

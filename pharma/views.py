@@ -398,6 +398,17 @@ def patient_shared_remove(request):
         print(e)
         return render(request, 'error_exception.html', {'exc':show_exc(e)})
 
+#@group_required("admins","managers")
+def patient_shared_lopd(request, obj_id):
+    context={}
+    try:
+        ps =get_or_none(PatientShared, obj_id)
+        context['patient'] = ps.patient
+        context['company'] = ps.user.company
+    except Exception as e:
+        print(e)
+    return render(request, "patient/lopd/lopd-document-template2.html", context)
+
 
 '''
     Treatment
@@ -832,7 +843,7 @@ def patient_lopd_generate_signed_document(request, patient_id):
             filename = "signed_consent_{0}_{1}.pdf".format(patient.nif, date_str)
             filepath = os.path.join(lopd_dir,filename)
 
-            consent = LOPDConsents(paciente=patient)
+            consent = LOPDConsents(paciente=patient, company=company)
             with open(filepath, 'wb+') as pdf_file :
                 filepath = os.path.join(lopd_dir, filename )
                 pdf_content = HTML(string=html_template).write_pdf()

@@ -60,8 +60,10 @@
             <tbody>
                 {% for item in obj.comp_shared.all %}
                     <tr class="small row-item" id="row_shared_{{item.id}}">
-                        <td class="p-0"> {{ item.user.company }} </td>
+                        <td class="p-0" width="80%"> {{ item.user.company }} </td>
                         <td class="p-0">
+                            <a href="{%url 'patient-shared-lopd' item.pk%}" class="btn btn-sm new " target="_blank" 
+                                title="{%trans "Firmar Documento"%}"> {% trans "Firmar documento" %}</a>
                             <a class="btn btn-sm ark p-2" data-url="{% url "patient-shared-remove" %}" data-obj_id="{{item.id}}" 
                                 data-target="patient-org-container" title="{% trans 'Remove' %}" 
                                 data-confirm="{% trans "Are you sure to remove this element?" %}"> <i class="fas fa-trash"></i></a>
