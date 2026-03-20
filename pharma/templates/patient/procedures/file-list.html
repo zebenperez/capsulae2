@@ -43,9 +43,9 @@
         <div class="col-12" id="obs-view-{{item.id}}">{{item.obs}}</div> 
         <div class="col-12 text-end hide" id="obs-edit-{{item.id}}"> 
             <button class="btn btn-xs" 
-                onclick="$('#obs-view-{{item.id}}').toggle();$('#obs-edit-{{item.id}}').toggle();$('#obs-view-{{item.id}}').html($('#obs').val())">
+                    onclick="$('#obs-view-{{item.id}}').toggle();$('#obs-edit-{{item.id}}').toggle();$('#obs-view-{{item.id}}').html($('#obs-{{item.id}}').val())">
                 {% trans "Guardar" %}</button>
-            <textarea class="form-control autosave b-bottom" id="obs" name="obs" value="{{item.obs}}" title="{{item.obs}}" 
+            <textarea class="form-control autosave b-bottom" id="obs-{{item.id}}" name="obs" value="{{item.obs}}" title="{{item.obs}}" 
                 data-model-name="community.patientproceduredoc" data-obj-id="{{item.id}}" data-url="{%url "autosave_field"%}" 
                 data-target="div-notification">{{item.obs}}</textarea> <span id="obs__msg"></span>
         </div>
