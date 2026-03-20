@@ -27,8 +27,10 @@
                 data-url="{% url "autoremove_obj"%}" data-target="row_{{item.id}}" title="{% trans 'Remove' %}"
                 data-confirm="{% patient_remove_confirm_text request.user item %}"><i class="fas fa-trash"></i></a>
             {%endcomment%}
-            <a class="btn btn-xs ark" data-url="{% url "patient-remove-msg" %}" data-target-modal="common-modal" 
-                data-obj_id="{{item.id}}" title="{% trans 'Remove' %}"><i class="fas fa-trash"></i></a> 
+            {% if item.owner == request.user %}
+                <a class="btn btn-xs ark" data-url="{% url "patient-remove-msg" %}" data-target-modal="common-modal" 
+                    data-obj_id="{{item.id}}" title="{% trans 'Remove' %}"><i class="fas fa-trash"></i></a> 
+            {% endif %}
         </div>
     </div>
 {% endfor %}
