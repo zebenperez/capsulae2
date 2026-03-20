@@ -31,7 +31,7 @@
                     <i class="fas fa-download"></i> </a>
                 {%endcomment%}
 
-                <button class="btn btn-xs" onclick="$('#obs-view').toggle();$('#obs-edit-{{item.id}}').toggle()">
+                <button class="btn btn-xs" onclick="$('#obs-view-{{item.id}}').toggle();$('#obs-edit-{{item.id}}').toggle()">
                     <i class="fas fa-edit"></i></button>
                 <a class="btn btn-xs ark delete-btn" id="btn-photo-{{item.pk}}" title="{% trans "Borrar fichero" %}" 
                     data-confirm="{% trans "Esta seguro/a de que desea borrar este fichero?" %}" 
@@ -40,10 +40,10 @@
             </div>
         </div>
         <div class="col-12"> {% trans "Descripción del fichero" %} </div>
-        <div class="col-12" id="obs-view">{{item.obs}}</div> 
+        <div class="col-12" id="obs-view-{{item.id}}">{{item.obs}}</div> 
         <div class="col-12 text-end hide" id="obs-edit-{{item.id}}"> 
             <button class="btn btn-xs" 
-                onclick="$('#obs-view').toggle();$('#obs-edit-{{item.id}}').toggle();$('#obs-view-{{item.id}}').html($('#obs').val())">
+                onclick="$('#obs-view-{{item.id}}').toggle();$('#obs-edit-{{item.id}}').toggle();$('#obs-view-{{item.id}}').html($('#obs').val())">
                 {% trans "Guardar" %}</button>
             <textarea class="form-control autosave b-bottom" id="obs" name="obs" value="{{item.obs}}" title="{{item.obs}}" 
                 data-model-name="community.patientproceduredoc" data-obj-id="{{item.id}}" data-url="{%url "autosave_field"%}" 
