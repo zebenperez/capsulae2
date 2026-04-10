@@ -3,11 +3,11 @@
 
 <div class="row spd-tab">
     <div class="col-12 text-end">
-        {% if obj.owner == request.user %}
-            <button type="button" class="btn btn-sm ark new" data-url="{%url "patient-procedure-form"%}" 
-                data-target-modal="common-modal" data-patient_id="{{obj.id}}"> 
-                <i class="fas fa-plus"></i> {% trans 'Crear Trámite' %}</button> 
-        {% endif %}
+        {#{% if obj.owner == request.user %}#}
+        <button type="button" class="btn btn-sm ark new" data-url="{%url "patient-procedure-form"%}" 
+            data-target-modal="common-modal" data-patient_id="{{obj.id}}"> 
+            <i class="fas fa-plus"></i> {% trans 'Crear Trámite' %}</button> 
+        {#{% endif %}#}
     </div>
 </div>
 

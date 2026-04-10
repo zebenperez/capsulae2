@@ -26,26 +26,26 @@ def get_projects(user, search_value=""):
 def get_project_context(user, search_value=""):
     return {'items': get_projects(user, search_value)}
 
-@group_required("admins","managers")
+@group_required("admins","managers", "employee")
 def projects(request):
     return render(request, "projects/projects.html", {})
 
-@group_required("admins","managers")
+@group_required("admins","managers", "employee")
 def project_list(request):
     return render(request, "projects/project-list.html", get_project_context(request.user))
 
-@group_required("admins","managers")
+@group_required("admins","managers", "employee")
 def project_search(request):
     search_value = get_param(request.GET, "s-name")
     return render(request, "projects/project-list.html", get_project_context(request.user, search_value))
 
-@group_required("admins","managers")
+@group_required("admins","managers", "employee")
 def project_new(request):
     obj = Project.objects.create(manager=request.user)
     #po, created = PatientOrigin.objects.get_or_create(patient=obj)
     return redirect(reverse('project-view', kwargs={'project_id': obj.id}))
 
-@group_required("admins","managers")
+@group_required("admins","managers", "employee")
 def project_remove(request):
     obj = get_or_none(Project, request.GET["obj_id"]) if "obj_id" in request.GET else None
     if obj != None:
@@ -55,37 +55,37 @@ def project_remove(request):
 '''
     Project
 '''
-@group_required("admins","managers")
+@group_required("admins","managers", "employee")
 def project_view(request, project_id):
     project = get_or_none(Project, project_id)
     return render(request, "project/project-view.html", {'obj': project})
 
-@group_required("admins","managers")
+@group_required("admins","managers", "employee")
 def project_details(request):
     project = get_or_none(Project, get_param(request.GET, "obj_id"))
     return render(request, "project/project-details.html", {'obj': project})
 
-@group_required("admins","managers")
+@group_required("admins","managers", "employee")
 def project_form(request):
     project = get_or_none(Project, get_param(request.GET, "obj_id"))
     return render(request, "project/project-form.html", {'obj': project})
 
-@group_required("admins","managers")
+@group_required("admins","managers", "employee")
 def project_texts(request):
     project = get_or_none(Project, get_param(request.GET, "obj_id"))
     return render(request, "project/texts/text-list.html", {'obj': project})
 
-@group_required("admins","managers")
+@group_required("admins","managers", "employee")
 def project_activities(request):
     project = get_or_none(Project, get_param(request.GET, "obj_id"))
     return render(request, "project/activities/activity-list.html", {'obj': project})
 
-@group_required("admins","managers")
+@group_required("admins","managers", "employee")
 def project_budget(request):
     project = get_or_none(Project, get_param(request.GET, "obj_id"))
     return render(request, "project/budget/budget-list.html", {'obj': project})
 
-@group_required("admins","managers")
+@group_required("admins","managers", "employee")
 def project_drive(request):
     project = get_or_none(Project, get_param(request.GET, "obj_id"))
     folder_list = project.folders.filter(parent__isnull=True)
@@ -96,7 +96,7 @@ def project_drive(request):
 '''
     Texts
 '''
-@group_required("admins","managers")
+@group_required("admins","managers", "employee")
 def project_text_form(request):
     try:
         project = get_or_none(Project, get_param(request.GET, "project_id"))
@@ -108,7 +108,7 @@ def project_text_form(request):
     except Exception as e:
         return render(request, 'error_exception.html', {'exc':show_exc(e)})
 
-@group_required("admins","managers")
+@group_required("admins","managers", "employee")
 def project_text_remove(request):
     try:
         obj = get_or_none(Text, request.GET["obj_id"])
@@ -122,7 +122,7 @@ def project_text_remove(request):
 '''
     Activities
 '''
-@group_required("admins","managers")
+@group_required("admins","managers", "employee")
 def project_activity_form(request):
     try:
         project = get_or_none(Project, get_param(request.GET, "project_id"))
@@ -134,7 +134,7 @@ def project_activity_form(request):
     except Exception as e:
         return render(request, 'error_exception.html', {'exc':show_exc(e)})
 
-@group_required("admins","managers")
+@group_required("admins","managers", "employee")
 def project_activity_remove(request):
     try:
         obj = get_or_none(Activity, request.GET["obj_id"])
@@ -174,7 +174,7 @@ def project_activity_set_register(request):
     except Exception as e:
         return render(request, 'error_exception.html', {'exc':show_exc(e)})
 
-@group_required("admins","managers")
+@group_required("admins","managers", "employee")
 def project_activity_register_list(request):
     try:
         obj = get_or_none(Activity, request.GET["obj_id"])
@@ -182,7 +182,7 @@ def project_activity_register_list(request):
     except Exception as e:
         return render(request, 'error_exception.html', {'exc':show_exc(e)})
 
-@group_required("admins","managers")
+@group_required("admins","managers", "employee")
 def project_activity_register_export(request, activity_id):
     try:
         obj = get_or_none(Activity, activity_id)
@@ -204,7 +204,7 @@ def project_activity_register_export(request, activity_id):
 '''
     Budget
 '''
-@group_required("admins","managers")
+@group_required("admins","managers", "employee")
 def project_income_form(request):
     try:
         project = get_or_none(Project, get_param(request.GET, "project_id"))
@@ -217,7 +217,7 @@ def project_income_form(request):
     except Exception as e:
         return render(request, 'error_exception.html', {'exc':show_exc(e)})
 
-@group_required("admins","managers")
+@group_required("admins","managers", "employee")
 def project_income_remove(request):
     try:
         obj = get_or_none(Income, request.GET["obj_id"])
@@ -227,7 +227,7 @@ def project_income_remove(request):
     except Exception as e:
         return render(request, 'error_exception.html', {'exc':show_exc(e)})
 
-@group_required("admins","managers")
+@group_required("admins","managers", "employee")
 def project_expense_form(request):
     try:
         project = get_or_none(Project, get_param(request.GET, "project_id"))
@@ -240,7 +240,7 @@ def project_expense_form(request):
     except Exception as e:
         return render(request, 'error_exception.html', {'exc':show_exc(e)})
 
-@group_required("admins","managers")
+@group_required("admins","managers", "employee")
 def project_expense_remove(request):
     try:
         obj = get_or_none(Expense, request.GET["obj_id"])
@@ -253,7 +253,7 @@ def project_expense_remove(request):
 '''
     Drive
 '''
-@group_required("admins","managers")
+@group_required("admins","managers", "employee")
 def project_folder_form(request):
     try:
         project = get_or_none(Project, get_param(request.GET, "project_id"))
@@ -270,7 +270,7 @@ def project_folder_form(request):
         return render(request, 'error_exception.html', {'exc':show_exc(e)})
 
 
-@group_required("admins","managers")
+@group_required("admins","managers", "employee")
 def project_folder_change(request):
     try:
         obj_id = request.GET["obj_id"]
@@ -288,7 +288,7 @@ def project_folder_change(request):
     except Exception as e:
         return render(request, 'error_exception.html', {'exc':show_exc(e)})
 
-@group_required("admins","managers")
+@group_required("admins","managers", "employee")
 def project_folder_remove(request):
     try:
         obj_id = request.GET["obj_id"]
@@ -306,7 +306,7 @@ def project_folder_remove(request):
     except Exception as e:
         return render(request, 'error_exception.html', {'exc':show_exc(e)})
 
-@group_required("admins","managers")
+@group_required("admins","managers", "employee")
 def project_file_list(request):
     try:
         obj_id = request.GET["obj_id"]
@@ -318,7 +318,7 @@ def project_file_list(request):
     except Exception as e:
         return render(request, 'error_exception.html', {'exc':show_exc(e)})
 
-@group_required("admins","managers")
+@group_required("admins","managers", "employee")
 def project_file_add(request):
     try:
         obj_id = request.POST["obj_id"]
@@ -340,7 +340,7 @@ def project_file_add(request):
         print(e)
         return (render(request, "error_exception.html", {'exc':show_exc(e)}))
 
-@group_required("admins","managers")
+@group_required("admins","managers", "employee")
 def project_file_form(request):
     try:
         obj = get_or_none(File, request.GET["obj_id"])  
@@ -348,7 +348,7 @@ def project_file_form(request):
     except Exception as e:
         return render(request, 'error_exception.html', {'exc':show_exc(e)})
 
-@group_required("admins","managers")
+@group_required("admins","managers", "employee")
 def project_file_remove(request):
     try:
         obj_id = request.GET["obj_id"]
@@ -364,7 +364,7 @@ def project_file_remove(request):
     except Exception as e:
         return render(request, 'error_exception.html', {'exc':show_exc(e)})
 
-@group_required("admins","managers")
+@group_required("admins","managers", "employee")
 def project_file_get(request, obj_id):
     try:
         f = get_or_none(File, obj_id) 

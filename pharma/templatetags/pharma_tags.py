@@ -17,6 +17,10 @@ register = template.Library()
     Filters
 '''
 @register.filter
+def is_owner(user, patient):
+    return (patient.owner == user)
+
+@register.filter
 def have_treatment(pillbox, treatment):
     return pillbox.have_treatment(treatment)
 

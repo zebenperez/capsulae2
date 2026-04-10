@@ -1,7 +1,8 @@
-{% load i18n common_tags %}
+{% load i18n common_tags pharma_tags %}
 
 <div class="row spd-tab">
     <div class="col-12 text-end">
+        {% if request.user|is_owner:patient %}
         <button type="button" class="btn btn-sm ark new" data-url="{% url "patient-shared-form" %}" data-target-modal="common-modal" 
             data-patient_id="{{obj.id}}"> <i class="fas fa-arrow-left"></i> {% trans 'Compartir paciente' %}</button> 
         |
@@ -10,6 +11,7 @@
         |
         <button type="button" class="btn btn-sm ark new" data-url="{% url "patient-org-form" %}" data-target-modal="common-modal" 
             data-patient_id="{{obj.id}}"> <i class="fas fa-plus"></i> {% trans 'Añadir organización' %}</button> 
+        {% endif %}
     </div>
 </div>
 
@@ -33,13 +35,15 @@
                     <div class="col-3 p-2">{{ item.rol }}</div>
                     <div class="col-2 p-2">{{ item.obs }}</div>
                     <div class="col-2 p-2 text-right">
-                        <a class="btn btn-xs ark p-2" title="{%trans 'Edit organización'%}" data-url="{%url "patient-org-form" %}"
-                            data-target-modal="common-modal" data-obj_id="{{item.id}}" data-patient_id="{{obj.id}}"
-                            title="{% trans "Editar" %}"> <i class="fas fa-edit"></i></a>
+                        {% if request.user|is_owner:patient %}
+                            <a class="btn btn-xs ark p-2" title="{%trans 'Edit organización'%}" data-url="{%url "patient-org-form" %}"
+                                data-target-modal="common-modal" data-obj_id="{{item.id}}" data-patient_id="{{obj.id}}"
+                                title="{% trans "Editar" %}"> <i class="fas fa-edit"></i></a>
 
-                        <a class="btn btn-sm ark p-2" data-url="{% url "patient-org-remove" %}" data-obj_id="{{item.id}}" 
-                            data-target="patient-org-container" title="{% trans 'Remove' %}" 
-                            data-confirm="{% trans "Are you sure to remove this element?" %}"> <i class="fas fa-trash"></i></a>
+                            <a class="btn btn-sm ark p-2" data-url="{% url "patient-org-remove" %}" data-obj_id="{{item.id}}" 
+                                data-target="patient-org-container" title="{% trans 'Remove' %}" 
+                                data-confirm="{% trans "Are you sure to remove this element?" %}"> <i class="fas fa-trash"></i></a>
+                        {% endif %}
                     </div>
                 </td>
             </tr>

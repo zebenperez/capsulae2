@@ -49,20 +49,20 @@ def get_organizations(user, search_value=""):
 def get_organization_context(user, search_value=""):
     return {'items': get_organizations(user, search_value)}
 
-@group_required("admins","managers")
+@group_required("admins","managers","employee")
 def organizations(request):
     return render(request, "organizations/organizations.html", get_organization_context(request.user))
 
-@group_required("admins","managers")
+@group_required("admins","managers","employee")
 def organization_list(request):
     return render(request, "organizations/organization-list.html", get_organization_context(request.user))
 
-@group_required("admins","managers")
+@group_required("admins","managers","employee")
 def organization_search(request):
     search_value = get_param(request.GET, "s-name")
     return render(request, "organizations/organization-list.html", get_organization_context(request.user, search_value))
 
-@group_required("admins","managers")
+@group_required("admins","managers","employee")
 def organization_form(request):
     obj_id = get_param(request.GET, "obj_id")
     obj = get_or_none(Organization, obj_id)
@@ -70,7 +70,7 @@ def organization_form(request):
         obj = Organization.objects.create(comp=Company.get_by_user(request.user), user=request.user)
     return render(request, "organizations/organization-form.html", {'obj': obj})
 
-@group_required("admins","managers")
+@group_required("admins","managers","employee")
 def organization_view(request, obj_id):
     try:
         obj = get_or_none(Organization, obj_id)
@@ -95,20 +95,20 @@ def organization_view(request, obj_id):
     except Exception as e:
         return render(request, 'error_exception.html', {'exc':show_exc(e)})
 
-@group_required("admins","managers")
+@group_required("admins","managers","employee")
 def organization_remove(request):
     obj = get_or_none(Organization, request.GET["obj_id"]) if "obj_id" in request.GET else None
     if obj != None:
         obj.delete()
     return render(request, "organizations/organization-list.html", get_organization_context(request.user))
 
-@group_required("admins","managers")
+@group_required("admins","managers","employee")
 def organization_print(request):
     context = get_organization_context(request.user)
     context["company"] = Company.get_by_user(request.user)
     return render(request, "organizations/organization-print.html", context)
 
-@group_required("admins","managers")
+@group_required("admins","managers","employee")
 def organization_csv(request):
     #context["company"] = Company.get_by_user(request.user)
     try:
@@ -386,20 +386,20 @@ def get_procedures(search_value=""):
 def get_procedure_context(search_value=""):
     return {'items': get_procedures(search_value)}
 
-@group_required("admins","managers")
+@group_required("admins","managers","employee")
 def procedures(request):
     return render(request, "procedures/procedures.html", get_procedure_context())
 
-@group_required("admins","managers")
+@group_required("admins","managers","employee")
 def procedure_list(request):
     return render(request, "procedures/procedure-list.html", get_procedure_context())
 
-@group_required("admins","managers")
+@group_required("admins","managers","employee")
 def procedure_search(request):
     search_value = get_param(request.GET, "s-name")
     return render(request, "procedures/procedure-list.html", get_procedure_context(search_value))
 
-@group_required("admins","managers")
+@group_required("admins","managers","employee")
 def procedure_form(request):
     obj_id = get_param(request.GET, "obj_id")
     obj = get_or_none(Procedure, obj_id)
@@ -407,7 +407,7 @@ def procedure_form(request):
         obj = Procedure.objects.create()
     return render(request, "procedures/procedure-form.html", {'obj': obj})
 
-@group_required("admins","managers")
+@group_required("admins","managers","employee")
 def procedure_remove(request):
     obj = get_or_none(Procedure, request.GET["obj_id"]) if "obj_id" in request.GET else None
     if obj != None:

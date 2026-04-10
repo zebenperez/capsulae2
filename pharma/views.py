@@ -95,14 +95,16 @@ def get_patients(user, search_value="", start=0, end=50, lopd_signed=True):
     user_id = get_owner_id(user)
     full_query &= Q(**{'id_user': user_id})
 
-    # Pacientes compartidos
-    shared_list = [item.patient for item in PatientShared.objects.filter(user__id=user_id)]
-
     # Pacientes con lopd firmada
     lopd_patient_ids = LOPDConsents.objects.all().distinct().values_list('paciente', flat=True)
-    lopd_list = list(Pacientes.objects.filter(full_query).filter(id__in=lopd_patient_ids)[start:end])
 
     if lopd_signed:
+        # Pacientes compartidos
+        shared_list = [item.patient for item in PatientShared.objects.filter(user__id=user_id)]
+        
+        #lopd_list = list(Pacientes.objects.filter(full_query).filter(id__in=lopd_patient_ids)[start:end])
+        lopd_list = list(Pacientes.objects.filter(full_query).filter(id__in=lopd_patient_ids))
+
         # Pacientes sin lopd firmada pero creados en los últimos 15 días
         try:
             lopd_limit = int(get_config_value("LOPD_{}".format(user_id), LOPD_LIMIT))
@@ -111,7 +113,7 @@ def get_patients(user, search_value="", start=0, end=50, lopd_signed=True):
         limit = datetime.today() - timedelta(days=lopd_limit)
         date_list = list(Pacientes.objects.filter(full_query).exclude(id__in=lopd_patient_ids).filter(created_at__gte=limit))
 
-        return date_list + lopd_list + shared_list
+        return (date_list + lopd_list + shared_list)[start:end]
     else:
         return list(Pacientes.objects.filter(full_query).exclude(id__in=lopd_patient_ids)[start:end])
 
