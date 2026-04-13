@@ -2,7 +2,7 @@
 
 <div class="row spd-tab">
     <div class="col-12 text-end">
-        {% if request.user|is_owner:patient %}
+        {% if request.user|is_owner:obj %}
         <button type="button" class="btn btn-sm ark new" data-url="{% url "patient-shared-form" %}" data-target-modal="common-modal" 
             data-patient_id="{{obj.id}}"> <i class="fas fa-arrow-left"></i> {% trans 'Compartir paciente' %}</button> 
         |
@@ -35,7 +35,7 @@
                     <div class="col-3 p-2">{{ item.rol }}</div>
                     <div class="col-2 p-2">{{ item.obs }}</div>
                     <div class="col-2 p-2 text-right">
-                        {% if request.user|is_owner:patient %}
+                        {% if request.user|is_owner:obj %}
                             <a class="btn btn-xs ark p-2" title="{%trans 'Edit organización'%}" data-url="{%url "patient-org-form" %}"
                                 data-target-modal="common-modal" data-obj_id="{{item.id}}" data-patient_id="{{obj.id}}"
                                 title="{% trans "Editar" %}"> <i class="fas fa-edit"></i></a>
