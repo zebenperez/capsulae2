@@ -6,15 +6,18 @@
         <div class="col-lg-1 col-1"><i class="fas fa-search"></i></div>
         <div class="col-lg-11 col-11 text-left p-0">
             <input type="text" class="autosearch form-control form-control-dark w-100" name="s-name" id="s-name" 
-               placeholder="{% trans 'Nombre' %}" data-url="{% url "project-search" %}" data-target="project-list" data-related="s-name" />
+               placeholder="{%trans 'Nombre'%}" data-url="{%url "organization-search"%}" data-target="org-list" data-related="s-name"/>
         </div>
     </div>
     <div class="content mt-4">
         <div class="toolbar-content">
-	        <h2 class="pathway b-right">{%trans 'Organizaciones'%} <span id="items-counter" class="badge badge-secondary">{{items|length}}</span></h2>
+	        <h2 class="pathway b-right">
+                {%trans 'Organizaciones'%} <span id="items-counter" class="badge badge-secondary">{{items|length}}</span></h2>
             {#<a class="btn btn-sm new" href="{% url "organization-new" %}">{% trans "Nueva organización"%}</a>#}
-            <a class="btn btn-sm" href="{% url "organization-print" %}" target="_blank"> <i class="fas fa-print"></i> {% trans 'PDF' %}</a> 
-            <a class="btn btn-sm" href="{%url "organization-csv"%}" target="_blank"> <i class="fas fa-file-csv"></i> {%trans 'CSV'%}</a>
+            <a class="btn btn-sm" href="{%url "organization-print"%}" target="_blank"> 
+                <i class="fas fa-print"></i> {%trans 'PDF'%}</a>
+            <a class="btn btn-sm" href="{%url "organization-csv"%}" target="_blank"> 
+                <i class="fas fa-file-csv"></i> {%trans 'CSV'%}</a>
             <button type="button" class="btn btn-sm ark new" data-url="{%url "organization-form"%}" data-target-modal="common-modal"> 
                 <i class="fas fa-plus"></i> {% trans 'Crear Organización' %}</button> 
         </div>

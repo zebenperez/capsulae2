@@ -64,12 +64,14 @@
 				<div class="entity-data">
                     <strong> {% trans "Datos de la entidad a la que se deriva" %} </strong>
 					{#<input type="text" value="" class="print-input print-input-lg">#}
-                    <select class="print-input print-input-lg" name="organization" {% if view %}disabled{% endif %}>
+                    <select id="select-orgs" class="print-input print-input-lg" name="organization" {% if view %}disabled{% endif %}>
                         {% for org in org_list %}
-                            <option value="{{org.name}}|{{org.email}}" {%if organization == org.name%}selected{%endif%}>{{org.name}}</option>
+                            <option value="{{org.name}}|{{org.email}}" {%if organization == org.name%}selected{%endif%}>
+                                {{org.name}}</option>
                         {% endfor %}
                     </select>
 				</div>
+                <br/>
 
 				<div class="risk-table">
 					<div class="risk-table-row">
@@ -214,6 +216,8 @@
 		</div>
 	</div>
     </form>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
         $(document).ready(function() {
             var sigdiv = $("#sign").jSignature();
@@ -229,7 +233,10 @@
                 $('#signature_form').submit();
             });*/
 
-            $('#reset_signature').on('click', function(e){sigdiv.jSignature("reset"); e.preventDefault(); e.stopImmediatePropagation();});
+            $('#reset_signature').on('click', function(e){
+                sigdiv.jSignature("reset"); e.preventDefault(); e.stopImmediatePropagation();});
+
+            $('#select-orgs').select2();
         });
 
         function checkScale(obj)
