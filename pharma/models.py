@@ -67,6 +67,7 @@ class Pacientes(models.Model):
     activo = models.NullBooleanField(blank=True, null=True)
     use_poli = models.CharField(max_length=10, blank=True, null=True, default="")
     qr = models.ImageField(upload_to=upload_form_qr, blank=True, verbose_name="QR", help_text="Select file to upload")
+    uuid = models.CharField(verbose_name='UUID', max_length=255, default='')
 
     id_user = models.ForeignKey(User, db_column='id_user', on_delete=models.SET_NULL, blank=True, null=True)  # owner
 

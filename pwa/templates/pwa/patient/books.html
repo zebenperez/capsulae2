@@ -9,7 +9,7 @@
     	       <div class="row py-1">
 	         <div class="col-6 py-2"><strong>Receta: {{item.date|date:"d-m-Y"}}</strong></div>
  	         <div class="col-6">
- 		    <a class="btn btn-primary w-100 py-2" href="{% url "pwa-patient-books-print" obj.id item.id %}" target="_blank"> 
+ 		    <a class="btn btn-primary w-100 py-2" href="{% url "pwa-patient-books-print" obj.uuid item.id %}" target="_blank"> 
                  	<i class="fas fa-print"></i> &nbsp; IMPRIMIR</a>
  	        </div>
  	      </div>

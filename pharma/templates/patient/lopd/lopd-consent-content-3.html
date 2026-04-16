@@ -1,0 +1,28 @@
+{% load i18n common_tags %}
+
+<table>
+    <tr style="border: none">
+        <td> <h5>AUTORIZACIÓN</h5> </td>
+    </tr>
+</table>
+
+<p><strong>Fecha: {{date|date:"d-m-Y"}}</strong></p>
+<p>
+<strong>{{patient.nombre}} {{patient.apellido}}</strong>, mayor de edad, nacido el 26 de febrero de 2001, nacional de {{patient.origin.country}}, provisto de NIE {{patient.nif}} como mejor proceda en Derecho DIGO:
+</p>
+<p>
+Que a través del presente escrito AUTORIZO A LA <span style="font-style:italic; color:#666">Fundación para la Innovación, Investigación, Formación y el Desarrollo Comunitario (FÜNDEC). CIF. G04978730  Nº Registro 2447 JUS www.fundec.es</span>, al objeto de que presente, en nombre y representación del poderdante, solicitud de autorización de residencia y trabajo ante la Oficina de Extranjería correspondiente.
+</p>
+<p>
+Este poder de representación abarca tanto la presentación de la instancia o solicitud antedicha, la consulta del estado del mismo, la contestación a requerimientos, aportación de documentación, presentación de otros recursos o cualquier otra actividad que, relacionada con el trámite de referencia, sea en beneficio de las personas interesadas.
+</p>
+<p>
+Para que a los efectos oportunos así conste, se firma en Santa Cruz de Tenerife, a {{date|date:"d-m-Y"}}.
+</p>
+
+<p><span style="">El abajo firmante, consiente en el tratamiento de sus datos personales, en los t&eacute;rminos relacionados:</span></p>
+<br/><br/>
+<p><strong>En {{company.main_address}} &ndash; {{company.town}}, a {% now "d \d\e F \d\e Y" %}.</strong></p>
+
+<p>Fdo: <strong>{{patient.nombre}} {{patient.apellido}} </strong>DNI: <strong>{{patient.nif}} </strong> CIP: <strong>{{patient.cip}}</strong></p>
+

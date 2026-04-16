@@ -1,7 +1,7 @@
 {% load i18n %}
 <html lang="es">
 	<head>
-		<title>Autorizacion Firmada LOPD Capsulae {{ patient.nif }}</title>
+		<title>Autorizacion Firmada Capsulae {{ patient.nif }}</title>
 		<style>
 			@page{
 				size: A4 portrait;
@@ -79,11 +79,7 @@
 		</style>
 	</head>
 	<body>
-		{% if company.id == 9 %} {# FUNDEC #}
-            {% include "patient/lopd/lopd-consent-content-fundec.html"%}
-		{% else %}
-		    {% include "patient/lopd/lopd-consent-content.html"%}
-		{% endif %}
+		{% include "patient/lopd/lopd-consent-content-3.html"%}
 		<table>
 			<tr>
 				<td id="patient-signature">
@@ -91,6 +87,5 @@
 				</td>
 			</tr>
 		</table>
-
 	</body>
 </html>

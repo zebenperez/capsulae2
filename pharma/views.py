@@ -804,6 +804,15 @@ def patient_lopd_generate_document2(request, patient_id):
         print(e)
     return render(request, "patient/lopd/lopd-document-template2.html", context)
 
+def patient_lopd_generate_document3(request, patient_id):
+    context={}
+    try:
+        patient = Pacientes.objects.get(pk=patient_id)
+        context = {'patient': patient, 'company': patient.owner.company, 'date': datetime.now()}
+    except Exception as e:
+        print(e)
+    return render(request, "patient/lopd/lopd-document-template3.html", context)
+
 def patient_lopd_generate_signed_document(request, patient_id):
     context = {}
     response ="<h3>400 BAD REQUEST</h3>"
@@ -859,6 +868,52 @@ def patient_lopd_generate_signed_document(request, patient_id):
             return response
 
     return HttpResponse(response)
+
+def patient_lopd_generate_signed_document3(request, patient_id):
+    context = {}
+    response ="<h3>400 BAD REQUEST</h3>"
+    if request.method =="POST":
+        company_id = get_param(request.POST, "company", None)
+        signature = get_param(request.POST, "patient_signature", None)
+        prof_signature = get_param(request.POST, 'professional_signature', None)
+        if company_id != None:
+            patient = Pacientes.objects.get(pk = patient_id)
+            company = Company.objects.get(pk = company_id)
+
+            context = {
+                'request' : request,
+                'patient' : patient,
+                'company' : company,
+                'signature': signature,
+                'signing': True,
+                'host': "%s://%s"%(request.scheme, request.META['HTTP_HOST']),
+
+            }
+            html_template = render_to_string("patient/lopd/lopd-signed-template3.html", context)
+
+            lopd_dir = os.path.abspath(os.path.join(MEDIA_ROOT, 'lopd_files'))
+            if not os.path.exists(lopd_dir):
+                os.makedirs(lopd_dir)
+
+            date_str = datetime.now().strftime("%d%m%Y%H%M")
+            filename = "signed_consent_{0}_{1}.pdf".format(patient.nif, date_str)
+            filepath = os.path.join(lopd_dir,filename)
+
+            consent = LOPDConsents(paciente=patient, company=company)
+            with open(filepath, 'wb+') as pdf_file :
+                filepath = os.path.join(lopd_dir, filename )
+                pdf_content = HTML(string=html_template).write_pdf()
+                pdf_file.write(pdf_content)
+                consent.document.save(filename, File(pdf_file), save=True)
+                consent.save()
+
+            response = HttpResponse(pdf_content, content_type="application/pdf")
+            response['Content-Disposition'] = 'filename="{0}"'.format(filename)
+            response['Content-Transfer-Encoding']= 'binary'
+            return response
+
+    return HttpResponse(response)
+
 
 @csrf_exempt
 def patient_api_get_patients(request):

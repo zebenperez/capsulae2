@@ -11,7 +11,11 @@
     <div class="p-2 text-center"> <h2 class="fst-italic">{{obj.nombre}} {{obj.apellido}}</h2></div>
     <div class="p-2 text-center"> <h3>{%trans "CIP: "%} {{obj.cip}}</h3></div>
     <div class="p-2 text-center mt-4"> 
-        <a class="btn border-primary text-primary w-75" href="{%url "pwa-patient-books" obj.id%}">
-		<i class="fas fa-book fa-3x"></i><br/><strong>Libros recetados</strong></a>
+        <a class="btn border-primary text-primary w-75" href="{%url "pwa-patient-lopd" obj.uuid%}">
+		    <i class="fas fa-file-pdf fa-3x"></i><br/><strong>LOPD</strong></a>
+    </div>
+    <div class="p-2 text-center mt-4"> 
+        <a class="btn border-primary text-primary w-75" href="{%url "pwa-patient-books" obj.uuid%}">
+		    <i class="fas fa-book fa-3x"></i><br/><strong>Libros recetados</strong></a>
     </div>
 {% endblock %}

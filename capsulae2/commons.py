@@ -10,6 +10,7 @@ import unicodedata
 import os
 import io
 import qrcode
+import uuid
 
 
 '''
@@ -155,4 +156,6 @@ def generate_qr(data, logo):
 
     return byteArr
 
+def new_uuid():
+    return uuid.uuid4()
 
