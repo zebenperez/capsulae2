@@ -35,6 +35,7 @@ class PatientActivity(models.Model):
         verbose_name_plural = "Actividades del paciente"
 
 class Organization(models.Model):
+    priority = models.BooleanField(verbose_name="Prioridad", default=False)
     reviewed = models.BooleanField(verbose_name="Realizado", default=True)
     name = models.CharField(verbose_name="Nombre", max_length=600, blank=True, null=True, default="")
     year = models.CharField(verbose_name="Año de creación", max_length=600, blank=True, null=True, default="")
@@ -53,7 +54,7 @@ class Organization(models.Model):
     class Meta:
         verbose_name = "Organización"
         verbose_name_plural = "Organizaciones"
-        ordering = ["name"]
+        ordering = ["-priority", "name"]
 
 class OrganizationAddress(models.Model):
     same_place = models.BooleanField(verbose_name="Mismo lugar", default=True)
