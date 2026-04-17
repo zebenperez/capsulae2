@@ -6,9 +6,6 @@
         <button type="button" class="btn btn-sm ark new" data-url="{%url "evolutionary-form"%}" data-target-modal="common-modal" 
             data-patient_id="{{obj.id}}"> <i class="fas fa-plus"></i> {% trans 'Crear Evolutivo' %}</button> 
         |
-        <a href="{% url "evolutionary-report1-form" obj.n_historial %}" class="btn btn-sm p-2 new" target="_blank" 
-            rel="noopener noreferrer"> <i class="fa fa-arrow-right"></i> {% trans "Informe Vulnerabilidad" %}</a>
-        |
         <a href="{% url "evolutionary-referral-form" obj.n_historial %}" class="btn btn-sm p-2 new" target="_blank" 
             rel="noopener noreferrer"> <i class="fa fa-arrow-right"></i> {% trans "Derivar paciente" %}</a>
         {#{% endif %}#}

@@ -1,0 +1,93 @@
+{% load i18n %}
+<html lang="es">
+	<head>
+		<title>Autorizacion Firmada LOPD Capsulae {{ patient.nif }}</title>
+		<style>
+			@page{
+				size: A4 portrait;
+
+
+			}
+			.signature-container{
+					display: inline-table;
+					width: 10cm !important;
+					vertical-align:top;
+
+			}
+			img.signature{
+					display:inline-table;
+					text-align:center;
+					width: 7cm;
+					
+					margin: auto;
+					margin-right:1em;
+			}
+
+			img {
+				margin-right: .5em;
+			}
+			body{ font-size:8.5pt; width:100%; font-family:sans;}
+			ul li, 
+			p, 
+			span{
+				margin-top: .7em;
+				font-family: sans;
+				font-size: 8.5pt;
+			}
+
+			table *{
+				margin:0;
+				padding:0;
+			}
+
+			table{
+				margin-top: 1em;
+				width: 90%;
+				margin: auto;
+			}
+
+			table tr{
+				border: 1px solid black;
+
+			}
+			td {
+				padding: .5em;
+			}
+			td li{
+				margin-top: 0;
+			}
+			h5 
+			{
+				text-align:center;
+				font-weight: bolder;
+				font-size: medium;
+			
+			}
+			td h4{
+				font-size: 11pt;
+			}
+
+			ul li{
+				list-style:none;
+				margin:0;
+				padding:0;
+			}
+			.accept-terms li{
+				padding-bottom: 0.6em;
+			}
+
+		</style>
+	</head>
+	<body>
+		{% include "patient/lopd/lopd-consent-content-4.html"%}
+        {%comment%}
+		<table>
+			<tr>
+				<td id="patient-signature">
+					<img src="data:{{signature}}" id="patient-signature-img" class="signature" width="50%"/>
+				</td>
+			</tr>
+		</table>
+        {%endcomment%}
+	</body>
+</html>

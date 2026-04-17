@@ -1,49 +1,49 @@
 {% load i18n %}
 
 <div class="row" style="margin:0;">
-    <div class="col-lg-2 col-12 mt-3">
+    <div class="col-lg-2 col-12 mt-1">
         <label class="label">{% trans "Nº Historial" %}:</label>
         <input type="text" class="form-control autosave input view" id="n_historial" name="n_historial" value="{{obj.n_historial}}" 
-            title="{{obj.n_historial}}" data-model-name="pharma.pacientes" data-obj-id="{{obj.id}}" data-url="{% url "autosave_field" %}" 
-            data-target="div-notification" disabled/> <span id="n_historial__msg"></span>
+            title="{{obj.n_historial}}" data-model-name="pharma.pacientes" data-obj-id="{{obj.id}}" 
+            data-url="{% url "autosave_field" %}" data-target="div-notification" disabled/> <span id="n_historial__msg"></span>
     </div>
-    <div class="col-lg-3 col-6 mt-3">
+    <div class="col-lg-3 col-6 mt-1">
         <label class="label">{% trans "Nombre" %}:</label>
-        <input type="text" class="form-control autosave input view" id="nombre" name="nombre" value="{{obj.nombre}}" title="{{obj.nombre}}" 
-            data-model-name="pharma.pacientes" data-obj-id="{{obj.id}}" data-url="{% url "autosave_field" %}" data-target="div-notification"
-            disabled/> <span id="nombre__msg"></span>
+        <input type="text" class="form-control autosave input view" id="nombre" name="nombre" value="{{obj.nombre}}" 
+            title="{{obj.nombre}}" data-model-name="pharma.pacientes" data-obj-id="{{obj.id}}" data-url="{% url "autosave_field" %}" 
+            data-target="div-notification" disabled/> <span id="nombre__msg"></span>
     </div>
-    <div class="col-lg-3 col-6 mt-3">
+    <div class="col-lg-3 col-6 mt-1">
         <label class="label">{% trans "Apellido" %}:</label>
         <input type="text" class="form-control autosave input view" id="apellildo" name="apellido" value="{{obj.apellido}}" 
             title="{{obj.apellido}}" data-model-name="pharma.pacientes" data-obj-id="{{obj.id}}" data-url="{% url "autosave_field" %}" 
             data-target="div-notification" disabled/> <span id="apellido__msg"></span>
     </div>
 
-    <div class="col-lg-3 col-6 mt-3">
+    <div class="col-lg-3 col-6 mt-1">
         <label class="label">{% trans "Fecha de nacimiento" %}:</label>
         <input type="date" class="form-control autosave input view" id="fecha_nacimiento" name="fecha_nacimiento" 
             value="{{obj.fecha_nacimiento|date:"Y-m-d"}}" data-model-name="pharma.pacientes" data-obj-id="{{obj.id}}" 
-            data-url="{% url "autosave_field" %}" data-target="div-notification"  title="{{obj.fecha_nacimiento|date:"Y-m-d"}}" disabled/> 
-            <span id="fecha_nacimiento__msg"></span>
+            data-url="{% url "autosave_field" %}" data-target="div-notification"  title="{{obj.fecha_nacimiento|date:"Y-m-d"}}" 
+            disabled/> <span id="fecha_nacimiento__msg"></span>
     </div>
-    <div class="col-lg-2 col-6 mt-3">
+    <div class="col-lg-2 col-6 mt-1">
         <label class="label">{% trans "NIF" %}:</label>
         <input type="text" class="form-control autosave input view" id="nif" name="nif" value="{{obj.nif}}" title="{{obj.nif}}" 
-            data-model-name="pharma.pacientes" data-obj-id="{{obj.id}}" data-url="{% url "autosave_field" %}" data-target="div-notification"
-            disabled/> <span id="nif__msg"></span>
+            data-model-name="pharma.pacientes" data-obj-id="{{obj.id}}" data-url="{% url "autosave_field" %}" 
+            data-target="div-notification" disabled/> <span id="nif__msg"></span>
     </div>
-    <div class="col-lg-3 col-6 mt-3">
+    <div class="col-lg-3 col-6 mt-1">
         <label class="label">{% trans "CIP" %}:</label>
         <input type="text" class="form-control autosave input view" id="cip" name="cip" value="{{obj.cip}}" title="{{obj.cip}}" 
-            data-model-name="pharma.pacientes" data-obj-id="{{obj.id}}" data-url="{% url "autosave_field" %}" data-target="div-notification"
-            disabled/> <span id="cip__msg"></span>
+            data-model-name="pharma.pacientes" data-obj-id="{{obj.id}}" data-url="{% url "autosave_field" %}" 
+            data-target="div-notification" disabled/> <span id="cip__msg"></span>
     </div>
-    <div class="col-lg-3 col-6 mt-3">
+    <div class="col-lg-3 col-6 mt-1">
         <label class="label">{% trans "Sexo" %}:</label>
         <select class="form-control autosave input view" id="sexo" name="sexo"
-            data-model-name="pharma.pacientes" data-obj-id="{{obj.id}}" data-url="{% url "autosave_field" %}" data-target="div-notification"
-            disabled>
+            data-model-name="pharma.pacientes" data-obj-id="{{obj.id}}" data-url="{% url "autosave_field" %}" 
+            data-target="div-notification" disabled>
             <option value="">{% trans "---" %}</option>
             <option value="M" {%if obj.sexo == "M"%}selected{%endif%}>{% trans "Mujer" %}</option>
             <option value="H" {%if obj.sexo == "H"%}selected{%endif%}>{% trans "Hombre" %}</option>

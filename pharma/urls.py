@@ -33,8 +33,10 @@ urlpatterns = [
     path('patients/lopd-generate-document/<int:patient_id>', views.patient_lopd_generate_document, name='patient-lopd-generate-document'),
     path('patients/lopd-generate-document2/<int:patient_id>', views.patient_lopd_generate_document2, name='patient-lopd-generate-document2'),
     path('patients/lopd-generate-document3/<int:patient_id>', views.patient_lopd_generate_document3, name='patient-lopd-generate-document3'),
+    path('patients/lopd-generate-document4/<int:patient_id>', views.patient_lopd_generate_document4, name='patient-lopd-generate-document4'),
     path('patients/lopd-generate-signed-document/<int:patient_id>', views.patient_lopd_generate_signed_document, name='patient-lopd-generate-signed-document'),
     path('patients/lopd-generate-signed-document3/<int:patient_id>', views.patient_lopd_generate_signed_document3, name='patient-lopd-generate-signed-document3'),
+    path('patients/lopd-generate-signed-document4/<int:patient_id>', views.patient_lopd_generate_signed_document4, name='patient-lopd-generate-signed-document4'),
 
     path('patients/allergy/', views.patient_allergy, name='patient-allergy'),
     path('patients/allergy/excipients', views.patient_allergy_excipients, name='patient-allergy-excipients'),

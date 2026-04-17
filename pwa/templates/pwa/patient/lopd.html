@@ -3,15 +3,11 @@
 
 {% block content%}
     <div class="row m-2">
-        <div class="col-4 text-center">
+        <div class="col-6 text-center">
             <a class="btn border-primary text-primary w-100" href="{%url "patient-lopd-generate-document2" obj.id%}">
 		        <i class="fas fa-file-pdf fa-3x"></i><br/><strong>LOPD</strong></a>
         </div>
-        <div class="col-4 text-center">
-            <a class="btn border-primary text-primary w-100" href="{%url "patient-lopd-generate-document3" obj.id%}">
-		        <i class="fas fa-file-pdf fa-3x"></i><br/><strong>Autorización</strong></a>
-        </div>
-        <div class="col-4 text-center">
+        <div class="col-6 text-center">
             <a class="btn border-primary text-primary w-100" href="{%url "pwa-patient-lopd" obj.uuid%}">
 		        <i class="fas fa-sync fa-3x"></i><br/><strong>Actualizar</strong></a>
         </div>

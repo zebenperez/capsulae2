@@ -1,13 +1,13 @@
 {% load i18n %}
 
 <div class="row" style="margin:0;">
-    <div class="col-lg-2 col-12 mt-3">
+    <div class="col-lg-2 col-12 mt-1">
         <label class="label">{% trans "Nacionalidad" %}:</label>
         <input type="text" class="form-control autosave input view" id="nationality" name="nationality" value="{{obj.origin.nationality}}" 
             title="{{obj.origin.nationality}}" data-model-name="pharma.patientorigin" data-obj-id="{{obj.origin.id}}" 
             data-url="{% url "autosave_field" %}" data-target="div-notification" disabled/> <span id="nationality__msg"></span>
     </div>
-    <div class="col-lg-3 col-12 mt-3">
+    <div class="col-lg-3 col-12 mt-1">
         <label class="label">{% trans "País de nacimiento" %}:</label>
         <select class="form-control autosave input view" id="country" name="country" data-model-name="pharma.patientorigin" 
             data-obj-id="{{obj.origin.id}}" data-url="{% url "autosave_field" %}" data-target="div-notification" disabled>
@@ -18,7 +18,7 @@
         </select>
         <span id="country__msg"></span>
     </div>
-    <div class="col-lg-3 col-12 mt-3">
+    <div class="col-lg-3 col-12 mt-1">
         <label class="label">{% trans "Etnia" %}:</label>
         <select class="form-control autosave input view" id="etnia" name="etnia" data-model-name="pharma.patientorigin" 
             data-obj-id="{{obj.origin.id}}" data-url="{% url "autosave_field" %}" data-target="div-notification" disabled>

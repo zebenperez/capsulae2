@@ -1,0 +1,80 @@
+{#{% load pharmatags  %}#}
+{% load static %}
+
+<html>
+    <head>
+        <title>Anexo II</title>
+        <meta charset="utf-8" />
+        <meta http-equiv="x-ua-compatible" content="ie=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" 
+            integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+        <link rel="stylesheet" href="{% static 'css/lopd_consents.css' %}" media="screen"/>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+        <script src="{% static 'js/jSignature.min.js' %}"></script>
+
+        <style>
+            .signature-box{
+                display:inline-block; 
+                width:35% text-align:center; 
+                background-color:white; 
+                border: 1px solid black;
+                text-align: center;
+            }
+
+            .page
+            {
+                height: 45.7cm;
+            }
+
+            @media print{
+                form { display:none; }
+                #patient_signature_field { border:none !important; }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="content" style="font-size:12pt">
+            <div class="page">
+                {%comment%}
+                <div class="signature-box">
+	                <div id="signature"></div>
+                    <button class="btn btn-sm sign-capture-btn new" id="reset_signature">Limpiar</button> 
+                </div>
+                {%endcomment%}
+ 
+                <form action="{% url 'patient-lopd-generate-signed-document4' patient.pk %}" class="form" method="post"
+                    id="signature_form">
+                    {% csrf_token %}
+
+                    {% include "patient/lopd/lopd-consent-content-4.html"%}
+               
+                    <input type="hidden" value="{{company.id}}" name="company"/>
+                    {#<input type="hidden" value="" name="patient_signature" id="id_patient_signature"/>#}
+                    <br/>
+                    <button id="guardar" type="submit" class="submit_btn btn btn-primary"> Guardar </button>
+                </form>
+            </div>
+        </div>
+    </body>
+    <script>
+        $(document).ready(function() {
+	        //var sigdiv = $("#signature").jSignature();
+			//sigdiv.attr("heigth",120);
+
+			$('#guardar').on('click', function(e){
+				e.preventDefault();
+				e.stopPropagation();
+				//var datapair = sigdiv.jSignature("getData", "svgbase64") 
+				//img_data=datapair[0] + "," + datapair[1];
+						
+				//$('#id_patient_signature').val(img_data);
+				$('#signature_form').submit();
+			});
+
+			//$('#reset_signature').on('click', function(e){sigdiv.jSignature("reset");});
+        });
+    </script>
+</html>
+

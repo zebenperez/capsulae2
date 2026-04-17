@@ -46,6 +46,8 @@ class Pacientes(models.Model):
 
     cod_postal = models.IntegerField(verbose_name="Cod. postal", blank=True, null=True, default=0)                  # ***
     domicilio = models.CharField(max_length=100, blank=True, null=True, default="")                                 # ***
+    locality = models.CharField(max_length=100, blank=True, null=True, default="")                                 # ***
+    province = models.CharField(max_length=100, blank=True, null=True, default="")                                 # ***
     slug_address = models.SlugField(max_length=200, verbose_name="Address slug", blank=True, null=True)
     telefono1 = models.IntegerField(blank=True, null=True, verbose_name="Teléfono")                                 # ***
     email = models.EmailField(blank=True, null=True, verbose_name="Correo electrónico", default="")                 # ***
