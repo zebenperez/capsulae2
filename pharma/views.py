@@ -158,7 +158,7 @@ def patient_search(request):
             list_users["items"] = []
             return render(request, "patients/patient-list.html",list_users)
 
-@group_required("admins","managers")
+@group_required("admins","managers","employee")
 def patient_new(request):
     obj = Pacientes.objects.create(id_user=request.user)
     po, created = PatientOrigin.objects.get_or_create(patient=obj)
@@ -169,7 +169,7 @@ def patient_remove_msg(request):
     context = {'user': request.user, 'patient': get_or_none(Pacientes, request.GET["obj_id"])}
     return render(request, "patients/patient-remove-dialog.html", context)
 
-@group_required("admins","managers")
+@group_required("admins","managers","employee")
 def patient_soft_remove(request):
     obj = get_or_none(Pacientes, request.GET["obj_id"]) if "obj_id" in request.GET else None
     if obj != None:
