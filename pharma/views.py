@@ -905,7 +905,7 @@ def patient_lopd_generate_signed_document3(request, patient_id):
                 os.makedirs(lopd_dir)
 
             date_str = datetime.now().strftime("%d%m%Y%H%M")
-            filename = "signed_consent_{0}_{1}.pdf".format(patient.nif, date_str)
+            filename = "consentimiento_{0}_{1}.pdf".format(patient.nif, date_str)
             filepath = os.path.join(lopd_dir,filename)
 
             consent = LOPDConsents(paciente=patient, company=company)
@@ -966,7 +966,7 @@ def patient_lopd_generate_signed_document4(request, patient_id):
                 os.makedirs(lopd_dir)
 
             date_str = datetime.now().strftime("%d%m%Y%H%M")
-            filename = "signed_consent_{0}_{1}.pdf".format(patient.nif, date_str)
+            filename = "vulnerabilidad_{0}_{1}.pdf".format(patient.nif, date_str)
             filepath = os.path.join(lopd_dir,filename)
 
             consent = LOPDConsents(paciente=patient, company=company)
