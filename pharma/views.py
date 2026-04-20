@@ -755,7 +755,7 @@ def patient_allergy_principles_list_search(request):
 '''
     Lopd
 '''
-@group_required("admins","managers")
+@group_required("admins","managers","employee")
 def patient_lopd_add(request):
     import unicodedata
     from django.core.files.storage import FileSystemStorage
@@ -777,7 +777,7 @@ def patient_lopd_add(request):
         print(e)
         return render(request, 'error_exception.html', {'msg': str(e)})
 
-@group_required("admins","managers")
+@group_required("admins","managers","employee")
 def patient_lopd_remove(request):
     try:
         obj_id = request.GET["obj_id"]
@@ -791,14 +791,15 @@ def patient_lopd_remove(request):
         print(e)
         return render(request, 'error_exception.html', {'msg': str(e)})
 
-@group_required("admins","managers")
+@group_required("admins","managers","employee")
 def patient_lopd_generate_document(request, patient_id):
     context={}
 
     try:
         patient = Pacientes.objects.get(pk=patient_id)
         context['patient'] = patient
-        context['company'] = request.user.company
+        context['company'] = Company.get_by_user(request.user)
+        #context['company'] = request.user.company
     except Exception as e:
         print(e)
     return render(request, "patient/lopd/lopd-document-template.html", context)
