@@ -3,11 +3,20 @@
 
 {% block central_content %}
     <div class="row toolbar-search pt-2 pb-2 m-0">
-        <div class="col-lg-1 col-1"><i class="fas fa-search"></i></div>
-        <div class="col-lg-7 col-7 text-left p-0">
+        <div class="col-7 text-left p-0">
+            {%comment%}
             <input type="text" class="autosearch form-control form-control-dark w-100" name="s-name" id="s-name" 
                placeholder="{% trans 'Historial, Nombre o CIP' %}" data-url="{% url "patient-search" %}" 
                data-target="patient-list" data-related="s-name" />
+            {%endcomment%}
+            <form action="{% url 'patient-search' %}" method="GET" id="form-search">
+                {%csrf_token%}
+                <input type="text" class="form-control form-control-dark w-100" name="s-name" id="s-name" 
+                    placeholder="{% trans 'Historial, Nombre o CIP' %}" />
+            </form>
+        </div>
+        <div class="col-1">
+            <a class="btn btn-sm saveform" data-form="form-search" data-target="patient-list"><i class="fas fa-search"></i></a>
         </div>
         <div class="spd-tab col-4">
             <div class="text-end">

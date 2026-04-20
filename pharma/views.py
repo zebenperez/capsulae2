@@ -83,8 +83,6 @@ def get_shared_patient(search_list, user_id):
         else:
             query |= Q(**{"patient__apellido__icontains": search_list[0]})
     #return list(PatientShared.objects.filter(name_query).filter(user__id=user_id).values_list('patient', flat=True))
-    print("--1--")
-    print(PatientShared.objects.filter(query).filter(user__id=user_id))
     return [item.patient for item in PatientShared.objects.filter(query).filter(user__id=user_id)]
 
 def get_patients(user, search_value="", start=0, end=50, lopd_signed=True):
@@ -115,10 +113,6 @@ def get_patients(user, search_value="", start=0, end=50, lopd_signed=True):
         # Pacientes compartidos
         #shared_list = [item.patient for item in PatientShared.objects.filter(user__id=user_id)]
         shared_list = get_shared_patient(search_list, user_id)
-        print("--2--")
-        print(shared_list)
-        for p in shared_list:
-            print(p.nombre)
         
         #lopd_list = list(Pacientes.objects.filter(full_query).filter(id__in=lopd_patient_ids)[start:end])
         lopd_list = list(Pacientes.objects.filter(full_query).filter(id__in=lopd_patient_ids))
