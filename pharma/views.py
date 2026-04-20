@@ -74,16 +74,29 @@ def get_owner_id(user):
         return user.employee_profile.company.manager.id
     return None
 
+def get_shared_patient(search_list, user_id):
+    query = Q()
+    if len(search_list) > 0:
+        query = Q(**{"patient__nombre__icontains": search_list[0]})
+        if len(search_list) > 1:
+            query &= Q(**{"patient__apellido__icontains": search_list[1]})
+        else:
+            query |= Q(**{"patient__apellido__icontains": search_list[0]})
+    #return list(PatientShared.objects.filter(name_query).filter(user__id=user_id).values_list('patient', flat=True))
+    print("--1--")
+    print(PatientShared.objects.filter(query).filter(user__id=user_id))
+    return [item.patient for item in PatientShared.objects.filter(query).filter(user__id=user_id)]
+
 def get_patients(user, search_value="", start=0, end=50, lopd_signed=True):
     #filters_to_search = ["n_historial__icontains", "nombre__icontains", "apellido__icontains", "cip__icontains"]
     filters_to_search = ["n_historial__icontains", "cip__icontains"]
 
+    search_list = search_value.split(" ", 1)
     full_query = Q()
     if search_value != "":
         for myfilter in filters_to_search:
             full_query |= Q(**{myfilter: search_value})
 
-        search_list = search_value.split(" ", 1)
         name_query = Q(**{"nombre__icontains": search_list[0]})
         if len(search_list) > 1:
             name_query &= Q(**{"apellido__icontains": search_list[1]})
@@ -100,7 +113,12 @@ def get_patients(user, search_value="", start=0, end=50, lopd_signed=True):
 
     if lopd_signed:
         # Pacientes compartidos
-        shared_list = [item.patient for item in PatientShared.objects.filter(user__id=user_id)]
+        #shared_list = [item.patient for item in PatientShared.objects.filter(user__id=user_id)]
+        shared_list = get_shared_patient(search_list, user_id)
+        print("--2--")
+        print(shared_list)
+        for p in shared_list:
+            print(p.nombre)
         
         #lopd_list = list(Pacientes.objects.filter(full_query).filter(id__in=lopd_patient_ids)[start:end])
         lopd_list = list(Pacientes.objects.filter(full_query).filter(id__in=lopd_patient_ids))
