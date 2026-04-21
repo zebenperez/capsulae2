@@ -15,7 +15,7 @@ from weasyprint import HTML, CSS
 import os, csv
 
 from capsulae2.decorators import group_required
-from capsulae2.commons import get_or_none, get_param, show_exc, generate_qr
+from capsulae2.commons import get_or_none, get_param, show_exc, generate_qr, get_int
 from capsulae2.settings import MEDIA_ROOT, PATIENT_URL, BASE_DIR 
 from capsulae2.capsulae_lib import check_user_payment
 #from account.models import Company, UserPayment
@@ -258,6 +258,46 @@ def patient_evolutionaries_csv(request):
         writer.writerow([name, ev.patient.sexo, ev.patient.telefono1, ev.matter, ev.date, prof, org, q1, q2, q3, q4, q5, q6, q7, q8, q9, q10, obs])
     return response
 
+@group_required("admins", "managers")
+def patient_import(request):
+    #['ESTADO', 'Marca temporal', 'Puntuación', 'NOMBRE COMPLETO', 'SEXO:', 'NÚMERO DE PASAPORTE (de NIE en su caso) (no importa que esté caducado)', 'TEL. DE CONTACTO', 'E-MAIL', 'FECHA DE NACIMIENTO', 'DOMICILIO', 'NACIONALIDAD Y PAIS DONDE NACISTE:', 'QUE IDIOMAS HABLAS:', 'LOCALIDAD:', 'PROVINCIA:', 'Acepta politica de privacidad', 'Acepta politica de PROTECCIÓN DE DATOS', 'CÓDIGO POSTAL', 'documento identificacion NIE O PASAPORTE', 'Alta CP', 'IV subido a CP', 'Columna 18', 'Columna 14']
+    try:
+        file_list = request.FILES.getlist('file')
+        for f in file_list:
+            #dataReader = csv.reader(f.read().decode("utf-8").splitlines(), delimiter=",", quotechar='"')
+            dataReader = csv.reader(f.read().decode("utf-8").splitlines(), delimiter=",")
+            i = 0
+            for row in dataReader:
+                if i > 0:
+                    #print(row)
+                    nif = row[5]
+                    #print(nif)
+                    p = Pacientes.objects.filter(nif=nif).first()
+                    if p == None:
+                        p = Pacientes.objects.create(id_user=request.user, nif=nif)
+                        PatientOrigin.objects.create(patient=p)
+                    p.nombre = row[3]
+                    p.sexo = "H" if row[4] == "Hombre" else "M"
+                    p.telefono1 = get_int(row[6])
+                    p.email = row[7]
+                    try:
+                        p.fecha_nacimiento = datetime.strptime(row[8], "%d/%m/%Y")
+                    except:
+                        pass
+                    p.domicilio = row[9]
+                    p.locality = row[12]
+                    p.province = row[13]
+                    p.cod_postal = get_int(row[16])
+                    p.save()
+
+                    p.origin.nationality = row[10]
+                    #row[11] Idiomas
+                    p.origin.save()
+                i += 1
+    except Exception as e:
+        print(e)
+    return render(request, "patients/patient-list.html", get_patient_context(request.user))
+ 
 '''
     Patient
 '''

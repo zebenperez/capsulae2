@@ -37,10 +37,21 @@
             <span id="items-counter" class="badge badge-secondary">{{items|length}}</span></h2>
             {#<a class="btn btn-primary ark" data-url="{% url "patient-form" %}" data-target-modal="common-modal">{% trans "New paciente"%}</a>  #}
             {% if request.user|in_group:"admins" or request.user|in_group:"managers" %}
-                <a class="btn btn-sm new" href="{% url "patient-evolutionaries" %}"> <i class="fas fa-arrow-right"></i> {%trans "Derivaciones"%} </a>
+                <a class="btn btn-sm new" href="{% url "patient-evolutionaries" %}"> 
+                    <i class="fas fa-arrow-right"></i> {%trans "Derivaciones"%} </a>
             {% endif %}
+
+            {% if request.user|in_group:"admins" %}
+                <label for ="file" class="btn btn-sm new">
+                    <i class="fas fa-upload"></i>
+                    <span class="d-none d-sm-block">{%trans "Elegir"%}&nbsp;{%trans "Archivo"%}</span></label>
+                <input type="file" class="multiupload d-none" name="file" id="file" data-url="{%url 'patient-import'%}" 
+                    data-target="patient-list" data-obj-id="" data-field="" data-folder="" data-csrf-token="{{csrf_token}}" multiple/>
+            {% endif %}
+
             <a class="btn btn-sm new" href="{% url "patient-new" %}">
-                <i class="fas fa-plus"></i> {%if request.user|is_pharma%}{%trans "Nuevo paciente"%}{%else%}{%trans "Nuevo usuario"%}{%endif%}
+                <i class="fas fa-plus"></i> 
+                {%if request.user|is_pharma%}{%trans "Nuevo paciente"%}{%else%}{%trans "Nuevo usuario"%}{%endif%}
             </a>
         </div>
 
