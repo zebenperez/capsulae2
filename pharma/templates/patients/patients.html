@@ -42,11 +42,18 @@
             {% endif %}
 
             {% if request.user|in_group:"admins" %}
-                <label for ="file" class="btn btn-sm new">
+                <label for="file" class="btn btn-sm new">
                     <i class="fas fa-upload"></i>
-                    <span class="d-none d-sm-block">{%trans "Elegir"%}&nbsp;{%trans "Archivo"%}</span></label>
+                    <span class="d-none d-sm-block">{%trans "Elegir"%}&nbsp;{%trans "Archivo de Pacientes"%}</span></label>
                 <input type="file" class="multiupload d-none" name="file" id="file" data-url="{%url 'patient-import'%}" 
                     data-target="patient-list" data-obj-id="" data-field="" data-folder="" data-csrf-token="{{csrf_token}}" multiple/>
+
+                <label for="file_docs" class="btn btn-sm new">
+                    <i class="fas fa-upload"></i>
+                    <span class="d-none d-sm-block">{%trans "Elegir"%}&nbsp;{%trans "Documentos"%}</span></label>
+                <input type="file" class="multiupload d-none" name="file_docs" id="file_docs" 
+                    data-url="{%url 'patient-import-documents'%}" data-target="import-result" data-obj-id="" 
+                    data-field="" data-folder="" data-csrf-token="{{csrf_token}}" multiple/>
             {% endif %}
 
             <a class="btn btn-sm new" href="{% url "patient-new" %}">
@@ -54,6 +61,8 @@
                 {%if request.user|is_pharma%}{%trans "Nuevo paciente"%}{%else%}{%trans "Nuevo usuario"%}{%endif%}
             </a>
         </div>
+
+        <div id="import-result"></div>
 
         <div class="small-info p-2">* Sin LOPD en los últimos 15 días</div>
         <div class="row patient-list-head" style="margin:0;">

@@ -41,9 +41,9 @@
                         <a class="btn btn-xs ark" title="{%trans 'Edit treatment'%}" data-url="{%url "patient-treatment-form" %}"
                             data-target-modal="common-modal" data-obj_id="{{item.id}}" data-patient_id="{{obj.id}}"> <i class="fas fa-edit"></i></a>
                         {%endcomment%}
-                        <a class="btn btn-sm ark" data-url="{%url "patient-lopd-remove"%}" data-obj_id="{{item.id}}" data-target="div-container" 
-                            title="{% trans 'Remove' %}" data-confirm="{% trans "Are you sure to remove this element?" %}">
-                            <i class="fas fa-trash"></i></a>
+                        <a class="btn btn-sm ark" data-url="{%url "patient-lopd-remove"%}" data-obj_id="{{item.id}}" 
+                            data-target="lopd-body" title="{% trans 'Remove' %}" 
+                            data-confirm="{% trans "Are you sure to remove this element?" %}"> <i class="fas fa-trash"></i></a>
                     </div>
                 </td>
             </tr>

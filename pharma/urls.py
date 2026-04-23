@@ -21,6 +21,7 @@ urlpatterns = [
     path('patients/evolutionaries/', views.patient_evolutionaries, name='patient-evolutionaries'),
     path('patients/evolutionaries-csv/', views.patient_evolutionaries_csv, name='patient-evolutionaries-csv'),
     path('patients/import/', views.patient_import, name='patient-import'),
+    path('patients/import/documents/', views.patient_import_documents, name='patient-import-documents'),
 
     #------------------------- PATIENT --------------------
     path('patients/view/<int:patient_id>', views.patient_view, name='patient-view'),

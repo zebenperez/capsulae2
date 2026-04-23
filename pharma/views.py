@@ -298,6 +298,21 @@ def patient_import(request):
         print(e)
     return render(request, "patients/patient-list.html", get_patient_context(request.user))
  
+@group_required("admins", "managers")
+def patient_import_documents(request):
+    try:
+        file_list = request.FILES.getlist('file')
+        comp = Company.get_by_user(request.user)
+        patient_list = []
+        for f in file_list:
+            nif = f.name.split("_")[2] if "signed_consent" in f.name else f.name.split("_")[1]
+            p = Pacientes.objects.filter(nif=nif, id_user=request.user).first()
+            patient_list.append(p)
+            lopd = LOPDConsents.objects.create(paciente=p, document=f, company=comp)
+    except Exception as e:
+        print(e)
+    return render(request, "patients/patient-import-dialog.html", {"patient_list": patient_list})
+ 
 '''
     Patient
 '''

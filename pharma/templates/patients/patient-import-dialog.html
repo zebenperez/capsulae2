@@ -1,0 +1,25 @@
+{% load i18n common_tags %}
+
+
+<div class="card p-4">
+    <div class="header">
+        <div class="row">
+            <div class="col-10">
+                <strong>{% trans "Se han subido ficheros a los siguientes pacientes" %}:</strong>
+            </div>
+            <div class="col-2">
+                <div class="d-flex justify-content-end"> 
+                    <button type="button" class="btn btn-lg" title="{% trans "Close" %}" onclick="$('#import-result').html('')">
+                        <i class="fas fa-times"></i></button> 
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="body">
+        {% for p in patient_list %}
+            <div class="row"><div class="col-12">{{p.nombre}} {{p.apellido}} - {{p.nif}}</div></div>
+        {% endfor %}
+    </div>
+</div>
+
+
