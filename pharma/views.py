@@ -18,6 +18,7 @@ from capsulae2.decorators import group_required
 from capsulae2.commons import get_or_none, get_param, show_exc, generate_qr, get_int
 from capsulae2.settings import MEDIA_ROOT, PATIENT_URL, BASE_DIR 
 from capsulae2.capsulae_lib import check_user_payment
+from capsulae2.email_lib import send_import_doc_email
 #from account.models import Company, UserPayment
 from account.models import Company
 from lopd.models import LOPDConsents
@@ -309,6 +310,11 @@ def patient_import_documents(request):
             p = Pacientes.objects.filter(nif=nif, id_user=request.user).first()
             patient_list.append(p)
             lopd = LOPDConsents.objects.create(paciente=p, document=f, company=comp)
+            try:
+                send_import_doc_email(request.META['HTTP_HOST'], [p.email], p.full_name, f.name)
+            except:
+                pass
+        #send_import_doc_email(request.META['HTTP_HOST'], ["zebenperez@gmail.com"], "Zeben Pérez", file_name)
     except Exception as e:
         print(e)
     return render(request, "patients/patient-import-dialog.html", {"patient_list": patient_list})

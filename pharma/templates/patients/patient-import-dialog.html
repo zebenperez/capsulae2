@@ -16,8 +16,17 @@
         </div>
     </div>
     <div class="body">
+        <div class="row">
+            <div class="col-4"><strong>{% trans "Nombre" %}</strong></div>
+            <div class="col-4"><strong>{% trans "NIF/NIE" %}</strong></div>
+            <div class="col-4"><strong>{% trans "Correo electrónico" %}</strong></div>
+        </div>
         {% for p in patient_list %}
-            <div class="row"><div class="col-12">{{p.nombre}} {{p.apellido}} - {{p.nif}}</div></div>
+            <div class="row">
+                <div class="col-4">{{p.nombre}} {{p.apellido}}</div>
+                <div class="col-4">{{p.nif}}</div>
+                <div class="col-4">{{p.email}}</div>
+            </div>
         {% endfor %}
     </div>
 </div>
