@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block central_content %}
+    <div class="content mt-4">
+        <div class="toolbar-content"> <h2 class="pathway b-right">{% trans 'Donaciones' %} </h2> </div>
+        <div class="patient-data-title p-4">
+            <div class="row"><div class="col-12"> 
+                {% if obj.plan != None%}
+                    Actualmente tiene una {{obj.plan.name}} activa por un importe de {{obj.amount}} €
+                {% else %}
+                    Actualmente no tiene donaciones activas
+                {% endif %}
+            </div></div>
+            <div class="row"><div class="col-12 text-right">
+                {%comment%}
+                <button type="button" class="btn btn-sm ark new" data-url="{% url "donation-edit" %}" data-target-modal="common-modal" 
+                    data-project_id="{{obj.id}}"> <i class="fas fa-edit"></i> {% trans 'Modificar donacion' %}</button> 
+                {%endcomment%}
+                {% if obj.plan != None%}
+                    <a class="btn btn-sm new" href="{% url "donation-remove" %}" 
+                        onclick="return confirm('Esta seguro/a de que desea cancelar su donación?');">  
+                        <i class="fas fa-edit"></i> {% trans 'Dejar de  donar' %}</a> 
+                {% else %}
+                    <button type="button" class="btn btn-sm ark new" data-url="{% url "donation-edit" %}" data-target-modal="common-modal" 
+                        data-project_id="{{obj.id}}"> <i class="fas fa-edit"></i> {% trans 'Nueva donacion' %}</button> 
+                {% endif %}
+                <button type="button" class="btn btn-sm ark new" data-url="{% url "donation-unique" %}" data-target-modal="common-modal" 
+                    data-project_id="{{obj.id}}"> <i class="fas fa-edit"></i> {% trans 'Donacion puntual' %}</button> 
+            </div> </div>
+        </div>
+    </div>
+    <div id="div-container">{% include "donations/donation-list.html" %}</div>
+
+    {% include "common-modal.html" %}
+{% endblock central_content %}

@@ -1,0 +1,22 @@
+{% load i18n common_tags %}
+
+<div class="card">
+    <div class="card-header">
+        <div class="row">
+            <div class="col-xs-8"><i class="fa fa-file"></i>&nbsp; {% trans "LOGS" %}</div>
+            <div class="col-xs-4"></div>
+        </div>
+    </div>  
+    <div class="card-body">
+        <div>
+            {% for log in log_list %}
+                <form method="GET" action="{% url "profile-view-dispensation-log" %}" target="_blank">
+                    {% csrf_token %}
+                    <input type="hidden" name="file_name" value="{{log}}"/>
+                    <button type="submit" class="btn btn-default">{{log}}</button>
+                </form>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+

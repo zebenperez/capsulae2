@@ -1,0 +1,20 @@
+{% load i18n %}
+
+
+<h2>Pagos realizados</h2>
+<div class="row patient-list-head main-th small small pt-3 pb-3 m-0">
+    <div class="col-4"> {% trans 'Fecha de pago' %} </div>
+    <div class="col-4"> {% trans 'Importe' %} </div>
+    <div class="col-4"> {% trans 'Confirmado' %} </div>
+    {#<div class="col-3"></div>#}
+</div>
+
+{% for item in items %}
+    <div class="row line small pt-2 pb-2 m-0">
+        <div class="col-4">{{ item.pay_date|date:"d-m-Y"}}</div>
+        <div class="col-4">{{ item.amount }}</div>
+        <div class="col-4">{% if item.confirm %}<i class="fas fa-check"></i>{% else %}<i class="fas fa-times"></i>{% endif %}</div>
+        {#<div class="col-3 text-right"> </div>#}
+    </div>
+{% endfor %}
+

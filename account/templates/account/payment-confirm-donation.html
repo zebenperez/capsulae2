@@ -1,0 +1,35 @@
+{% extends 'base_error.html' %}
+{% load i18n common_tags %}
+
+{% block central_content %}
+
+    <div class="row"> 
+        <div class="col-12 menu sticky-top text-center bg-black py-3"> 
+            <a href="#"><img src="/static/imgs/logo-w.png" alt="white logo" width="150"></a>
+        </div>
+
+        <div id="msg-error-exc" class="col-lg-10 offset-lg-1 col-12">
+            <span class="separator">&nbsp;</span>
+            <div class="col-lg-10 offset-lg-1 col-12 card warning-pay mt-5">
+                {% if error == True %}
+                    <div class="card-header text-white text-center"> <div class="row"> <div class="col-lg-10 offset-lg-1 col-12">
+                        {% trans 'Descripción del problema' %}</div> </div> </div>
+                    <div class="card-body text-center p-3"> Ha habido un problema al procesar su pago, disculpe las molestias!
+	                    <div class="col-lg-4 offset-lg-4 text-center pt-5 pb-3"> <a class="btn btn-primary payment w-100 py-3" 
+                            href="{% url "account-payment-error" %}"> <strong>{% trans "VOLVER" %}</strong></a></div>
+                    </div>
+                {% else %}
+                    <div class="card-header text-white text-center"> <div class="row"> <div class="col-lg-10 offset-lg-1 col-12">
+                        {% trans 'Pago procesado' %}</div> </div> </div>
+                    <div class="card-body text-center p-3"> 
+                        Su donación, por un importe de {{obj.amount|floatformat:2}}&euro; se ha procesado correctamente.
+                        <br/> Gracias por su apoyo
+                        <div class="col-lg-4 offset-lg-4 text-center pt-5 pb-3"> <a class="btn btn-primary payment w-100 py-3" 
+                            href="{% url "pharma-index" %}"> <strong>{% trans "VOLVER" %}</strong></a></div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
