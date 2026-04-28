@@ -1,0 +1,50 @@
+{% load i18n pharma_tags %}
+
+
+{% if error %} <div class="alert alert-danger">{{ error }}</div> {% endif %}
+
+{% if print %}
+	<canvas id="line-chart"></canvas>
+{% else %}
+    <div class="row">
+		<div class="col-xs-8"><i class="fa fa-medkit"></i>&nbsp; 
+            {% if paciente.owner == request.user %}{{ paciente.nombre }} {{paciente.apellido }} {% else %} -- {% endif %}</div>
+		<div class="col-xs-4 text-right"></div>
+	</div>
+    <div class="panel-body cap-panel"> <canvas id="line-chart" width="800" height="450"></canvas> </div>
+{% endif %}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js"></script>
+<script>
+    new Chart(document.getElementById("line-chart"), {
+      type: 'line',
+      data: {
+        labels:[{% for item in registros %} "{{ item.creation_date|date:"d/m/Y"}}" {% if not forloop.last%},{% endif%} {% endfor %}],
+        datasets: [
+            {% for plot in plots %}
+                {
+                    data :[
+                        {% for item in registros %} 
+                            {% with value=item|value_for_key:plot.key %}
+                                {% if value %} parseFloat({{value}}) {% endif %}
+                            {% endwith %}
+                            {% if not forloop.last%},{% endif%} 
+                        {% endfor %}
+                    ],
+                    label : "{{ plot.label }}",
+                    borderColor: "{{plot.color}}",
+                    fill:false
+                }
+                {% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ]
+      },
+      options: {
+        title: {
+          display: true,
+          text: 'Gráfico de evolución del paciente '
+        }
+      }
+    });
+</script>
+

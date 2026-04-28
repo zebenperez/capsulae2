@@ -1,0 +1,9 @@
+{% load i18n app_tags generictags static %}
+<div class="col-md-4 col-xl-2 prod-item pointer p-1" onclick="{% ark 'tpv-add-product' 'div-calc-tpv' product_id=item.pk hashinv=invoice.hashinv %}">
+    <div class="prod-img text-center">
+        <img id="img__{{item.pk}}"  alt="{{ item.name }}" class="product-img" src="/media/{{item.picture}}" onerror='this.onerror=null;this.src="https://via.placeholder.com/250"' />
+    </div>
+    <div class="prod-pvp text-center">{{item.last_pvp.pvp}} &euro;</div>
+    <div class="prod-name text-center text-ellipsis">{{item.name|default:'UNKNOWN'}}</div>
+</div>
+

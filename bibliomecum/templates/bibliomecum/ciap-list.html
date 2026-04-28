@@ -1,0 +1,17 @@
+{% load i18n %}
+
+<div class="d-flex justify-content-end"> <button type="button" class="btn btn-lg" data-bs-dismiss="modal" title="{% trans "Close" %}">
+    <i class="fas fa-times"></i></button> </div>
+
+{%for ciap in obj.patient.diagnoses %}
+    <div class="row ciap-row">
+        <div class="col-2">{{ciap.cie_ciap.ciap}}</div>
+        <div class="col-9">{{ciap.cie_ciap.nombre}}</div>
+        <div class="col-1"> 
+            <button class="btn ciap-btn ark" data-url="{%url "bibliomecum-receipts-ciap-add"%}" data-target="div-ciap"
+                data-obj_id="{{obj.id}}" data-ciap="{{ciap.cie_ciap.ciap}}" data-name="{{ciap.cie_ciap.nombre}}" 
+                data-bs-dismiss="modal" {#onclick="$('.ciap-row').hide()"#}><i class="fas fa-plus"></i></button>
+        </div>
+    </div>
+{% endfor %}
+

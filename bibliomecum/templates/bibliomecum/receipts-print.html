@@ -1,0 +1,49 @@
+{% load i18n static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Receta Literaria</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+ 
+  <link rel="stylesheet" href="{% static "css/bibliomecum.css" %}" asp-append-version="true">  
+</head>
+<body class="p-0">
+
+{% with books=obj.books.all %}
+    <div class="container-fluid">
+        <div class="row row d-flex align-items-stretch">
+            <!--VERTICAL LABEL LEFT-->
+            <div class="col-auto mw-25 text-white vertical-label p-0"> <h2>INFORMACION DE LECTURA</h2> </div>
+
+            {% include "bibliomecum/receipts-print-receipt.html" %}
+
+            <!--VERTICAL LABEL RIGHT-->
+            <div class="col-auto mw-25 text-white vertical-label p-0"> <h2 style="color:#7d4c89;">INFORMACION DE LECTURA</h2> </div>
+
+        </div>
+    </div>
+    <div class="py-2"></div>
+
+    <img class="w-100" src="{% static "imgs/bibliomecum/tijeras.png" %}" alt="Contador Icono">
+
+    <div class="py-2"></div>
+
+    <div class="container-fluid">
+        <div class="row row d-flex align-items-stretch">
+            <!--VERTICAL LABEL LEFT-->
+            <div class="col-auto mw-25 text-white vertical-label p-0"> <h2>INFORMACION PARA EL LECTOR/A</h2> </div>
+
+            {% include "bibliomecum/receipts-print-receipt.html" %}
+        
+            <!--VERTICAL LABEL RIGHT-->
+            <div class="col-auto mw-25 text-white vertical-label p-0"> <h2 style="color:#7d4c89;">INFORMACION DE LECTURA</h2> </div>
+        </div>
+    </div>
+    {%endwith%}
+
+    <img class="w-100" src="{% static "imgs/bibliomecum/marcapaginas.png" %}" alt="Contador Icono">
+    <script> window.print(); </script>
+</body>
+</html>

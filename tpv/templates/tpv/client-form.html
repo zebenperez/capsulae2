@@ -1,0 +1,29 @@
+{% load i18n %}
+
+
+<div class="row">
+    <div class="col-11"> <h2><i class="fa fa-history"></i>&nbsp; {% trans 'Datos del cliente' %}</h2> </div>
+    <div class="col-1">
+        <div class="d-flex justify-content-end"> 
+            <button type="button" class="btn btn-lg" data-bs-dismiss="modal" title="{% trans "Close" %}">
+            <i class="fas fa-times"></i></button> 
+        </div>
+    </div>
+</div>
+
+<div class="list-view-screen" id="div-list-screen">
+    <div class="panel-heading-orange text-white mb-4">Datos del cliente</div>
+    <form method="POST" action="{%url "print-invoice-client-save"%}" class="form">
+        {% csrf_token %}
+        <input type="hidden" id="invoice" name="invoice" value="{{invoice.id}}" />
+        <div class="row">
+            <div class="col-6"> Nombre: <input type="text" id="name" name="name" class="form-control" required/> </div>
+            <div class="col-6"> DNI/CIF: <input type="text" id="dni" name="dni" class="form-control" required/> </div>
+            <div class="col-12"> Dirección: <input type="text" id="address" name="address" class="form-control" required/> </div>
+        </div>
+        <div class="row mt-4"> <div class="col-12 text-center">
+            <input type="submit" class="btn btn-success" value="Guardar"/>
+        </div> </div>
+    </form>
+</div>
+

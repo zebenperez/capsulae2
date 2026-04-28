@@ -1,0 +1,44 @@
+{% load i18n common_tags %}
+
+<h2>{% trans "Ficheros" %}</h2>
+
+<div class="row spd-tab">
+    <div class="col-12 text-end">
+        <label for ="id_client_files_{{ obj.id }}" class="btn-tools tools-primary btn-labeled btn-sm async-load">
+            <i class="fas fa-upload"></i><span class="d-none d-sm-block">{%trans "Elegir"%}&nbsp;{%trans "Archivos"%}</span></label>
+        <input type="file" class="multiupload d-none" name="client_file" id="id_client_files_{{ obj.id }}" 
+            data-url="{% url 'evolutionary-file-add' %}" data-target="div-files" data-obj-id="{{obj.id}}"
+            data-csrf-token="{{ csrf_token }}" multiple/>
+    </div>
+</div>
+
+<div id="div-notification"></div>
+{% for item in obj.docs.all %}
+    <div class="row m-4">
+        <div class="col-10"> 
+            {% if item.doc %} 
+                <a href="{{item.doc.url}}" alt="{{item.doc.filename}}" class="text-primary" target="_blank">
+                    {{item.doc.name|substr:38}}</a> 
+            {% endif %}
+        </div>
+        <div class="col-2 text-end">
+            <div class="tools flex space-between">
+                <button class="btn btn-xs" onclick="$('#obs-view-{{item.id}}').toggle();$('#obs-edit-{{item.id}}').toggle()">
+                    <i class="fas fa-edit"></i></button>
+                <a class="btn btn-xs ark delete-btn" id="btn-photo-{{item.pk}}" title="{% trans "Borrar fichero" %}" 
+                    data-confirm="{% trans "Esta seguro/a de que desea borrar este fichero?" %}" 
+                    data-url="{%url "evolutionary-file-remove"%}" data-target="div-files" data-obj_id="{{item.id}}"> 
+                    <i class="fas fa-times"></i></a>
+            </div>
+        </div>
+        <div class="col-12"> {% trans "Descripción del fichero" %} </div>
+        <div class="col-12" id="obs-view-{{item.id}}">{{item.obs}}</div> 
+        <div class="col-12 text-end hide" id="obs-edit-{{item.id}}"> 
+            <button class="btn btn-xs" onclick="$('#obs-view-{{item.id}}').toggle();$('#obs-edit-{{item.id}}').toggle();$('#obs-view-{{item.id}}').html($('#obs-{{item.id}}').val())">
+                {% trans "Guardar" %}</button>
+            <textarea class="form-control autosave b-bottom" id="obs-{{item.id}}" name="obs" value="{{item.obs}}" title="{{item.obs}}" 
+                data-model-name="pharma.evolutionarydoc" data-obj-id="{{item.id}}" data-url="{%url "autosave_field"%}" 
+                data-target="div-notification">{{item.obs}}</textarea> <span id="obs__msg"></span>
+        </div>
+    </div>
+{% endfor %}

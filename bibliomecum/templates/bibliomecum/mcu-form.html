@@ -1,0 +1,47 @@
+<form id="libroBusquedaSimpleForm" name="libroBusquedaSimpleForm" method="post"
+    action="https://www.cultura.gob.es/webISBN/tituloSimpleDispatch.do">
+	<input type="hidden" name="params.forzaQuery" value="N" id="params.forzaQuery" />
+	<!--<p class="formNota">Campos obligatorios marcados con <span>*</span></p>-->
+
+	<fieldset>
+		<legend>Búsqueda sencilla de títulos</legend>
+		<div>
+			<div class="camposCheck">
+				<p><strong class="camposEnLineaTitulo">Realizar búsqueda por:</strong></p>
+				<label for="params.cdispo">
+                    <input type="radio" name="params.cdispo" tabindex="103" value="A" checked="checked" id="params.cdispo1" />
+                    ambos </label>
+				<label for="params.cdispo"><input type="radio" name="params.cdispo" tabindex="104" value="D" id="params.cdispo2" />
+                    disponibles</label>
+				<label for="params.cdispo"><input type="radio" name="params.cdispo" tabindex="105" value="N" id="params.cdispo3" />
+                    no disponibles</label>
+			</div>
+			<div>
+			    <label for="params.cisbnExt">ISBN</label>
+                <input type="text" name="params.cisbnExt" tabindex="106" value="" id="params.cisbnExt" />
+			</div>
+			<div>
+				<label for="params.liConceptosExt[0].texto">Texto de búsqueda</label>
+                <input type="text" name="params.liConceptosExt[0].texto" size="50" tabindex="107" value="" 
+                    id="params.liConceptosExt[0].texto" />
+			</div>
+			<div>
+				<label for="params.orderByFormId">Ordenar por</label>
+                <select name="params.orderByFormId" tabindex="108" id="params.orderByFormId">
+                    <option value="3">AUTOR</option>
+                    <option value="2">FECHA EDICIÓN</option>
+                    <option value="0">NINGUNO</option>
+                    <option value="1" selected="selected">TITULO</option>
+                </select>
+			</div>
+		</div>
+	</fieldset>
+
+	<div id="botones">
+		<input type="submit" name="action" tabindex="109" value="Buscar" />
+		<input type="submit" name="action" tabindex="110" value="Limpiar" />
+	</div>
+
+	<input type="hidden" name="language" value="es"/><input type="hidden" name="prev_layout" value="busquedaisbn"/><input type="hidden" name="layout" value="busquedaisbn"/>
+</form>
+

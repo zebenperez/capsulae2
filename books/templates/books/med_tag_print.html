@@ -1,0 +1,33 @@
+{% load i18n %}
+
+
+<html lang="es">
+	<head>
+		<style>
+            @media screen { body{display:none} }
+			@page { size: auto; width:95%; margin:1mm 1mm 1mm 1mm; }
+            html , body { margin-left:.1%; width: 99.8%; margin-top:0!important; }
+            p {margin:0}
+            body * {font-size: 7.5pt;}
+			table {border: 1px solid silver; padding-bottom:1em; border-collapse: collapse; width:100%;}
+            td{ border-bottom:1px solid silver; padding-left:5px;}
+            img { width: 50px; height: 50px; padding: 5px; }
+            .med_table td { border: 1px solid silver; }
+            .title { font-size: 10pt; font-weight:bolder; width:100%;}
+            .subtitle { font-size: 8pt; width:95%; margin:auto;}
+            .center { text-align: center}
+            .top_align {vertical-align:top;}
+            .dossis_table {text-align:left;}
+		</style>
+	</head>
+
+	<body>
+        {% for item in lista_medicamentos  %}
+            {% with ficha=item.ficha medicamento=item.medicamento tratamiento=item.tratamiento %}
+                {% include "medication/med_tag_template.html" %}
+            {% endwith %}
+            <p style="page-break-after:always"></p>
+        {% endfor %}
+    </body>
+    <script> window.print(); </script>
+</html>

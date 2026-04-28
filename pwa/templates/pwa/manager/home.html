@@ -1,0 +1,26 @@
+{% extends "pwa-base.html" %}
+{% load static i18n %}
+
+{% block content%}
+    <div class="col-12 py-4 text-center"><h1 class="welcome">Bienvenid@</h1></div>
+    <div class="col-12 p-2 text-center"> <h2 class="fst-italic">{{employee.first_name}} </h2> </div>
+    {% if obj is None %}
+        {%comment%}
+        <div class="col-12 p-2 text-center">
+            <strong><a class="btn btn-success btn-xl p-5" href="{% url 'notes-index' %}">
+                <i class="fas fa-sticky-note"></i> Notas</a></strong>
+        </div>
+        {%endcomment%}
+    {% else %}
+        <div class="col-12 p-2 mt-3">
+            <div class="text-start my-2">
+                <p class="info text-center">{%trans "Actualmente se encuentra con el/la paciente: "%}</p>
+                <p class="name text-center">{{obj.full_name}}</p>
+                <p class="date text-center">{%trans "CIP: "%} {{obj.cip}}</p>
+            </div>
+            <br/>
+            <a href="{%url 'patient-lopd-generate-document2' obj.pk%}" class="btn btn-info w-100" target="_blank" 
+                title="{%trans "Firmar LOPD"%}"> {% trans "Firmar LOPD" %}</a>
+        </div>
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,37 @@
+{% load i18n %}
+
+
+<div class="d-flex justify-content-end"> <button type="button" class="btn btn-lg" data-bs-dismiss="modal" title="{% trans "Close" %}">
+    <i class="fas fa-times"></i></button> </div>
+
+<h2>{% trans 'Editar diagnóstico' %}</h2>
+
+{#<span id="div-notification"></span><br/>#}
+
+<div class="row justify-center">
+    <div class="col-12">{{obj.cie_ciap.nombre}} {{obj.cie_ciap.cie}} {{obj.cie_ciap.ciap}}<br/><br/></div>
+	<div class="col-12 text-left p-1">
+        <div class="greybox-sm p-1">
+            {% trans "Fecha inicio" %}
+       	    <input type="date" class="form-control autosave text-end" id="fecha_ini" name="fecha_ini" 
+               	value="{{obj.fecha_ini|date:"Y-m-d"}}" title="{{obj.fecha_ini}}" data-model-name="pharma.diagnosticos" 
+                data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" data-target="div-notification"/> 
+                <span id="fecha_inicio__msg"></span>
+       	</div>
+	</div>
+	<div class="col-12 mt-3 p-1">
+	    <div class="greybox-sm p-1">
+        	{% trans "Observaciones" %}
+	        <input type="text" class="form-control autosave b-bottom" id="observaciones" name="observaciones" 
+        	    value="{{obj.observaciones|default:""}}" title="{{obj.observaciones}}" data-model-name="pharma.diagnosticos" data-obj-id="{{obj.id}}" 
+                data-url="{%url "autosave_field"%}" data-target="div-notification"/>
+	            <span id="observaciones__msg"></span>
+        </div>
+	</div>
+</div>
+
+<div class="d-flex justify-content-end">
+    <button type="button" class="btn btn-sm ark save" data-bs-dismiss="modal" data-url="{% url "patient-diagnoses" %}"
+        data-target="div-container" data-obj_id="{{patient.id}}">{% trans "Guardar" %}</button>
+</div>
+

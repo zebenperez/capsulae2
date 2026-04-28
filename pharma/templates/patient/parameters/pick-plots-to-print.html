@@ -1,0 +1,84 @@
+{% load i18n %}
+
+{%comment%}
+<style>
+	.form-group{
+		padding: 0.5em;
+		background-color: #f8f8f8;
+		border: 1px solid white;
+	}
+</style>
+{%endcomment%}
+
+<div class="d-flex justify-content-end"> <button type="button" class="btn btn-lg" data-bs-dismiss="modal" title="{% trans "Close" %}">
+    <i class="fas fa-times"></i></button> </div>
+
+<h2>{% trans 'Seleccione los gráficos que desea imprimir' %}</h2>
+
+<div class="row">
+    <form class="form" id="form_plot" target="_blank" action="{% url 'patient-params-print-pdf' %}" method="get">
+        <input type="hidden" id="patient_id" name="patient_id" value="{{obj.id}}"/>
+        <input type="hidden" value="{{ start_date }}" name="start_date">
+        <input type="hidden" value="{{ end_date }}" name="end_date">
+        <div class="form-group col-3">
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="weight" value="weight" name="items[]">
+                <label class="form-check-label" for="weight">{% trans "Peso" %}</label>
+            </div>
+            <input type="hidden" value="Peso" name="weight_label"/>
+            <input type="hidden" value="#3e95cd" name="weight_color"/>
+        </div>
+        <div class="form-group col-3">
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="bmi" value="bmi" name="items[]">
+                <label class="form-check-label" for="bmi">{% trans "IMC" %}</label>
+            </div>
+            <input type="hidden" value="IMC" name="bmi_label"/>
+            <input type="hidden" value="#3cba9f" name="bmi_color"/>
+        </div>
+        <div class="form-group col-3">
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="glicosylated" value="glicosylated" name="items[]">
+                <label class="form-check-label" for="glicosylated">{% trans "Glicosilada" %}</label>
+            </div>
+            <input type="hidden" value="Glicosilada" name="glicosylated_label"/>
+            <input type="hidden" value="#e8c3b9" name="glicosylated_color"/>
+        </div>
+        <div class="form-group col-3">
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="glucose" value="glucose" name="items[]">
+                <label class="form-check-label" for="glucose">{% trans "Glucosa Basal" %}</label>
+            </div>
+            <input type="hidden" value="Glucosa basal" name="glucose_label"/>
+            <input type="hidden" value="#c45850" name="glucose_color"/>
+        </div>
+        <div class="form-group col-3">
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="hearth_rate" value="hearth_rate" name="items[]">
+                <label class="form-check-label" for="hearth_rate">{% trans "Pulso" %}</label>
+            </div>
+            <input type="hidden" value="Pulso" name="hearth_rate_label"/>
+            <input type="hidden" value="#c334eb" name="hearth_rate_color"/>
+        </div>
+        <div class="form-group col-3">
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="bpressure_max" value="bpressure_max" name="items[]">
+                <label class="form-check-label" for="bpressure_max">{% trans "Ta Máx" %}</label>
+            </div>
+            <input type="hidden" value="Ta Máx" name="bpressure_max_label"/>
+            <input type="hidden" value="#eb4034" name="bpressure_max_color"/>
+        </div>
+        <div class="form-group col-3">
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="bpressure_min" value="bpressure_min" name="items[]">
+                <label class="form-check-label" for="bpressure_min">{% trans "Ta Mín" %}</label>
+            </div>
+            <input type="hidden" value="Ta Min" name="bpressure_max_label"/>
+            <input type="hidden" value="#ebc034" name="bpressure_max_color"/>
+        </div>
+        <div class="col-12 text-center">
+            <button class="btn btn-success btn-block" id="print_report" type="submit" value="Imprimir" name="print_report"> 
+                <i class="fa fa-print"></i> Imprimir </button>
+        </div>
+    </form>
+</div>

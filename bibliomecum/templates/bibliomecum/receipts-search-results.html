@@ -1,0 +1,27 @@
+{% load i18n %}
+
+
+<div id="search-results-card" class="card">
+    <div class="card-header"> {% trans "Resultados de la búsqueda" %}</div>
+    <div class="card-body">
+        <div class="row justify-center">
+            <div class="col-2"> <div class="greybox-sm p-1"> {% trans "ISBN" %}</div></div>
+            <div class="col-5"> <div class="greybox-sm p-1"> {% trans "Título" %}</div></div>
+            <div class="col-4"> <div class="greybox-sm p-1"> {% trans "Author/es" %}</div></div>
+            <div class="col-1"> </div>
+        </div>
+        {% for item in item_list %}
+            <div class="row justify-center">
+                <div class="col-2">{{ item.isbn }}</div> 
+                <div class="col-5">{{ item.title }}</div>
+                <div class="col-4">{{ item.author }}</div>
+                <div class="col-1">
+                    <button id="btn-isbn-add" class="btn btn-sm ark p-2" data-url="{%url "bibliomecum-receipts-isbn-add"%}" 
+                        data-target="div-isbn" data-obj_id="{{receipt.id}}" data-isbn="{{item.isbn}}" data-title="{{item.title}}" 
+                        data-author="{{item.author}}" data-hide="search-results-card" title="{%trans 'Añadir'%}"> 
+                        <i class="fas fa-plus"></i></button>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>

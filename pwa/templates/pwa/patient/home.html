@@ -1,0 +1,30 @@
+{% extends "pwa-base.html" %}
+{% load static i18n %}
+
+{% block content%}
+    {%comment%}
+    <div class="p-2 text-end">
+        <strong><a class="btn btn-light btn-xl powericon" href="{%url 'pwa-logout'%}"><i class="fas fa-power-off"></i></a></strong>
+    </div>
+    {%endcomment%}
+    <div class="py-4 text-center"><h1 class="welcome">Bienvenid@</h1></div>
+    <div class="p-2 text-center"> <h2 class="fst-italic">{{obj.nombre}} {{obj.apellido}}</h2></div>
+    <div class="p-2 text-center"> <h3>{%trans "CIP: "%} {{obj.cip}}</h3></div>
+    <div class="p-2 text-center mt-4"> 
+        <a class="btn border-primary text-primary w-75" href="{%url "pwa-patient-lopd" obj.uuid%}">
+		    <i class="fas fa-file-pdf fa-3x"></i><br/><strong>LOPD</strong></a>
+    </div>
+    <div class="p-2 text-center mt-4"> 
+        <a class="btn border-primary text-primary w-75" href="{%url "patient-lopd-generate-document3" obj.id%}">
+		    <i class="fas fa-file-pdf fa-3x"></i><br/><strong>Autorización</strong></a>
+    </div>
+    <div class="p-2 text-center mt-4"> 
+        <a class="btn border-primary text-primary w-75" href="{%url "patient-lopd-generate-document4" obj.id%}">
+		    <i class="fas fa-list fa-3x"></i><br/><strong>Informe vulnerabilidad</strong></a>
+    </div>
+
+    <div class="p-2 text-center mt-4"> 
+        <a class="btn border-primary text-primary w-75" href="{%url "pwa-patient-books" obj.uuid%}">
+		    <i class="fas fa-book fa-3x"></i><br/><strong>Libros recetados</strong></a>
+    </div>
+{% endblock %}

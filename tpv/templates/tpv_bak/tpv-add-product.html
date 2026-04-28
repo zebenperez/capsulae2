@@ -1,0 +1,13 @@
+{#{% load i18n app_tags generictags %}#}
+{% load i18n %}
+
+<span id="msg">Producto encontrado!!!</span>
+<button id="btn-add-product" class="hide ark" data-url="{% url "tpv-add-product" %}" data-target="div-calc-tpv" 
+    data-product_id="{{product.pk}}" data-hashinv="{{invoice.hashinv}}"></button>
+<script>
+    {#{% ark 'tpv-add-product' 'div-calc-tpv' product_id=product.pk hashinv=invoice.hashinv %};#}
+    $("#btn-add-product").click();
+    $('#code').val(''); 
+    $('#code').focus();
+    $('#msg').fadeOut();
+</script>

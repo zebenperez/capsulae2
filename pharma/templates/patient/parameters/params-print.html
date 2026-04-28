@@ -1,0 +1,61 @@
+{% load pharma_tags static %}
+
+<html>
+	<head>
+		<title> Cartilla tension 
+            {% if paciente.owner == request.user %}{{ paciente.nombre }} {{ paciente.apellido }} {% else %} -- {% endif %}</title>
+
+		<link href="https://fonts.googleapis.com/css?family=Ubuntu&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" 
+            integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx" crossorigin="anonymous">
+        <link rel="stylesheet" href="{% static 'css/params.css' %}" >
+	</head>
+	<body>
+		<div class="page">
+            <div class="page-wrapper">
+                <div class="row header m-0">
+                    <div class="col-4 company-logo"> <img src="http://{{request.get_host}}{{request.user|company_logo}}"></div>
+                    <div class="col-3 offset-5 patient_qr_code text-center" tyle="border:1px solid red">
+                        <img src="{% userqr_code request paciente %}"/><br/>
+                        Historial {{ paciente.n_historial }}
+                    </div>
+                </div>
+                <br />
+                <div class="content">
+                    <h2 class="main-title">Cartilla de control de CONSTANTES</h2> 
+                </div>
+
+                <div class="patient_personal_data">	
+                    <div id="data" class="row head-data m-0">
+                        <div class="col-2 label">Nombre </div>
+                        <div class="col-2 label-b"> {%if paciente.owner == request.user%} {{paciente.nombre}} {%else%} -- {%endif%}</div> 
+                        <div class="col-2 label">Apellidos </div> 
+                        <div class="col-2 label-b"> {% if paciente.owner == request.user %} {{ paciente.apellido }} {% endif %}</div>
+                        <div class="col-2 label">Teléfono </div>
+                        <div class="col-2 label-b">{% if paciente.owner == request.user %}{{ paciente.telefono1 }} {% endif %}</div>
+                    </div>
+                    <div id="data" class="row head-data m-0">
+                        <div class="col-2 label">Dirección </div>
+                        <div class="col-10 label-b">{% if paciente.owner == request.user %}{{ paciente.domicilio }} {% endif %}</div>
+                    </div>
+                </div>
+                               <br/><br/>
+
+                {% include "patient/parameters/params-table-print.html" %}
+                <br/><br/>
+
+                <div class="row content">
+                    <div class="col-12"><h4>CONSEJOS SANITARIOS </h4></div>
+                    <div class="col-12"> Haga ejercicio suave de forma regular: <span class="exercises">caminar, nadar, etc.</span></div>
+                    <div class="col-12"> Modere su consumo de sal.<span class="exercises"> Sustitúyalo por limón, ajo, especias.</span></div>
+                    <div class="col-12"> No abuse de las grasas.</div>
+                    <div class="col-12"> Abandone el hábito del tabaco.</div>
+                    <div class="col-12"> No interrumpa su tratamiento sin cunsultarlo con su médico o farmacéutico.</div>
+                </div>
+            </div>
+        </div>
+	</body>
+	<script> window.print(); </script>
+</html>
+
+

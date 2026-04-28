@@ -1,0 +1,18 @@
+{% load i18n %}
+
+<div class="d-flex justify-content-end"> <button type="button" class="btn btn-lg" data-bs-dismiss="modal" title="{% trans "Close" %}">
+    <i class="fas fa-times"></i></button> </div>
+
+{%for atc in obj.patient.tratamientos.all %}
+    <div class="row atc-row">
+        <div class="col-2">{{atc.atcs_last}}</div>
+        <div class="col-9">{{atc.name}}</div>
+        <div class="col-1">
+            <button class="btn atc-btn ark" data-url="{%url "bibliomecum-receipts-atc-add"%}" data-target="div-atc"
+                data-obj_id="{{obj.id}}" data-atc="{{atc.atcs_last}}" data-name="{{atc.name}}" data-bs-dismiss="modal">
+                {#onclick="$('.atc-row').hide()">#}
+                <i class="fas fa-plus"></i></button>
+        </div>
+    </div>
+{% endfor %}
+

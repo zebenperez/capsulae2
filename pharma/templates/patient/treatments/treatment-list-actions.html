@@ -1,0 +1,38 @@
+{% load i18n static common_tags %}
+
+<div class="dropdown">
+    <a class="pt-3" type="button" id="dropdownProfile" data-bs-toggle="dropdown" aria-expanded="false">
+        <i class="fas fa-ellipsis-h"></i></a>
+    <div class="dropdown-menu user-dropdown" aria-labelledby="dropdownProfile">
+        <ul class="m-0">
+            <li>
+                <button type="button" class="btn btn-sm ark" data-url="{%url "patient-complement-form"%}" 
+                    data-target-modal="common-modal" data-patient_id="{{obj.id}}"> <i class="fas fa-plus"></i> 
+                    {% trans 'Crear Complemento' %}</button> 
+            </li><div class="dropdown-divider"></div>
+            <li>
+                <a class="btn btn-sm" href="{%url "patient-summary" obj.id%}" target="_blank"> 
+                    <i class="fas fa-list"></i> {% trans 'Resumen Paciente' %}</a> 
+            </li><div class="dropdown-divider"></div>
+            <li>
+                <button type="button" class="btn btn-sm ark" data-url="{%url "patient-interactions-comment"%}" 
+                    data-target-modal="common-modal" data-patient_id="{{obj.id}}"> 
+                    <i class="fas fa-list"></i> {% trans 'Informe Farmacoterapéutico' %}</button>
+            </li><div class="dropdown-divider"></div>
+            <li>
+                <a class="btn btn-sm" href="{%url "patient-treatments-print" obj.id%}" target="_blank"> 
+                    <i class="fas fa-print"></i> {% trans 'Imprimir' %}</a> 
+            </li><div class="dropdown-divider"></div>
+            <li>
+                <a class="btn btn-sm" href="{%url "patient-treatments-print-tags" obj.id%}" target="_blank"> 
+                    <i class="fas fa-print"></i> {% trans 'Imprimir Etiquetas' %}</a> 
+            </li><div class="dropdown-divider"></div>
+            <li>
+                <button type="button" class="btn btn-sm ark" data-url="{%url "patient-timeline"%}" 
+                    data-target-modal="common-modal" data-patient_id="{{obj.id}}"> <i class="fas fa-chart-line"></i> 
+                    {% trans 'Ver Cronología' %}</button> 
+            </li>
+        </ul>
+    </div>
+</div>
+

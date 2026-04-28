@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block central_content %}
+    {% include "store-menu.html" %}
+
+    <body>
+        <div class="tpv-container">
+            <header class="tpv-header px-3">
+                <div class="row">
+                    <div class="col-lg-6">
+                        <h1 class="store-name"><strong>{{company}}</strong></h1>
+                    </div>
+
+                    <div class="col-lg-6 header-btns d-flex flex-row-reverse">
+                        <a class="btn btn-outline-secondary sales" href="{% url 'zeta' %}">
+                            <i class="fa fa-cash-register"></i>&nbsp;Zeta</a>
+                        <a class="btn btn-outline-secondary sales pl-3 pr-3" href="{% url 'get-sales' %}">
+                            <i class="fas fa-list"></i>&nbsp;Lista de ventas</a>
+                        <a class="btn btn-outline-secondary sales pl-3 pr-3" href="{% url 'get-orders' %}">
+                            <i class="fas fa-euro-sign"></i>&nbsp;Pedidos web (<span id="get-n-pendings">{{morders}}</span>)</a>
+                    </div>
+
+                    <div class="col-lg-6">
+                        <div class="header-info">
+                            <input type="text" class="form-control ark_keyup" autocomplete="off" name="code" id="code" value="" 
+                                placeholder="{%trans "Codigo de producto"%}" data-url="{% url "tpv-product-by-code" %}" 
+                                data-target="div-result-query" data-hashinv="{{invoice.hashinv}}" /><span id="div-result-query"></span>
+
+                            <input type="text" class="form-control ark_change" id="invoiceClient" aria-describedby="clientHelp" 
+                                placeholder="C&oacute;digo Cliente" value="{{invoice.client.code|default:''}}" 
+                                data-target="div-result-client" data-hashinv="{{invoice.hashinv}}" 
+                                data-url="{% url "tpv-client-by-code" %}"> <span id="div-result-client"></span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+   
+            <main class="tpv-main">
+                <section class="products-section">
+                     <div id="div-calc-tpv">{%include "tpv/tpv-calc.html" with invoice=invoice%}</div> 
+                </section>
+            </main>
+        </div>
+    </body>
+
+
+    <script> 
+        function confirmSale() {
+            const content = $('#table-products').text();
+            if (content.includes("No hay art"))
+            {
+                alert("No hay artículos seleccionados!")
+                return false;
+            }
+            return (confirm('Va a finalizar la compra. ¿Es correcto?'));
+        }
+
+        function cancelSale() {
+            const content = $('#table-products').text();
+            if (content.includes("No hay art"))
+            {
+                alert("No hay artículos seleccionados!")
+                return false;
+            }
+            return (confirm('Va a cancelar la compra y limpiar el TPV. ¿Es correcto?'));
+        }
+
+        function calcula_cambio()
+        {
+            try {
+                entrega = parseFloat( $('#entrega').val());
+                total_str = $('#total_a_pagar').html();
+                total = parseFloat(total_str.replace(',','.'));
+                if (!isNaN(entrega - total)) {
+                    $('#change_returned').html((entrega - total).toFixed(2));
+                }
+                url = $('#entrega').data("url");
+                invoice_id = $('#entrega').data("invoice");
+                diff = (entrega - total).toFixed(2);
+                ajaxGet(url, {'invoice_id': invoice_id, 'paid': entrega, 'diff': diff}, "", "");
+            } catch (error) {};
+        }
+
+        {%comment%}
+        function get_order_counter() {
+            setTimeout(get_order_counter, 600000);  // every 10 minutos
+            {% ark 'get-n-orders' 'get-n-pendings' %};
+        }
+
+        get_order_counter();
+        {%endcomment%}
+
+        $(document).ready(function(){ if ($(window).width() < 1200){ $('#sidebar').removeClass('expanded').addClass('closed'); }}); 
+
+        $(window).resize(function(){ 
+            if ($(window).width() < 1200){ 
+                $('#sidebar').removeClass('expanded').addClass('closed'); 
+            } else { 
+                $('#sidebar').removeClass('closed').addClass('expanded'); 
+            }
+        }); 
+
+        $(".card-cash").click(function(){
+            $(".card-cash").removeClass("option-on");
+            $(this).addClass("option-on");
+            $("input", this).prop("checked", true);
+        });
+    </script>
+{% endblock central_content %}

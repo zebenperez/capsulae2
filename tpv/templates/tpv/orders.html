@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% load i18n common_tags%}
+
+{% block central_content %}
+    <div class="row space-between center-vertical mb-2">
+        <div class="col-1">
+            <a class="btn btn-primray btn-labeled btn-sm {%current_exact "get-orders" days=36500%}" href="{%url "get-orders" 36500%}">
+                <i class="fas fa-search"></i><span class="d-none d-sm-block">{%trans "Todos"%}</span>
+            </a>
+        </div>
+        <div class="col-2">
+            <a class="btn btn-primray btn-labeled btn-sm {%current_exact "get-orders" days=365%}" href="{%url "get-orders" 365%}">
+                <i class="fas fa-search"></i><span class="d-none d-sm-block">{%trans "365 días"%}</span>
+            </a>
+        </div>
+        <div class="col-2">
+            <a class="btn btn-primray btn-labeled btn-sm {%current_exact "get-orders" days=180%}" href="{%url "get-orders" 180%}">
+                <i class="fas fa-search"></i><span class="d-none d-sm-block">{% trans "180 días" %}</span>
+            </a>
+        </div>
+        <div class="col-2">
+            <a class="btn btn-primray btn-labeled btn-sm {%current_exact "get-orders" days=90%}" href="{%url "get-orders" 90%}">
+                <i class="fas fa-search"></i><span class="d-none d-sm-block">{% trans "90 días" %}</span>
+            </a>
+        </div>
+        <div class="col-2">
+            <a class="btn btn-primray btn-labeled btn-sm {%current_exact "get-orders" days=30%}" href="{%url "get-orders" 30%}">
+                <i class="fas fa-search"></i><span class="d-none d-sm-block">{% trans "30 días" %}</span>
+            </a>
+        </div>
+        <div class="col-2">
+            <a class="btn btn-primray btn-labeled btn-sm {%current_exact "get-orders" days=7%}" href="{%url "get-orders" 7%}">
+                <i class="fas fa-search"></i><span class="d-none d-sm-block">{% trans "Última semana" %}</span>
+            </a>
+        </div>
+        <div class="col-1">
+            <a class="btn btn-primray btn-labeled btn-sm" href="{%url "tpv-index"%}">
+                <i class="fas fa-arrow-left"></i><span class="d-none d-sm-block">{% trans "Volver a TPV" %}</span></a>
+        </div>
+    </div>
+    <div class="panel-heading-orange text-white"> {% trans "Listado de pedidos pendientes" %} </div>
+
+    <div class="panel-list"> 
+        <table class="table table-hover table-striped table-list">
+            <thead>
+                <tr>
+                    <th>Ref</th>
+                    <th>Fecha</th>
+                    <th>Cliente</th>
+                    <th>Productos</th>
+                    <th>Base</th>
+                    <th>Tax</th>
+                    <th>Descuento</th>
+                    <th colspan="2">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr >
+                    <td class="pt-3" title="{{item.hashinv}}"> {{item.hashinv}} </td>
+                    <td class="pt-3"> {{item.date}}</td>
+                    <td class="pt-3"> {{item.client.code}}</td>
+                    <td class="pt-3"> {{item.get_quantity}}</td>
+                    <td class="pt-3"> {{item.get_base|floatformat:2}}</td>
+                    <td class="pt-3"> {{item.get_taxes|floatformat:2}}</td>
+                    <td class="pt-3"> {{item.get_discount|floatformat:2}}</td>
+                    <td class="pt-3"> {{item.total|floatformat:2}}</td>
+                    <td class="pt-3">
+                        <a href="{% url 'view-order' item.hashinv %}" class="btn btn-sm"><i class="fa fa-eye"></i></a>
+                        {% if forloop.counter == 1 %}
+                        <a href="{% url 'remove-sale' item.hashinv %}" class="btn btn-sm" onclick="return confirm('Va a eliminar este item');"><i class="fa fa-trash"></i></a>
+                        {% endif %}
+                        {% if item.paid %} <span class="alert alert-success">{% trans 'Ready' %}</span> {% else %}  <span class="alert alert-danger">{% trans 'Pending' %}</span> {% endif%}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock central_content %}

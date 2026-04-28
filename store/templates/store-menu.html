@@ -1,0 +1,27 @@
+{% load i18n common_tags %}
+
+{% if user.is_authenticated %}
+    <div class="row left-submenu hadow-sm m-0 mb-2">
+        <div class="col-lg-2 col-6 nav-item text-center">
+            {% if user|have_menu:"STO_TPV"%}
+                <div class="nav-item"><a class="nav-link active px-0" href="{%url "tpv-index"%}">
+                    <i class="fas fa-calculator"></i><br />{%trans "TPV"%}</a></div>
+            {% endif %}
+        </div>
+        <div class="col-lg-2 col-6 nav-item text-center">
+            {% if user|have_menu:"STO_PRO"%}
+                <div class="nav-item"><a class="nav-link active px-0" href="{%url "products"%}">
+                    <i class="fas fa-box"></i><br />{%trans "Productos"%}</a></div>
+            {% endif %}
+        </div>
+        <div class="col-lg-2 col-6 nav-item text-center">
+            {% if user|have_menu:"STO_PROV"%}
+                <div class="nav-item"><a class="nav-link px-0" href="{%url "providers"%}">
+                    <i class="fa fa-warehouse"></i><br />{%trans "Provedores"%}</a></div>
+            {% endif %}
+        </div>
+    </div>
+
+{% else %}
+{% endif %}
+

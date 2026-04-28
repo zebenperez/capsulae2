@@ -1,0 +1,127 @@
+{% load i18n common_tags static %}
+
+<table>
+    <tr style="border: 0px">
+        <td >
+            <img src="{{host}}/static/imgs/bandera_esp.png" %}" style="display:block; width:3cm; margin-right:-1.2cm;"/>
+        </td>
+        <td> <h5 style="border:1px solid black;padding-top:10px;padding-bottom:10px;">
+            Anexo II <br/><small>{% trans "Modelo de Certificado de Vulnerabilidad" %}</small></h5> </td>
+    </tr>
+</table>
+
+<div style="border: 1px solid black; margin-top:50px; padding:10px;">
+    <h4>{% trans "1. DATOS DE LA ENTIDAD CERTIFICADORA" %}</h4>
+    <p>{% trans "Nombre de la entidad" %}: Fundación para la Innovación, Investigación, Formación y el Desarrollo Comunitario (FÜNDEC)</p>
+    <p>{% trans "NIF/CIF" %}: G04978730</p>
+    <p><strong>{% trans "Tipo de entidad" %}</strong></p>
+    <ul class="accept-terms">
+	    {% if not signing %}
+            <li><input type="checkbox" class="check-btn" name="check1" disabled>
+                Administración pública competente en asistencia social</li>
+            <li><input type="checkbox" class="check-btn" name="check2" checked readonly>
+                Entidad del Tercer Sector inscrita en el Registro de Colaboradores de Extranjería</li>
+	    {% else %}
+            <li><img src="{{host}}/static/imgs/{{check1_img}}" style="width: 1em; height:1em;"/>
+                Administración pública competente en asistencia social</li>
+            <li><img src="{{host}}/static/imgs/{{check2_img}}" style="width: 1em; height:1em;"/>
+                Entidad del Tercer Sector inscrita en el Registro de Colaboradores de Extranjería</li>
+	    {% endif %}
+    </ul>
+    <p>{% trans "Nº de inscripción en el Registro (si aplica)" %}: 2447 JUS (Fundación de Ámbito Nacional) N.º Expediente RECEX: 26e00025073379</p>
+    <p>{% trans "Dirección" %}: Calle la Hoyita, 22, 38611. San Isidro, S/C de Tenerife </p>
+    <p>{% trans "Teléfono / Email" %}: info@fundec.org</p>
+
+    <h4>{% trans "2. DATOS DE LA PERSONA INTERESADA" %}</h4>
+    <p>{% trans "Nombre y apellidos" %}: {{patient.nombre}} {{patient.apellido}}</p>
+    <p>{% trans "NIE / Pasaporte (si dispone)" %}: {{patient.nif}}</p>
+    <p>{% trans "Fecha de nacimiento" %}: {{patient.fecha_nacimiento|date:'d-m-Y'}}</p>
+    <p>{% trans "Nacionalidad" %}: {{patient.origin.nationality}}</p>
+    <p>{% trans "Domicilio" %}: {{patient.domicilio}}</p>
+    <p>{% trans "Teléfono móvil" %}: {{patient.telefono1}}</p>
+    <p>{% trans "Localidad" %}: {{patient.locality}}</p>
+    <p>{% trans "C.P." %}: {{patient.cod_postal}}</p>
+    <p>{% trans "Provincia" %}: {{patient.province}}</p>
+
+    <h4>{% trans "3. CIRCUNSTANCIAS DE VULNERABILIDAD" %}</h4>
+    <ul class="accept-terms">
+	    {% if not signing %}
+            <li><input type="checkbox" class="check-btn" name="check3">
+                Aislamiento social o falta de red de apoyo</li>
+            <li><input type="checkbox" class="check-btn" name="check4">
+                Situación de sinhogarismo o vivienda precaria</li>
+            <li><input type="checkbox" class="check-btn" name="check5">
+                Víctima de discriminación o exclusión social</li>
+            <li><input type="checkbox" class="check-btn" name="check6">
+                Carencia de ingresos suficientes</li>
+            <li><input type="checkbox" class="check-btn" name="check7">
+                Situación de pobreza o riesgo de exclusión económica</li>
+            <li><input type="checkbox" class="check-btn" name="check8">
+                Dificultad de acceso a empleo</li>
+            <li><input type="checkbox" class="check-btn" name="check9">
+                Personas a cargo (menores, dependientes</li>
+            <li><input type="checkbox" class="check-btn" name="check10">
+                Unidad familiar en situación de vulnerabilidad</li>
+            <li><input type="checkbox" class="check-btn" name="check11">
+                Monoparentalidad en contexto de precariedad</li>
+            <li><input type="checkbox" class="check-btn" name="check12">
+                Riesgos psicosociales</li>
+            <li><input type="checkbox" class="check-btn" name="check13">
+                Exposición a situaciones de explotación o abuso</li>
+            <li><input type="checkbox" class="check-btn" data-target="check14">
+                Otros (especificar): <input type="text" name="others"/></li>
+	    {% else %}
+	        <li><img src="{{host}}/static/imgs/{{check3_img}}" style="width: 1em; height:1em;"/>
+                Aislamiento social o falta de red de apoyo</li>
+	        <li><img src="{{host}}/static/imgs/{{check4_img}}" style="width: 1em; height:1em;"/>
+                Situación de sinhogarismo o vivienda precaria</li>
+	        <li><img src="{{host}}/static/imgs/{{check5_img}}" style="width: 1em; height:1em;"/>
+                Víctima de discriminación o exclusión social</li>
+	        <li><img src="{{host}}/static/imgs/{{check6_img}}" style="width: 1em; height:1em;"/>
+                Carencia de ingresos suficientes</li>
+	        <li><img src="{{host}}/static/imgs/{{check7_img}}" style="width: 1em; height:1em;"/>
+                Situación de pobreza o riesgo de exclusión económica</li>
+	        <li><img src="{{host}}/static/imgs/{{check8_img}}" style="width: 1em; height:1em;"/>
+                Dificultad de acceso a empleo</li>
+	        <li><img src="{{host}}/static/imgs/{{check9_img}}" style="width: 1em; height:1em;"/>
+                Personas a cargo (menores, dependientes</li>
+	        <li><img src="{{host}}/static/imgs/{{check10_img}}" style="width: 1em; height:1em;"/>
+                Unidad familiar en situación de vulnerabilidad</li>
+            <li><img src="{{host}}/static/imgs/{{check11_img}}" style="width: 1em; height:1em;"/>
+                Monoparentalidad en contexto de precariedad</li>
+	        <li><img src="{{host}}/static/imgs/{{check12_img}}" style="width: 1em; height:1em;"/>
+                Riesgos psicosociales</li>
+	        <li><img src="{{host}}/static/imgs/{{check13_img}}" style="width: 1em; height:1em;"/>
+                Exposición a situaciones de explotación o abuso</li>
+	        <li><img src="{{host}}/static/imgs/{{check14_img}}" style="width: 1em; height:1em;"/>
+                Otros (especificar): {{others}}</li>
+	    {% endif %}
+    </ul>
+
+    <p><strong>
+Por la presente se constata que la persona extranjera se encuentra en situación administrativa irregular y que las circunstancias consignadas afectan negativamente a las condiciones de vida o al acceso efectivo a derechos por lo que
+    </strong></p>
+    <br/>
+    <p><strong>
+La entidad certificadora
+    </strong></p>
+    <p style="text-align:center"><strong>
+ACREDITA
+    </strong></p>
+    <br/><br/>
+    <p>
+que la persona indicada se encuentra en situación de vulnerabilidad conforme a la normativa aplicable, a los exclusivos efectos previstos en dicha disposición.
+    </p>
+    <br/><br/>
+    <p>
+Firma y sello de la entidad
+    </p>
+    <br/><br/>
+    <p>
+    Fecha: {{date|date:"d-m-Y"}}
+    </p>
+</div>
+<br/><br/>
+<p><strong>DIRIGIDA A DIRECCIÓN GENERAL DE GESTIÓN MIGRATORIA …………………Código DIR3…… EA0053027……………EX - 32</strong></p>
+
+

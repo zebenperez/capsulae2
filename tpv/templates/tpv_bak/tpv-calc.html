@@ -1,0 +1,124 @@
+{#{% load i18n app_tags generictags static %}#}
+{% load i18n common_tags %}
+
+<div class="row" style="padding-bottom: 8rem;">
+    <!-- COLUMNA IZQUIERDA -->
+    <div class="col-lg-7">
+        <table class="table table-hover w-100 table-striped" id="table-products">
+            <thead>
+                <tr class="bg-dark- text-white">
+                    <th width="2%">#</th>
+                    <th width="35%">Producto</th>
+                    <th class="text-center" width="20%">Precio</th>
+                    <th class="text-center" width="10%">Cantidad</th>
+                    <th class="text-center" width="10%">Tax (%)</th>
+                    <th class="text-center" width="10%">Desc. (&euro;)</th>
+                    <th class="text-right" width="10%">Subtotal</th>
+                    <th class="text-right" width="3%"></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if invoice.lines.all.count > 0 %}
+                {% for line in invoice.lines.all %}
+                <form>
+                    <tr>
+                        <td>{{forloop.counter}}</td>
+                        <td>{{line.product.name|default:'UNKNOWN'}}</td>
+                        <td class="text-center">{{line.unit_price|floatformat:2}} </td>
+                        <td> 
+                            <input type="number" class="number w-100 text-center ark_change" name="units" id="id-units" min="1" 
+                                step="1" value="{{line.units|jsfloat}}" placeholder="1" data-url="{% url "change-units-tpv-line" %}" 
+                                data-target="div-calc-tpv" data-obj_id="{{line.pk}}" data-field="units"/> 
+                        </td>
+                        <td> 
+                            <input type="number" class="number w-100 text-center ark_change" name="tax" id="id-tax" min="0" step="0.01"
+                                value="{{line.tax|jsfloat}}" placeholder="0" data-field="tax" 
+                                data-url="{%url "change-units-tpv-line"%}" data-target="div-calc-tpv" data-obj_id="{{line.pk}}" /> 
+                        </td>
+                        <td> 
+                            <input type="number" class="number w-100 text-center ark_change" name="discount" id="id-discount" min="0" 
+                                step="0.01" value="{{line.discount|jsfloat}}" placeholder="0" 
+                                data-url="{%url "change-units-tpv-line"%}" data-target="div-calc-tpv" data-obj_id="{{line.pk}}" 
+                                data-field="discount"/> 
+                        </td>
+                        <td class="text-right">{{line.total|floatformat:2}} &euro;</td>
+                        <td class="text-right">
+                            <a class="ark" data-url="{% url "tpv-remove-line" %}" data-target="div-calc-tpv" data-id_line="{{line.pk}}"
+                                data-confirm="Vas a eliminar un producto. ¿Es correcto?"><i class="far fa-trash-alt"></i></a></td>
+                    </tr>
+                </form>
+                {%endfor%}
+                {% else %}
+                <tr><td colspan="8">No hay art&iacute;culos</td></tr>
+                {%endif%}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- COLUMNA DERECHA -->
+    <div class="col-lg-5">
+        <aside class="cart-section">
+            <h1 class="cart-header">Carrito de Compra</h1>
+            <div class="cart-items cart-summary" id="cartItems">
+                <div class="sh-thead-calc row summary-row">
+                    <div class="col-3 text-left p-2">Total Art&iacute;culos</div>
+                    <div class="col-3 text-left p-2" title="Unidades">
+                        {{invoice.lines.all.count}} arts., {{invoice.get_quantity}} uds.</div>
+                    <div class="col-3 text-left p-2">Base</div>
+                    <div class="col-3 text-right p-2" title="Base">{{invoice.get_base|floatformat:2}} &euro;</div>
+                </div>
+                <div class="sh-thead-calc row summary-row">
+                    <div class="col-3 text-left p-2">Descuento</div>
+                    <div class="col-3 text-left p-2">{{invoice.get_discount|floatformat:2}} &euro;</div>
+                    <div class="col-3 text-left p-2"><a href="#">IGIC del pedido</a></div>
+                    <div class="col-3 text-right p-2">{{invoice.get_taxes|floatformat:2}} &euro;</div>
+                </div>
+                <div class="sh-tr-calc row summary-row total">
+                    <div class="col-3 text-left p-1">Total a pagar</div>
+                    <div class="col-3 text-right p-1"></div>
+                    <div class="col-3 text-left p-1"></div>
+                    <div class="col-3 text-right p-1">
+                    <strong><span id="total_a_pagar">{{invoice.total|floatformat:2}}</span> &euro;</strong></div>
+                </div>
+            </div>
+
+            {%include "tpv/tpv-footer.html" with invoice=invoice%}
+
+            <div class="row mt-3">
+                <div class="col-lg-6 col-6 btnfinish-center">
+                    <a href="{%url "confirm-sale" hashinv=invoice.hashinv%}" class="checkout-btn" onclick="return confirmSale();">
+                        <strong>Finalizar Compra</strong></a>
+                </div>
+                <div class="col-lg-6 col-6 btncancel text-center">
+                    <a href="{%url "cancel-sale" hashinv=invoice.hashinv%}" class="checkout-btn" onclick="return cancelSale();" > 
+                        <strong>Cancelar Compra</strong></a>
+                </div>
+            </div>
+        </aside>
+
+        <!--
+        <div class="sh-calculate mt-2">
+            <div class="sh-thead-calc row">
+                <div class="col-3 text-left p-2">Total Art&iacute;culos</div>
+                <div class="col-3 text-left p-2" title="Unidades">{{invoice.lines.all.count}} arts., {{invoice.get_quantity}} uds.</div>
+                <div class="col-3 text-left p-2">Base</div>
+                <div class="col-3 text-right p-2" title="Base">{{invoice.get_base|floatformat:2}} &euro;</div>
+            </div>
+            <div class="sh-thead-calc row">
+                <div class="col-3 text-left p-2">Descuento</div>
+                <div class="col-3 text-left p-2">{{invoice.get_discount|floatformat:2}} &euro;</div>
+                <div class="col-3 text-left p-2"><a href="#">IGIC del pedido</a></div>
+                <div class="col-3 text-right p-2">{{invoice.get_taxes|floatformat:2}} &euro;</div>
+            </div>
+            <div class="sh-tr-calc row">
+                <div class="col-3 text-left p-1">Total a pagar</div>
+                <div class="col-3 text-right p-1"></div>
+                <div class="col-3 text-left p-1"></div>
+                <div class="col-3 text-right p-1 fs-2">
+                    <strong><span id="total_a_pagar">{{invoice.total|floatformat:2}}</span> &euro;</strong></div>
+            </div>
+        </div>
+        -->
+
+    </div>
+</div>

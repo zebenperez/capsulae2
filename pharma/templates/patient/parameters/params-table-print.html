@@ -1,0 +1,47 @@
+
+<table id="register" class="register w-100">
+	<thead>
+        <th>Fecha</th>
+        <th>Hora </th>
+        <th>PA Máx<br>(mmHg)</th>
+        <th>PA Mín<br>(mmHg)</th>
+        <th>Pulso</th>
+        <th>Peso</th>
+        <th>Glucemia</th>
+        {%comment%} <th>Framingham</th> {%endcomment%}
+        <th tyle="border-right: 1px solid #478a00">Observaciones</th>
+    </thead>
+	<tbody>
+	    {% for item in registros %}
+            <tr>
+                <td>{{ item.date|date:"d/m/Y"}} </td>
+                <td>{{ item.date|date:"H:i"}} </td>
+                <td>{{ item.bpressure_max|default_if_none:""}} </td>
+                <td>{{ item.bpressure_min|default_if_none:""}} </td>
+                <td>{{ item.hearth_rate|default_if_none:""}} </td>
+                <td>{{ item.weight|default_if_none:"" }} </td>
+                <td>{{ item.glucose|default_if_none:""}} </td>
+                {%comment%}  <td>{{ item.framingham|default_if_none:""}} </td> {%endcomment%}
+
+                <td>{{ item.observations|default_if_none:""}} </td>
+            </tr>
+        {% endfor %}
+        {%comment%}
+		{% if range %}
+		    {% for row in range %}
+				<tr class="empty">
+                    <td><p></p></td>
+                    <td><p></p></td>
+                    <td><p></p></td>
+                    <td><p></p></td>
+                    <td><p></p></td>
+                    <td><p></p></td>
+                    <td><p></p></td>
+                    <td><p></p></td>
+                    <td><p></p></td>
+                </tr>
+            {% endfor %}
+        {% endif %}	
+        {%endcomment%}
+	</tbody>
+</table>

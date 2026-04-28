@@ -1,0 +1,30 @@
+{% load i18n common_tags %}
+
+<span id="div-notification"></span>
+
+<div class="card">
+    <div class="card-header">{% trans "Datos personales" %}</div>
+    <div class="card-body">{%include "patient/patient-form.html"%}</div>
+</div>
+
+<br/>
+<div class="card">
+    <div class="card-header" onclick="$('#orgs-body').slideToggle()"><i class="fas fa-arrow-right"></i> {%trans "Derivaciones"%}</div>
+    <div class="card-body hide" id="orgs-body"><div id="patient-org-container">{%include "patient/patient-orgs.html"%}</div></div>
+</div>
+
+{% if user|have_menu:"LOPD" %}
+<br/>
+<div class="card">
+    <div class="card-header" onclick="$('#lopd-body').slideToggle()"><i class="fa fa-gavel"></i> {% trans "RGPD" %}</div>
+    <div class="card-body hide" id="lopd-body">{%include "patient/lopd/lopd-list.html"%}</div>
+</div>
+{% endif %}
+
+{% if user|have_menu:"ALE" %}
+<br/>
+<div class="card">
+    <div class="card-header" onclick="$('#alle-body').slideToggle()"><i class="fas fa-allergies"></i> {% trans "Alergias" %}</div>
+    <div class="card-body hide" id="alle-body">{%include "patient/allergies/allergy-list.html"%}</div>
+</div>
+{% endif %}

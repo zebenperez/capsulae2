@@ -1,0 +1,63 @@
+{% load i18n app_tags generictags %}
+
+
+<div class="flex flex-row-reverse space-between center-vertical mb-2">
+    <div class="tools">
+        <a class="btn-tools btn-primray btn-labeled btn-sm" href="{% url "tpv-index" %}" >
+            <i class="fas fa-arrow-left"></i><span class="d-none d-sm-block">{% trans "Volver a TPV" %}</span></a>
+    </div>
+</div>
+
+<div class="row mb-4"> {% for dt in month_list %} <div class="col-1">
+    <a class="btn btn-outline-secondary sales ml-2 mr-2 {%if dt == current_month%}active{%endif%}" href="{%url "zeta" dt%}">{{dt}}</a>
+</div> {% endfor %} </div>
+
+<div class="panel-heading-orange text-white"> {% trans "Zeta" %} </div>
+
+<div class="panel-list"> 
+    <table class="table table-hover table-striped table-list">
+        <thead>
+            <tr>
+                <th></th>
+                <th class="text-center" colspan="4">Totales</th>
+                <th class="text-center" colspan="4">Tarjeta</th>
+                <th class="text-center" colspan="4">Efectivo</th>
+            </tr>
+            <tr>
+                <th class="text-left" style="border-right:1px solid #dee2e6">{% trans 'Fecha' %}</th>
+                <th class="text-right">{% trans 'Ventas ' %}</th>
+                <th class="text-right">{% trans 'Base ' %}</th>
+                <th class="text-right">{% trans 'Tax ' %}</th>
+                <th class="text-right" style="border-right:1px solid #dee2e6">{% trans 'Total ' %}</th>
+                <th class="text-right">{% trans 'Ventas ' %}</th>
+                <th class="text-right">{% trans 'Base' %}</th>
+                <th class="text-right">{% trans 'Tax' %}</th>
+                <th class="text-right" style="border-right:1px solid #dee2e6">{% trans 'Total' %}</th>
+                <th class="text-right">{% trans 'Ventas' %}</th>
+                <th class="text-right">{% trans 'Base' %}</th>
+                <th class="text-right">{% trans 'Tax' %}</th>
+                <th class="text-right">{% trans 'Total' %}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in summary reversed %}
+            <tr >
+                <td class="pt-3 text-left" style="border-right:1px solid #dee2e6"> {{item.0|date:'l, d  F  Y'}}</td>
+                <td class="pt-3 text-right"> {{item.1|floatformat:0}}</td>
+                <td class="pt-3 text-right"> {{item.2|floatformat:2}} &euro;</td>
+                <td class="pt-3 text-right"> {{item.3|floatformat:2}} &euro;</td>
+                <td class="pt-3 text-right" style="border-right:1px solid #dee2e6"> {{item.4|floatformat:2}} &euro;</td>
+                <td class="pt-3 text-right"> {{item.5|floatformat:0}}</td>
+                <td class="pt-3 text-right"> {{item.6|floatformat:2}} &euro;</td>
+                <td class="pt-3 text-right"> {{item.7|floatformat:2}} &euro;</td>
+                <td class="pt-3 text-right" style="border-right:1px solid #dee2e6"> {{item.8|floatformat:2}} &euro;</td>
+                <td class="pt-3 text-right"> {{item.9|floatformat:0}}</td>
+                <td class="pt-3 text-right"> {{item.10|floatformat:2}} &euro;</td>
+                <td class="pt-3 text-right"> {{item.11|floatformat:2}} &euro;</td>
+                <td class="pt-3 text-right"> {{item.12|floatformat:2}} &euro;</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+

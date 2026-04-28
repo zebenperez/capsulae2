@@ -1,0 +1,88 @@
+<html>
+    <body>
+    <head>
+        <style> 
+            @page {size:{{width}}mm {{height}}mm; margin:0; font-size:6pt} 
+            body {width:{{width}}mm; font-size:x-small}
+            table {border-collapse:collapse;}
+            @media print {body,td {font-size:6pt}}
+        </style>
+    </head>
+    <body>
+        <table border="0" width="100%">
+            <tr> <td colspan="2" align="center"><img src="https://www.mulema.es/static/admin/img/logo-cab.png" width="60%"></img></td></tr>
+	    {#<tr> <td colspan="2" align="center"> La comunitaria </td></tr>#}
+            <tr> <td colspan="2" align="center"> La Hoyita, 24</td></tr>
+            <tr> <td colspan="2" align="center"> Granadilla de Abona</td></tr>
+            <tr> <td  align="left"> DNI/CIF:08875218R </td><td align="right"> Fecha: {{idate|date:'d/m/Y H:i'}}</td></tr>
+            <tr> <td > Tfno: 922391217 </td><td align="right"> Factura simple.:0-{{invoice.number}}</td></tr>
+            <tr> 
+                <td > Cliente: {{invoice.client.code|default:'CONTADO'}}</td>
+                <td align="right"> {{invoice.client.name|default:''}}</td>
+            </tr>
+        </table>
+        <br><br><br>
+        <table width="100%">
+            <tr style="border-bottom:1px solid">
+                <td>Descripci&oacute;n</td>
+                <td>Ap</td>
+                <td>Cd</td>
+                <td align="right">PVP</td>
+                <td align="right">Import</td>
+            </tr>
+            {% for line in invoice.lines.all  %}
+            <tr>
+                <td>{{line.product.name}}</td>
+                <td>RP</td>
+                <td>{{line.units}}</td>
+                <td align="right">{{line.unit_price|floatformat:2}}</td>
+                <td align="right">{{line.total|floatformat:2}}</td>
+            </tr>
+            {% endfor %}
+            <tr><td colspan="5"><br><br><br></td></tr>
+            <tr style="border-top:1px solid">
+                <td colspan="3"> T.Dispensado</td>
+                <td align="right">{{invoice.base|floatformat:2}}</td>
+                <td align="right">{{invoice.total|floatformat:2}}</td>
+            </tr>
+            <tr style="border-bottom:1px solid; font-size:2em;">
+                <td colspan="3"> <strong>Total</strong></td>
+                <td colspan="2" align="right"><strong>{{invoice.total|floatformat:2}}</strong></td>
+            </tr>
+            <tr style="font-size:2em;">
+                <td colspan="3"> Entrega</td>
+                <td colspan="2" align="right">{{invoice.paid_amount|floatformat:2}}</td>
+            </tr>
+            <tr style="border-bottom:1px solid; font-size:2em;">
+                <td colspan="3"> Cambio</td>
+                <td colspan="2" align="right">{{invoice.diff_amount|floatformat:2}}</td>
+            </tr>
+            <tr>
+                <td colspan="5" > COMERCIANTE MINORISTA EXENTO DE IGIC</td>
+            </tr>
+            <tr>
+                <td>&nbsp;</td>
+                <td colspan="3">T. Pagos:</td>
+                <td align="right">{{invoice.total|floatformat:2}}</td>
+            </tr>
+        </table>
+        <br>
+        <table>
+            <tr>
+                <td> {% if cash %}PAGO EN EFECTIVO{%else%}PAGO CON TARJETA{%endif%}</td>
+            </tr>
+            <tr>
+                <td> Gracias por su visita</td>
+            </tr>
+            <tr>
+                <td>Le ha atendido {{profile.name}}.</td>
+            </tr>
+        </table>
+    <script>
+        window.print();
+        //window.onfocus = function () {window.close();}
+        setTimeout(function () {window.location="/tpv/";}, 1000);
+    </script>
+    </body>
+</html>
+
