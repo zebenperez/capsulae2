@@ -1,11 +1,16 @@
 from django.apps import apps
 from django.conf import settings
+from PIL import Image
 import sys
 import datetime
 import json
 import string
 import random
 import unicodedata
+import os
+import io
+import qrcode
+import uuid
 
 
 '''
@@ -39,6 +44,14 @@ def get_or_none_str(app_name, model_name, value, field="pk"):
         #logger.error("(get_object): %s" % e)
         return None
 
+def create_obj_str(app_name, model_name):
+    try:
+        model = apps.get_model(app_name, model_name)
+        obj = model.objects.create()
+        return obj
+    except Exception as e:
+        return None
+
 def set_obj_field(obj, field, value):
     obj_field = obj._meta.get_field(field)
     if obj_field.get_internal_type() == "ManyToManyField":
@@ -46,7 +59,8 @@ def set_obj_field(obj, field, value):
         for item in value:
             getattr(obj, field).add(get_or_none_str(obj._meta.app_label, obj_field.remote_field.model.__name__, item))
     elif obj_field.get_internal_type() == "ForeignKey":
-        setattr(obj, field, get_or_none_str(obj._meta.app_label, obj_field.remote_field.model.__name__, value))
+        setattr(obj, field, get_or_none_str(obj_field.related_model._meta.app_label, obj_field.related_model._meta.model_name, value))
+        #setattr(obj, field, get_or_none_str(obj._meta.app_label, obj_field.remote_field.model.__name__, value))
     elif obj_field.get_internal_type() == "FloatField":
         setattr(obj, field, value.replace(",", "."))
     elif obj_field.get_internal_type() == "DecimalField":
@@ -112,4 +126,36 @@ def validate_captcha(request):
     else:
         return False
 
+def generate_qr(data, logo):
+    #qr = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_L, box_size=10, border=4)
+    qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_H)
+    qr.add_data(data)
+    qr.make(fit=True)
+
+    if logo != None and logo != "":
+        img = qr.make_image(fill_color="#000000", back_color="#ffffff").convert('RGB')
+
+        basewidth = 150
+        img_logo = Image.open(logo)
+        wpercent = (basewidth / float(img_logo.size[0]))
+        hsize = int((float(img_logo.size[1]) * float(wpercent)))
+        img_logo = img_logo.resize((basewidth, hsize))
+        #img_logo = img_logo.resize((basewidth, hsize), Image.ANTIALIAS)
+
+        pos = ((img.size[0] - img_logo.size[0]) // 2, (img.size[1] - img_logo.size[1]) // 2)
+        img.paste(img_logo, pos)
+    else:
+        color = "#000000"
+        color_back = "#ffffff"
+        img = qr.make_image(fill_color=color, back_color=color_back)
+
+    byteIO = io.BytesIO()
+    img.save(byteIO, format='PNG')
+    byteIO.seek(0)
+    byteArr = byteIO.getvalue()
+
+    return byteArr
+
+def new_uuid():
+    return uuid.uuid4()
 

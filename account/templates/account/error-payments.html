@@ -32,13 +32,18 @@
                 {% endif %}
                 <br/> <br/>
                 {% if register %}
+	                <div class="col-lg-4 offset-lg-4 text-center pt-5 pb-3"> <a class="btn btn-primary payment w-100 py-3" 
+                        href="{% url "account-payment-send" user_profile.plan.id %}">
+                        <strong>{% trans "REALIZAR PAGO DEL PLAN " %}{{user_profile.plan.name|upper}} ({{user_profile.plan.amount}}) €
+                        <i class="fas fa-paper-plane fa-fw"></i></strong></a></div>
+ 
+                    {%comment%}
                     {% for plan in plan_list %}
 	                    <div class="col-lg-4 offset-lg-4 text-center pt-5 pb-3"> <a class="btn btn-primary payment w-100 py-3" 
                             href="{% url "account-payment-send" plan.id %}">
                             <strong>{% trans "REALIZAR PAGO DEL PLAN " %}{{plan.name|upper}} ({{plan.amount}}) €
                             <i class="fas fa-paper-plane fa-fw"></i></strong></a></div>
                     {% endfor %}
-                    {%comment%}
                     Para regularizar su pago ponganse en contacto con nosotros a través de 
                         <a href="mailto:info@fundec.org" style="color:#4e1134;">info@fundec.org</a>
                     {%endcomment%}

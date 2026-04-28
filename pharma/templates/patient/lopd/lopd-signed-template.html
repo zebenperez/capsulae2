@@ -79,11 +79,15 @@
 		</style>
 	</head>
 	<body>
-		{% include "patient/lopd/lopd-consent-content.html"%}
+		{% if company.id == 9 %} {# FUNDEC #}
+            {% include "patient/lopd/lopd-consent-content-fundec.html"%}
+		{% else %}
+		    {% include "patient/lopd/lopd-consent-content.html"%}
+		{% endif %}
 		<table>
 			<tr>
 				<td id="patient-signature">
-					<img src="data:{{signature}}" id="patient-signature-img" class="signature"/>
+					<img src="data:{{signature}}" id="patient-signature-img" class="signature" width="50%"/>
 				</td>
 			</tr>
 		</table>

@@ -100,6 +100,11 @@ body.loading .overlay{
 	margin-left:0;
 	margin-right:0;
 }
+#patient-list {
+	overflow-y: scroll;
+	max-height: 50vh;
+}
+
 .row.line {
 	border-bottom: 1px solid #dee2e6;
 }
@@ -113,14 +118,18 @@ body.loading .overlay{
 
 .register-hours {
     border:1px solid #cccccc;
-/*    background-color: #e0f1f9;*/
     background-color: #eef0f1;
 }
 
 .shadowBox {
-    border:1px solid #ccc; 
-    border-radius:0.2rem; 
     background: white;
+    border:1px solid #ccc; 
+    border-radius: 50%;
+    height:100px;
+    width: 100px;
+    align-items: center;
+    display: flex;
+    justify-content: center;
     -webkit-box-shadow: 1px 3px 16px -5px rgba(66, 68, 90, 1);
     -moz-box-shadow: 1px 3px 16px -5px rgba(66, 68, 90, 1);
     box-shadow: 1px 3px 16px -5px rgba(66, 68, 90, 1);
@@ -134,6 +143,10 @@ a.btn.btn.shadowBox-btn:hover {
     border:1px solid #000 !important; 
 }
 
+i.fa.fa-user.large {
+	color: #727272;
+	font-size: 28px;
+}
 i.fa.fa-clock.large {
 	color: #727272;
 	font-size: 28px;
@@ -171,9 +184,12 @@ i.fas.fa-thumbtack.large {
 
 #div-container {
 	background: white;
+    padding-bottom: 150px;
+	/*
 	border-left:1px solid #ddd;
 	border-right:1px solid #ddd;
 	border-bottom:1px solid #ddd;
+	*/
 }
 
 
@@ -270,7 +286,8 @@ a.btn.btn-secondary.ark {
 }
 
 .toolbar-search.projects {
-    display:grid;grid-template-columns: 0% 2% 98%;
+    display:grid;
+    grid-template-columns: 0% 2% 98%;
 }
 
 .toolbar-search.projects i.fas.fa-search {
@@ -279,18 +296,17 @@ a.btn.btn-secondary.ark {
     margin-top: 12px;
 }
 
-.profile-btn {
+.profile-btn,
+.profile-btn:hover {
     text-align: center;
     line-height: 0 !important;
     width: 50px;
-}
-.profile-btn:hover {
-    border-radius: 50%;
     padding: 15px 5px 15px 5px;
-    background: #f4f4f4;
-    line-height: 0 !important;
+    border-radius: 50%;
 }
-
+.profile-btn:hover i.fas.fa-ellipsis-v {
+    color: #000 !important;
+}
 
 input#s-name.autosearch.form-control.form-control-dark.w-100 {
     border: 0;
@@ -514,7 +530,7 @@ textarea.form-control {
 	text-transform: uppercase;
 }
 .save, .new, 
-.save i, .new i.fas.fa-plus, i.fas.fa-upload, i.fas.fa-arrow-left, i.fas.fa-trash { color: #36abfc; font-size: 0.8rem;}
+.save i, .new i.fas.fa-plus, i.fas.fa-upload, i.fas.fa-arrow-left, i.fas.fa-arrow-right, i.fas.fa-trash { color: #36abfc; font-size: 0.8rem;}
 .new i.fas.fa-plus:hover { color: #212529; font-size: 0.8rem; }
 .new i.fas.fa-plus:hover { color: #212529; font-size: 0.8rem; }
 
@@ -691,6 +707,22 @@ div.striped-nested>div>div:nth-of-type(even) { background: #FFFFFF; }
 		font-size: 1.5rem;
 	}
 
+	.shadowBox {
+		height: 70px;
+		width: 70px;
+
+	/*	border:1px solid red; */
+	}
+	.titnumb {
+		display: grid; 
+		grid-template-columns: 80% 20%; 
+		align-items:center; 
+	}
+
+
+
+
+
 
 }
  
@@ -755,17 +787,17 @@ img.img-cart-line {
 /************************************************/
 
 
-.header {
+.main-header {
 	border-bottom: 1px solid rgba(0, 0, 0, 0.0625);
 	height:55px;
 	line-height: 1.5;
-	background: #fafbfc;
+	background: #fafbfc !important;
 	-webkit-box-shadow: 0px 6px 8px -2px rgb(0 0 0 / 15%);
 	-moz-box-shadow: 0px 6px 8px -2px rgba(0,0,0,0.15);
 	box-shadow: 0px 6px 8px -2px rgb(0 0 0 / 15%);
 }
 
-.header i {
+.main-header i {
 	font-size: 17px;
 	font-weight: light !important;
 	color: #5b7898 !important;
@@ -777,7 +809,7 @@ i.fas.fa-user-circle, i.fas.fa-sign-out-alt.text-white, a.dropdown-toggle {
 
 a.dropdown-toggle {
 	font-size: 1.6rem !important;
- }
+}
 
 .divbars-menu {
 	padding-left: 20px;
@@ -795,6 +827,10 @@ a.dropdown-toggle {
 	align-items: center;
 }
 
+small.mob-name {
+	font-size: 0.6rem !important;
+}
+
 .general {
 	width: 100%;
 }
@@ -804,7 +840,7 @@ a.dropdown-toggle {
 ul.left-menu  {
 	margin:0;
 	padding:0;
-    width:100%;
+	width:100%;
 }
 .left-menu li {
 	list-style:none;
@@ -817,7 +853,7 @@ ul.left-menu  {
 	white-space: nowrap;
 }
 .left-menu li:hover {
-    background-color: #fff;
+	background-color: #fff;
 }
 .left-menu li a:hover {
 	color: #5b7898;
@@ -826,6 +862,33 @@ ul.left-menu  {
 i.fas.fa-home:hover, i.far.fa-folder-open:hover, i.fas.fa-users:hover, i.fas.fa-bed:hover, i.fas.fa-tablet-alt:hover, i.fas.fa-book:hover, i.fas.fa-envelope:hover, i.fas.fa-lock:hover {color: #5b7898; }
 
 /************ end LEFT MENU WEB ************/
+
+
+/************ LEFT SUBMENU WEB ************/
+
+.row.left-submenu  {
+}
+.row.left-submenu .nav-link {
+	border: 1px solid #f3f3f3;
+	border-radius: 0.25rem;
+	--tw-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+	--tw-shadow-colored: 0 1px 2px 0 var(--tw-shadow-color);
+	box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+}
+.row.left-submenu .nav-link {
+	color: #72777a;
+	font-size: 15px;
+	line-height: 2rem; 
+}
+.row.left-submenu .nav-link.active {
+	background-color: #f8f9fa !important;
+}
+.row.left-submenu .nav-link:hover {
+	background-color: #f8f9fa;
+	border: 1px solid #e7e7e7;
+}
+
+/************ end LEFT SUBMENU WEB ************/
 
 
 /************ LEFT MENU HAMB MENU ************/
@@ -959,10 +1022,24 @@ i.fas.fa-home:hover, i.far.fa-folder-open:hover, i.fas.fa-users:hover, i.fas.fa-
     display: flex;
     background: #fff;
 	border:1px solid white !important;
-	/*width: 99%;*/
 	width: 100%;
 	margin:0;
 	padding:0;
+}
+
+.web-content {
+    align-items: stretch;
+    overflow-y: hidden;
+    overflow-y: scroll !important;
+	max-height: 100vh;
+}
+
+.web-footer {
+	height: 50px;
+	position: absolute;
+	bottom:0;
+	width: 100%;
+	background:black;
 }
 
 #sidebar {
@@ -972,7 +1049,7 @@ i.fas.fa-home:hover, i.far.fa-folder-open:hover, i.fas.fa-users:hover, i.fas.fa-
     padding: 0px 0px 10px 0px;
     min-height: 100%;
     overflow: hidden;
-    z-index: 400;
+    /*z-index: 400;*/
     -webkit-transition: width 200ms linear;
     -moz-transition: width 200ms linear;
     -o-transition: width 200ms linear;
@@ -1732,5 +1809,18 @@ TIMELINE
 .timeline{
   --timelineMainColor: rgb(79,142,58,1);
   font-size: 16px;
+}
+
+
+/***************************************/
+	/* BIBLIOMECUM */
+/***************************************/
+
+.row-list-item {
+  border: 1px solid #e7f2d8;
+  border-radius: 5px;
+  margin-bottom: 15px !important;
+  -webkit-box-shadow: 0 1px 5px rgba(0,0,0,0.2);
+  font-size: 13px;
 }
 

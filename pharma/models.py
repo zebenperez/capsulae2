@@ -25,6 +25,12 @@ class Config(models.Model):
 def get_historial():
     return ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(8))
 
+def upload_form_qr(instance, filename):
+    ascii_filename = str(filename.encode('ascii', 'ignore'))
+    instance.filename = ascii_filename
+    folder = "patients/qr/%s" % (instance.id)
+    return '/'.join(['%s' % (folder), datetime.now().strftime("%Y%m%d%H%M%S") + ascii_filename])
+
 class Pacientes(models.Model):
     n_orden = models.CharField(max_length=10)
     n_historial = models.CharField(max_length=8, unique=True, blank=True, null=True, verbose_name="Nº Hisotrial", default=get_historial)   # ***
@@ -40,6 +46,8 @@ class Pacientes(models.Model):
 
     cod_postal = models.IntegerField(verbose_name="Cod. postal", blank=True, null=True, default=0)                  # ***
     domicilio = models.CharField(max_length=100, blank=True, null=True, default="")                                 # ***
+    locality = models.CharField(max_length=100, blank=True, null=True, default="")                                 # ***
+    province = models.CharField(max_length=100, blank=True, null=True, default="")                                 # ***
     slug_address = models.SlugField(max_length=200, verbose_name="Address slug", blank=True, null=True)
     telefono1 = models.IntegerField(blank=True, null=True, verbose_name="Teléfono")                                 # ***
     email = models.EmailField(blank=True, null=True, verbose_name="Correo electrónico", default="")                 # ***
@@ -60,6 +68,8 @@ class Pacientes(models.Model):
     otras_alergias = models.TextField(blank=True, null=True)
     activo = models.NullBooleanField(blank=True, null=True)
     use_poli = models.CharField(max_length=10, blank=True, null=True, default="")
+    qr = models.ImageField(upload_to=upload_form_qr, blank=True, verbose_name="QR", help_text="Select file to upload")
+    uuid = models.CharField(verbose_name='UUID', max_length=255, default='')
 
     id_user = models.ForeignKey(User, db_column='id_user', on_delete=models.SET_NULL, blank=True, null=True)  # owner
 
@@ -121,6 +131,35 @@ class Pacientes(models.Model):
         self.slug_address = Pacientes.slugify_address(self.domicilio)
         super(Pacientes, self).save(*args, **kwargs)
 
+    @property
+    def lopd_signed(self):
+        from lopd.models import LOPDConsents
+        try:
+            return LOPDConsents.objects.filter(paciente=self).exists()
+        except:
+            False
+
+    def toJSON(self):
+        return {
+            "id": self.id,
+            "n_orden": self.n_orden,
+            "n_historial": self.n_historial,
+            "nif": self.nif,
+            "fecha_nacimiento": self.fecha_nacimiento.strftime("%Y-%m-%d") if self.fecha_nacimiento else None,
+            "cip": self.cip,
+            "nombre": self.nombre,
+            "apellido": self.apellido,
+            "sexo": self.sexo,
+            "borrado": self.borrado,
+            "created_at": self.created_at.strftime("%Y-%m-%d %H:%M:%S") if self.created_at else None,
+            "updated_at": self.updated_at.strftime("%Y-%m-%d %H:%M:%S") if self.updated_at else None,
+            "cod_postal": self.cod_postal,
+            "domicilio": self.domicilio,
+            "slug_address": self.slug_address,
+            "telefono1": self.telefono1,
+            "email": self.email,
+        }            
+
     class Meta:
         db_table = 'pacientes'
         verbose_name = 'paciente'
@@ -172,4 +211,13 @@ class Diagnosticos(models.Model):
         db_table = 'diagnosticos'
         verbose_name = 'diagnostico'
         verbose_name_plural = 'diagnosticos'
+
+class PatientShared(models.Model):
+    patient = models.ForeignKey(Pacientes, verbose_name="Paciente", on_delete=models.SET_NULL, blank=True, null=True, related_name="comp_shared")
+    user = models.ForeignKey(User, verbose_name="Usuario", on_delete=models.SET_NULL, blank=True, null=True)
+
+    class Meta:
+        verbose_name ="Paciente compartido"
+        verbose_name_plural ="Pacientes compartidos"
+
 

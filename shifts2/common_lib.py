@@ -15,14 +15,20 @@ def get_month_shifts(year=None, month=None, user=None, employee=None):
             year = "20%s" % year 
         today = datetime.strptime("%s %s %s" % (year, month, 1), "%Y %m %d")
     kwargs = {"ini_date__year": today.year, "ini_date__month": today.month}
+    kwargs_prev = {"ini_date__year": today.year, "ini_date__month": today.month-1}
+    kwargs_next = {"ini_date__year": today.year, "ini_date__month": today.month+1}
 
     if user != None:
         kwargs["user"] = user
+        kwargs_prev["user"] = user
+        kwargs_next["user"] = user
 
     if employee != None:
         kwargs["employees__in"] = [employee]
+        kwargs_prev["employees__in"] = [employee]
+        kwargs_next["employees__in"] = [employee]
 
-    shift_list = Shift.objects.filter(**kwargs)
+    shift_list=list(Shift.objects.filter(**kwargs))+list(Shift.objects.filter(**kwargs_prev))+list(Shift.objects.filter(**kwargs_next))
     return today, shift_list
 
 def get_journeys_hours(user, ini_date, end_date):

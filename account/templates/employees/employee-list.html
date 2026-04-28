@@ -5,7 +5,8 @@
     <div class="col-3"> {% trans 'Nombre' %} </div>
     <div class="col-3"> {% trans 'Nombre de usuario' %} </div>
     {#<div class="col-3"> {% trans 'Correo electrónico' %} </div>#}
-    <div class="col-3"> {% trans 'Tipo' %} </div>
+    <div class="col-2"> {% trans 'Tipo' %} </div>
+    <div class="col-1"> {% trans 'PIN' %} </div>
     <div class="col-1"> {% trans 'Active' %} </div>
     <div class="col-2"></div>
 </div>
@@ -15,7 +16,8 @@
             <div class="col-3">{{ item.first_name }}</div>
             <div class="col-3">{{ item.username }}</div>
             {#<div class="col-3">{{ item.email }}</div>#}
-            <div class="col-3">{{ item.employee_profile.user_type.name }}</div>
+            <div class="col-2">{{ item.employee_profile.user_type.name }}</div>
+            <div class="col-1">{{ item.employee_profile.pin|default:"" }}</div>
             <div class="col-1">{%if item.is_active%}<i class="fas fa-check"></i>{%else%}<i class="fas fa-times"></i>{%endif%}</div>
             <div class="col-2 text-right">
                 <a class="btn btn-xs ark p-2" title="{%trans 'Jornadas'%}" data-url="{%url "employee-journeys" %}"
@@ -24,8 +26,9 @@
                 <a class="btn btn-xs ark p-2" title="{%trans 'Editar'%}" data-url="{%url "employee-form" %}"
                     data-target-modal="common-modal" data-obj_id="{{item.employee_profile.id}}"> 
                     <i class="fas fa-edit"></i></a>
-                <a class="btn btn-xs ark" data-url="{%url "employee-remove"%}" data-target="employee-list" data-obj_id="{{item.employee_profile.id}}" 
-                    title="{% trans 'Remove' %}" data-confirm="{% trans "Are you sure to remove this element?" %}"><i class="fas fa-trash"></i></a> 
+                <a class="btn btn-xs ark" data-url="{%url "employee-remove"%}" data-target="employee-list" 
+                    data-obj_id="{{item.employee_profile.id}}" title="{% trans 'Remove' %}" 
+                    data-confirm="{% trans "Are you sure to remove this element?" %}"><i class="fas fa-trash"></i></a> 
             </div>
     </div>
 {% endfor %}

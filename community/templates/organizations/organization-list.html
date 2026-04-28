@@ -3,10 +3,11 @@
 
 <div class="row patient-list-head main-th small small p-3 m-0">
     {% if user|in_group:"admins" %}
-        <div class="col-5"> {% trans 'Nombre' %} </div>
+        <div class="col-4"> {% trans 'Nombre' %} </div>
         <div class="col-2"> {% trans 'Empresa' %} </div>
         <div class="col-2"> {% trans 'Usuario' %} </div>
         <div class="col-1"> {% trans 'Revisada' %} </div>
+        <div class="col-1"> {% trans 'Prioridad' %} </div>
     {% else %}
         <div class="col-5"> {% trans 'Nombre' %} </div>
         <div class="col-5"> {% trans 'Correo electrónico' %} </div>
@@ -18,10 +19,11 @@
     <div class="row line pointer small pt-2 pb-2 m-0" id="row_{{item.id}}">
             {#<div class="row pointer" onclick="window.location='{%url "project-view" item.id%}'">#}
             {% if user|in_group:"admins" %}
-                <div class="col-5">{{ item.name|default:"---" }}<br/>{{item.email}}</div>
+                <div class="col-4">{{ item.name|default:"---" }}<br/>{{item.email}}</div>
                 <div class="col-2">{{ item.comp|default:"" }}</div>
                 <div class="col-2">{{ item.user|default:"" }}</div>
                 <div class="col-1">{% if item.reviewed %} <i class="fas fa-check"></i> {% else %} <i class="fas fa-times"></i> {% endif %}</div>
+                <div class="col-1">{% if item.priority%} <i class="fas fa-check"></i> {% else %} <i class="fas fa-times"></i> {% endif %}</div>
             {% else %}
                 <div class="col-5">{{ item.name|default:"---" }}</div>
                 <div class="col-5">{{ item.email }}</div>

@@ -10,17 +10,18 @@ from datetime import datetime, timedelta
 
 from capsulae2.decorators import group_required
 from capsulae2.commons import get_or_none, get_param, show_exc
+from capsulae2.email_lib import send_derivation_email
 
 from account.models import Company
 from community.models import Organization
 from .models import Pacientes
-from .evolutionary_models import Evolutionary 
+from .evolutionary_models import Evolutionary, EvolutionaryDoc
 
 
 '''
     Evolutionary
 '''
-@group_required("admins",)
+@group_required("admins", "managers", "employee")
 def evolutionary_form(request):
     try:
         patient = get_or_none(Pacientes, request.GET["patient_id"])
@@ -33,13 +34,41 @@ def evolutionary_form(request):
         print(e)
         return render(request, 'error_exception.html', {'exc':show_exc(e)})
 
-@group_required("admins",)
+@group_required("admins", "managers")
 def evolutionary_remove(request):
     try:
         evo = get_or_none(Evolutionary, request.GET["obj_id"])
         patient = evo.patient
         evo.delete()
         return render(request, "patient/evolutionary/evo-list.html", {'obj': patient})
+    except Exception as e:
+        return render(request, 'error_exception.html', {'exc':show_exc(e)})
+
+@group_required("admins","managers","employee")
+def evolutionary_file_add(request):
+    try:
+        obj = get_or_none(Evolutionary, request.POST["obj_id"])
+        if obj != None:
+            file_list = request.FILES.getlist('file')
+            for f in file_list:
+                obj_doc = EvolutionaryDoc.objects.create(evolutionary=obj)
+                obj_doc.doc = f
+                obj_doc.save()
+
+        return render(request, "patient/evolutionary/file-list.html", {"obj": obj,})
+    except Exception as e:
+        return render(request, 'error_exception.html', {'exc':show_exc(e)})
+
+@group_required("admins","managers","employee")
+def evolutionary_file_remove(request):
+    try:
+        obj = get_or_none(EvolutionaryDoc, request.GET["obj_id"])
+        if obj != None:
+            evol = obj.evolutionary
+            obj.doc.delete(save=False)
+            obj.delete()
+
+        return render(request, "patient/evolutionary/file-list.html", {"obj": evol,})
     except Exception as e:
         return render(request, 'error_exception.html', {'exc':show_exc(e)})
 
@@ -60,7 +89,10 @@ def evolutionary_referral_form(request, history_num, evolutionary_id=None, view=
     context = {'view': bool(view)}
     context['patient'] = patient
     context['company'] = Company.objects.filter(manager=patient.id_user).first()
-    context['org_list'] = Organization.objects.all()
+    if request.user.is_superuser:
+        context['org_list'] = Organization.objects.all()
+    else:
+        context['org_list'] = Organization.objects.filter(comp=context["company"])
     if evolutionary_id != None:
         ev = Evolutionary.objects.get(pk=evolutionary_id)
         #print(ev.matter)
@@ -100,7 +132,8 @@ def evolutionary_send_form(request):
                 html = "{}{}<br/><br/>".format(html, val)
                 link = "Puede ver la hoja de derivación a través de <a href='{}'>este enlace</a>".format(request.build_absolute_uri(reverse('evolutionary-referral-form', kwargs={'history_num':patient.n_historial, 'evolutionary_id': ev.id})))
                 html = "{}{}".format(html, link)
-                send_mail('Derivación de paciente', 'Derivación de paciente', 'info@capsulae.org', [org_list[1]], html_message=html)
+                #send_mail('Derivación de paciente', 'Derivación de paciente', 'info@capsulae.org', [org_list[1]], html_message=html)
+                send_derivation_email([org_list[1]], html)
             else:
                 msg = "ERROR: email not found!"
     except Exception as e:

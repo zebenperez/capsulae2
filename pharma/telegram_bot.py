@@ -41,7 +41,7 @@ class TelegramBot(Bot):
         cert = None
         if cert_path:
             cert = open(cert_path, 'rb')
-        self.set_webhook(webhook_url=webhook_url, certificate=cert)
+        #self.set_webhook(url=webhook_url, certificate=cert)
         # self._updater.idle()
 
     def start_idle(self):

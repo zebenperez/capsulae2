@@ -8,7 +8,7 @@ from weasyprint import HTML, CSS
 from capsulae2.decorators import group_required
 from capsulae2.commons import get_or_none, get_param, show_exc
 from community.models import Organization, PatientOrg, Procedure, PatientProcedure
-from medication.medication_lib import get_medication
+from medication.medication_lib import get_medication, get_medication_by_cn
 from medication.models import PresentationsPrescriptionsAempsCache as AempsCache
 from .models import Pacientes
 from .treatment_models import Tratamiento, MedicamentoTratamiento, ComplementoTratamiento
@@ -35,7 +35,10 @@ def patient_treatment_form(request):
         if patient == None:
             return render(request, 'error_exception.html', {'exc':'Paciente no encontrado!'})
 
-        obj = get_or_none(Tratamiento, request.GET["obj_id"]) if "obj_id" in request.GET else Tratamiento.objects.create(paciente=patient)
+        if "obj_id" in request.GET:
+            obj = get_or_none(Tratamiento, request.GET["obj_id"])
+        else:
+            obj = Tratamiento.objects.create(paciente=patient)
 
         medic = get_or_none(AempsCache, get_param(request.GET, "medication_id"))
         if medic != None:
@@ -71,7 +74,9 @@ def patient_treatment_remove(request):
 def patient_treatment_medication_search(request):
     patient_id = get_param(request.GET, "patient_id")
     search_value = get_param(request.GET, "value")
-    return render(request, "patient/treatments/medication-list.html", {'patient_id': patient_id, 'items': get_medication(search_value)})
+    context = {'patient_id': patient_id, 'items': get_medication(search_value)}
+    context1 = {'patient_id': patient_id, 'items': get_medication_by_cn(search_value)}
+    return render(request, "patient/treatments/medication-list.html", context)
 
 @group_required("admins","managers")
 def patient_complement_form(request):

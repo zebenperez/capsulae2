@@ -1,4 +1,5 @@
 from django.urls import path
+#from . import views, donation_views
 from . import views
 
 urlpatterns = [
@@ -12,6 +13,9 @@ urlpatterns = [
 
     #------------------------- PROFILE --------------------
     path('profile/view/', views.profile_view, name='profile-view'),
+    path('profile/view/import/', views.profile_view_import, name='profile-view-import'),
+    path('profile/view/import-farmatic/', views.profile_view_import_farmatic, name='profile-view-import-farmatic'),
+    path('profile/view/dispensation-log/', views.profile_view_dispensation_log, name='profile-view-dispensation-log'),
 
     #------------------------- PAYMENTS --------------------
     path('payment-error/', views.payment_error, name='account-payment-error'),
@@ -33,4 +37,13 @@ urlpatterns = [
     path('donations/send/', views.donation_send, name='donation-send'),
     path('donation-custom/', views.donation_custom, name='donation-custom'),
     path('test/', views.test),
+
+    #------------------------- COMPANIES --------------------
+    path('companies/upgrade-uuid/', views.company_upgrade_uuid, name='company-upgrade-uuid'),
+
+    #path('donations/index/', donation_views.donations_index, name='donation-index'),
+    #path('donations/edit/', donation_views.donation_edit, name='donation-edit'),
+    #path('donations/remove/', donation_views.donation_remove, name='donation-remove'),
+    #path('donations/unique/', donation_views.donation_unique, name='donation-unique'),
+    #path('donations/unique-send/', donation_views.donation_unique_send, name='donation-unique-send'),
 ]

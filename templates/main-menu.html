@@ -1,17 +1,24 @@
-{% load i18n common_tags %}
+{% load i18n pharma_tags common_tags %}
 
 {% if user.is_authenticated %}
     <ul class="left-menu">
     {% if menu == "admins" %}
-        <li class="nav-item"><a class="nav-link " href="{%url "pharma-index"%}"><i class="fa fa-home"></i> {%trans "Home"%} </a></li><hr/>
+        <li class="nav-item"><a class="nav-link " href="{%url "pharma-index"%}">
+            <i class="fa fa-home"></i> {%trans "Home"%} </a></li><hr/>
         {% if user|have_menu:"PAC"%}
-            <li class="nav-item"><a class="nav-link " href="{%url "patients"%}"><i class="fa fa-user"></i> {%trans "Pacientes"%} </a></li><hr/>
+            <li class="nav-item">
+                <a class="nav-link " href="{%url "patients"%}">
+                    <i class="fa fa-user"></i> {%if user|is_pharma%}{%trans 'Pacientes'%} {%else%} {%trans 'Usuarios'%} {%endif%}
+                </a>
+            </li><hr/>
         {% endif %}
         {% if user|have_menu:"MED"%}
-            <li class="nav-item"><a class="nav-link " href="{%url "medication"%}"><i class="fa fa-vial"></i> {%trans "Medicamentos"%} </a></li><hr/>
+            <li class="nav-item"><a class="nav-link " href="{%url "medication"%}">
+                <i class="fa fa-vial"></i> {%trans "Medicamentos"%} </a></li><hr/>
         {% endif %}
         {% if user|have_menu:"PRO"%}
-            <li class="nav-item"><a class="nav-link " href="{%url "projects"%}"><i class="fa fa-list"></i> {%trans "Proyectos"%} </a></li> <hr/>
+            <li class="nav-item"><a class="nav-link " href="{%url "projects"%}">
+                <i class="fa fa-list"></i> {%trans "Proyectos"%} </a></li> <hr/>
         {% endif %}
         {% if user|have_menu:"ORG"%}
             <li class="nav-item"><a class="nav-link " href="{%url "organizations"%}">
@@ -22,8 +29,12 @@
                 <i class="fa fa-project-diagram"></i> {%trans "Trámites"%}</a></li><hr/>
         {% endif %}
         {% if user|have_menu:"EMP"%}
-            <li class="nav-item"><a class="nav-link " href="{%url "employees"%}">
-                <i class="fa fa-users"></i> {%trans "Usuarios"%}</a></li><hr/>
+            <li class="nav-item">
+                <a class="nav-link " href="{%url "employees"%}">
+                    <i class="fa fa-users"></i> 
+                    {%if user|is_pharma%}{%trans 'Farmacéuticos'%} {%else%} {%trans 'Colaboradores'%} {%endif%}
+                </a>
+            </li><hr/>
         {% endif %}
         {% if user|have_menu:"TUR"%}
             <li class="nav-item"><a class="nav-link " href="{%url "shifts-index"%}">
@@ -33,6 +44,20 @@
             <li class="nav-item"><a class="nav-link " href="{%url "notes-index"%}">
                 <i class="fa fa-calendar-alt"></i> {%trans "Agenda"%}</a></li><hr/>
         {% endif %}
+        {% if user|have_menu:"BOOK"%}
+            <li class="nav-item"><a class="nav-link" href="{%url "books"%}"><i class="fa fa-book"></i> {%trans "Libros"%}</a></li><hr/>
+        {% endif %}
+        {% if user|have_menu:"STO_PRO"%}
+            <li class="nav-item"><a class="nav-link" href="{%url "products"%}">
+                <i class="fa fa-store"></i> {%trans "Almacén"%}</a></li><hr/>
+        {% endif %}
+
+        {%comment%}
+        {% if user|have_menu:"DON"%}
+            <li class="nav-item"><a class="nav-link " href="{%url "donation-index"%}">
+                <i class="fa fa-hand-holding-usd"></i> {%trans "Donaciones"%}</a></li><hr/>
+        {% endif %}
+        {%endcomment%}
     {% endif %}
     </ul>
 {% else %}

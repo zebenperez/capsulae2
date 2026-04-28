@@ -1,147 +1,19 @@
 {% load i18n static common_tags %}
 
-<div class="row toolbar-search pt-2 pb-2 m-0">
-    <div class="col-lg-1 col-1"><i class="fas fa-search"></i></div>
-    <div class="col-lg-10 col-10">
-        <input type="text" class="form-control form-control-dark w-100 ark_change" name="s-name" id="s-name" 
-           placeholder="{% trans 'Añadir tratamiento a partir del historial, Nombre o CIP' %}" 
-           data-url="{% url "patient-treatment-medication-search" %}" 
-           {#data-target="medication-list" data-patient_id="{{obj.id}}" data-show="medication-list"/>#}
-           data-target-modal="common-modal" data-patient_id="{{obj.id}}" data-show="medication-list"/>
-    </div>
-    <div class="col-lg-1 col-1 text-end">
-        <div class="dropdown">
-            <a class="pt-3" type="button" id="dropdownProfile" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-ellipsis-h"></i></a>
-            <div class="dropdown-menu user-dropdown" aria-labelledby="dropdownProfile">
-                <ul class="m-0">
-                    <li>
-                        <button type="button" class="btn btn-sm ark" data-url="{%url "patient-complement-form"%}" data-target-modal="common-modal" 
-                            data-patient_id="{{obj.id}}"> <i class="fas fa-plus"></i> {% trans 'Crear Complemento' %}</button> 
-                    </li><div class="dropdown-divider"></div>
-                    <li>
-                        <a class="btn btn-sm" href="{%url "patient-summary" obj.id%}" target="_blank"> 
-                            <i class="fas fa-list"></i> {% trans 'Resumen Paciente' %}</a> 
-                    </li><div class="dropdown-divider"></div>
-                    <li>
-                        <button type="button" class="btn btn-sm ark" data-url="{%url "patient-interactions-comment"%}" 
-                            data-target-modal="common-modal" data-patient_id="{{obj.id}}"> 
-                            <i class="fas fa-list"></i> {% trans 'Informe Farmacoterapéutico' %}</button>
-                    </li><div class="dropdown-divider"></div>
-                    <li>
-                        <a class="btn btn-sm" href="{%url "patient-treatments-print" obj.id%}" target="_blank"> 
-                            <i class="fas fa-print"></i> {% trans 'Imprimir' %}</a> 
-                    </li><div class="dropdown-divider"></div>
-                    <li>
-                        <a class="btn btn-sm" href="{%url "patient-treatments-print-tags" obj.id%}" target="_blank"> 
-                            <i class="fas fa-print"></i> {% trans 'Imprimir Etiquetas' %}</a> 
-                    </li><div class="dropdown-divider"></div>
-                    <li>
-                        <button type="button" class="btn btn-sm ark" data-url="{%url "patient-timeline"%}" data-target-modal="common-modal" 
-                            data-patient_id="{{obj.id}}"> <i class="fas fa-chart-line"></i> {% trans 'Ver Cronología' %}</button> 
-                    </li>
-                </ul>                                                                                                                       
-            </div>
-        </div>
-
-    </div>
-</div>
-{#<div id="medication-list" class="hide">{% include "patient/treatments/medication-list.html" %}</div>#}
-
-<div class="row spd-tab">
-    <div class="col-12 text-end">
-        {%comment%}
-
-        <button type="button" class="btn btn-sm ark new" data-url="{%url "patient-complement-form"%}" data-target-modal="common-modal" 
-            data-patient_id="{{obj.id}}"> <i class="fas fa-plus"></i> {% trans 'Crear Complemento' %}</button> 
-        <a class="btn btn-sm new" href="{%url "patient-summary" obj.id%}" target="_blank"> 
-            <i class="fas fa-list"></i> {% trans 'Resumen Paciente' %}</a> 
-        <button type="button" class="btn btn-sm ark new" data-url="{%url "patient-interactions-comment"%}" data-target-modal="common-modal" 
-            data-patient_id="{{obj.id}}"> <i class="fas fa-list"></i> {% trans 'Informe Farmacoterapéutico' %}</button> 
-        <a class="btn btn-sm new" href="{%url "patient-treatments-print" obj.id%}" target="_blank"> 
-            <i class="fas fa-print"></i> {% trans 'Imprimir' %}</a> 
-        <a class="btn btn-sm new" href="{%url "patient-treatments-print-tags" obj.id%}" target="_blank"> 
-            <i class="fas fa-print"></i> {% trans 'Imprimir Etiquetas' %}</a> 
-        <button type="button" class="btn btn-sm ark new" data-url="{%url "patient-timeline"%}" data-target-modal="common-modal" 
-            data-patient_id="{{obj.id}}"> <i class="fas fa-chart-line"></i> {% trans 'Ver Cronología' %}</button> 
-        |
-
-        {%endcomment%}
-
-        <button class="btn btn-sm check-row new" data-row="row-item" data-active="True"> 
-            <i class="fas fa-eye-open"></i> {%trans 'Activos'%}</button> |
-		<button class="btn btn-sm check-row new" data-row="row-item" data-active="False"> 
-            <i class="fas fa-eye-open"></i> {%trans 'No Activos'%}</button> | 
-		<button class="btn btn-sm check-row new" data-row="row-item" data-active=""> 
-            <i class="fas fa-eye-open"></i> {%trans 'Todos'%}</button> 
-    </div>
+<div class="card">
+    <div class="card-header" onclick="$('#treat-body').slideToggle()"><i class="fa fa-barcode"></i>{% trans "Tratamientos" %}</div>
+    <div class="card-body" id="treat-body">{%include "patient/treatments/treatment-list-details.html"%}</div>
 </div>
 
+{% if user|have_menu:"DISP" %}
+<br/>
+<div class="card">
+    <div class="card-header" onclick="$('#btn-load-disp').click();$('#disp-body').slideToggle();">
+        <i class="fa fa-barcode"></i> {% trans "Dispensaciones" %}</div>
+    <div class="card-body hide" id="disp-body">{#{%include "patient/dispensations/dispensations-list.html"%}#}</div>
+</div>
+<button id="btn-load-disp" class="ark" data-url="{% url "patient-dispensations" %}" data-target="disp-body" data-obj_id="{{obj.id}}"
+    style="display:none"></button>
+{% endif %}
 
-<table class="table table-striped table-hover">
-    <thead>
-        <tr class="small small">
-            <th class="row main-th">
-                <div class="col-8"> {% trans 'Nombre' %} </div>
-                {#<div class="col-3"> {% trans 'ATC' %} </div>#}
-                <div class="col-4">
-                    <div class="row">
-                        <div class="col-2"> <img src="{% static "imgs/desayuno.jpg" %}" style="width:20px"/> </div>
-                        <div class="col-2"> <img src="{% static "imgs/comida.jpg" %}" style="width:20px"/> </div>
-                        <div class="col-2"> <img src="{% static "imgs/cena.jpg" %}" style="width:20px"/> </div>
-                        <div class="col-2"> <img src="{% static "imgs/noche.jpg" %}" style="width:20px"/> </div>
-                        <div class="col-4"></div>
-                    </div>
-                </div>
-            </th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for item in obj.tratamientos.all %}
-            {% with comp=item.is_complement %}
-            <tr class="small row-item {%if item.activo == False%}hide{%endif%}" data-active="{{item.activo}}" id="row_{{item.id}}">
-                <td class="row {%if comp%}text-primary{%endif%}">
-                    <div class="col-8">{{ item.name }} {%if not comp%}| {{item.atcs_last}}{%endif%}</div>
-                    {#<div class="col-3">{{ item.atcs }}</div>#}
-                    <div class="col-4">
-                        <div class="row">
-                            <div class="col-2">{{ item.m }}</div>
-                            <div class="col-2">{{ item.t }}</div>
-                            <div class="col-2">{{ item.n }}</div>
-                            <div class="col-2">{{ item.o }}</div>
-                            <div class="col-4 text-right">
-                                {% if obj.patient_telegram.all.count > 0 %}
-                                    <a class="btn btn-xs ark p-2" data-url="{% url 'patient-telegram-treatment-notification' %}" 
-                                        data-target-modal="common-modal" data-obj_id="{{item.id}}" title="Enviar notificación de recogida">
-                                        <i class="fab fa-telegram"></i> </a>
-                                {% endif %}
-
-                                {% if comp %}
-                                    <a class="btn btn-sm ark" title="{%trans 'Edit treatment'%}" data-url="{%url "patient-complement-form" %}"
-                                        data-target-modal="common-modal" data-obj_id="{{item.id}}" data-patient_id="{{obj.id}}"> 
-                                        <i class="fas fa-edit"></i></a>&nbsp; &nbsp;
-                                {% else %}
-                                    <a class="btn btn-sm ark" title="{%trans 'Edit treatment'%}" data-url="{%url "patient-treatment-form" %}"
-                                        data-target-modal="common-modal" data-obj_id="{{item.id}}" data-patient_id="{{obj.id}}"> 
-                                        <i class="fas fa-edit"></i></a>&nbsp; &nbsp;
-                                {% endif %}
-
-                                <a class="btn btn-sm ark" data-url="{%url "patient-treatment-soft-remove"%}" data-obj_id="{{item.id}}" 
-                                    data-target="div-container" title="{% trans 'Remove' %}" 
-                                    data-confirm="{% trans "Are you sure to desactivate this element?" %}"> <i class="fas fa-trash-alt"></i></a>
-                                    &nbsp;
-
-                                {% if request.user|in_group:"admins" %}
-                                    <a class="btn btn-sm ark" data-url="{%url "patient-treatment-remove"%}" data-obj_id="{{item.id}}" 
-                                        data-target="div-container" title="{% trans 'Remove' %}" 
-                                        data-confirm="{% trans "Are you sure to remove this element?" %}"> <i class="fas fa-trash"></i></a>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
-                </td>
-            </tr>
-            {% endwith %}
-        {% endfor %}
-    </tbody>
-</table>
 

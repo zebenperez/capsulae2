@@ -20,17 +20,25 @@ urlpatterns = [
     path('patients/remove-msg/', views.patient_remove_msg, name='patient-remove-msg'),
     path('patients/evolutionaries/', views.patient_evolutionaries, name='patient-evolutionaries'),
     path('patients/evolutionaries-csv/', views.patient_evolutionaries_csv, name='patient-evolutionaries-csv'),
+    path('patients/import/', views.patient_import, name='patient-import'),
+    path('patients/import/documents/', views.patient_import_documents, name='patient-import-documents'),
 
     #------------------------- PATIENT --------------------
     path('patients/view/<int:patient_id>', views.patient_view, name='patient-view'),
 
     path('patients/form/', views.patient_form, name='patient-form'),
+    path('patients/qr-generate/', views.patient_qr_generate, name='patient-qr-generate'),
 
     path('patients/lopd/', views.patient_lopd, name='patient-lopd'),
     path('patients/lopd-add', views.patient_lopd_add, name='patient-lopd-add'),
     path('patients/lopd-remove', views.patient_lopd_remove, name='patient-lopd-remove'),
     path('patients/lopd-generate-document/<int:patient_id>', views.patient_lopd_generate_document, name='patient-lopd-generate-document'),
+    path('patients/lopd-generate-document2/<int:patient_id>', views.patient_lopd_generate_document2, name='patient-lopd-generate-document2'),
+    path('patients/lopd-generate-document3/<int:patient_id>', views.patient_lopd_generate_document3, name='patient-lopd-generate-document3'),
+    path('patients/lopd-generate-document4/<int:patient_id>', views.patient_lopd_generate_document4, name='patient-lopd-generate-document4'),
     path('patients/lopd-generate-signed-document/<int:patient_id>', views.patient_lopd_generate_signed_document, name='patient-lopd-generate-signed-document'),
+    path('patients/lopd-generate-signed-document3/<int:patient_id>', views.patient_lopd_generate_signed_document3, name='patient-lopd-generate-signed-document3'),
+    path('patients/lopd-generate-signed-document4/<int:patient_id>', views.patient_lopd_generate_signed_document4, name='patient-lopd-generate-signed-document4'),
 
     path('patients/allergy/', views.patient_allergy, name='patient-allergy'),
     path('patients/allergy/excipients', views.patient_allergy_excipients, name='patient-allergy-excipients'),
@@ -47,6 +55,12 @@ urlpatterns = [
     path('patients/procedure/', views.patient_procedure, name='patient-procedure'),
     path('patients/procedure-form/', views.patient_procedure_form, name='patient-procedure-form'),
     path('patients/procedure-remove/', views.patient_procedure_remove, name='patient-procedure-remove'),
+    path('patients/procedure-file-add/', views.patient_procedure_file_add, name='patient-procedure-file-add'),
+    path('patients/procedure-file-remove/', views.patient_procedure_file_remove, name='patient-procedure-file-remove'),
+
+    path('patients/dispensations/', views.patient_dispensations, name='patient-dispensations'),
+
+    path('patients/bibliomecum/', views.patient_bibliomecum, name='patient-bibliomecum'),
 
     #------------------------- TREATMENT --------------------
     path('patients/treatment/', views.patient_treatment, name='patient-treatment'),
@@ -67,6 +81,12 @@ urlpatterns = [
     path('patients/orgs/form', views.patient_org_form, name='patient-org-form'),
     path('patients/orgs/remove', views.patient_org_remove, name='patient-org-remove'),
 
+    #------------------------- PATIENT SHARED --------------------
+    path('patients/shared/form', views.patient_shared_form, name='patient-shared-form'),
+    path('patients/shared/save', views.patient_shared_save, name='patient-shared-save'),
+    path('patients/shared/remove', views.patient_shared_remove, name='patient-shared-remove'),
+    path('patients/shared/lopd/<int:obj_id>', views.patient_shared_lopd, name='patient-shared-lopd'),
+
     #------------------------- PATIENT SPD --------------------
     path('patients/spd/', views.patient_spd, name='patient-spd'),
     path('patients/spd/form', spd_views.spd_form, name='spd-form'),
@@ -83,6 +103,11 @@ urlpatterns = [
     path('patients/spd/blister-qr-print/<int:pd_id>', spd_views.spd_blister_qr_print, name='spd-blister-qr-print'),
 
     path('patients/spd/search-by-qr/', spd_views.spd_search_by_qr, name='spd-search-by-qr'),
+    path('patients/spd/sim/', spd_views.spd_sim, name='spd-sim'),
+    path('patients/spd/sim-clear/', spd_views.spd_sim_clear, name='spd-sim-clear'),
+    path('patients/spd/sim/json/', spd_views.spd_sim_json, name='spd-sim-json'),
+    path('patients/spd/sim/json-get/<int:comp>/', spd_views.spd_sim_json_get, name='spd-sim-json-get'),
+    path('sim/api/', spd_views.spd_simulator, name='spd-simulator'),
 
     #------------------------- PATIENT EVOLUTIONARY --------------------
     path('patients/evolutionary/', views.patient_evolutionary, name='patient-evolutionary'),
@@ -92,12 +117,16 @@ urlpatterns = [
     path('patients/evolutionary/referral-form/<slug:history_num>/<int:evolutionary_id>/', evo_views.evolutionary_referral_form, name='evolutionary-referral-form'),
     path('patients/evolutionary/referral-form/<slug:history_num>/<int:evolutionary_id>/<slug:view>/', evo_views.evolutionary_referral_form, name='evolutionary-referral-form'),
     path('patients/evolutionary/send-form/', evo_views.evolutionary_send_form, name='evolutionary-send-form'),
+    path('patients/evolutionary/file-add/', evo_views.evolutionary_file_add, name='evolutionary-file-add'),
+    path('patients/evolutionary/file-remove/', evo_views.evolutionary_file_remove, name='evolutionary-file-remove'),
 
     #------------------------- PARAMETERS --------------------
     path('patients/params/', views.patient_params, name='patient-params'),
     path('patients/params-form/', params_views.patient_params_form, name='patient-params-form'),
     path('patients/params-form-tab/', params_views.patient_params_form_tab, name='patient-params-form-tab'),
     path('patients/params-remove/', params_views.patient_params_remove, name='patient-params-remove'),
+    path('patients/params-print/<int:patient_id>', params_views.patient_params_print, name='patient-params-print'),
+    #path('patients/params-print-pdf/', params_views.patient_params_print_pdf, name='patient-params-print-pdf'),
 
     #------------------------- TELEGRAM --------------------
     path('patients/telegram/', views.patient_telegram, name='patient-telegram'),
@@ -118,7 +147,11 @@ urlpatterns = [
     path('patients/diagnoses/remove/', diagnoses_views.patient_diagnoses_remove, name='patient-diagnoses-remove'),
     path('patients/diagnoses/search/', diagnoses_views.patient_diagnoses_search, name='patient-diagnoses-search'),
 
+    #------------------------- API --------------------
+    path('patients/api/get-patients/', views.patient_api_get_patients, name='patient-api-get-patients'),
+
     #---------------------- AUTO -----------------------
     path('autosave_field/', auto_views.autosave_field, name='autosave_field'),
+    path('autosave_fields/', auto_views.autosave_fields, name='autosave_fields'),
     path('autoremove_obj/', auto_views.autoremove_obj, name='autoremove_obj'),
 ]

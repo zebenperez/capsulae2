@@ -47,6 +47,13 @@ INSTALLED_APPS = [
     'community',
     'shifts2',
     'agenda',
+    'dispensations',
+    'bibliomecum',
+    'pwa',
+    'actionlogs',
+    'books',
+    'store',
+    'tpv',
 ]
 
 MIDDLEWARE = [
@@ -190,4 +197,3 @@ LOGGING = {
         },
     },
 }
-

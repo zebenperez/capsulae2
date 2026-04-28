@@ -1,4 +1,5 @@
 from django.utils.safestring import mark_safe
+from django.urls import reverse
 from django import template
 
 from capsulae2.settings import BASE_DIR
@@ -54,6 +55,14 @@ def sub_days(date, sub_days):
     except Exception as e :
         return None
 
+@register.filter
+def jsfloat(value):
+    return str(value).replace(',','.')
+
+@register.filter
+def substr(text, pos):
+    return(text[pos:])
+
 '''
     Simple Tags
 '''
@@ -67,12 +76,21 @@ def userqr_code(request, paciente):
     out="%s://%s/media/lopd_codebars/%s"%(request.scheme, request.get_host(), filename)
     return out
 
+@register.simple_tag(takes_context=True)
+def current_exact(context, url, **kwargs):
+    request = context['request']
+    reverseurl = reverse(url, kwargs=eval(str(kwargs)))
+    if reverseurl == request.get_full_path() :
+        return "active current"
+    else:
+        return ""
+
 '''
     Inclusion Tags
 '''
 @register.inclusion_tag('main-menu.html')
 def get_main_menu(user):
-    groups = ["admins", "managers", "employee", "donor"]
+    groups = ["admins", "managers", "employee"]
     #if user.groups.filter(name="admins").exists() or user.groups.filter(name="managers").exists() or user.is_superuser:
     if user.groups.filter(name__in=groups).exists() or user.is_superuser:
         return {'user': user, 'menu': "admins"}

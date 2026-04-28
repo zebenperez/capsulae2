@@ -3,6 +3,12 @@
 
 <div class="row spd-tab">
     <div class="col-12 text-end">
+        {%comment%}
+        <button type="button" class="btn btn-sm ark new" data-url="{%url "patient-params-print"%}" data-target-modal="common-modal" 
+            data-patient_id="{{obj.id}}"> <i class="fas fa-print"></i> {% trans 'Generar Informe' %}</button> 
+        {%endcomment%}
+        <a class="btn btn-sm new" href="{% url "patient-params-print" obj.id %}" target="_blank"> 
+            <i class="fas fa-print"></i> {% trans 'Generar Informe' %}</a> 
         <button type="button" class="btn btn-sm ark new" data-url="{%url "patient-params-form"%}" data-target-modal="common-modal" 
             data-patient_id="{{obj.id}}"> <i class="fas fa-plus"></i> {% trans 'Crear Parámetros' %}</button> 
     </div>

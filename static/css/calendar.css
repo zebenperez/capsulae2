@@ -590,13 +590,21 @@ A HORIZONTAL event
 
   border: 1px solid #c02891;
   border: 1px solid var(--fc-event-border-color, #c02891);
-  background-color: #c02891;
-  background-color: var(--fc-event-bg-color, #c02891);
+  /*background-color: #c02891;
+  background-color: var(--fc-event-bg-color, #c02891);*/
 
+  color: #000 !important;
+    background-color: #fff;
+    line-height: 18px;
+    padding:10px;
 }
 .fc-h-event .fc-event-main {
-    color: #fff;
-    color: var(--fc-event-text-color, #fff);
+/*    color: #fff;
+    color: var(--fc-event-text-color, #fff);*/
+    color: #000 !important;
+    background-color: #fff;
+    line-height: 18px;
+    font-size: 0.8em !important;
   }
 .fc-h-event .fc-event-main-frame {
     display: flex; /* for make fc-event-title-container expand */
@@ -726,7 +734,18 @@ A HORIZONTAL event
 .fc .fc-daygrid-day.fc-day-today {
       background-color: rgba(255, 220, 40, 0.15);
       background-color: var(--fc-today-bg-color, rgba(255, 220, 40, 0.15));
+      border: 1px solid #ffc107;
     }
+
+.fc-daygrid-event.fc-daygrid-block-event.fc-h-event.fc-event.fc-event-start.fc-event-end.fc-event-today
+{
+    padding: 10px;
+    line-height: 20px;
+    background: white !important;
+    border: 1px solid #ffc107 !important;
+    color: #ffc107 !important;
+
+}
 .fc .fc-daygrid-day-frame {
     position: relative;
     min-height: 100%; /* seems to work better than `height` because sets height after rows/cells naturally do it */
@@ -752,6 +771,8 @@ A HORIZONTAL event
     position: relative;
     z-index: 4;
     padding: 4px;
+    color: #666;
+    font-size: 11px;
   }
 .fc {
 
@@ -832,6 +853,7 @@ A HORIZONTAL event
     position: relative;
     z-index: 4;
     cursor: pointer;
+    color: #000;
   }
 .fc {
 

@@ -8,12 +8,17 @@
 </div>
 
 {% for item in items %}
-    <div class="row line small pt-2 pb-2 m-0" id="row_{{item.id}}" onclick="window.location='{%url "project-view" item.id%}'">
-        <div class="col-5">{{ item.name|default:"---" }}</div>
-        <div class="col-5">{{ item.desc|safe }}</div>
+    <div class="row line small pt-2 pb-2 m-0" id="row_{{item.id}}">
+        <div class="col-10">
+            <div class="row pointer" onclick="window.location='{%url "project-view" item.id%}'">
+                <div class="col-6">{{ item.name|default:"---" }}</div>
+                <div class="col-6">{{ item.desc|safe|truncatechars:150 }}</div>
+            </div>
+        </div>
         <div class="col-2 text-right">
             <a class="btn btn-sm ark" data-url="{% url "project-remove" %}" data-target="project-list" data-obj_id="{{item.id}}" 
-                title="{% trans 'Remove' %}" data-confirm="{% trans "Are you sure to remove this element?" %}"><i class="fas fa-trash"></i></a> 
+                title="{%trans 'Remove'%}" data-confirm="{%trans "Are you sure to remove this element?"%}"><i class="fas fa-trash"></i>
+            </a> 
         </div>
     </div>
 {% endfor %}

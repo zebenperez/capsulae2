@@ -1,25 +1,33 @@
 from django.core.files import File
+from django.core.files.base import ContentFile
 #from django.contrib.auth import logout
 from django.db.models import Q
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, reverse
 from django.template.loader import render_to_string
 
 from datetime import datetime, timedelta
+from io import BytesIO
+from django.views.decorators.csrf import csrf_exempt
+
 from weasyprint import HTML, CSS
 
 import os, csv
 
 from capsulae2.decorators import group_required
-from capsulae2.commons import get_or_none, get_param, show_exc
-from capsulae2.settings import MEDIA_ROOT
+from capsulae2.commons import get_or_none, get_param, show_exc, generate_qr, get_int
+from capsulae2.settings import MEDIA_ROOT, PATIENT_URL, BASE_DIR 
+from capsulae2.capsulae_lib import check_user_payment
+from capsulae2.email_lib import send_import_doc_email
 #from account.models import Company, UserPayment
 from account.models import Company
 from lopd.models import LOPDConsents
-from community.models import Organization, PatientOrg, Procedure, PatientProcedure
+from community.models import Organization, PatientOrg, Procedure, PatientProcedure, PatientProcedureDoc
+from django.contrib.auth.models import User
 from medication.medication_lib import get_medication
 from medication.models import PresentationsPrescriptionsAempsCache as AempsCache
-from .models import Pacientes, Paises, Etnia, PatientOrigin
+from dispensations.models import Dispensation
+from .models import Pacientes, Paises, Etnia, PatientOrigin, PatientShared
 from .spd_models import Pillbox
 from .treatment_models import Tratamiento, MedicamentoTratamiento, ComplementoTratamiento
 from .evolutionary_models import Evolutionary
@@ -27,7 +35,6 @@ from .allergy_models import AlergiasExcipientes, AlergiasPrincipios, Excipientes
 from .common_lib import LOPD_LIMIT, PILLBOX_ADVISE, get_config_value
 from .pharma_lib import get_values_to_interactions_print, get_values_to_summary_print
 from .telegram_models import TelegramUserChat
-from capsulae2.capsulae_lib import check_user_payment
 
 
 #def check_user_payment(user):
@@ -37,7 +44,7 @@ from capsulae2.capsulae_lib import check_user_payment
 #        return False
 #    return True
 
-@group_required("admins","managers","employee", "donor")
+@group_required("admins","managers","employee","donor")
 def index(request):
 #    if  not check_user_payment(request.user):
 #        if request.user.is_superuser:
@@ -60,16 +67,35 @@ def home(request):
 '''
     Patients
 '''
-def get_patients(user, search_value="", start=0, end=50):
+def get_owner_id(user):
+    groups = user.groups.all().values_list('name', flat=True)
+    if "managers" in groups or "admins" in groups:
+        return user.id
+    elif "employee" in groups:
+        return user.employee_profile.company.manager.id
+    return None
+
+def get_shared_patient(search_list, user_id):
+    query = Q()
+    if len(search_list) > 0:
+        query = Q(**{"patient__nombre__icontains": search_list[0]})
+        if len(search_list) > 1:
+            query &= Q(**{"patient__apellido__icontains": search_list[1]})
+        else:
+            query |= Q(**{"patient__apellido__icontains": search_list[0]})
+    #return list(PatientShared.objects.filter(name_query).filter(user__id=user_id).values_list('patient', flat=True))
+    return [item.patient for item in PatientShared.objects.filter(query).filter(user__id=user_id)]
+
+def get_patients(user, search_value="", start=0, end=50, lopd_signed=True):
     #filters_to_search = ["n_historial__icontains", "nombre__icontains", "apellido__icontains", "cip__icontains"]
     filters_to_search = ["n_historial__icontains", "cip__icontains"]
 
+    search_list = search_value.split(" ", 1)
     full_query = Q()
     if search_value != "":
         for myfilter in filters_to_search:
             full_query |= Q(**{myfilter: search_value})
 
-        search_list = search_value.split(" ", 1)
         name_query = Q(**{"nombre__icontains": search_list[0]})
         if len(search_list) > 1:
             name_query &= Q(**{"apellido__icontains": search_list[1]})
@@ -77,44 +103,77 @@ def get_patients(user, search_value="", start=0, end=50):
             name_query |= Q(**{"apellido__icontains": search_list[0]})
         full_query |= name_query
 
-    full_query &= Q(**{'id_user': user.id})
+    #user_id = user.id
+    user_id = get_owner_id(user)
+    #full_query &= Q(**{'id_user': user_id})
+    comp = Company.get_by_user(user)
+    full_query &= (Q(**{'id_user__company': comp}) | Q(**{'id_user__user_companies__in': [comp]}))
 
     # Pacientes con lopd firmada
     lopd_patient_ids = LOPDConsents.objects.all().distinct().values_list('paciente', flat=True)
-    lopd_list = list(Pacientes.objects.filter(full_query).filter(id__in=lopd_patient_ids)[start:end])
 
-    # Pacientes sin lopd firmada pero creados en los últimos 15 días
-    try:
-        lopd_limit = int(get_config_value("LOPD_{}".format(user.id), LOPD_LIMIT))
-    except:
-        lopd_limit = LOPD_LIMIT
-    limit = datetime.today() - timedelta(days=lopd_limit)
-    date_list = list(Pacientes.objects.filter(full_query).exclude(id__in=lopd_patient_ids).filter(created_at__gte=limit))
+    if lopd_signed:
+        # Pacientes compartidos
+        #shared_list = [item.patient for item in PatientShared.objects.filter(user__id=user_id)]
+        shared_list = get_shared_patient(search_list, user_id)
+        
+        #lopd_list = list(Pacientes.objects.filter(full_query).filter(id__in=lopd_patient_ids)[start:end])
+        lopd_list = list(Pacientes.objects.filter(full_query).filter(id__in=lopd_patient_ids))
 
-    return date_list + lopd_list
+        # Pacientes sin lopd firmada pero creados en los últimos 15 días
+        try:
+            lopd_limit = int(get_config_value("LOPD_{}".format(user_id), LOPD_LIMIT))
+        except:
+            lopd_limit = LOPD_LIMIT
+        limit = datetime.today() - timedelta(days=lopd_limit)
+        date_list = list(Pacientes.objects.filter(full_query).exclude(id__in=lopd_patient_ids).filter(created_at__gte=limit))
 
-def get_patient_context(user, search_value="", start=0, end=50):
+        return (date_list + lopd_list + shared_list)[start:end]
+    else:
+        return list(Pacientes.objects.filter(full_query).exclude(id__in=lopd_patient_ids)[start:end])
+
+def get_patient_context(user, search_value="", start=0, end=50, lopd_signed=True):
     if (search_value == ""):
-        return {'items': get_patients(user, search_value, start, end), 'start': (start+end), 'end': (end+end)}
-    return {'items': get_patients(user, search_value, start, end),}
+        return {'items': get_patients(user, search_value, start, end), 'start': (start+end), 'end': (end+end), 'lopd_signed': lopd_signed}
+    return {'items': get_patients(user, search_value, start, end, lopd_signed),}
 
-@group_required("admins","managers")
+@group_required("admins","managers", "employee")
 def patients(request):
     return render(request, "patients/patients.html", {})
     #return render(request, "patients/patients.html", get_patient_context(request.user))
 
-@group_required("admins","managers")
+@group_required("admins","managers", "employee")
 def patient_list(request):
     start = int(request.GET["start"]) if "start" in request.GET else 0
-    end = int(request.GET["end"]) if "end" in request.GET else 50
+    end = int(request.GET["end"]) if "end" in request.GET else 10
     return render(request, "patients/patient-list.html", get_patient_context(request.user, "", start, end))
 
-@group_required("admins","managers")
-def patient_search(request):
-    search_value = get_param(request.GET, "s-name")
-    return render(request, "patients/patient-list.html", get_patient_context(request.user, search_value))
+@group_required("admins", "managers")
+def patient_list_nolopd(request):
+    start = int(request.GET["start"]) if "start" in request.GET else 0
+    end = int(request.GET["end"]) if "end" in request.GET else 10
+    return render(request, "patients/patient-list.html", get_patient_context(request.user, "", start, end, False))
 
-@group_required("admins","managers")
+@group_required("admins", "managers", "employee")
+def patient_search(request):
+    import base64
+    search_value = get_param(request.GET, "s-name")
+    list_users = get_patient_context(request.user, search_value)
+    if list_users["items"] != []:
+        return render(request, "patients/patient-list.html", list_users)
+    else:
+        list_users = get_patient_context(request.user, search_value, lopd_signed=False)
+        #print(list_users)
+        if (len(list_users["items"]) == 1):
+            url_abs = request.build_absolute_uri(reverse('patient-lopd-generate-document2', kwargs={'patient_id': list_users["items"][0].id}))
+            qrcode = generate_qr("{}".format(url_abs), "")
+            qrcode_base64 = base64.b64encode(qrcode).decode()
+            return render(request, "patients/patient-nolopd.html", {'qrcode': qrcode_base64})
+        else:
+            list_users["items"] = []
+            return render(request, "patients/patient-list.html",list_users)
+
+@group_required("admins","managers","employee")
 def patient_new(request):
     obj = Pacientes.objects.create(id_user=request.user)
     po, created = PatientOrigin.objects.get_or_create(patient=obj)
@@ -125,7 +184,7 @@ def patient_remove_msg(request):
     context = {'user': request.user, 'patient': get_or_none(Pacientes, request.GET["obj_id"])}
     return render(request, "patients/patient-remove-dialog.html", context)
 
-@group_required("admins","managers")
+@group_required("admins","managers","employee")
 def patient_soft_remove(request):
     obj = get_or_none(Pacientes, request.GET["obj_id"]) if "obj_id" in request.GET else None
     if obj != None:
@@ -202,19 +261,93 @@ def patient_evolutionaries_csv(request):
         writer.writerow([name, ev.patient.sexo, ev.patient.telefono1, ev.matter, ev.date, prof, org, q1, q2, q3, q4, q5, q6, q7, q8, q9, q10, obs])
     return response
 
+@group_required("admins", "managers")
+def patient_import(request):
+    #['ESTADO', 'Marca temporal', 'Puntuación', 'NOMBRE COMPLETO', 'SEXO:', 'NÚMERO DE PASAPORTE (de NIE en su caso) (no importa que esté caducado)', 'TEL. DE CONTACTO', 'E-MAIL', 'FECHA DE NACIMIENTO', 'DOMICILIO', 'NACIONALIDAD Y PAIS DONDE NACISTE:', 'QUE IDIOMAS HABLAS:', 'LOCALIDAD:', 'PROVINCIA:', 'Acepta politica de privacidad', 'Acepta politica de PROTECCIÓN DE DATOS', 'CÓDIGO POSTAL', 'documento identificacion NIE O PASAPORTE', 'Alta CP', 'IV subido a CP', 'Columna 18', 'Columna 14']
+    try:
+        file_list = request.FILES.getlist('file')
+        for f in file_list:
+            #dataReader = csv.reader(f.read().decode("utf-8").splitlines(), delimiter=",", quotechar='"')
+            dataReader = csv.reader(f.read().decode("utf-8").splitlines(), delimiter=",")
+            i = 0
+            for row in dataReader:
+                if i > 0:
+                    #print(row)
+                    nif = row[5]
+                    #print(nif)
+                    p = Pacientes.objects.filter(nif=nif).first()
+                    if p == None:
+                        p = Pacientes.objects.create(id_user=request.user, nif=nif)
+                        PatientOrigin.objects.create(patient=p)
+                    p.nombre = row[3]
+                    p.sexo = "H" if row[4] == "Hombre" else "M"
+                    p.telefono1 = get_int(row[6])
+                    p.email = row[7]
+                    try:
+                        p.fecha_nacimiento = datetime.strptime(row[8], "%d/%m/%Y")
+                    except:
+                        pass
+                    p.domicilio = row[9]
+                    p.locality = row[12]
+                    p.province = row[13]
+                    p.cod_postal = get_int(row[16])
+                    p.save()
+
+                    p.origin.nationality = row[10]
+                    #row[11] Idiomas
+                    p.origin.save()
+                i += 1
+    except Exception as e:
+        print(e)
+    return render(request, "patients/patient-list.html", get_patient_context(request.user))
+ 
+@group_required("admins", "managers")
+def patient_import_documents(request):
+    try:
+        file_list = request.FILES.getlist('file')
+        comp = Company.get_by_user(request.user)
+        patient_list = []
+        for f in file_list:
+            nif = f.name.split("_")[2] if "signed_consent" in f.name else f.name.split("_")[1]
+            p = Pacientes.objects.filter(nif=nif, id_user=request.user).first()
+            patient_list.append(p)
+            lopd = LOPDConsents.objects.create(paciente=p, document=f, company=comp)
+            try:
+                send_import_doc_email(request.META['HTTP_HOST'], [p.email], p.full_name, f.name)
+            except:
+                pass
+        #send_import_doc_email(request.META['HTTP_HOST'], ["zebenperez@gmail.com"], "Zeben Pérez", file_name)
+    except Exception as e:
+        print(e)
+    return render(request, "patients/patient-import-dialog.html", {"patient_list": patient_list})
+ 
 '''
     Patient
 '''
-@group_required("admins","managers")
+@group_required("admins","managers","employee")
 def patient_view(request, patient_id):
     patient = get_or_none(Pacientes, patient_id)
     po, created = PatientOrigin.objects.get_or_create(patient=patient)
-    return render(request, "patient/patient-view.html", {'obj': patient, 'country_list': Paises.objects.all(), 'etnia_list': Etnia.objects.all()})
+    context = {'obj': patient, 'country_list': Paises.objects.all(), 'etnia_list': Etnia.objects.all()}
+    return render(request, "patient/patient-view.html", context)
 
-@group_required("admins","managers")
+@group_required("admins","managers","employee")
 def patient_form(request):
     patient = get_or_none(Pacientes, get_param(request.GET, "obj_id"))
-    return render(request, "patient/patient-form.html", {'obj': patient, 'country_list': Paises.objects.all(), 'etnia_list': Etnia.objects.all()})
+    context = {'obj': patient, 'country_list': Paises.objects.all(), 'etnia_list': Etnia.objects.all()}
+    return render(request, "patient/patient-personal.html", context)
+
+@group_required("admins","managers")
+def patient_qr_generate(request):
+    obj = get_or_none(Pacientes, get_param(request.GET, "obj_id"))
+
+    url = "{}{}".format(PATIENT_URL, obj.id)
+    path = os.path.join(BASE_DIR, "static", "imgs", "logo-capsulae.jpg")
+    img_data = ContentFile(generate_qr(url, path))
+    obj.qr.save('qr_{}.png'.format(obj.id), img_data, save=True)
+
+    context = {'obj': obj, 'country_list': Paises.objects.all(), 'etnia_list': Etnia.objects.all()}
+    return render(request, "patient/patient-personal.html", context)
 
 @group_required("admins","managers")
 def patient_treatment(request):
@@ -236,12 +369,12 @@ def patient_spd(request):
     patient = get_or_none(Pacientes, get_param(request.GET, "obj_id"))
     return render(request, "patient/spd/spd-list.html", {'obj': patient, 'advice_days': PILLBOX_ADVISE})
 
-@group_required("admins","managers")
+@group_required("admins","managers","employee")
 def patient_evolutionary(request):
     patient = get_or_none(Pacientes, get_param(request.GET, "obj_id"))
     return render(request, "patient/evolutionary/evo-list.html", {'obj': patient})
 
-@group_required("admins","managers")
+@group_required("admins","managers","employee")
 def patient_procedure(request):
     patient = get_or_none(Pacientes, get_param(request.GET, "obj_id"))
     return render(request, "patient/procedures/procedure-list.html", {'obj': patient})
@@ -260,6 +393,17 @@ def patient_telegram(request):
 def patient_diagnoses(request):
     patient = get_or_none(Pacientes, get_param(request.GET, "obj_id"))
     return render(request, "patient/diagnoses/diagnosis-list.html", {'obj': patient})
+
+@group_required("admins","managers")
+def patient_dispensations(request):
+    patient = get_or_none(Pacientes, get_param(request.GET, "obj_id"))
+    return render(request, "patient/dispensations/dispensations-list.html", {'obj': patient})
+
+@group_required("admins","managers")
+def patient_bibliomecum(request):
+    patient = get_or_none(Pacientes, get_param(request.GET, "obj_id"))
+    return render(request, "bibliomecum/receipts-list.html", {'obj': patient})
+
 
 '''
     Patient Org
@@ -293,6 +437,54 @@ def patient_org_remove(request):
         return render(request, "patient/patient-orgs.html", {'obj': patient, 'advice_days': PILLBOX_ADVISE})
     except Exception as e:
         return render(request, 'error_exception.html', {'exc':show_exc(e)})
+
+'''
+    Patient Shared
+'''
+@group_required("admins","managers")
+def patient_shared_form(request):
+    try:
+        obj = get_or_none(Pacientes, request.GET["patient_id"])
+        comp_list = Company.objects.all()
+        return render(request, "patient/patient-shared-form.html", {'obj': obj, 'comp_list': comp_list})
+    except Exception as e:
+        print(e)
+        return render(request, 'error_exception.html', {'exc':show_exc(e)})
+
+@group_required("admins","managers")
+def patient_shared_save(request):
+    try:
+        patient = get_or_none(Pacientes, get_param(request.POST, "patient"))
+        comp = get_or_none(Company, get_param(request.POST, "comp"))
+        PatientShared.objects.create(patient=patient, user=comp.manager)
+        return render(request, "patient/patient-orgs.html", {'obj': patient})
+        #return render(request, "patient/patient-shared-form.html", {'obj': obj, 'comp_list': comp_list})
+    except Exception as e:
+        print(e)
+        return render(request, 'error_exception.html', {'exc':show_exc(e)})
+
+@group_required("admins","managers")
+def patient_shared_remove(request):
+    try:
+        obj = get_or_none(PatientShared, get_param(request.GET, "obj_id"))
+        if obj != None:
+            patient = obj.patient
+            obj.delete()
+        return render(request, "patient/patient-orgs.html", {'obj': patient})
+    except Exception as e:
+        print(e)
+        return render(request, 'error_exception.html', {'exc':show_exc(e)})
+
+#@group_required("admins","managers")
+def patient_shared_lopd(request, obj_id):
+    context={}
+    try:
+        ps =get_or_none(PatientShared, obj_id)
+        context['patient'] = ps.patient
+        context['company'] = ps.user.company
+    except Exception as e:
+        print(e)
+    return render(request, "patient/lopd/lopd-document-template2.html", context)
 
 
 '''
@@ -428,7 +620,7 @@ def patient_org_remove(request):
 '''
     Procedure
 '''
-@group_required("admins","managers")
+@group_required("admins","managers","employee")
 def patient_procedure_form(request):
     try:
         patient = get_or_none(Pacientes, get_param(request.GET, "patient_id"))
@@ -441,7 +633,7 @@ def patient_procedure_form(request):
         return render(request, 'error_exception.html', {'exc':show_exc(e)})
 
 
-@group_required("admins","managers")
+@group_required("admins","managers","employee")
 def patient_procedure_remove(request):
     try:
         obj = get_or_none(PatientProcedure, request.GET["obj_id"])
@@ -449,6 +641,34 @@ def patient_procedure_remove(request):
         obj.delete()
 
         return render(request, "patient/procedures/procedure-list.html", {'obj': patient})
+    except Exception as e:
+        return render(request, 'error_exception.html', {'exc':show_exc(e)})
+
+@group_required("admins","managers","employee")
+def patient_procedure_file_add(request):
+    try:
+        obj = get_or_none(PatientProcedure, request.POST["obj_id"])
+        if obj != None:
+            file_list = request.FILES.getlist('file')
+            for f in file_list:
+                obj_doc = PatientProcedureDoc.objects.create(procedure=obj)
+                obj_doc.doc = f
+                obj_doc.save()
+
+        return render(request, "patient/procedures/file-list.html", {"obj": obj,})
+    except Exception as e:
+        return render(request, 'error_exception.html', {'exc':show_exc(e)})
+
+@group_required("admins","managers","employee")
+def patient_procedure_file_remove(request):
+    try:
+        obj = get_or_none(PatientProcedureDoc, request.GET["obj_id"])
+        if obj != None:
+            procedure = obj.procedure
+            obj.doc.delete(save=False)
+            obj.delete()
+
+        return render(request, "patient/procedures/file-list.html", {"obj": procedure,})
     except Exception as e:
         return render(request, 'error_exception.html', {'exc':show_exc(e)})
 
@@ -598,20 +818,29 @@ def patient_allergy_principles_list_search(request):
 '''
     Lopd
 '''
-@group_required("admins","managers")
+@group_required("admins","managers","employee")
 def patient_lopd_add(request):
+    import unicodedata
+    from django.core.files.storage import FileSystemStorage
+
     try:
         obj_id = request.POST["obj_id"]
         signed_doc = request.FILES["file"]
 
+        upload_name = unicodedata.normalize('NFKD', signed_doc.name).encode('ascii', 'ignore').decode('ascii')
+        fs = FileSystemStorage()
+        filename = fs.save(upload_name, signed_doc)
+
         patient = get_or_none(Pacientes, obj_id)
         if patient != None:
-            lopd = LOPDConsents.objects.create(paciente = patient, document = signed_doc)
+            lopd = LOPDConsents.objects.create(paciente = patient, document = filename)
+            #lopd = LOPDConsents.objects.create(paciente = patient, document = signed_doc)
         return render(request, "patient/lopd/lopd-list.html", {'obj': patient})
     except Exception as e:
+        print(e)
         return render(request, 'error_exception.html', {'msg': str(e)})
 
-@group_required("admins","managers")
+@group_required("admins","managers","employee")
 def patient_lopd_remove(request):
     try:
         obj_id = request.GET["obj_id"]
@@ -625,19 +854,51 @@ def patient_lopd_remove(request):
         print(e)
         return render(request, 'error_exception.html', {'msg': str(e)})
 
-@group_required("admins","managers")
+@group_required("admins","managers","employee")
 def patient_lopd_generate_document(request, patient_id):
     context={}
 
     try:
         patient = Pacientes.objects.get(pk=patient_id)
         context['patient'] = patient
-        context['company'] = request.user.company
+        context['company'] = Company.get_by_user(request.user)
+        #context['company'] = request.user.company
     except Exception as e:
         print(e)
-
     return render(request, "patient/lopd/lopd-document-template.html", context)
 
+#@group_required("admins","managers")
+def patient_lopd_generate_document2(request, patient_id):
+    context={}
+
+    try:
+        patient = Pacientes.objects.get(pk=patient_id)
+        context['patient'] = patient
+        context['company'] = Company.get_by_user(patient.owner)
+        #context['company'] = request.user.company
+    except Exception as e:
+        print(e)
+    return render(request, "patient/lopd/lopd-document-template2.html", context)
+
+def patient_lopd_generate_document3(request, patient_id):
+    context={}
+    try:
+        patient = Pacientes.objects.get(pk=patient_id)
+        comp = Company.get_by_user(patient.owner)
+        context = {'patient': patient, 'company': comp, 'date': datetime.now()}
+    except Exception as e:
+        print(e)
+    return render(request, "patient/lopd/lopd-document-template3.html", context)
+
+def patient_lopd_generate_document4(request, patient_id):
+    context={}
+    try:
+        patient = Pacientes.objects.get(pk=patient_id)
+        comp = Company.get_by_user(patient.owner)
+        context = {'patient': patient, 'company': comp, 'date': datetime.now()}
+    except Exception as e:
+        print(e)
+    return render(request, "patient/lopd/lopd-document-template4.html", context)
 
 def patient_lopd_generate_signed_document(request, patient_id):
     context = {}
@@ -680,7 +941,7 @@ def patient_lopd_generate_signed_document(request, patient_id):
             filename = "signed_consent_{0}_{1}.pdf".format(patient.nif, date_str)
             filepath = os.path.join(lopd_dir,filename)
 
-            consent = LOPDConsents(paciente=patient)
+            consent = LOPDConsents(paciente=patient, company=company)
             with open(filepath, 'wb+') as pdf_file :
                 filepath = os.path.join(lopd_dir, filename )
                 pdf_content = HTML(string=html_template).write_pdf()
@@ -694,5 +955,142 @@ def patient_lopd_generate_signed_document(request, patient_id):
             return response
 
     return HttpResponse(response)
+
+def patient_lopd_generate_signed_document3(request, patient_id):
+    context = {}
+    response ="<h3>400 BAD REQUEST</h3>"
+    if request.method =="POST":
+        company_id = get_param(request.POST, "company", None)
+        signature = get_param(request.POST, "patient_signature", None)
+        prof_signature = get_param(request.POST, 'professional_signature', None)
+        if company_id != None:
+            patient = Pacientes.objects.get(pk = patient_id)
+            company = Company.objects.get(pk = company_id)
+
+            context = {
+                'request' : request,
+                'patient' : patient,
+                'company' : company,
+                'signature': signature,
+                'signing': True,
+                'host': "%s://%s"%(request.scheme, request.META['HTTP_HOST']),
+
+            }
+            html_template = render_to_string("patient/lopd/lopd-signed-template3.html", context)
+
+            lopd_dir = os.path.abspath(os.path.join(MEDIA_ROOT, 'lopd_files'))
+            if not os.path.exists(lopd_dir):
+                os.makedirs(lopd_dir)
+
+            date_str = datetime.now().strftime("%d%m%Y%H%M")
+            filename = "consentimiento_{0}_{1}.pdf".format(patient.nif, date_str)
+            filepath = os.path.join(lopd_dir,filename)
+
+            consent = LOPDConsents(paciente=patient, company=company)
+            with open(filepath, 'wb+') as pdf_file :
+                filepath = os.path.join(lopd_dir, filename )
+                pdf_content = HTML(string=html_template).write_pdf()
+                pdf_file.write(pdf_content)
+                consent.document.save(filename, File(pdf_file), save=True)
+                consent.save()
+
+            response = HttpResponse(pdf_content, content_type="application/pdf")
+            response['Content-Disposition'] = 'filename="{0}"'.format(filename)
+            response['Content-Transfer-Encoding']= 'binary'
+            return response
+
+    return HttpResponse(response)
+
+def patient_lopd_generate_signed_document4(request, patient_id):
+    context = {}
+    response ="<h3>400 BAD REQUEST</h3>"
+    if request.method =="POST":
+        company_id = get_param(request.POST, "company", None)
+        #signature = get_param(request.POST, "patient_signature", None)
+        #prof_signature = get_param(request.POST, 'professional_signature', None)
+        if company_id != None:
+            patient = Pacientes.objects.get(pk = patient_id)
+            company = Company.objects.get(pk = company_id)
+
+            context = {
+                'request' : request,
+                'patient' : patient,
+                'company' : company,
+                #'signature': signature,
+                'check1_img': "checked.png" if get_param(request.POST, "check1") != "" else "unchecked.png",
+                'check2_img': "checked.png" if get_param(request.POST, "check2") != "" else "unchecked.png",
+                'check3_img': "checked.png" if get_param(request.POST, "check3") != "" else "unchecked.png",
+                'check4_img': "checked.png" if get_param(request.POST, "check4") != "" else "unchecked.png",
+                'check5_img': "checked.png" if get_param(request.POST, "check5") != "" else "unchecked.png",
+                'check6_img': "checked.png" if get_param(request.POST, "check6") != "" else "unchecked.png",
+                'check7_img': "checked.png" if get_param(request.POST, "check7") != "" else "unchecked.png",
+                'check8_img': "checked.png" if get_param(request.POST, "check8") != "" else "unchecked.png",
+                'check9_img': "checked.png" if get_param(request.POST, "check9") != "" else "unchecked.png",
+                'check10_img': "checked.png" if get_param(request.POST, "check10") != "" else "unchecked.png",
+                'check11_img': "checked.png" if get_param(request.POST, "check11") != "" else "unchecked.png",
+                'check12_img': "checked.png" if get_param(request.POST, "check12") != "" else "unchecked.png",
+                'check13_img': "checked.png" if get_param(request.POST, "check13") != "" else "unchecked.png",
+                'check14_img': "checked.png" if get_param(request.POST, "check14") != "" else "unchecked.png",
+                'others': get_param(request.POST, "others"),
+                'signing': True,
+                'host': "%s://%s"%(request.scheme, request.META['HTTP_HOST']),
+
+            }
+            #return render(request, "patient/lopd/lopd-signed-template4.html", context)
+            html_template = render_to_string("patient/lopd/lopd-signed-template4.html", context)
+
+            lopd_dir = os.path.abspath(os.path.join(MEDIA_ROOT, 'lopd_files'))
+            if not os.path.exists(lopd_dir):
+                os.makedirs(lopd_dir)
+
+            date_str = datetime.now().strftime("%d%m%Y%H%M")
+            filename = "vulnerabilidad_{0}_{1}.pdf".format(patient.nif, date_str)
+            filepath = os.path.join(lopd_dir,filename)
+
+            consent = LOPDConsents(paciente=patient, company=company)
+            with open(filepath, 'wb+') as pdf_file :
+                filepath = os.path.join(lopd_dir, filename )
+                pdf_content = HTML(string=html_template).write_pdf()
+                pdf_file.write(pdf_content)
+                consent.document.save(filename, File(pdf_file), save=True)
+                consent.save()
+
+            response = HttpResponse(pdf_content, content_type="application/pdf")
+            response['Content-Disposition'] = 'filename="{0}"'.format(filename)
+            response['Content-Transfer-Encoding']= 'binary'
+            return response
+
+    return HttpResponse(response)
+
+
+@csrf_exempt
+def patient_api_get_patients(request):
+    """
+    API endpoint to get patients for the company with uuid = POST.API_KEY.
+    """
+    try:
+        if request.method == "POST":
+            api_key = request.POST.get("api-key", None)
+            if api_key is None:
+                return JsonResponse({"error": "API_KEY is required"}, status=400)
+
+            company = Company.objects.filter(uuid=api_key).first()
+            if company is None:
+                return JsonResponse({"error": "Invalid API_KEY"}, status=404)
+
+            days_ago = int(request.POST.get("days_ago", 1))
+
+
+            users_in_company = company.users.all()
+            users_in_company = User.objects.filter(pk__in=users_in_company) | User.objects.filter(pk = company.manager.id)
+            patients_list = Pacientes.objects.filter(id_user__in=users_in_company, created_at__gte=datetime.now() - timedelta(days=days_ago)) | Pacientes.objects.filter(id_user__in=users_in_company, created_at__gte=datetime.now() - timedelta(days=days_ago))
+            patients_list = patients_list.filter(email__isnull=False).distinct()
+            patients_data = [patient.toJSON() for patient in patients_list]
+
+            return JsonResponse({"patients": patients_data}, status=200)
+    except Exception as e:
+        print(show_exc(e))
+        return JsonResponse({"error": "An error occurred"}, status=500)
+
 
 

@@ -8,9 +8,16 @@ def get_cn_query(cn):
     else:
         if cn.isdigit() or ("|" in cn):
             if "|" in cn:
-                cn = parse_qr(cn).get("cn", "")[1:]  # El codigo de barras incluido en el QR empieza por 0 y tiene 14 dititos en lugar de 13
+                # El codigo de barras incluido en el QR empieza por 0 y tiene 14 dititos en lugar de 13
+                cn = parse_qr(cn).get("cn", "")[1:]  
             if len(cn) == 13:
                 cn = cn[6:-1]
+            query['cn'] = cn
+        if cn.startswith("010847000"):
+            cn = cn[9:15]
+            query['cn'] = cn
+        if "712" in cn:
+            cn = cn.split("712")[1][:6]
             query['cn'] = cn
     return query
  
@@ -54,6 +61,18 @@ def get_medication(search_value):
             params = {param:search_value}
             medicamentos_aux, error  = medicamentos_search_aemps(params, in_status=None, max_size=100)
             medicamentos = medicamentos + medicamentos_aux
+    except Exception as e:
+        print ("ERR :"+str(e))
+        error = "%s: %s. %s." % (_("Problemas al conectar con la base de datos de medicamentos: "), str(e), _("Inténtelo más tarde"))
+
+    return medicamentos
+
+def get_medication_by_cn(search_value):
+    medicamentos = []
+    try:
+        params = {"cn":search_value}
+        medicamentos_aux, error  = medicamentos_search_aemps(params, in_status=None, max_size=100)
+        medicamentos = medicamentos + medicamentos_aux
     except Exception as e:
         print ("ERR :"+str(e))
         error = "%s: %s. %s." % (_("Problemas al conectar con la base de datos de medicamentos: "), str(e), _("Inténtelo más tarde"))

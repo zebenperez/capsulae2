@@ -3,8 +3,10 @@
 
 <div class="row">
     <div class="col-12 text-end">
-        <a href="{%url 'patient-lopd-generate-document' obj.pk%}" class="btn btn-sm new " target="_blank" title="{%trans "Firmar Documento"%}">
-            {% trans "Firmar documento" %}</a>
+        <a href="{%url 'patient-lopd-generate-document2' obj.pk%}" class="btn btn-sm new " target="_blank" 
+            title="{%trans "Firmar Documento"%}"> {% trans "Firmar documento" %}</a>
+        <a href="{%url 'patient-lopd-generate-document' obj.pk%}" class="btn btn-sm new " target="_blank" 
+            title="{%trans "Firmar Documento"%}"> {% trans "Firmar documento Tablet" %}</a>
         <button id="btn-edit" class="btn btn-sm toggle-btn new" data-target="div-upload" data-text="{%trans "Subir fichero"%}" 
             data-text-alt="{%trans "Hecho"%}"> {%trans "Subir fichero"%} </button>
     </div>
@@ -18,7 +20,8 @@
     <thead>
         <tr class="small small">
             <th class="row main-th">
-                <div class="col-9"> {% trans 'Archivo' %} </div>
+                <div class="col-6"> {% trans 'Archivo' %} </div>
+                <div class="col-3"> {% trans 'Organización' %} </div>
                 <div class="col-2"> {% trans 'Fecha' %} </div>
                 <div class="col-1"></div>
             </th>
@@ -29,16 +32,18 @@
             <tr class="small" id="row_{{item.id}}">
                 <td class="row">
 			{#<div class="col-9"><a href="{{item.document.url}}" target="_blank">{{ item.document.name }}</a></div>#}
-                    <div class="col-9"><a href="{{item.document|get_lopd_url}}" target="_blank">{{ item.document.name }}</a></div>
+                    <div class="col-6"> <a class="text-primary" href="{{item.document|get_lopd_url}}" target="_blank">
+			            {{ item.document.name }}</a></div>
+                    <div class="col-3"> {{ item.company.name }} </div>
                     <div class="col-2">{{ item.date|date:"d-m-Y" }}</div>
                     <div class="col-1 text-right">
                         {%comment%}
                         <a class="btn btn-xs ark" title="{%trans 'Edit treatment'%}" data-url="{%url "patient-treatment-form" %}"
                             data-target-modal="common-modal" data-obj_id="{{item.id}}" data-patient_id="{{obj.id}}"> <i class="fas fa-edit"></i></a>
                         {%endcomment%}
-                        <a class="btn btn-sm ark" data-url="{%url "patient-lopd-remove"%}" data-obj_id="{{item.id}}" data-target="div-container" 
-                            title="{% trans 'Remove' %}" data-confirm="{% trans "Are you sure to remove this element?" %}">
-                            <i class="fas fa-trash"></i></a>
+                        <a class="btn btn-sm ark" data-url="{%url "patient-lopd-remove"%}" data-obj_id="{{item.id}}" 
+                            data-target="lopd-body" title="{% trans 'Remove' %}" 
+                            data-confirm="{% trans "Are you sure to remove this element?" %}"> <i class="fas fa-trash"></i></a>
                     </div>
                 </td>
             </tr>

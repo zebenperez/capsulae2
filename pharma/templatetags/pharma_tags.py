@@ -2,7 +2,7 @@ from django import template
 from django.utils.safestring import mark_safe
 from datetime import datetime, timedelta
 
-from capsulae2.settings import BASE_DIR, MEDIA_ROOT
+from capsulae2.settings import BASE_DIR, MEDIA_ROOT, MAIN_URL, MEDIA_URL
 from pharma.models import Pacientes
 from pharma.spd_models import Pillbox
 from medication.models import FichaPrincipioActivo
@@ -16,6 +16,10 @@ register = template.Library()
 '''
     Filters
 '''
+@register.filter
+def is_owner(user, patient):
+    return (patient.owner == user)
+
 @register.filter
 def have_treatment(pillbox, treatment):
     return pillbox.have_treatment(treatment)
@@ -68,10 +72,21 @@ def get_patients(user):
 
 @register.filter
 def get_lopd_url(doc):
-    media_path = os.path.abspath(os.path.join(MEDIA_ROOT, doc.url))
-    if os.path.exists(media_path):
-        return doc.url
-    return "https://capsulae.org/{}".format(doc.url)
+    #media_path = os.path.abspath(os.path.join(MEDIA_ROOT, doc.url))
+    #if os.path.exists(media_path):
+    #    return doc.url
+    #url = doc.url[7:] if doc.url.count("media") > 1 else doc.url
+    #return "https://capsulae.org/{}".format(doc.url[7:])
+    url = doc.url.replace("media/", "") if "media" in doc.url else doc.url
+    return "{}{}{}".format(MAIN_URL, MEDIA_URL[:-1], url)
+
+@register.filter
+def value_for_key(dictionary, key):
+    try:
+        return dictionary.get(str(key))
+    except Exception as e:
+        #print(e)
+        return getattr(dictionary, str(key))
 
 '''
     Simple Tags
@@ -100,6 +115,11 @@ def get_atcs_for_print(dictionary, key, salto=True):
 '''
     Inclusion Tags
 '''
+@register.inclusion_tag('patient-list-index.html')
+def get_patient_list(user):
+    p_list = Pacientes.objects.filter(id_user=user).order_by('-id')[:10]
+    return {'item_list': p_list}
+ 
 @register.inclusion_tag('pillbox-list.html')
 def get_pillbox_list(user):
     now = datetime.now().date() - timedelta(days=365)

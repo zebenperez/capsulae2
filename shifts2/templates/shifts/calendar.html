@@ -1,5 +1,21 @@
 {% load i18n static %}
 
+<style>
+    .fc-daygrid-day-frame {
+        height: 220px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .fc-daygrid-day-events {
+        flex-grow: 1;
+        overflow-y: auto;
+    }
+
+    .fc-daygrid-day-top {
+        flex-shrink: 0;
+    }
+</style>
 <script>
     var stop = false;
     var calendar;
@@ -11,11 +27,13 @@
                 center: 'title',
                 right: 'dayGridMonth,timeGridWeek,timeGridDay,listMonth'
             },
-            contentHeight: 1200,
+            //contentHeight: 1000,
 
+            locale: 'es',
+            firstDay: 1,
             initialDate: '{{today|date:"Y-m-d"}}',
             navLinks: true, // can click day/week names to navigate views
-            dayMaxEvents: true,
+            dayMaxEvents: false,
             {% if perms.create_events %}
                 dateClick: function(info) { if (stop == false) ajaxGet('{% url "shifts-get-shift" %}', {'date': info.dateStr}, "div-shifts", "") },
             {% endif %}

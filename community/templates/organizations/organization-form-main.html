@@ -4,22 +4,29 @@
     {# ------------ ROW 1 --------------#}
     <div class="col-8 mt-3">
         <label class="label">{% trans "Nombre" %}:</label>
-        <input type="text" class="form-control input autosave input view" id="name" name="name" value="{{obj.name|default:""}}" title="{{obj.name}}" 
-            data-model-name="community.organization" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+        <input type="text" class="form-control input autosave input view" id="name" name="name" value="{{obj.name|default:""}}" 
+            title="{{obj.name}}" data-model-name="community.organization" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
             data-target="div-notification" placeholder="Nombre..." disabled/> <span id="name__msg"></span>
     </div>
-    <div class="col-4 mt-3">
+    <div class="col-2 mt-3">
         <label class="label">{% trans "Año de creación" %}:</label>
-        <input type="text" class="form-control input autosave input view" id="year" name="year" value="{{obj.year|default:""}}" title="{{obj.year}}" 
-            data-model-name="community.organization" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+        <input type="text" class="form-control input autosave input view" id="year" name="year" value="{{obj.year|default:""}}" 
+            title="{{obj.year}}" data-model-name="community.organization" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
             data-target="div-notification" placeholder="Año..." disabled/> <span id="year__msg"></span>
+    </div>
+    <div class="col-2 mt-3">
+        <label class="label">{% trans "Prioritaria" %}:</label>
+        <input type="checkbox" class="form-checkbox input autosave input view" id="priority" name="priority" 
+            data-model-name="community.organization" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+            data-target="div-notification" data-bool="True" {%if obj.priority%}checked{%endif%} disabled/> 
+        <span id="priority__msg"></span>
     </div>
 
     {# ------------ ROW 2 --------------#}
     <div class="col-6 mt-3">
         <label class="label">{% trans "Correo electrónico" %}:</label>
         <input type="text" class="form-control input autosave input view" id="email" name="email" value="{{obj.email|default:""}}" 
-            title="{{obj.email}}" data-model-name="community.organization" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+            title="{{obj.email}}" data-model-name="community.organization" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}"
             data-target="div-notification" placeholder="Correo electrónico..." disabled/> <span id="email__msg"></span>
     </div>
     <div class="col-6 mt-3">
@@ -32,39 +39,44 @@
     {# ------------ ROW 3 --------------#}
     <div class="col-6 mt-3">
         <label class="label">{% trans "Persona de contacto" %}:</label>
-        <input type="text" class="form-control input autosave input view" id="contact" name="contact" value="{{obj.contact|default:""}}" 
-            title="{{obj.contact}}" data-model-name="community.organization" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
-            data-target="div-notification" placeholder="Persona de contacto..." disabled/> <span id="contact__msg"></span>
+        <input type="text" class="form-control input autosave input view" id="contact" name="contact" 
+            value="{{obj.contact|default:""}}" title="{{obj.contact}}" data-model-name="community.organization" 
+            data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" data-target="div-notification" 
+            placeholder="Persona de contacto..." disabled/> <span id="contact__msg"></span>
     </div>
     <div class="col-6 mt-3">
         <label class="label">{% trans "Cargo de la persona de contacto" %}:</label>
         <input type="text" class="form-control input autosave input view" id="contact_resp" name="contact_resp" 
-            value="{{obj.contact_resp|default:""}}" title="{{obj.contact_resp}}" data-model-name="community.organization" data-obj-id="{{obj.id}}" 
-            data-url="{%url "autosave_field"%}" data-target="div-notification" placeholder="Cargo de la persona de contacto..." disabled/> 
+            value="{{obj.contact_resp|default:""}}" title="{{obj.contact_resp}}" data-model-name="community.organization" 
+            data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" data-target="div-notification" 
+            placeholder="Cargo de la persona de contacto..." disabled/> 
         <span id="contact_resp__msg"></span>
     </div>
 
     {# ------------ ROW 4 --------------#}
     <div class="col-6 mt-3">
         <label class="label">{% trans "Persona responsable" %}:</label>
-        <input type="text" class="form-control input autosave input view" id="in_charge" name="in_charge" value="{{obj.in_charge|default:""}}" 
-            title="{{obj.in_charge}}" data-model-name="community.organization" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
-            data-target="div-notification" placeholder="Persona responsable..." disabled/> <span id="in_charge__msg"></span>
+        <input type="text" class="form-control input autosave input view" id="in_charge" name="in_charge" 
+            value="{{obj.in_charge|default:""}}" title="{{obj.in_charge}}" data-model-name="community.organization" 
+            data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" data-target="div-notification" 
+            placeholder="Persona responsable..." disabled/> <span id="in_charge__msg"></span>
     </div>
     <div class="col-6 mt-3">
         <label class="label">{% trans "Cargo de la persona responsable" %}:</label>
         <input type="text" class="form-control input autosave input view" id="in_charge_resp" name="in_charge_resp" 
-            value="{{obj.in_charge_resp|default:""}}" title="{{obj.in_charge_resp}}" data-model-name="community.organization" data-obj-id="{{obj.id}}"
-            data-url="{%url "autosave_field"%}" data-target="div-notification" placeholder="Cargo de la persona responsable..." disabled/> 
+            value="{{obj.in_charge_resp|default:""}}" title="{{obj.in_charge_resp}}" data-model-name="community.organization" 
+            data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" data-target="div-notification" 
+            placeholder="Cargo de la persona responsable..." disabled/> 
         <span id="contact_resp__msg"></span>
     </div>
 
     {# ------------ ROW 5 --------------#}
     <div class="col-12 col-6 mt-3">
         <label class="label">{% trans "Vía de derivación" %}:</label>
-        <input type="text" class="form-control input autosave input view" id="derivation_way" name="derivation_way" value="{{obj.derivation_way|default:""}}" 
-            title="{{obj.derivation_way}}" data-model-name="community.organization" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
-            data-target="div-notification" placeholder="Vía de derivación..." disabled/> <span id="derivation_way__msg"></span>
+        <input type="text" class="form-control input autosave input view" id="derivation_way" name="derivation_way" 
+            value="{{obj.derivation_way|default:""}}" title="{{obj.derivation_way}}" data-model-name="community.organization" 
+            data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" data-target="div-notification" 
+            placeholder="Vía de derivación..." disabled/> <span id="derivation_way__msg"></span>
     </div>
 
     {# ------------ ROW 6 --------------#}
@@ -83,6 +95,5 @@
             placeholder="Dirección..." disabled/> <span id="address__msg"></span>
     </div>
     {%endcomment%}
-
 </div>
 

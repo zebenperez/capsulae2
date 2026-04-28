@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from django.db import models
+from uuid import uuid4
 
 from datetime import date, datetime, timedelta
 
@@ -51,7 +52,7 @@ class Company(models.Model):
     manager = models.OneToOneField(User, verbose_name="Manager", on_delete=models.SET_NULL, related_name="company", blank=True, null=True)
     users = models.ManyToManyField(User, verbose_name="Empleados", related_name="user_companies", blank=True)
     company_options = models.ManyToManyField(CompanyOptions, verbose_name="Opciones", related_name="options_company", blank=True)
-
+    uuid = models.CharField(verbose_name='UUID', max_length=255, default='', unique=False)
 
     @staticmethod
     def get_by_user(user):
@@ -181,26 +182,35 @@ class Plan(models.Model):
     payment_link = models.CharField(verbose_name="Enlace de pago", max_length=250, blank=True, null=True, default="")
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name="plans")
 
+    def __str__(self):
+        return self.name
+
+
     class Meta:
         verbose_name = "Plan"
         verbose_name_plural="Planes"
 
 class UserProfile(models.Model):
-    amount = models.FloatField(verbose_name="Pago mensual", blank=True, default=0)
+    #amount = models.FloatField(verbose_name="Pago mensual", blank=True, default=0)
     profile = models.ForeignKey(Profile, on_delete=models.SET_NULL, null=True, related_name="users")
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="profiles")
     plan = models.ForeignKey(Plan, on_delete=models.SET_NULL, related_name="profiles", null=True)
+
+    @property
+    def company(self):
+        company = None
+        try:
+            company = Company.objects.filter(users = self.user).first()
+        except Exception as e:
+            print(str(e))
+        return company
 
     class Meta:
         verbose_name = "Perfil de usuario"
 
 class UserPayment(models.Model):
-<<<<<<< HEAD
-    confirm = models.BooleanField(verbose_name="Cancelado", default=False)
-=======
-    donation = models.BooleanField(verbose_name="Donación", default=False)
+    #donation = models.BooleanField(verbose_name="Donación", default=False)
     confirm = models.BooleanField(verbose_name="Confirmación", default=False)
->>>>>>> 8369e00 (ajustes de pro)
     cancel = models.BooleanField(verbose_name="Cancelado", default=False)
     amount = models.FloatField(verbose_name="Pago", blank=True, default=0)
     pay_date = models.DateField(verbose_name="Fecha de pago", default=datetime.now)
@@ -212,5 +222,20 @@ class UserPayment(models.Model):
     class Meta:
         verbose_name = "Pago de usuario"
         verbose_name_plural="Pagos de usuarios"
+
+class Donation(models.Model):
+    confirm = models.BooleanField(verbose_name="Confirmación", default=False)
+    amount = models.FloatField(verbose_name="Pago", blank=True, default=0)
+    pay_date = models.DateField(verbose_name="Fecha de pago", default=datetime.now)
+    code = models.CharField(verbose_name="Stripe code", max_length=250, blank=True, null=True, default="")
+    name = models.CharField(verbose_name="Nombre", max_length=250, blank=True, null=True, default="")
+    cif = models.CharField(verbose_name="NIF", max_length=250, blank=True, null=True, default="")
+    email = models.CharField(verbose_name="Correo electrónico", max_length=250, blank=True, null=True, default="")
+    plan = models.CharField(verbose_name="Plan", max_length=250, blank=True, null=True, default="")
+    plan_days = models.IntegerField(verbose_name="Días", blank=True, default=0)
+
+    class Meta:
+        verbose_name = "Donación"
+        verbose_name_plural="Donaciones"
 
 

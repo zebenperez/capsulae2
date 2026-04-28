@@ -3,11 +3,20 @@
 
 {% block central_content %}
     <div class="row toolbar-search pt-2 pb-2 m-0">
-        <div class="col-lg-1 col-1"><i class="fas fa-search"></i></div>
-        <div class="col-lg-7 col-7 text-left p-0">
+        <div class="col-7 text-left p-0">
+            {%comment%}
             <input type="text" class="autosearch form-control form-control-dark w-100" name="s-name" id="s-name" 
                placeholder="{% trans 'Historial, Nombre o CIP' %}" data-url="{% url "patient-search" %}" 
                data-target="patient-list" data-related="s-name" />
+            {%endcomment%}
+            <form action="{% url 'patient-search' %}" method="GET" id="form-search">
+                {%csrf_token%}
+                <input type="text" class="form-control form-control-dark w-100" name="s-name" id="s-name" 
+                    placeholder="{% trans 'Historial, Nombre o CIP' %}" />
+            </form>
+        </div>
+        <div class="col-1">
+            <a class="btn btn-sm saveform" data-form="form-search" data-target="patient-list"><i class="fas fa-search"></i></a>
         </div>
         <div class="spd-tab col-4">
             <div class="text-end">
@@ -28,12 +37,32 @@
             <span id="items-counter" class="badge badge-secondary">{{items|length}}</span></h2>
             {#<a class="btn btn-primary ark" data-url="{% url "patient-form" %}" data-target-modal="common-modal">{% trans "New paciente"%}</a>  #}
             {% if request.user|in_group:"admins" or request.user|in_group:"managers" %}
-                <a class="btn btn-sm new" href="{% url "patient-evolutionaries" %}"> <i class="fas fa-arrow-right"></i> {%trans "Derivaciones"%} </a>
+                <a class="btn btn-sm new" href="{% url "patient-evolutionaries" %}"> 
+                    <i class="fas fa-arrow-right"></i> {%trans "Derivaciones"%} </a>
             {% endif %}
+
+            {% if request.user|in_group:"admins" %}
+                <label for="file" class="btn btn-sm new">
+                    <i class="fas fa-upload"></i>
+                    <span class="d-none d-sm-block">{%trans "Elegir"%}&nbsp;{%trans "Archivo de Pacientes"%}</span></label>
+                <input type="file" class="multiupload d-none" name="file" id="file" data-url="{%url 'patient-import'%}" 
+                    data-target="patient-list" data-obj-id="" data-field="" data-folder="" data-csrf-token="{{csrf_token}}" multiple/>
+
+                <label for="file_docs" class="btn btn-sm new">
+                    <i class="fas fa-upload"></i>
+                    <span class="d-none d-sm-block">{%trans "Elegir"%}&nbsp;{%trans "Documentos"%}</span></label>
+                <input type="file" class="multiupload d-none" name="file_docs" id="file_docs" 
+                    data-url="{%url 'patient-import-documents'%}" data-target="import-result" data-obj-id="" 
+                    data-field="" data-folder="" data-csrf-token="{{csrf_token}}" multiple/>
+            {% endif %}
+
             <a class="btn btn-sm new" href="{% url "patient-new" %}">
-                <i class="fas fa-plus"></i> {%if request.user|is_pharma%}{%trans "Nuevo paciente"%}{%else%}{%trans "Nuevo usuario"%}{%endif%}
+                <i class="fas fa-plus"></i> 
+                {%if request.user|is_pharma%}{%trans "Nuevo paciente"%}{%else%}{%trans "Nuevo usuario"%}{%endif%}
             </a>
         </div>
+
+        <div id="import-result"></div>
 
         <div class="small-info p-2">* Sin LOPD en los últimos 15 días</div>
         <div class="row patient-list-head" style="margin:0;">

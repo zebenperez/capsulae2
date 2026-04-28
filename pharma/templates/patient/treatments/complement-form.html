@@ -2,7 +2,7 @@
 <div class="d-flex justify-content-end"> <button type="button" class="btn btn-lg" data-bs-dismiss="modal" title="{% trans "Close" %}">
     <i class="fas fa-times"></i></button> </div>
 
-<h2>{% trans 'New treatment' %}</h2>
+<h2>{% trans 'Nuevo tratamiento' %}</h2>
 
 {#<span id="div-notification"></span><br/>#}
 
@@ -123,7 +123,7 @@
 
 <div class="d-flex justify-content-end">
     <button type="button" class="btn btn-sm ark save" data-bs-dismiss="modal" data-url="{% url "patient-treatment" %}"
-        data-target="div-container" data-obj_id="{{obj.paciente.id}}">{% trans "Save" %}</button>
+        data-target="div-container" data-obj_id="{{obj.paciente.id}}">{% trans "Guardar" %}</button>
     {%comment%}
     <button type="button" class="btn btn-sm ark cancel" data-bs-dismiss="modal" data-url="{% url "guest-remove" %}" data-target="guest-list"
         data-obj_id="{{obj.id}}" data-confirm="{% trans "Are you sure to remove this element?" %}">{% trans "Remove" %}</button>

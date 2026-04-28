@@ -63,13 +63,13 @@
         <div class="container"> 
 		<form action="/account/signup/" method="post" enctype="multipart/form-data" name="frmRegister" id="frmRegister" class="p-3">
 		    {% csrf_token %}
-		    <input type="hidden" id="profile" name="profile" value="1" />
+            {#<input type="hidden" id="profile" name="profile" value="1" />#}
             <!--contact form start-->
             <div class="row w-100 m-0">
                 <div class="col-lg-4 col-12">
-			<h1 class="login">Registro</h1>
-			<div class="text-center"><img src="/static/imgs/register-now.png" alt="Imagen registrate ahora"></div>
-		</div>
+			        <h1 class="login">Registro</h1>
+			        <div class="text-center"><img src="/static/imgs/register-now.png" alt="Imagen registrate ahora"></div>
+		        </div>
                 <div class="col-lg-8 col-12 conForm">
 				    <div class="form-group">
 					    <input type="text" id="name" name="name" class="form-control" title="Nombre" placeholder="(*) Nombre" required/> </div>
@@ -91,9 +91,7 @@
 					    <input type="text" id="province" name="province" class="form-control" title="Provincia" placeholder="(*) Provincia" 
                             required/> </div>
 
-        			<div class="required-fields">(*) Campos obligatorios</div>
-
-                    {#{% get_profile_select %}#}
+                    {% get_profile_select %}
 
 				    <div class="acceptCheck small mt-5 p-0">
 					    <input type="checkbox" id="tos" name="tos"/> 
@@ -108,6 +106,7 @@
 					    <script src='https://www.google.com/recaptcha/api.js'></script>
 					    <div class="g-recaptcha" data-sitekey="6Lex26gUAAAAAAz2BSZPNuHpj5-84MYnkIzvsTy4"></div>
 				    </div>
+        			<div class="required-fields mt-4">(*) Campos obligatorios</div>
 				    <div class="mt-5"> <button id="btn-register-send" class="submitBnt register"> Reg&iacute;strame</button> </div>
 				    <div id="div-errors" class="alert-msg hideClass"></div>
 			    </div>

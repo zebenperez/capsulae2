@@ -2,8 +2,8 @@
 
 
 {% for item in items %}
-    <div class="row line small pt-2 pb-2 row-item {%if item.activo == False%}hide{%endif%}" id="row_{{item.id}}" data-active="{{item.is_active}}" 
-        style="margin:0;">
+    <div class="row line small pt-2 pb-2 row-item {%if item.activo == False%}hide{%endif%}" id="row_{{item.id}}" 
+        data-active="{{item.is_active}}" style="margin:0;">
         <div class="col-11">
             <div class="row pointer" id="row_{{item.id}}" style="margin:0;" onclick="window.location='{%url "patient-view" item.id%}'">
                 <div class="col-2">
@@ -16,19 +16,10 @@
             </div>
         </div>
         <div class="col-1 text-right">
-            {%comment%}
-            {#<a class="btn btn-xs" href="{% url "phases" item.id %}" title="{% trans 'View phases' %}"><i class="fas fa-list"></i></a>#}
-            {#<a class="btn btn-xs ark" data-url="{% url "patient-form" %}" data-target-modal="common-modal" 
-                data-obj_id="{{item.id}}" title="{% trans 'Edit' %}"><i class="fas fa-edit"></i></a> #}
-            {%endcomment%}
-            {#<a class="btn btn-xs" href="{%url "patient-view" item.id%}" title="{%trans 'View patient'%}"><i class="fas fa-eye"></i></a>#}
-            {%comment%}
-            <a class="btn btn-sm autoremove" data-model-name="pharma.pacientes" data-obj-id="{{item.id}}" 
-                data-url="{% url "autoremove_obj"%}" data-target="row_{{item.id}}" title="{% trans 'Remove' %}"
-                data-confirm="{% patient_remove_confirm_text request.user item %}"><i class="fas fa-trash"></i></a>
-            {%endcomment%}
-            <a class="btn btn-xs ark" data-url="{% url "patient-remove-msg" %}" data-target-modal="common-modal" 
-                data-obj_id="{{item.id}}" title="{% trans 'Remove' %}"><i class="fas fa-trash"></i></a> 
+            {% if item.owner == request.user %}
+                <a class="btn btn-xs ark" data-url="{% url "patient-remove-msg" %}" data-target-modal="common-modal" 
+                    data-obj_id="{{item.id}}" title="{% trans 'Remove' %}"><i class="fas fa-trash"></i></a> 
+            {% endif %}
         </div>
     </div>
 {% endfor %}
@@ -36,7 +27,7 @@
 {% if start %}
     <div class="text-center" id="btn-more-{{start}}">
         <a class="btn btn-sm new ark-append" id="load-patient-list" data-url="{% url "patient-list" %}" data-target="patient-list"
-            data-start="{{start}}" data-end="{{end}}" data-hide="btn-more-{{start}}">{% trans "Ver mas" %}</a>
+            data-start="{{start}}" data-end="{{end}}" data-hide="btn-more-{{start}}">{% trans "Ver más" %}</a>
     </div>
 {% endif %}
 

@@ -35,6 +35,7 @@ class PatientActivity(models.Model):
         verbose_name_plural = "Actividades del paciente"
 
 class Organization(models.Model):
+    priority = models.BooleanField(verbose_name="Prioridad", default=False)
     reviewed = models.BooleanField(verbose_name="Realizado", default=True)
     name = models.CharField(verbose_name="Nombre", max_length=600, blank=True, null=True, default="")
     year = models.CharField(verbose_name="Año de creación", max_length=600, blank=True, null=True, default="")
@@ -53,6 +54,7 @@ class Organization(models.Model):
     class Meta:
         verbose_name = "Organización"
         verbose_name_plural = "Organizaciones"
+        ordering = ["-priority", "name"]
 
 class OrganizationAddress(models.Model):
     same_place = models.BooleanField(verbose_name="Mismo lugar", default=True)
@@ -137,5 +139,20 @@ class PatientProcedure(models.Model):
     class Meta:
         verbose_name = "Paciente Tratamiento"
         verbose_name_plural = "Pacientes Tratamientos"
+
+def upload_procedure_file(instance, filename):
+    ascii_filename = str(filename.encode('ascii', 'ignore'))
+    instance.filename = ascii_filename
+    folder = "patients/procedures/%s" % (instance.id)
+    return '/'.join(['%s' % (folder), datetime.now().strftime("%Y%m%d%H%M%S") + ascii_filename])
+
+class PatientProcedureDoc(models.Model):
+    obs = models.TextField(verbose_name="Descripción del fichero", blank=True, null=True, default="")
+    doc = models.FileField(upload_to=upload_procedure_file, blank=True, verbose_name="Fichero", help_text="Select file to upload")
+    procedure = models.ForeignKey(PatientProcedure, verbose_name="Trámite", on_delete=models.CASCADE, null=True, related_name="docs")
+
+    class Meta:
+        verbose_name = "Documento de trámite"
+        verbose_name_plural = "Documentos de tramite"
 
 

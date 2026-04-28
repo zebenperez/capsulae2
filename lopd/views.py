@@ -11,11 +11,11 @@ from django.views.decorators.csrf import csrf_exempt
 from weasyprint import HTML, CSS
 
 #local imports
-from capsulae.settings import MEDIA_ROOT
-from companies.models import Company
+from capsulae2.settings import MEDIA_ROOT
+from account.models import Company
 from pharma.models import Pacientes
-from pharma.utils import is_group_member
-from companies.views import MANAGERS_GROUP
+#from pharma.utils import is_group_member
+#from companies.views import MANAGERS_GROUP
 from .models import *
 
 log = logging.getLogger(__name__)

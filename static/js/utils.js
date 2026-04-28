@@ -214,7 +214,7 @@ $(document).ready(()=>{
         });
         if ($("#plan-d").val() == "")
         {
-            msg += "Debe seleccionar un Plan. <br/>";
+            msg += "Debe seleccionar una periodicidad. <br/>";
             isOk = false;
         }
         if ($("#donation-amount").val() == "")
