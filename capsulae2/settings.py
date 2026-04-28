@@ -197,9 +197,12 @@ LOGGING = {
         },
     },
 }
+<<<<<<< HEAD
 
 STRIPE_TEST_SECRET_KEY = "sk_test_51PhcNxRoZVlu63Sfbj4IXF9YBurdnpDkC0pjxr5fdCWeNzpdz6lVdT5xZXjYCa3O7zdKequs5kZQgUMpX8MkPB6z00LmcMegFf"
 
 STRIPE_REAL_SECRET_KEY="sk_test_51PhcNxRoZVlu63Sfbj4IXF9YBurdnpDkC0pjxr5fdCWeNzpdz6lVdT5xZXjYCa3O7zdKequs5kZQgUMpX8MkPB6z00LmcMegFf"
 
 STRIPE_REAL_SECRET_KEY="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"
+=======
+>>>>>>> 9591c778662af3c1ab7a870e41c3de8fc109529b
