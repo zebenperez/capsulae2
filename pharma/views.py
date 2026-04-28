@@ -105,7 +105,9 @@ def get_patients(user, search_value="", start=0, end=50, lopd_signed=True):
 
     #user_id = user.id
     user_id = get_owner_id(user)
-    full_query &= Q(**{'id_user': user_id})
+    #full_query &= Q(**{'id_user': user_id})
+    comp = Company.get_by_user(user)
+    full_query &= (Q(**{'id_user__company': comp}) | Q(**{'id_user__user_companies__in': [comp]}))
 
     # Pacientes con lopd firmada
     lopd_patient_ids = LOPDConsents.objects.all().distinct().values_list('paciente', flat=True)
@@ -872,7 +874,7 @@ def patient_lopd_generate_document2(request, patient_id):
     try:
         patient = Pacientes.objects.get(pk=patient_id)
         context['patient'] = patient
-        context['company'] = patient.owner.company
+        context['company'] = Company.get_by_user(patient.owner)
         #context['company'] = request.user.company
     except Exception as e:
         print(e)
@@ -882,7 +884,8 @@ def patient_lopd_generate_document3(request, patient_id):
     context={}
     try:
         patient = Pacientes.objects.get(pk=patient_id)
-        context = {'patient': patient, 'company': patient.owner.company, 'date': datetime.now()}
+        comp = Company.get_by_user(patient.owner)
+        context = {'patient': patient, 'company': comp, 'date': datetime.now()}
     except Exception as e:
         print(e)
     return render(request, "patient/lopd/lopd-document-template3.html", context)
@@ -891,7 +894,8 @@ def patient_lopd_generate_document4(request, patient_id):
     context={}
     try:
         patient = Pacientes.objects.get(pk=patient_id)
-        context = {'patient': patient, 'company': patient.owner.company, 'date': datetime.now()}
+        comp = Company.get_by_user(patient.owner)
+        context = {'patient': patient, 'company': comp, 'date': datetime.now()}
     except Exception as e:
         print(e)
     return render(request, "patient/lopd/lopd-document-template4.html", context)
