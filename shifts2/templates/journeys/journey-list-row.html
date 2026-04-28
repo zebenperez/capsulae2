@@ -1,0 +1,21 @@
+{% load i18n %}
+
+<td>{{obj.ini_date|date:"d-m-Y H:i"|default:"--"}}</td>
+<td>{% if obj.started == True %}---{% else %}{{obj.end_date|date:"d-m-Y H:i"|default:"--"}}{% endif %}</td>
+<td>{% if obj.started == True %}<i class="fas fa-clock"></i> {% trans "Iniciada" %}
+    {% else %}<i class="fas fa-minus"></i> {% trans "Terminada" %}{% endif %}</td>
+{%comment%}
+<td class="text-right">
+    <a class="btn btn-xs ark p-2" data-url="{%url "spd-blister-clone"%}" data-target="row-{{item.patient}}" 
+        data-obj_id="{{obj.id}}" data-show="blister-list-{{item.id}}" data-dashboard="True" title="{%trans "Clonar"%}">
+        <i class="fas fa-clone"></i> </a>
+    <a class="btn btn-xs w-25" title="{%trans "Imprimir blister"%}" href="{%url "spd-blister-print" obj.id%}" target="_blank">
+        <i class="fas fa-print"></i></a>
+    <a class="btn btn-xs w-25 ark" title="{% trans "Editar blister" %}" data-url="{% url "spd-blister-form" %}"
+        data-target-modal="common-modal" data-obj_id="{{obj.id}}" data-pillbox_id="{{item.id}}">
+        <i class="fas fa-edit"></i></a>
+    <a class="btn btn-xs w-25 ark" title="{% trans "Eliminar blister" %}" data-url="{% url "spd-blister-remove" %}"
+        data-target="blister-list-{{item.pillbox.id}}" data-obj_id="{{item.id}}"
+        data-confirm="{% trans "Esta seguro/a de que desea eliminar este elemento?" %}"><i class="fas fa-trash"></i></a>
+</td>
+{%endcomment%}

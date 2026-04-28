@@ -1,0 +1,23 @@
+{% load i18n %}
+
+<div class="flex space-between center-vertical vertical-separator">
+	<h5> {% trans "Eventos"%} </h5>
+	<div class="tools">
+        <a class="cancel btn btn-tools tools-primary btn-labeled ark" data-url="{% url "shifts-shift-calendar" %}" data-target="div-events">   
+            <i class="fas fa-arrow-left"></i> {% trans "Volver" %}</a> 
+	</div>
+</div>
+
+<div class="product-card">
+	<div class="row p-3" >
+	    <span class="title-0 pl-3">Nombre</span><br/>
+		<div class="col-lg-12"> <h4 class="event-name bold">{{ obj.name|default:"Nombre del evento" }}</h4> </div>
+
+		<span class="title-0 pl-3">Fechas</span><br/>
+		<div class="col-lg-12"><strong>Fecha de inicio:</strong> {{obj.ini_date|date:"Y-m-d"}} ({{obj.ini_time|date:"H:i"}}) </div>
+		<div class="col-lg-12"><strong>Fecha de fin:</strong> {{obj.end_date|date:"Y-m-d"}} ({{obj.end_time|date:"H:i"}}) </div>
+				
+		<div class="col-lg-12 pt-3"> <span class="title-0">Descripción</span> {{ obj.desc|default:"Descripción del evento" }} </div>
+	</div>
+</div>
+

@@ -1,0 +1,35 @@
+{% load i18n %}
+
+<div class="d-flex justify-content-end"> <button type="button" class="btn btn-lg" data-bs-dismiss="modal" title="{% trans "Close" %}">
+    <i class="fas fa-times"></i></button> </div>
+
+<h2>{% trans 'Editar parámetros' %}</h2>
+
+<form method="POST" action="{% url "patient-telegram-message-send" %}" class="form" id="message-send">
+    <div class="row justify-center">
+        <div class="col-12 text-left p-1">
+            <div class="greybox-sm p-1">
+                {% csrf_token %}
+                <input type="hidden" id="patient_id" name="patient_id" value="{{ patient.pk }}">
+                <input type="hidden" id="chat_id" name="chat_id" value="{{ chat.pk }}">
+
+                <div class="form-group col-xs-12">
+                    <label for=""> Asunto del mensaje </label>
+                    <input class="form-control" type="text" id="subject" name="subject"/>
+                    <label for=""> Contenido del mensaje</label>
+                    <textarea class="form-control col-xs-12" id="message" name="message" ></textarea>
+                    <br/>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="d-flex justify-content-end">
+        <button type="button" class="btn btn-sm saveform" data-bs-dismiss="modal" data-form="message-send"
+            data-target="div-container">{% trans "Enviar" %}</button>
+
+        <button class="btn btn-sm ark cancel" data-bs-dismiss="modal" data-url="{%url "patient-params-remove"%}" data-obj_id="{{obj.id}}" 
+            data-target="div-container" title="{% trans 'Eliminar' %}" data-confirm="{% trans "Are you sure to remove this element?" %}">
+            {% trans "Remove" %}</a>
+    </div>
+</form>
+

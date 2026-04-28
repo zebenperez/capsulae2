@@ -1,0 +1,49 @@
+{% load i18n %}
+
+
+<div class="row">
+    <div class="col-11"> <h2><i class="fa fa-history"></i>&nbsp; {% trans 'Modificar Evolutivo' %}</h2> </div>
+    <div class="col-1">
+        <div class="d-flex justify-content-end"> <button type="button" class="btn btn-lg" data-bs-dismiss="modal" title="{% trans "Close" %}">
+            <i class="fas fa-times"></i></button> </div>
+    </div>
+</div>
+
+{% comment %} <span id="div-notification"></span><br/> {% endcomment %}
+
+<div class="row justify-center">
+    <div class="col-10">
+	<div class="greybox-sm p-1">
+                {% trans "Asunto" %}
+        	<input type="text" class="form-control autosave" id="matter" name="matter" value="{{obj.matter}}" 
+	            title="{{obj.matter}}" data-model-name="pharma.evolutionary" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+        	    data-target="div-notification" /> <span id="matter__msg"></span>
+    	</div>
+    </div>
+    <div class="col-2">
+	<div class="greybox-sm p-1">
+        	{% trans "Fecha" %}
+        	<input type="date" class="form-control autosave" id="date" name="date" value="{{obj.date|date:"Y-m-d"}}" 
+	            title="{{obj.date}}" data-model-name="pharma.evolutionary" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+        	    data-target="div-notification" /> <span id="matter__msg"></span>
+    	</div>
+    </div>
+    <div class="col-12">
+	<div class="greybox-sm p-1">
+        	{% trans "Observaciones" %}
+	        <input type="text" class="form-control autosave" id="observations" name="observations" title="{{obj.observations}}" 
+        	    data-model-name="pharma.evolutionary" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+	            data-target="div-notification">{{obj.observations}}</input>
+        	    <span id="observations__msg"></span>
+    	</div>
+    </div>
+</div>
+
+<div class="d-flex justify-content-end">
+    <button type="button" class="btn btn-sm ark save" data-bs-dismiss="modal" data-url="{% url "patient-evolutionary" %}"
+        data-target="div-container" data-obj_id="{{obj.patient.id}}">{% trans "Guardar" %}</button>
+    <button type="button" class="btn btn-sm ark cancel" data-bs-dismiss="modal" data-url="{% url "evolutionary-remove" %}" data-target="div-container"
+        data-obj_id="{{obj.id}}">{% trans "Eliminar" %}</button>
+        {#data-obj_id="{{obj.id}}" data-confirm="{% trans "Are you sure to remove this element?" %}">{% trans "Remove" %}</button>#}
+</div>
+

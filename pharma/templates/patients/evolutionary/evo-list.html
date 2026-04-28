@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% load i18n pharma_tags %}
+
+{% block central_content %}
+ 
+    <div class="row spd-tab"> <div class="col-12 text-end"> 
+        <a href="{% url "patient-evolutionaries-csv" %}" class="btn btn-sm p-2 new" target="_blank" rel="noopener noreferrer">
+            <i class="fa fa-arrow-right"></i> {% trans "Exportar a CSV" %}</a>
+    </div> </div>
+
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr class="small small">
+                <th class="row main-th">
+                    <div class="col-2"> {% trans 'Paciente' %} </div>
+                    <div class="col-1"> {% trans 'Genero' %} </div>
+                    <div class="col-1"> {% trans 'Teléfono' %} </div>
+                    <div class="col-2"> {% trans 'Asunto' %} </div>
+                    <div class="col-1"> {% trans 'Fecha' %} </div>
+                    <div class="col-3"> {% trans 'Observaciones' %} </div>
+                    <div class="col-2"></div>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in ev_list %}
+                <tr class="small row-item {%if item.active == False%}hide{%endif%}" data-active="{{item.active}}" id="row_{{item.id}}">
+                    <td class="row p-0">
+                        <div class="col-2 p-2">{{ item.patient.nombre }} {{ item.patient.apellido }}</div>
+                        <div class="col-1 p-2">{{ item.patient.sexo }}</div>
+                        <div class="col-1 p-2">{{ item.patient.telefono1 }}</div>
+                        <div class="col-2 p-2">{{ item.matter }}</div>
+                        <div class="col-1 p-2"> {{ item.date|date:"d-m-Y"|default_if_none:"--" }} &nbsp; </div>
+                        <div class="col-3 p-2">{{ item.observations|safe }}</div>
+                        <div class="col-2 p-2 text-right">
+                            <a href="{% url "evolutionary-referral-form" item.patient.n_historial item.id True %}" class="btn btn-sm p-2"
+                                target="_blank" rel="noopener noreferrer"><i class="fa fa-info"></i> </a>
+                        {%comment%}
+                            <a class="btn btn-sm ark p-2" title="{%trans 'Edit evolutivo'%}" data-url="{%url "evolutionary-form" %}"
+                                data-target-modal="common-modal" data-obj_id="{{item.id}}" data-patient_id="{{obj.id}}"
+                                title="{% trans "Editar" %}"> <i class="fas fa-edit"></i></a>
+                            <a class="btn btn-sm ark p-2" data-url="{%url "evolutionary-remove"%}" data-obj_id="{{item.id}}" data-target="div-container" 
+                                title="{% trans 'Remove' %}" data-confirm="{% trans "Are you sure to remove this element?" %}">
+                                <i class="fas fa-trash"></i></a>
+                        {%endcomment%}
+                        </div>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock central_content %}

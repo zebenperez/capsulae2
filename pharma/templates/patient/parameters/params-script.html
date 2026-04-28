@@ -1,0 +1,252 @@
+<script>
+
+    $(".tab-item").click(function(){
+        $(".tab-item").removeClass("active");
+        $(this).addClass("active");
+    });
+
+    /* ------------------------------
+    Functions				 
+    ------------------------------*/ 
+    var C = parseFloat("{{ c_index }}".replace(",","."));
+    var M = parseFloat("{{ m_index }}".replace(",","."));
+    function calculatebmi()
+    {
+        weight = parseFloat($('#weight').val());
+        height = parseFloat($('#height').val().replace(",","."));
+        if (isNaN(weight) || isNaN(height))
+        {
+            return ;
+        }
+
+        bmi = weight / Math.pow(height,2);
+        $('#bmi').val(bmi.toFixed(2)).change();
+    }
+
+    function calculate_belt_hip_index(belt, hip)
+    {
+        belt = (belt) ? belt.replace(",",".") : null; 
+        hip = (hip) ? hip.replace(" ",".") : null;
+        let value = ""
+        if (belt && hip)
+        {
+            value = (parseFloat(belt) / parseFloat(hip)).toFixed(2);
+        }
+        $("#belt_hip_index").val(value).change();
+    }
+
+    function calculate_d(fold_values_array){
+        fold_values_array = fold_values_array.filter((el)=>{ return (el != null && el !== "" && !isNaN(el)) });
+    
+        if ((fold_values_array.length < 4) || C == null || M == null)
+        {
+            return false;
+        }
+        
+        let SUM4 = fold_values_array.slice(0,4).reduce((a,b) => a + b );
+        let D =  (C - (M * Math.log(SUM4)))
+        return D
+        
+    }
+    
+    function calculate_muscle_weight()
+    {
+        console.log("weight deberia ser cadena");
+        let weight = ""+$("#weight").val();
+        let fweight = ""+$("#fat_weight").val();
+        
+        if (!weight || !fweight)
+            return 
+        console.log(weight);
+        try{
+            let mweight =  (parseFloat(weight.replace(",",".")) - parseFloat(fweight.replace(",","."))).toFixed(1);
+            $("#muscle_weight").val(mweight);
+        }catch(e){ 
+            console.error(e);
+            console.error(weight);
+            console.error(fweight);
+        
+        }
+
+        return "";
+
+    }
+
+    /* ------------------------------
+    Event Handlers
+    ------------------------------*/ 
+    $('#height').on('input', calculatebmi);
+
+    $('#weight').on('input', function(){
+        calculatebmi()
+        console.log("peso normal");
+        calculate_muscle_weight();
+        $(".fold_value").trigger("input");
+
+    });
+    
+    $('#fat_weight').on("input", function(){
+        console.log("peso graso");
+        calculate_muscle_weight();
+    });
+    
+
+    $(".fold_value").on('input', function(e){
+        let fold_values_array = []
+        let weight = false
+        try{
+             weight = parseFloat($("#weight").val().replace(",","."));
+        }catch(e){  }
+        
+
+        $('.fold_value').each(function(){
+            try{
+                let fvalue = $(this).val()
+                if (fvalue){
+                    fold_values_array.push(parseFloat(fvalue.replace(",",".")))
+                }
+            }catch(e){ }
+            
+        });
+
+        let D = calculate_d(fold_values_array)
+        
+        if (D && weight)
+        {
+            let fat_index = ((4.95/D) - 4.5) * 100
+            let fat_weight = ( fat_index * weight ) / 100
+
+            $("#fat_index").val(fat_index.toFixed(1));
+            $("#fat_weight").val(fat_weight.toFixed(1));
+            console.log("trigger");
+            $("#fat_weight").trigger("input");
+        }
+        else{
+            $(".fat_value").val("");
+        }
+    });
+
+    $('#glicosylated').on('input', function(e){
+            glicosylated = parseFloat($('#glicosylated').val());
+            glucose = $('#glucose');
+            if (isNaN(glicosylated))
+            {
+                glucose.val("");
+                return;
+            }
+
+            glucose_val = (glicosylated * 33.6) - 77.3;
+            glucose.val(glucose_val.toFixed(2));
+    
+    });
+
+    $('#glucose').on('input', function(e){
+            glucose = parseFloat($('#glucose').val());
+            glicosylated = $('#glicosylated');
+            if (isNaN(glucose))
+            {
+                glicosylated.val("");
+                return;
+            }
+
+            glicosylated_val = (glucose+ 77.3)/33.6;
+            glicosylated.val(glicosylated_val.toFixed(2));
+    });
+
+    //$('#got, #gpt').on('input', function(e){
+    $("body").on("input", "#got, #gpt", function(e){
+        got = parseFloat($("#got").val());
+        gpt = parseFloat($("#gpt").val());
+        val = ""
+        if ($.isNumeric(got) && $.isNumeric(gpt))
+        {
+            val = (got/gpt).toFixed(3);
+        }
+
+        $("#got_gpt").val(val).change();
+        
+    });
+
+    //$('#fev1, #fev6').on('input', function(e){
+    $("body").on("input", "#fev1, #fev6", function(e){
+        fev1 = parseFloat($("#fev1").val());
+        fev6 = parseFloat($("#fev6").val());
+        val = "--";
+        if ($.isNumeric(fev1) && $.isNumeric(fev6))
+        {
+            val = (fev1/fev6).toFixed(3);
+        }
+        $("#coef_fev1_fev6").val(val).change();
+    });
+
+    $("#belt, #hip").on("input", function(){
+        calculate_belt_hip_index($("#belt").val(), $("#hip").val())
+    });
+
+    //$('#serin_creatine_index').on('input', function(e){
+    $("body").on("input", "#serin_creatine_index", function(e){
+        sci = parseFloat($(this).val().replace(",",".")) 					
+        //age = {{ paciente.age }}
+        age = $(this).data("age");
+        sex = $(this).data("sex");
+        race = $(this).data("race");
+
+        /* NOTA en el documento .pdf el factor para raza negra es 1.210 pero la sociedad española de nefrologia es 1.212 */
+        //fg_base = Math.pow(sci, -1.154) * Math.pow(age, -0.203) {% if paciente.sexo == 'M'  %} * 0.742 {% endif %} {% if paciente.black_race %} * 1.212 {% endif %}
+        if (sex == "M")
+            fg_base = Math.pow(sci, -1.154) * Math.pow(age, -0.203) * 0.742;
+        else
+            fg_base = Math.pow(sci, -1.154) * Math.pow(age, -0.203) * 1.212;
+
+        mdrd4 = 186 * fg_base
+        $('#mdrd_4').val(""+mdrd4.toFixed(3)).change();
+        
+        mdrd4_ims = 175 * fg_base
+        $('#mdrd_4_ims').val(""+mdrd4_ims.toFixed(3)).change();
+        cdkec = 0;
+        exp = 1;
+        fact = 1;
+        
+        /*
+            NOTA :  Los datos de los calculos siguientes provienen de 
+            https://qxmd.com/calculate/calculator_251/egfr-using-ckd-epi
+            https://www.msdmanuals.com/medical-calculators/GFR_CKD_EPI-es.htm --> los nombres de los parametros fueron copiados de aqui
+        */
+        if (sex == "M") {
+            sex = 1.018;
+            alfa = -0.329
+            kappa = 0.7
+        } else {
+            sex = 1;
+            alfa = -0.411;
+            kappa = 0.9
+        }
+
+        if (race == "True")
+            race = 1.159
+        else
+            race = 1
+        
+        sci_kappa = sci/kappa;
+        cdkec = 141 * Math.pow(Math.min(sci_kappa,1), alfa) * Math.pow(Math.max(sci_kappa, 1), -1.209) * Math.pow(0.993, age) * sex * race;
+        
+        $('#cdk_epi_creatinine').val(""+cdkec.toFixed(3)).change();
+    });
+    
+
+    //autoload
+    (()=> {
+        let sex = ('M' == "{{ paciente.sexo }}") ? 'Femenino' : 'Masculino';
+        let html =`
+            <div class="row">
+                <div class="col-xs-12 text-muted small">
+            <i class="fas fa-info-circle"></i> C = {{c_index}} , M = {{ m_index }} ; Valores calculados para una persona de sexo ${sex} de {{ paciente.edad }}  años de edad 
+
+                </div>
+            </div>
+        `
+        $("#antropometricos").append(html);
+
+    })()
+</script>
+

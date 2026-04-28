@@ -1,0 +1,34 @@
+{% load i18n %}
+
+
+<div class="d-flex justify-content-end"> <button type="button" class="btn btn-lg" data-bs-dismiss="modal" title="{% trans "Close" %}">
+    <i class="fas fa-times"></i></button> </div>
+
+<h2>{% trans 'Comentarios informe farmacoterapéutico' %}</h2>
+
+{#<span id="div-notification"></span><br/>#}
+
+<div class="row justify-center">
+    <div class="col-12">
+        <form action="{% url 'patient-interactions-print' %}" method="post" id="comments" target="_blank">
+            {% csrf_token %}
+            <input type="hidden" name="patient_id" value="{{obj.pk}}" />
+            <div class="form-group col-xs-12">
+                <label for="comment_id">{%trans 'Comentarios informe farmacoterapéutico' %}</label>
+                <textarea name="comments" id="comment_id" class="form-control"></textarea>
+            </div>
+            <div class="separator">&nbsp;</div>
+            <div class="col-xs-12 text-center">
+                <button class="btn btn-success pull-center" type="submit"><i class="fa fa-print"></i> &nbsp; {% trans 'Imprimir' %} </button>
+            </div>
+        </form>
+
+    </div>
+</div>
+
+{%comment%}
+<div class="d-flex justify-content-end">
+    <button type="button" class="btn btn-sm ark save" data-bs-dismiss="modal" data-url="{% url "patient-treatment" %}"
+        data-target="div-container" data-obj_id="{{obj.paciente.id}}">{% trans "Save" %}</button>
+</div>
+{%endcomment%}

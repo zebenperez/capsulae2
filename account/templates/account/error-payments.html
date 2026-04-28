@@ -1,0 +1,103 @@
+{% extends 'base_error.html' %}
+{% load i18n common_tags %}
+
+{% block central_content %}
+
+<div class="row"> 
+    <div class="col-12 menu sticky-top text-center bg-black py-3"> 
+        <a href="#"><img src="/static/imgs/logo-w.png" alt="white logo" width="150"></a>
+    </div>
+
+    {% if request.user.is_authenticated %}
+        <div class="row w-100 mt-2 z-9k">
+            <div class="col-12 text-end"> <a href="{% url 'auth_logout' %}"><i class="fas fa-power-off"></i> Salir</a> </div>
+        </div>
+    {% endif %}
+
+    <div id="msg-error-exc" class="col-lg-10 offset-lg-1 col-12">
+        <div class="col-lg-10 offset-lg-1 col-12 alert alert-warning-pay text-center mt-5">
+            {% trans "¡Cuenta desactivada!" %}{%if err_msg%} {{err_msg}} {%endif%}</div>
+        <span class="separator">&nbsp;</span>
+        <div class="col-lg-10 offset-lg-1 col-12 card warning-pay">
+            <div class="card-header text-white text-center">
+                <div class="row"> <div class="col-lg-10 offset-lg-1 col-12">{% trans 'Descripción del problema' %}</div> </div>
+            </div>
+            <div class="card-body text-center p-3">
+                {% if payment %}
+                    Su último pago fue el {{payment.pay_date}} y expiró el {{payment.expire_date}}
+                    <br/> <br/> 
+                    Debe realizar el pago de su cuota para reactivar la cuenta.
+                {% else %}
+                    No se ha encontrado ningún pago registrado, debe abonar la cuota asociada a su perfil para activar la cuenta.
+                {% endif %}
+                <br/> <br/>
+                {% if register %}
+                    {% for plan in plan_list %}
+	                    <div class="col-lg-4 offset-lg-4 text-center pt-5 pb-3"> <a class="btn btn-primary payment w-100 py-3" 
+                            href="{% url "account-payment-send" plan.id %}">
+                            <strong>{% trans "REALIZAR PAGO DEL PLAN " %}{{plan.name|upper}} ({{plan.amount}}) €
+                            <i class="fas fa-paper-plane fa-fw"></i></strong></a></div>
+                    {% endfor %}
+                    {%comment%}
+                    Para regularizar su pago ponganse en contacto con nosotros a través de 
+                        <a href="mailto:info@fundec.org" style="color:#4e1134;">info@fundec.org</a>
+                    {%endcomment%}
+                {% else %}
+                    <div class="row w-100 patient-data-body-2 p-1" style="margin:0;">
+                        <div class="col-11 patient-data">
+                            <div class="row" style="margin:0;">
+                                <div class="col-4 mt-3">
+                                    <label class="label">{% trans "Nombre" %}:</label>
+                                    <input type="text" class="form-control autosave input view" id="name" name="name" value="{{obj.name}}" 
+                                        title="{{obj.name}}" data-model-name="account.company" data-obj-id="{{obj.id}}" 
+                                        data-url="{%url "autosave_field"%}" data-target="div-notification"/> <span id="name__msg"></span>
+                                </div>
+                                <div class="col-4 mt-3">
+                                    <label class="label">{% trans "CIF" %}:</label>
+                                    <input type="text" class="form-control autosave input view" id="code" name="code" value="{{obj.code}}" 
+                                        title="{{obj.code}}" data-model-name="account.company" data-obj-id="{{obj.id}}" 
+                                        data-url="{% url "autosave_field" %}" data-target="div-notification"/> <span id="code__msg"></span>
+                                </div>
+                                <div class="col-4 mt-3">
+                                    <label class="label">{% trans "Correo electrónico" %}:</label>
+                                    <input type="text" class="form-control autosave input view" id="email" name="email" value="{{obj.email}}" 
+                                        title="{{obj.email}}" data-model-name="account.company" data-obj-id="{{obj.id}}" 
+                                        data-url="{% url "autosave_field" %}" data-target="div-notification"/> <span id="email__msg"></span>
+                                </div>
+                            </div>
+                            <div class="row" style="margin:0;">
+                                <div class="col-4 mt-3">
+                                    <label class="label">{% trans "Dirección" %}:</label>
+                                    <input type="text" class="form-control autosave input view" id="main_address" name="main_address" 
+                                        value="{{obj.main_address}}" title="{{obj.main_address}}" data-model-name="account.company" 
+                                        data-obj-id="{{obj.id}}" data-url="{% url "autosave_field" %}" data-target="div-notification"/> 
+                                    <span id="main_address__msg"></span>
+                                </div>
+                                <div class="col-4 mt-3">
+                                    <label class="label">{% trans "Localidad" %}:</label>
+                                    <input type="text" class="form-control autosave input view" id="town" name="town" value="{{obj.town}}" 
+                                        title="{{obj.town}}" data-model-name="account.company" data-obj-id="{{obj.id}}" 
+                                        data-url="{% url "autosave_field" %}" data-target="div-notification"/> <span id="town__msg"></span>
+                                </div>
+                                <div class="col-4 mt-3">
+                                    <label class="label">{% trans "Provincia" %}:</label>
+                                    <input type="text" class="form-control autosave input view" id="province" name="province" value="{{obj.province}}"
+                                        title="{{obj.province}}" data-model-name="account.company" data-obj-id="{{obj.id}}"  
+                                        data-url="{% url "autosave_field" %}" data-target="div-notification"/> <span id="province__msg"></span>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12 mt-3">
+                                    <a class="btn btn-default btn-sm" 
+                                        onclick="setTimeout(()=>{window.location.href = '{% url "pharma-index" %}';}, 300);">{% trans "Enviar" %}</a>
+                                </div>    
+                            </div>    
+                        </div>    
+                    </div>    
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,118 @@
+.risk-table .title{
+	font-weight: bolder;
+	text-transform: uppercase;
+}
+
+
+.patient-data, .entity-data{
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+}
+
+.risk-table-row{
+	display: grid;
+	grid-template-columns: 40px 6fr 2fr 2fr;
+	border: 1px solid silver;
+	box-sizing: border-box;
+	padding: 4px 10px;
+}
+
+.risk-table-row div{
+	display: flex;
+	justify-content: flex-start;
+	align-items: center;
+	max-width: 100%;
+	max-height: 100%;
+	overflow: hidden;
+}
+
+
+.risk-table-row div:nth-child(n+3){
+	justify-content: center;
+	align-items: center;
+}
+
+.risk-table-row .print-input{
+	text-align: center;
+	font-weight: bolder;
+	font-size: 1.1em;
+	max-width: 90%;
+	max-height: 90%;
+}
+
+
+.meter-row{
+	width: 100%;
+	border: 1px solid silver;
+	display: flex;
+	justify-content: flex-start;
+	margin-bottom: 2em;
+}
+
+
+
+.metric{
+	flex-grow: 1;
+	border: 1px solid silver;
+	min-height: 2rem;
+
+}
+
+.metric-1{
+	background-color:  #d9ead3;
+}
+
+.metric-2{
+	background-color: #fff2cc;
+}
+.metric-3{
+	background-color: #f9cb9c;
+}
+
+.metric-4{
+	background-color: #e69138;
+}
+
+.metric-5{
+	background-color: #ea9999;
+}
+
+.metric-6{
+ 	background-color: #e06666;
+}
+
+.metric-7{
+	background-color: #990000
+}
+
+.metric-8{
+	background-color: #6b4157
+}
+
+.metric-9{
+	background-color: #4c1130
+}
+
+.metric-10{
+	background-color: #000000
+}
+
+.signature .professional{
+	font-weight: bolder;
+    width: 6cm;
+    border: 1px solid silver;
+}
+
+.check-icon{
+	display: flex;
+	width: 100%;
+	height: 100%;
+	justify-content: center;
+	align-items: center;
+	font-size: 2rem;
+}
+
+.icon-white .check-icon{
+	color: var(--light-color);
+}

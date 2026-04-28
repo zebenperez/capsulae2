@@ -1,0 +1,379 @@
+{% load i18n static %}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="UTF-8">
+	<title>{% trans "Formulario de derivación para "%} {{ patient.history_number }}</title>
+	<link rel="stylesheet" href="{% static 'community/css/colors.css' %}">
+	<link rel="stylesheet" href="{% static 'community/css/documents.css' %}">
+	<link rel="stylesheet" href="{% static 'community/css/referral-form.css' %}">
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" 
+        integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.min.js" 
+        integrity="sha384-ODmDIVzN+pFdexxHEHFBQH3/9/vQ9uori45z4JjnFsRydbmQbmL5t1tQ0culUzyK" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js" 
+        integrity="sha384-A3rJD856KowSb7dwlZdYEkO39Gagi7vIsF0jrRAoQmDKKtQBHUuLZ9AsSv4jD4Xa" crossorigin="anonymous"></script>
+
+    <!-- JQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.1.min.js" integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" 
+        crossorigin="anonymous"></script>
+
+    <script src="{% static "js/common.js" %}"></script>
+
+    <style>
+        .custom-th{
+            border-bottom: 1px solid #999;;
+            padding-bottom:10px;
+        }
+        .custom-td{
+            padding-top:10px;
+            padding-bottom:10px;
+        }
+        .tos-link{
+            color: #832bf7;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+ 	<div class="page-infinite">
+		<div class="page-wrapper">
+            <div class="header"> 
+                <div class="fundec-logo">
+                    {% if company.image %}
+                        <img src="{{company.image.url}}" alt="{{company.name}}" style="height:60px"/> 
+                        {%comment%}
+                    {% else %}
+                        <img src="{% static 'community/images/capsulae-logo.png' %}" alt="Capsulae"/> 
+                        {%endcomment%}
+                    {% endif %}
+                </div> 
+                <div class="company-logo"> 
+                    <img src="{% static 'community/images/fundec-logo.png' %}" alt="Fundec"/>
+               </div>
+            </div>
+            <br/><br/>
+            <form action="{% url "organization-register-send" %}" method="POST">
+            {%csrf_token%}
+            <input type="hidden" name="username" value="{{username}}"/>
+			<div class="content">
+                <h2 class="main-title"> <strong>{% trans "GUÍA DE RECURSOS COMUNITARIOS PARA LA SALUD" %}</strong></h2>
+                <p class="intro-register">
+                    Les damos la bienvenida al proceso de elaboración de la primera Guía de recursos comunitarios para La salud de Granadilla de Abona. Este cuestionario es para identificar y mapear los recursos/programas/proyectos/organizaciones del municipio que nos ayudan a tener mejor salud.
+                </p>
+
+                <div class="row"> <div class="col-12"> <div class="greybox-sm register p-1">
+                    {% trans "Nombre del recurso" %} <input type="text" class="form-control" id="name" name="name" value="" placeholder="Nombre..."/> 
+                </div> </div> </div>
+
+                <div class="row mt-2"> <div class="col-12"> <div class="greybox-sm register p-1">
+                    {% trans "Breve descripción del recurso/programa/proyecto/organización" %}
+                    <textarea class="form-control" id="description" name="description" placeholder=""></textarea>
+                </div> </div> </div>
+
+                <div class="row"> <div class="col-12"> <div class="greybox-sm register p-1">
+                    {% trans "Año de creación" %} <input type="text" class="form-control" id="year" name="year" value="" placeholder="Año..." /> 
+                </div> </div> </div>
+
+                <br/><div class="bg-section col-12 text-center"><strong>{% trans "Dirección" %}</strong></div><br/>
+                <div class="row mt-2"> 
+                    <div class="col-4"> <div class="greybox-sm register p-1">
+                        Tipo de vía 
+                        <select name="street_type" class="form-control">
+                            <option value="">-- Selecciones una opción --</option>
+                            <option value="calle">Calle</option>
+                            <option value="avenida">Avenida</option>
+                            <option value="paso">Paso</option>
+                            <option value="camino">Camino</option>
+                            <option value="carretera">Carretera</option>
+                            <option value="barranco">Barranco</option>
+                            <option value="acceso">Acceso</option>
+                            <option value="bajada">Bajada</option>
+                            <option value="llano">Llano</option>
+                            <option value="autovia">Autovía</option>
+                            <option value="autopista">Autopista</option>
+                            <option value="otros">Otros</option>
+                        </select>
+                    </div></div>
+                    <div class="col-8"> <div class="greybox-sm register p-1">
+                        {% trans "Nombre de la vía" %} 
+                        <input type="text" class="form-control" id="street_name" name="street_name" value="" placeholder="Nombre..." /> 
+                    </div></div>
+                    <div class="col-4"> <div class="greybox-sm register p-1">
+                        {% trans "Número" %} 
+                        <input type="text" class="form-control" id="number" name="number" value="" placeholder="Número..." /> 
+                    </div></div>
+                    <div class="col-4"> <div class="greybox-sm register p-1">
+                        {% trans "Puerta" %} 
+                        <input type="text" class="form-control" id="door" name="door" value="" placeholder="Puerta..." /> 
+                    </div></div>
+                    <div class="col-4"> <div class="greybox-sm register p-1">
+                        {% trans "Código postal" %} 
+                        <input type="text" class="form-control" id="postal_code" name="postal_code" value="" placeholder="Código postal..." /> 
+                    </div></div>
+                    <div class="col-12"> <div class="greybox-sm register p-1">
+                        {% trans "Barrio o núcleo" %} 
+                        <select id="place" name="place" class="form-control">
+                            <option value="">-- Selecciones una opción --</option>
+                            <option value="los abrigos">Los Abrigos</option>
+                            <option value="los blanquitos">Los Blanquitos</option>
+                            <option value="cruz de tea">Cruz de Tea</option>
+                            <option value="charco del pino">Charco del Pino</option>
+                            <option value="chimiche">Chimiche</option>
+                            <option value="el desierto">El Desierto</option>
+                            <option value="granadilla casco">Granadilla casco</option>
+                            <option value="el medano">El Médano</option>
+                            <option value="el salto">El Salto</option>
+                            <option value="san isidro">San Isidro</option>
+                            <option value="otro">Otro</option>
+                        </select>
+                    </div></div>
+                    <div class="row mt-2" id="div-place2" style="display:none"> <div class="col-12"> <div class="greybox-sm register p-1">
+                        {% trans "Barrio o núcleo" %}
+                        <input type="text" class="form-control" id="place2" name="place2" value="" placeholder="..." /> 
+                    </div> </div> </div>
+                    <div class="col-12"> <div class="greybox-sm register p-1">
+                        ¿La mayoría de sus actividades se desarrollan en un barrio/núcleo diferente al de su sede?
+                        <select name="same_place" class="form-control" onchange="$('#div-place').toggle()">
+                            <option value="0">No</option>
+                            <option value="1">Si</option>
+                        </select>
+                    </div></div>
+                    <div class="col-12" id="div-place" style="display:none"> <div class="greybox-sm register p-1">
+                        ¿En qué barrio/núcleo realizan las actividades?
+                        <select name="activity_place" class="form-control">
+                            <option value="">-- Selecciones una opción --</option>
+                            <option value="los abrigos">Los Abrigos</option>
+                            <option value="los blanquitos">Los Blanquitos</option>
+                            <option value="cruz de tea">Cruz de Tea</option>
+                            <option value="charco del pino">Charco del Pino</option>
+                            <option value="chimiche">Chimiche</option>
+                            <option value="el desierto">El Desierto</option>
+                            <option value="granadilla casco">Granadilla casco</option>
+                            <option value="el medano">El Médano</option>
+                            <option value="el salto">El Salto</option>
+                            <option value="san isidro">San Isidro</option>
+                            <option value="otros">Otros</option>
+                        </select>
+                    </div></div>
+                </div>
+
+                <div class="row mt-2"> 
+                    <div class="col-12"> <div class="greybox-sm register p-1">
+                        {% trans "Correos electrónicos" %}
+                        <textarea class="form-control" id="email" name="email" placeholder=""></textarea>
+                        {#<input type="text" class="form-control" id="email" name="email" value="" placeholder="Correo electrónico..." /> #}
+                    </div> </div>
+                    <div class="col-12"> <div class="greybox-sm register p-1">
+                        {% trans "Teléfonos" %}
+                        <textarea class="form-control" id="phone" name="phone" placeholder=""></textarea>
+                        {#<input type="text" class="form-control" id="phone" name="phone" value="" placeholder="Teléfono..." /> #}
+                    </div> </div>
+                </div>
+
+                <br/><div class="bg-section col-12 text-center"><strong>{% trans "Redes sociales" %}</strong></div><br/>
+                <div class="row mt-2"> <div class="col-12"> <div class="greybox-sm register p-1">
+                    {% trans "Facebook" %}
+                    <input type="text" class="form-control" id="facebook" name="facebook" value="" placeholder="..." /> 
+                </div> </div> </div>
+                <div class="row mt-2"> <div class="col-12"> <div class="greybox-sm register p-1">
+                    {% trans "Instagram" %}
+                    <input type="text" class="form-control" id="instagram" name="instagram" value="" placeholder="..." /> 
+                </div> </div> </div>
+                <div class="row mt-2"> <div class="col-12"> <div class="greybox-sm register p-1">
+                    {% trans "Twitter" %}
+                    <input type="text" class="form-control" id="twitter" name="twitter" value="" placeholder="..." /> 
+                </div> </div> </div>
+                <div class="row mt-2"> <div class="col-12"> <div class="greybox-sm register p-1">
+                    {% trans "Canal de Youtube" %}
+                    <input type="text" class="form-control" id="youtube" name="youtube" value="" placeholder="..." /> 
+                </div> </div> </div>
+
+                <br />
+                <hr />
+                <div class="row mt-2"> <div class="col-12"> <div class="greybox-sm register p-1">
+                    {% trans "Persona responsable" %}
+                    <input type="text" class="form-control" id="in_charge" name="in_charge" value="" placeholder="Persona responsable..." /> 
+                </div> </div> </div>
+                <div class="row mt-2"> <div class="col-12"> <div class="greybox-sm register p-1">
+                    {% trans "Cargo de la persona responsable" %}
+                    <input type="text" class="form-control" id="in_charge_resp" name="in_charge_resp" value="" placeholder="Cargo..." /> 
+                </div> </div> </div>
+                <div class="row mt-2"> <div class="col-12"> <div class="greybox-sm register p-1">
+                    {% trans "Persona de contacto" %}
+                    <input type="text" class="form-control" id="contact" name="contact" value="" placeholder="Persona de contacto..." /> 
+                </div> </div> </div>
+                <div class="row mt-2"> <div class="col-12"> <div class="greybox-sm register p-1">
+                    {% trans "Cargo de la persona de contacto" %}
+                    <input type="text" class="form-control" id="contact_resp" name="contact_resp" value="" placeholder="Cargo..." /> 
+                </div> </div> </div>
+
+                <br />
+                <hr />
+                <div class="row mt-4"> <div class="col-12"> <div class="greybox-sm register p-1">
+                    {% trans "Titularidad del recurso" %} 
+                    <select name="owner" class="form-control">
+                        <option value="">-- Selecciones una opción --</option>
+                        <option value="gobierno de canarias">Gobierno de Canarias</option>
+                        <option value="cabildo de tenerife">Cabildo de Tenerife</option>
+                        <option value="ayuntamiento de granadilla de abona">Ayuntamiento de Granadilla de Abona</option>
+                        <option value="entidade sin animo de lucro">Entidad Sin Ánimo de Lucro</option>
+                        <option value="otros">Otros</option>
+                    </select>
+                </div> </div> </div>
+                <div class="row mt-4"> <div class="col-12"> <div class="greybox-sm register p-1">
+                    ¿Se trata de un recurso gratuito?
+                    <select name="free" class="form-control">
+                        <option value="1">Si</option>
+                        <option value="0">No</option>
+                    </select>
+                </div></div></div>
+                <br />
+                <hr />
+                <div class="row mt-4"> <div class="col-12"> <div class="greybox-sm register p-1">
+                    {% trans "Grupo poblacional con el que trabaja" %} <br/>
+                    (Se puede seleccionar varias opciones utilizando la tecla <i>ctrl</i>)
+                    <select id="group" name="group" class="form-control" multiple>
+                        <option value="población general">Población general</option>
+                        <option value="mayores">Mayores</option>
+                        <option value="infancia y adolescencia">Infancia y adolescencia</option>
+                        <option value="jóvenes">Jóvenes</option>
+                        <option value="inmigrantes">Inmigrantes</option>
+                        <option value="mujeres">Mujeres</option>
+                        <option value="personas racializadas">Personas racializadas</option>
+                        <option value="personas LGTBIQ+">Personas LGTBIQ+</option>
+                        <option value="personas en situación de drogodependencia">Personas en situación de drogodependencia</option>
+                        <option value="personas en situación de sinhogarismo">Personas en situación de sinhogarismo</option>
+                        <option value="personas con discapacidad">Personas con discapacidad</option>
+                        <option value="otros">Otros</option>
+                    </select>
+                </div> </div> </div>
+                <div class="row mt-2" id="div-group2" style="display:none"> <div class="col-12"> <div class="greybox-sm register p-1">
+                    {% trans "Grupo poblacional con el que trabaja" %}
+                    <input type="text" class="form-control" id="group2" name="group2" value="" placeholder="Grupo..." /> 
+                </div> </div> </div>
+ 
+                {%comment%}
+                <div class="row mt-2"> <div class="col-12"> <div class="greybox-sm register p-1">
+                    {% trans "Dirección" %}
+                    <input type="text" class="form-control" id="address" name="address" value="" placeholder="Dirección..." /> 
+                </div> </div> </div>
+
+                <div class="row mt-2"> <div class="col-12"> <div class="greybox-sm register p-1">
+                    {% trans "Vía de derivación" %}
+                    <input type="text" class="form-control" id="derivation_way" name="derivation_way" value="" placeholder="Vía de derivación..." />
+                </div> </div> </div>
+
+                <div class="row mt-2"> <div class="col-12"> <div class="greybox-sm register p-1">
+                    {% trans "Observaciones" %}
+                    <textarea class="form-control" id="derivation" name="derivation" placeholder="Observaciones..."></textarea>
+                </div> </div> </div>
+                <div class="row mt-4"> <div class="col-12"> <div class="greybox-sm register p-1">
+                    Ámbito de actuación 
+                    {#<textarea class="form-control mt-2" id="ambit" name="ambit" placeholder="Ámbito..."></textarea>#}
+                    <select name="ambit" class="form-control">
+                        <option value="">-- Selecciones una opción --</option>
+                        <option value="mayores">Mayores</option>
+                        <option value="infancia y adolescencia">Infancia y adolescencia</option>
+                        <option value="jovenes">Jovenes</option>
+                        <option value="inmigrantes">Inmigrantes</option>
+                        <option value="mujeres">Mujeres</option>
+                        <option value="personas racializadas">Personas racializadas</option>
+                        <option value="personas en situación de drogodependencia">Personas en situación de drogodependencia</option>
+                        <option value="personas en situación de sinhogarismo">Personas en situación de sinhogarismo</option>
+                        <option value="otros">Otros</option>
+                    </select>
+                </div> </div> </div>
+                {%endcomment%}
+
+                <div class="row mt-2"> <div class="col-12"> <div class="greybox-sm register p-1">
+                    Actividades que realiza
+                    <textarea class="form-control" id="activities" name="activities" placeholder=""></textarea>
+                </div> </div> </div>
+
+                <div class="row mt-2"> <div class="col-12"> <div class="greybox-sm register p-1">
+                    ¿Cómo participar?  <textarea class="form-control" id="participate" name="participate" placeholder=""></textarea>
+                </div> </div> </div>
+
+                <div class="row mt-2"> <div class="col-12"> <div class="greybox-sm register p-1">
+                    ¿Cómo ven la salud en el municipio?  
+                    <textarea class="form-control" id="health" name="health" placeholder=""></textarea>
+                </div> </div> </div>
+
+                <div class="row mt-2"> <div class="col-12"> <div class="greybox-sm register p-1">
+                    ¿De qué forma creen que sus actividades mejoran el bienestar en el municipio?
+                    <textarea class="form-control" id="improvements" name="improvements" placeholder=""></textarea>
+                </div> </div> </div>
+
+                <div class="row mt-2"> <div class="col-12"> <div class="greybox-sm register p-1">
+                    ¿Qué otro recurso no podría faltar en esta guía?
+                    <textarea class="form-control" id="resources" name="resources" placeholder=""></textarea>
+                </div> </div> </div>
+            </div>
+
+            <br/>
+            <hr />
+            <div class="row mt-4"> <div class="col-12"> <div class="greybox-sm register p-1">
+                <input type="checkbox" id="tos" name="tos" /> 
+                <a class="ark tos-link" data-url="{%url "organization-register-tos"%}" data-target-modal="common-modal" data-temp="tos">
+                    Acepto los terminos de protección de datos.</a> 
+            </div></div></div>
+            <div class="row mt-4"> <div class="col-12"> <div class="greybox-sm register p-1">
+                <input type="checkbox" id="tos-datas" name="tos" /> 
+                <a class="ark tos-link" data-url="{%url "organization-register-tos"%}" data-target-modal="common-modal" data-temp="tos-datas">
+                    Acepto la publicación de los datos proporcionados.</a> 
+            </div></div></div>
+            <br/>
+            <div class="d-flex justify-content-center"> 
+                <input type="submit" id="btn-send" class="btn btn-secondary" value="{% trans "Enviar" %}"/> </div>
+            </form>
+
+            {%comment%}
+            <div class="footer">
+	            <div class="data">
+		            <p class="company"> {{ company.name|default:"" }} </p>
+		            <address>
+			            {{ company.main_address|default:"" }} {{company.town|default:"" }},
+			            {{ company.postal_code|default:"" }} {{ company.province|default:"" }}
+		            </address>
+		            <div class="contact-info">
+                        {% if company.phone != "" %} <div class="phone"> tel: {{ company.phone }} </div> {% endif %}
+			            <div class="website"> {{ company.email }} </div>
+		            </div>
+	            </div>
+            </div>
+            {%endcomment%}
+		</div>
+	</div>
+    {% include "common-modal.html" %}
+    <script>
+        $("#place").change(function(){
+            var val = $(this).val();
+            if (val == "otro")
+                $("#div-place2").show();
+            else
+                $("#div-place2").hide();
+        });
+ 
+        $("#group").change(function(){
+            var gList = $(this).val();
+            if (gList.indexOf("otros") !== -1)
+                $("#div-group2").show();
+            else
+                $("#div-group2").hide();
+        });
+        $("#btn-send").click(function(){
+            if( $('#tos').is(':checked') && $('#tos-datas').is(':checked') ) 
+                return true;
+            alert('Debe confirmar que acepta la publicación y la protección de los datos proporcionados');
+            return false;
+        });
+    </script>
+</body>
+</html>
+
+

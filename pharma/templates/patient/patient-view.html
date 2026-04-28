@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% load i18n common_tags %}
+
+{% block central_content %} 
+    <div class="content"> 
+        {#{% include "patient/patient-form.html" %} #}
+        <div class="patient-data-title p-4">
+            <div class="col-lg-1 col-1 patient-profile-left">
+                <div class="img"> <img src="/static/imgs/no-avatar.png" class="patient-profile-img"> </div>
+            </div>
+            <div class="col-lg-11 col-10 col-offset-1">{{obj.nombre}} {{obj.apellido}}</div>
+        </div>
+    </div>
+    <div class="tabs mt-3">
+        <div class="tab-item active ark text-center" data-url="{% url "patient-form" %}" data-target="div-container" data-obj_id="{{obj.id}}"> 
+            <i class="fa fa-user"></i><span class="hide-mobile"><br />{% trans "Personal" %}</span></div>
+        {% if user|have_menu:"TRA"%}
+            <div class="tab-item ark text-center" data-url="{% url "patient-treatment" %}" data-target="div-container" data-obj_id="{{obj.id}}"> 
+                <i class="fa fa-barcode"></i> <span class="hide-mobile"><br />{% trans "Tratamientos" %} ({{obj.get_active_treatments}})</span></div>
+        {% endif %}
+        {% if user|have_menu:"PARAM"%}
+            <div class="tab-item ark text-center" data-url="{% url "patient-params" %}" data-target="div-container" data-obj_id="{{obj.id}}">
+                <i class="fa fa-history"></i><span class="hide-mobile"><br />{% trans "Parametros" %} ({{obj.blood_pressure.all.count}})</span></div>
+        {% endif %}
+        {% if user|have_menu:"DIA"%}
+            <div class="tab-item ark text-center" data-url="{% url "patient-diagnoses" %}" data-target="div-container" data-obj_id="{{obj.id}}"> 
+                <i class="fa fa-list"></i> <span class="hide-mobile"><br />
+                {% trans "Diagnósticos" %} ({{obj.diagnoses.all.count}})</span></div>
+        {% endif %}
+        {% if user|have_menu:"SPD"%}
+            <div class="tab-item ark text-center" data-url="{% url "patient-spd" %}" data-target="div-container" data-obj_id="{{obj.id}}">
+                <i class="fa fa-pills"></i><span class="hide-mobile"><br />{% trans "Pastilleros" %} ({{obj.get_active_pillboxes}})</span></div>
+        {% endif %}
+        {% if user|have_menu:"ALE"%}
+            <div class="tab-item ark text-center" data-url="{% url "patient-allergy" %}" data-target="div-container" data-obj_id="{{obj.id}}">
+                <i class="fas fa-allergies"></i><span class="hide-mobile"><br />{% trans "Alergias" %} 
+                ({{obj.alergias_excipientes.all.count}}/{{obj.alergias_principios.all.count}})</span></div>
+        {% endif %}
+        {% if user|have_menu:"LOPD"%}
+            <div class="tab-item ark text-center" data-url="{% url "patient-lopd" %}" data-target="div-container" data-obj_id="{{obj.id}}">
+                <i class="fa fa-gavel"></i><span class="hide-mobile"><br />{% trans "LOPD" %} ({{obj.lopd.all.count}})</span></div>
+        {% endif %}
+        {% if user|have_menu:"EVO"%}
+            <div class="tab-item ark text-center" data-url="{% url "patient-evolutionary" %}" data-target="div-container" data-obj_id="{{obj.id}}">
+                <i class="fa fa-history"></i><span class="hide-mobile"><br />{% trans "Evolutivo" %} ({{obj.evolutionary.all.count}})</span></div>
+        {% endif %}
+        {% if user|have_menu:"TELEGRAM"%}
+            <div class="tab-item ark text-center" data-url="{% url "patient-telegram" %}" data-target="div-container" data-obj_id="{{obj.id}}">
+                <i class="fab fa-telegram"></i><span class="hide-mobile"><br />{% trans "Telegram" %}</span></div>
+        {% endif %}
+        {% if user|have_menu:"PTR"%}
+            <div class="tab-item ark text-center" data-url="{% url "patient-procedure" %}" data-target="div-container" data-obj_id="{{obj.id}}"> 
+                <i class="fa fa-project-diagram"></i> <span class="hide-mobile"><br />
+                {% trans "Trámites" %} ({{obj.procedures.all.count}})</span></div>
+        {% endif %}
+    </div>
+
+    <div id="div-container">{% include "patient/patient-form.html" %}</div>
+    {#<div id="div-container">{% include "patient/treatments/treatment-list.html" %}</div>#}
+    
+    {% include "common-modal.html" %} 
+
+    <script>
+        $(".tab-item").click(function(){
+            $(".tab-item").removeClass("active");
+            $(this).addClass("active");
+        });
+    </script>
+
+    <script>
+        function myFunction() {
+            var x = document.getElementById("hamb-menu");
+            if (x.style.display === "block") {
+                x.style.display = "none";
+            } else {
+                x.style.display = "block";
+            }
+        }
+    </script>
+
+{% endblock central_content %}

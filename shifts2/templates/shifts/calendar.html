@@ -1,0 +1,65 @@
+{% load i18n static %}
+
+<script>
+    var stop = false;
+    var calendar;
+    document.addEventListener('DOMContentLoaded', function() {
+        var calendarEl = document.getElementById('calendar');
+        calendar = new FullCalendar.Calendar(calendarEl, {
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek,timeGridDay,listMonth'
+            },
+            contentHeight: 1200,
+
+            initialDate: '{{today|date:"Y-m-d"}}',
+            navLinks: true, // can click day/week names to navigate views
+            dayMaxEvents: true,
+            {% if perms.create_events %}
+                dateClick: function(info) { if (stop == false) ajaxGet('{% url "shifts-get-shift" %}', {'date': info.dateStr}, "div-shifts", "") },
+            {% endif %}
+            eventClick: function(info) { ajaxGet('{% url "shifts-get-shift" %}', {'obj_id': info.event.id}, "div-shifts", "") },
+            events: [
+                {% for item in shift_list%}
+                    {
+                        id: '{{item.pk}}',
+                        title: '{%if item.name != ""%}<b>{{item.name}}</b>{%else%}{{item.pk}}{%endif%}<br/> - {{item.employee_list}}',
+                        //title: '{%if item.name != ""%}{{item.name}}{%else%}{{item.pk}}{%endif%}',
+                        start: '{{item.ini_date|date:"Y-m-d"}} {{item.ini_time|date:"H:i"}}',
+                        end: '{{item.end_date|date:"Y-m-d"}} {{item.end_time|date:"H:i"}}',
+                        {#{% if item.ini_date|date:"Y-m-d" != item.end_date|date:"Y-m-d" %} end: '{{item.end_date|date:"Y-m-d"}} {{item.end_time|date:"H:i"}}' {% endif %}#}
+                        display: 'block',
+                    },
+                {% endfor %}
+            ],
+                
+            eventContent: function(arg) {
+                return { html: arg.event.title.replaceAll("|", "<br/> - ") }
+            },
+        });
+        calendar.render();
+
+        $(".fc-today-button").click(function(){
+            var y = calendar.getDate().getYear();
+            var m = calendar.getDate().getMonth();
+            ajaxGet('{% url "shifts-calendar" %}', {'year': (y-100), 'month':(m+1)}, "load-shifts", "")
+        });
+        $(".fc-prev-button").click(function(){
+            var y = calendar.getDate().getYear();
+            var m = calendar.getDate().getMonth();
+            ajaxGet('{% url "shifts-calendar" %}', {'year': (y-100), 'month':(m+1)}, "load-shifts", "")
+        });
+        $(".fc-next-button").click(function(){
+            var y = calendar.getDate().getYear();
+            var m = calendar.getDate().getMonth();
+            ajaxGet('{% url "shifts-calendar" %}', {'year': (y-100), 'month':(m+1)}, "load-shifts", "")
+        });
+    });
+
+    // Truco para evitar el doble click en los eventos
+    $('#calendar').dblclick(function(e){ stop = true; setTimeout(function(){ stop = false}, 1000); e.preventDefault(); });
+</script>
+
+<div id='calendar' style="max-width:1400px; margin: 0 auto;"></div>
+

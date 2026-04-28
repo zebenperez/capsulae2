@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block central_content %} 
+    <div class="content"> 
+        <div class="patient-data-title p-4">
+            <div class="col-lg-1 col-1 patient-profile-left">
+                <div class="img"> <img src="/static/imgs/no-avatar.png" class="patient-profile-img"> </div>
+            </div>
+            <div class="col-lg-11 col-10 col-offset-1">{{obj.name}} </div>
+        </div>
+    </div>
+    <div class="tabs mt-3">
+        <div class="tab-item active ark" data-url="{% url "project-details" %}" data-target="div-container" data-obj_id="{{obj.id}}"> 
+            <i class="fa fa-user"></i> <span class="hide-mobile">&nbsp; {% trans "Datos principales" %}</span></div>
+        <div class="tab-item ark" data-url="{% url "project-texts" %}" data-target="div-container" data-obj_id="{{obj.id}}"> 
+            <i class="fa fa-sticky-note"></i> <span class="hide-mobile">&nbsp; {% trans "Anexos" %} ({{obj.texts.all.count}})</span></div>
+        <div class="tab-item ark" data-url="{% url "project-activities" %}" data-target="div-container" data-obj_id="{{obj.id}}"> 
+            <i class="fa fa-barcode"></i> <span class="hide-mobile">&nbsp; {% trans "Actividades" %} ({{obj.activities.all.count}})</span></div>
+        <div class="tab-item ark" data-url="{% url "project-budget" %}" data-target="div-container" data-obj_id="{{obj.id}}"> 
+            <i class="fa fa-coins"></i> <span class="hide-mobile">&nbsp; {% trans "Presupuesto" %} 
+            ({{obj.incomes.all.count}}/{{obj.expenses.all.count}})</span></div>
+        <div class="tab-item ark" data-url="{% url "project-drive" %}" data-target="div-container" data-obj_id="{{obj.id}}"> 
+            <i class="fa fa-database"></i> <span class="hide-mobile">&nbsp; {% trans "Drive" %} </span></div>
+    </div>
+
+    <div id="div-container">{% include "project/project-details.html" %}</div>
+    
+    {% include "common-modal.html" %} 
+
+    <script>
+        $(".tab-item").click(function(){
+            $(".tab-item").removeClass("active");
+            $(this).addClass("active");
+        });
+    </script>
+
+    <script>
+        function myFunction() {
+            var x = document.getElementById("hamb-menu");
+            if (x.style.display === "block") {
+                x.style.display = "none";
+            } else {
+                x.style.display = "block";
+            }
+        }
+    </script>
+
+{% endblock central_content %}

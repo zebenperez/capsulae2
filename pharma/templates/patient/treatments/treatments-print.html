@@ -1,0 +1,170 @@
+{% load pharma_tags i18n  %}
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <style>
+button{display:none;}    
+@media screen{button{display:inline;}}
+
+@page 
+{
+    size: A4  {% if simple_report %}landscape {% endif %};
+    /*@top-right{content: "Pág. " counter(page) " de " counter(pages);font-size:0.6em;}
+      @top-left{content: "CAPSULAE";} */
+        {% if interacciones|length > 0 %}
+        @top-center{content:"Plan de tratamiento - {{paciente.n_historial}} -";}
+        {%endif%}
+        @bottom-right{content: "{% now "d F Y" %}";}
+}
+            body {font-size:0.85em; {% if html_view %} width:90%; margin:auto; {% endif %}}
+            table {width:99.9%}
+            table.list, table#register {border-collapse:collapse; border:2px solid black;}
+            table.list td, table.list th {border-bottom:1px solid black;}
+            tr.odd { background-color:#eee; border-color:#eee;}
+            tr.medicamentos td{border-bottom:0px;}
+            tr.interacciones td{border-top:1px dotted black;}
+            table.list th {font-size:0.8em}
+            .warnings { font-size:0.6em;}
+            table.firmas td {border:2px solid; border-collapse: collapse; font-size:1em;}
+            table.firmas, table#register {border-collapse:collapse;}
+            table.intera, table#register {border-collapse:collapse;}
+            table.intera thead th {font-size:1.2em;}
+            table.intera tbody tr td , table#register tbody tr td{font-size:0.8em;}
+            table#register * td , table#register th{ border-bottom: 1px solid black; font-size:1.2em;!important}
+            table#register thead * { font-size:0.9em!important;}
+            table#register * tr:nth-child(even) { background-color:#eee}
+            table.info * td, table.info * th {text-align:left;!important}
+            .text-danger {color:red; font-weight:bold}
+
+            .float-button {
+                position: fixed;
+                right: 30px;
+                top: 78px;
+                transition: all 0.2s ease-in 0s;//this is the key attribute
+                z-index: 9999;
+                cursor: pointer;
+            }
+
+
+            button.rm-btn{
+                background-color:none;
+                width: 2em;
+                height: 2em;
+                text-align: center;
+                border: 1px solid silver;
+                border-radius: 3px;
+
+            }
+            #logo{
+                max-width: 200px;
+                max-height: 220px;
+                padding-right: 10px;
+                height: auto;
+            }
+
+        </style>
+
+        {% comment %}
+        <div class="" style="background:grey; padding-top:1em; padding-bottom:3em; padding-right:2em;">
+            <button type="button" onclick="printDiv('printarea')" style="float:right;">Imprimir</button>
+        </div>
+        {% endcomment %}
+
+    </head>
+
+    <body>
+        <div id="printarea">
+            <table class="firmas">
+                <tr>
+                    <td align="left" rowspan="2" style="width:15%;border:0px;">
+                        <img id="logo" src="http://{{url_base}}{{request.user|company_logo|default:"/static/imgs/logo-capsulae.png"}}"
+				style="width:50px">
+                    </td>
+                    <td align="center"  style="width:60%;font-size:1em;text-align:left;padding-left:5px;line-height:1.4rem">
+                        <div style="text-align: center">
+                            <span style="font-size:1.2em;font-weight:600">{{paciente.full_name }}</span></br>
+                            {{paciente.fecha_nacimiento}}
+                            <span style="margin-left:20px"> CIP:</span> {{ paciente.cip|default_if_none:"--" }}
+                            <span style="margin-left:20px">Código de paciente:</span> {{paciente.n_historial}}</br> 
+                        </div>
+                    </td>
+                </tr>
+            </table>
+            <br/>
+            {%comment%}
+            </br>
+            {% if comments %}
+
+            <table class="intera">
+                <thead> <tr> <th>{% trans 'Comentarios' %}</th> </tr> </thead>
+                <tbody> <tr> <td>{{ comments }}</td> </tr> </tbody>
+            </table>
+            <br/>
+
+            <hr/>
+            {%endif%}
+            {%endcomment%}
+            <table class="list">
+                <tr>
+                    <th style="width:50%;text-align:center;font-size:1.1em">Medicamento</th>
+                    <th style="width:5%;text-align:center;">
+                        <img src="http://{{url_base}}/static/imgs/desayuno.png" style="width:16px; height:16px;"/></th>
+                    <th style="width:5%;text-align:center;">
+                        <img src="http://{{url_base}}/static/imgs/comida.png" style="width:20px; height:16px;"/></th>
+                    <th style="width:5%;text-align:center;">
+                        <img src="http://{{url_base}}/static/imgs/cena.png" style="width:20px; height:16px;"/></th>
+                    <th style="width:5%;text-align:center;">
+                        <img src="http://{{url_base}}/static/imgs/noche.png" style="width:16px; height:16px;"/></th>
+                    <th style="width:25%;text-align:center;">Observaciones</th>
+                </tr>
+                {% for trat in tratamientos %}
+                <tr style="font-size:0.8em;width:40%" class='{{trat.in_pillbox|yesno:",text-danger"}} {% if interacciones|length > 0 %} medicamentos {%endif%}{{forloop.counter|divisibleby:2|yesno:"even,odd"}}'>
+                    <td style="height:33px">
+                        {% if trat.principio %} <span style="font-size:1.2em;">{{ trat.principio }} </span><br> {% endif %}
+                        {% if trat.edo %} {{ trat.edo }} <br> {% endif %}
+                        {#{% for med in trat.medicamentos.all %} {{med.name}} <br> {% endfor %}#}
+                        {{trat.name}} <br> 
+                    </td>
+                    <td style="text-align:center;width:5%;font-size:1.2em">{{trat.m}}</td>
+                    <td style="text-align:center;width:5%;font-size:1.2em">{{trat.t}}</td>
+                    <td style="text-align:center;width:5%;font-size:1.2em">{{trat.n}}</td>
+                    <td style="text-align:center;width:5%;font-size:1.2em">{{trat.o}}</td>
+                    <td style="text-align:center;width:25%;">{{trat.observaciones}}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <script src="https://code.jquery.com/jquery-3.4.1.slim.js" integrity="sha255-BTlTdQO9/fascB1drekrDVkaKd9PkwBymMlHOiG+qLI=" crossorigin="anonymous">
+        </script>
+
+        <script src="https://code.jquery.com/jquery-3.4.1.js"></script>
+
+        <script>
+$('.rm-btn').on('click', function(e){
+
+    e.stopPropagation();
+    e.preventDefault();
+    id = $(this).attr('id');
+    id_element = id.split("_")[1]
+
+        $("#id_"+id_element).remove();
+
+});
+
+function printDiv(divName) {
+    var printContents = document.getElementById(divName).innerHTML;
+    var originalContents = document.body.innerHTML;
+
+    document.body.innerHTML = printContents;
+
+    window.print();
+
+    document.body.innerHTML = originalContents;
+}
+        </script>
+        <script src="https://cdn.tiny.cloud/1/ux3hwvtttvl9g6frvob39dd08fez1u7xuowtvsi79fo8h7rt/tinymce/5/tinymce.min.js" referrerpolicy="origin"/></script>
+        <script>tinymce.init({selector:'textarea'});</script>
+    </body>
+</html>

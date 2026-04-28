@@ -1,0 +1,97 @@
+{% load i18n %}
+
+
+<div class="row">
+    <div class="col-11"> <h2><i class="fa fa-history"></i>&nbsp; {% trans 'Modificar organización' %}</h2> </div>
+    <div class="col-1">
+        <div class="d-flex justify-content-end"> <button type="button" class="btn btn-lg" data-bs-dismiss="modal" title="{% trans "Close" %}">
+            <i class="fas fa-times"></i></button> </div>
+    </div>
+</div>
+
+<div id="div-notification"></div>
+
+<div class="row justify-center">
+    <div class="col-12">
+        <div class="row">
+            <div class="greybox-sm p-1">
+                {% trans "Nombre" %}
+                <input type="text" class="form-control autosave" id="name" name="name" value="{{obj.name|default:""}}" 
+                    title="{{obj.name}}" data-model-name="community.organization" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+                    data-target="div-notification" placeholder="Nombre..." /> <span id="name__msg"></span>
+            </div>
+        </div>
+    </div>
+    <div class="col-7">
+        <div class="row">
+            <div class="greybox-sm p-1">
+                {% trans "Correo electrónico" %}
+                <input type="text" class="form-control autosave" id="email" name="email" value="{{obj.email|default:""}}" 
+                    title="{{obj.email}}" data-model-name="community.organization" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+                    data-target="div-notification" placeholder="Correo electrónico..." /> <span id="email__msg"></span>
+            </div>
+        </div>
+    </div>
+    <div class="col-2">
+        <div class="row">
+            <div class="greybox-sm p-1">
+                {% trans "Teléfono" %}
+                <input type="text" class="form-control autosave" id="phone" name="phone" value="{{obj.phone|default:""}}" 
+                    title="{{obj.phone}}" data-model-name="community.organization" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+                    data-target="div-notification" placeholder="Teléfono..." /> <span id="phone__msg"></span>
+            </div>
+        </div>
+    </div>
+    <div class="col-3">
+        <div class="row">
+            <div class="greybox-sm p-1">
+                {% trans "Persona de contacto" %}
+                <input type="text" class="form-control autosave" id="contact" name="contact" value="{{obj.contact|default:""}}" 
+                    title="{{obj.contact}}" data-model-name="community.organization" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+                    data-target="div-notification" placeholder="Persona de contacto..." /> <span id="contact__msg"></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12">
+        <div class="row">
+            <div class="greybox-sm p-1">
+                {% trans "Dirección" %}
+                <input type="text" class="form-control autosave" id="address" name="address" value="{{obj.address|default:""}}" 
+                    title="{{obj.address}}" data-model-name="community.organization" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+                    data-target="div-notification" placeholder="Dirección..." /> <span id="address__msg"></span>
+            </div>
+        </div>
+    </div>
+    <div class="col-12">
+        <div class="row">
+            <div class="greybox-sm p-1">
+                {% trans "Vía de derivación" %}
+                <input type="text" class="form-control autosave" id="derivation_way" name="derivation_way" value="{{obj.derivation_way|default:""}}" 
+                    title="{{obj.derivation_way}}" data-model-name="community.organization" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+                    data-target="div-notification" placeholder="Vía de derivación..." /> <span id="derivation_way__msg"></span>
+            </div>
+        </div>
+    </div>
+    <div class="col-12">
+        <div class="row">
+            <div class="greybox-sm p-1">
+                {% trans "Observaciones" %}
+                <textarea class="form-control autosave" id="derivation" name="derivation" title="{{obj.derivation}}" 
+                    data-model-name="community.organization" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+                    data-target="div-notification" placeholder="Escriba aquí las observaciones...">{{obj.derivation}}</textarea>
+                    <span id="derivation__msg"></span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="d-flex justify-content-end">
+    <button type="button" class="btn btn-sm ark save" data-bs-dismiss="modal" data-url="{% url "organization-list" %}"
+        data-target="org-list">{% trans "Guardar" %}</button>
+    {%comment%}
+    <button type="button" class="btn btn-sm ark cancel" data-bs-dismiss="modal" data-url="{% url "guest-remove" %}" data-target="guest-list"
+        data-obj_id="{{obj.id}}" data-confirm="{% trans "Are you sure to remove this element?" %}">{% trans "Remove" %}</button>
+    {%endcomment%}
+</div>
+

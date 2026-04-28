@@ -1,0 +1,80 @@
+<input type="hidden" id="profile" name="profile" value="1" />
+
+{#<div class="profile-selects">#}
+<div class="donation-selects">
+	<div class="row"> <div class="col-lg-12 text-center">Tipo de donación:</div> </div>
+	<div class="row m-0">
+	    {% for plan in plan_list %}
+		    <div class="col-lg-4 col-12 text-center mt-3"> 
+                <button type="button" class="btn btn-info btn-plan" value="{{plan.id}}"> {{plan.name}} </button> </div>
+	    {% endfor %}
+	</div>
+    <br/>
+    <div class="row m-0 text-center">
+        <div class="col-lg-12 text-center mb-3">Importe:</div>
+	    <div class="col-lg-3 col-12 donation-card"> <button type="button" class="btn btn-success btn-donation" value="12">
+            12 <span class="small-text">€</span> </button> </div> 
+        <div class="col-lg-3 col-12 donation-card"> <button type="button" class="btn btn-success btn-donation" value="30">
+            30 <span class="small-text">€</span> </button> </div> 
+        <div class="col-lg-3 col-12 donation-card"> <button type="button" class="btn btn-success btn-donation" value="50">
+            50 <span class="small-text">€</span> </button> </div> 
+        <div class="col-lg-3 col-12 donation-card"> 
+            <input type="text" class="form-control custom" id="custom-donation" value="" placeholder="Otra cantidad"/> </div> 
+	    <div class="col-lg-12 text-start mb-3 mt-3 deduction">De su aportación se puede deducir:&nbsp; <span class="result" id="div-deduction"></span></div>
+    </div>
+    <br/>
+    <input type="hidden" id="plan-d" name="plan-d" value="" />
+    <input type="hidden" id="amount-d" name="amount-d" value="" />
+</div>
+<script>
+    $(".btn-plan").click(function(e){
+        var obj = $(this);
+        $("#plan-d").val(obj.val());
+        $(".btn-plan").each(function(){
+            $(this).removeClass("btn-active");
+        })
+        setTimeout(() => {obj.addClass("btn-active")}, 100);
+        e.preventDetault();
+    });
+    $(".btn-donation").click(function(){
+        var obj = $(this);
+        $("#amount-d").val(obj.val());
+        $("#custom-donation").val(0);
+        $(".btn-donation").each(function(){
+            $(this).removeClass("btn-warning");
+        })
+        calculateDeduction();
+        setTimeout(() => {obj.addClass("btn-warning")}, 100);
+        e.preventDetault();
+    });
+    $("#custom-donation").change(function(){
+        var obj = $(this);
+        $("#amount-d").val(obj.val());
+        $(".btn-donation").each(function(){
+            $(this).removeClass("btn-warning");
+        })
+        calculateDeduction();
+        e.preventDetault();
+    });
+
+    function calculateDeduction() {
+        // Obtener el valor de la donación
+        var donation = parseFloat($("#amount-d").val());
+
+        // Validar si el valor introducido es un número
+        if (isNaN(donation) || donation <= 0) { $("#div-deduction").html("Por favor, introduce una cantidad válida."); return; }
+
+        // Calcular la deducción en base a las reglas proporcionadas
+        var deduction = 0;
+        if (donation <= 250) { deduction = donation * 0.80; } 
+        else { deduction = 250 * 0.80 + (donation - 250) * 0.40; }
+
+        // Mostrar el resultado
+        $("#div-deduction").html(` <strong>${deduction.toFixed(2)} € `);
+        /*document.getElementById('resultado').innerHTML = `
+            <p>Cantidad donada: <strong>${donation.toFixed(2)} €</strong></p>
+            <p>Deducción fiscal: <strong>${deduction.toFixed(2)} €</strong></p>
+            <p>Coste final: <strong>${(donation - deduction).toFixed(2)} €</strong></p>
+        `;*/
+    }
+</script>

@@ -1,0 +1,45 @@
+{% load i18n static %}
+
+
+<div class="row spd-tab">
+    <div class="col-12 text-end">
+        <button type="button" class="btn btn-sm ark new" data-url="{%url "patient-procedure-form"%}" data-target-modal="common-modal" 
+            data-patient_id="{{obj.id}}"> <i class="fas fa-plus"></i> {% trans 'Crear Trámite' %}</button> 
+    </div>
+</div>
+
+
+<table class="table table-striped table-hover">
+    <thead>
+        <tr class="small small">
+            <th class="row main-th">
+                <div class="col-3"> {% trans 'Trámite' %} </div>
+                <div class="col-2"> {% trans 'Fecha' %} </div>
+                <div class="col-4"> {% trans 'Observaciones' %} </div>
+                <div class="col-2"> {% trans 'Realizado' %} </div>
+                <div class="col-1"></div>
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in obj.procedures.all %}
+            <tr class="small row-item" id="row_{{item.id}}">
+                <td class="row">
+                    <div class="col-3">{{ item.procedure.name }}</div>
+                    <div class="col-2">{{ item.date|date:"d-m-Y" }}</div>
+                    <div class="col-4">{{ item.obs }}</div>
+                    <div class="col-2">{% if item.done %}<i class="fas fa-check"></i>{% else %}<i class="fas fa-times"></i>{% endif %}</div>
+                    <div class="col-1 text-right">
+                        <a class="btn btn-sm ark" title="{%trans 'Edit procedure'%}" data-url="{%url "patient-procedure-form" %}"
+                            data-target-modal="common-modal" data-obj_id="{{item.id}}" data-patient_id="{{obj.id}}"> 
+                            <i class="fas fa-edit"></i></a>&nbsp; &nbsp; &nbsp; 
+                        <a class="btn btn-sm ark" data-url="{%url "patient-procedure-remove"%}" data-obj_id="{{item.id}}" data-target="div-container" 
+                            title="{% trans 'Remove' %}" data-confirm="{% trans "Are you sure to remove this element?" %}">
+                            <i class="fas fa-trash"></i></a>
+                    </div>
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+

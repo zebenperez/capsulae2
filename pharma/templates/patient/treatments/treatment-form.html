@@ -1,0 +1,104 @@
+{% load i18n %}
+<div class="d-flex justify-content-end"> <button type="button" class="btn btn-lg" data-bs-dismiss="modal" title="{% trans "Close" %}">
+    <i class="fas fa-times"></i></button> </div>
+
+<h2>{% trans 'New treatment' %}</h2>
+
+{#<span id="div-notification"></span><br/>#}
+
+<div class="row justify-center">
+	<div class="col-12">{{obj.name}}<br/><br/></div>
+	<div class="col-1 text-left p-1">
+               	<div class="greybox-sm p-1">
+                    {% trans "Mañana" %}
+       	            <input type="text" class="form-control autosave text-end" id="m" name="m" value="{{obj.m}}" title="{{obj.m}}" 
+               	        data-model-name="pharma.tratamiento" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+                       	data-target="div-notification"/> <span id="m__msg"></span>
+                </div>
+	</div>
+	<div class="col-1 text-left p-1">
+               	<div class="greybox-sm p-1">
+                    {% trans "Tarde" %}
+       	            <input type="text" class="form-control autosave text-end" id="t" name="t" value="{{obj.t}}" title="{{obj.t}}" 
+               	        data-model-name="pharma.tratamiento" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+                       	data-target="div-notification"/> <span id="t__msg"></span>
+		</div>
+	</div>
+	<div class="col-1 text-left p-1">
+               	<div class="greybox-sm p-1">
+                    {% trans "Noche" %}
+       	            <input type="text" class="form-control autosave text-end" id="n" name="n" value="{{obj.n}}" title="{{obj.n}}" 
+               	        data-model-name="pharma.tratamiento" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+                       	data-target="div-notification"/> <span id="n__msg"></span>
+                </div>
+	</div>
+	<div class="col-1 text-left p-1">
+               	<div class="greybox-sm p-1">
+                    {% trans "Otros" %}
+       	            <input type="text" class="form-control autosave text-end" id="o" name="o" value="{{obj.o}}" title="{{obj.o}}" 
+               	        data-model-name="pharma.tratamiento" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+                       	data-target="div-notification"/> <span id="o__msg"></span>
+                </div>
+	</div>
+	<div class="col-2 text-left p-1">
+               	<div class="greybox-sm p-1">
+                    {% trans "Fecha inicio" %}
+       	            <input type="date" class="form-control autosave text-end" id="fecha_inicio" name="fecha_inicio" 
+               	        value="{{obj.fecha_inicio|date:"Y-m-d"}}" title="{{obj.fecha_inicio}}" data-model-name="pharma.tratamiento" 
+                       	data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" data-target="div-notification"/> 
+                        <span id="fecha_inicio__msg"></span>
+       	        </div>
+	</div>
+	<div class="col-2 text-left p-1">
+                <div class="greybox-sm p-1">
+       	            {% trans "Fecha fin" %}
+               	    <input type="date" class="form-control autosave text-end" id="fecha_fin" name="fecha_fin" 
+                       	value="{{obj.fecha_fin|date:"Y-m-d"}}" title="{{obj.fecha_fin}}" data-model-name="pharma.tratamiento" 
+                        data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" data-target="div-notification"/> 
+       	                <span id="fecha_fin__msg"></span>
+               	</div>
+	</div>
+	<div class="col-1 text-left p-1">
+        	<div class="greybox-sm p-1">
+                	    {% trans "Activo" %}
+			    <div class="select-arrow">
+				<select class="form-control autosave text-end" id="activo" name="activo" data-model-name="pharma.tratamiento" 
+                	        	data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" data-target="div-notification"> 
+	                	        <option value="" {%if obj.activo != False and obj.activo != True %}selected{%endif%}>{% trans "Desconocido" %}</option> 
+        	                	<option value="True" {%if obj.activo == True %}selected{%endif%}>{% trans "Si" %}</option>
+	                	        <option value="False" {%if obj.activo == False %}selected{%endif%}>{% trans "No" %}</option>
+		                    </select>
+				    <span style="margin-left: -10px;"><i class='fas fa-caret-down'></i></span>
+			    </div>
+        	          <span id="n__msg"></span>
+		</div>
+	</div>
+	<div class="col-3 p-1">
+        	<div class="greybox-sm p-1">
+	            {% trans "CN" %}
+        	    <input type="text" class="form-control autosave b-bottom text-end" id="cn" name="cn" value="{{med.cn}}" title="{{med.cn}}" 
+                	data-model-name="pharma.medicamentotratamiento" data-obj-id="{{med.id}}" data-url="{%url "autosave_field"%}" 
+	                data-target="div-notification"/> <span id="cn__msg"></span>
+	      	</div>
+	</div>
+
+	<div class="col-12 mt-3 p-1">
+	        <div class="greybox-sm p-1">
+        	    {% trans "Observaciones" %}
+	            <input type="text" class="form-control autosave b-bottom text-end" id="observaciones" name="observaciones" 
+        	        value="{{obj.observaciones}}" title="{{obj.observaciones}}" data-model-name="pharma.tratamiento" data-obj-id="{{obj.id}}" 
+                	data-url="{%url "autosave_field"%}" data-target="div-notification"/>
+	                <span id="observaciones__msg"></span>
+        	</div>
+	</div>
+</div>
+
+<div class="d-flex justify-content-end">
+    <button type="button" class="btn btn-sm ark save" data-bs-dismiss="modal" data-url="{% url "patient-treatment" %}"
+        data-target="div-container" data-obj_id="{{obj.paciente.id}}">{% trans "Save" %}</button>
+    {%comment%}
+    <button type="button" class="btn btn-sm ark cancel" data-bs-dismiss="modal" data-url="{% url "guest-remove" %}" data-target="guest-list"
+        data-obj_id="{{obj.id}}" data-confirm="{% trans "Are you sure to remove this element?" %}">{% trans "Remove" %}</button>
+    {%endcomment%}
+</div>
+

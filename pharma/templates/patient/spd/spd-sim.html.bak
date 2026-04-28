@@ -1,0 +1,308 @@
+<style>
+    body {
+        background-color: #f8f9fa;
+        font-family: Arial, sans-serif;
+    }
+    .container {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        padding: 20px;
+        gap: 20px;
+        align-items: center;
+        justify-content: center;
+    }
+    .panel-container {
+        width: 90%;
+        max-width: 800px;
+        text-align: center;
+        background-color: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    }
+    .panel {
+        display: grid;
+        grid-template-columns: 150px repeat(4, 120px);
+        gap: 15px;
+        justify-content: center;
+        margin-top: 20px;
+    }
+    .header {
+        font-weight: bold;
+        font-size: 18px;
+        text-align: center;
+        padding: 10px 0;
+        background-color: #007bff;
+        color: white;
+        border-radius: 8px;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+    .header:first-of-type {
+        background:inherit;
+    }
+    .day-label {
+        font-weight: bold;
+        font-size: 18px;
+        text-align: right;
+        padding-right: 10px;
+        align-self: center;
+    }
+    .control-btn {
+        width: 120px;
+        height: 50px;
+        font-size: 18px;
+        font-weight: bold;
+        border-radius: 8px;
+        transition: 0.3s;
+    }
+    .buttons-container {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        width: 90%;
+        max-width: 800px;
+    }
+    .action-btn {
+        flex: 1;
+        font-size: 18px;
+    }
+
+    .resolution-btn {
+        width: 80%;
+        max-width: 250px;
+        margin-top: 10px;
+    }
+    #resolution-display {
+        font-size: 16px;
+        margin-top: 5px;
+        font-weight: bold;
+    }
+
+    /* RESPONSIVE PARA TABLET 768x1024 */
+    @media (max-width: 1024px) {
+        .panel {
+            grid-template-columns: 120px repeat(4, 100px); /* Botones más pequeños en tablets */
+            gap: 10px;
+        }
+        .control-btn {
+            width: 90px;
+            height: 45px;
+            font-size: 14px;
+        }
+        .header {
+            font-size: 16px;
+            padding: 8px 0;
+        }
+        .day-label {
+            font-size: 16px;
+            padding-right: 5px;
+        }
+        .buttons-container {
+            flex-direction: column; /* Apila los botones en tablets */
+            align-items: center;
+        }
+        .action-btn {
+            width: 80%;
+            max-width: 250px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .panel {
+            grid-template-columns: 80px repeat(4, 70px); /* Reduce aún más los botones */
+            gap: 6px;
+        }
+
+        .control-btn {
+            width: 55px;
+            height: 35px;
+            font-size: 11px;
+        }
+
+        .header, .day-label {
+            font-size: 12px;
+        }
+
+        .header {
+            width:55px;
+        }
+
+        .panel-container {
+            width: 100%;
+        }
+
+        .buttons-container {
+            width: 95%;
+            gap: 6px;
+        }
+
+        .action-btn, .resolution-btn {
+            font-size: 12px;
+            max-width: 200px;
+            padding: 6px;
+        }
+    }
+</style>
+
+<div class="container">
+    <!-- Panel de control -->
+    <div class="panel-container">
+        <h2>Pastillero</h2>
+        <div class="panel" id="controlPanel"></div>
+    </div>
+
+    {%comment%}
+    <!-- Campo para introducir una cadena alfanumérica-->
+    <div class="buttons-container">
+        <input type="text" id="pillbox_deliver_code" name="pillbox_deleiver_code" placeholder="Introduce el código del pastillero"> 
+        <button class="btn btn-secondary action-btn" id="pillbox_deliver_button">Buscar código pastillero</button>
+    </div>
+    {%endcomment%}
+
+    <!-- Botones de acción -->
+    <div class="buttons-container" id="actionButtons">
+        {% for med in response %}
+            <button class="btn btn-secondary action-btn treat-btn" id="treat-{{med.id}}"
+                data-morning="{{med.morning}}" data-lunch="{{med.lunch}}" data-dinner="{{med.dinner}}" data-others="{{med.others}}">
+                {{med.treatment}}</button>
+        {% endfor %}
+    </div>
+
+    <!-- Botón para mostrar la resolución -->
+    <button class="btn btn-info resolution-btn" id="show-resolution">Ver Resolución</button>
+    <div id="resolution-display"></div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        const daysOfWeek = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
+        var headers = ["", "Desayuno", "Almuerzo", "Merienda", "Cena"];
+        const rows = 7;
+        const cols = 4;
+        const panel = $("#controlPanel");
+
+        if ($(window).width() < 768) {
+            headers = ["", "Des", "Alm", "Mer", "Cena"];
+        }
+
+        // Agregar encabezados
+        headers.forEach(text => {
+            panel.append(`<div class="header">${text}</div>`);
+        });
+
+        // Agregar los días de la semana y los botones ON/OFF
+        for (let i = 0; i < rows; i++) {
+            panel.append(`<div class="day-label">${daysOfWeek[i]}</div>`);
+
+            for (let j = 0; j < cols; j++) {
+                panel.append(`<button id="btn-${i}-${j}" class="control-btn btn btn-danger">OFF</button>`);
+            }
+        }
+
+        // Evento click para los botones de la tabla
+        $(".control-btn").click(function () {
+            $(this).toggleClass("btn-danger btn-success");
+            $(this).text($(this).hasClass("btn-success") ? "ON" : "OFF");
+        });
+
+        // Función para encender/apagar botones específicos
+        function setButtonState(day, meal, state) {
+            let btn = $(`#btn-${day}-${meal}`);
+            if (state) {
+                btn.removeClass("btn-danger").addClass("btn-success").text("ON");
+            } else {
+                btn.removeClass("btn-success").addClass("btn-danger").text("OFF");
+            }
+        }
+
+        // Función para apagar todos los botones
+        function resetAll() {
+            $(".control-btn").removeClass("btn-success").addClass("btn-danger").text("OFF");
+            $(".action-btn").removeClass("btn-warning").addClass("btn-secondary");
+        }
+
+        // Mostrar resolución en tiempo real
+        $("#show-resolution").click(function () {
+            let width = window.innerWidth;
+            let height = window.innerHeight;
+            $("#resolution-display").text(`Resolución: ${width} x ${height}`);
+        });
+
+        $(".treat-btn").click(function () {
+            resetAll();
+            $(this).addClass("btn-warning");
+    
+            for (let i = 0; i < 7; i++) {
+                setButtonState(i, 0, $(this).data("morning"));
+                setButtonState(i, 1, $(this).data("lunch"));
+                setButtonState(i, 2, $(this).data("dinner"));
+                setButtonState(i, 3, $(this).data("others"));
+            }
+        });
+        {%comment%}
+        {% for med in response %}
+            $("#treat-{{med.id}}").click(function () {
+                resetAll();
+                $(this).addClass("btn-warning");
+        
+                for (let i = 0; i < 7; i++) {
+                    setButtonState(i, 0, {{med.morning}});
+                    setButtonState(i, 1, {{med.lunch}});
+                    setButtonState(i, 2, {{med.dinner}});
+                    setButtonState(i, 3, {{med.others}});
+                }
+            });
+        {% endfor %}
+        {%endcomment%}
+
+        {%comment%}
+        $("#pillbox_deliver_button").click(function () {
+            let cadena = $("#pillbox_deliver_code").val();
+            let domainname = "https://" + window.location.hostname;
+            // Eliminar botones de accion
+            $("#actionButtons").empty();
+
+            $.ajax({
+                url: domainname + "/pharma/sim/api/", // URL de la API, agregar domainname
+
+                type: "POST",
+                data: {
+                    pillbox_deliver_code: cadena,
+                    api_key: "1234"
+                },
+                success: function (response) {
+                    json_response = response;
+                    resetAll();
+
+                    for (let item = 0; item < json_response.length; item++) {
+                        $('#actionButtons').append(`<button class="btn btn-secondary action-btn" id="treat-${json_response[item].id}">${json_response[item].treatment}</button>`);
+                        $(`#treat-${json_response[item].id}`).click(function () {
+                            resetAll();
+                            $(this).addClass("btn-warning");
+
+    
+                            for (let i = 0; i < 7; i++) {
+                                setButtonState(i, 0, json_response[item].morning);
+                                setButtonState(i, 1, json_response[item].lunch);
+                                setButtonState(i, 2, json_response[item].dinner);
+                                setButtonState(i, 3, json_response[item].others);
+                            }
+                        });
+                    }
+                },
+                error: function (error) {
+                    alert("Error al buscar el código del pastillero: " + error.error_msg);
+                    console.error(error);
+                }
+            });
+        });
+        {%endcomment%}
+
+    });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+

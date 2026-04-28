@@ -1,0 +1,20 @@
+:root {
+    --main-color: #8023fa;
+	--main-text: white;
+	--main-alpha: rgba(128, 35, 250, 0.9);
+	--secondary-color: whitesmoke;
+
+	--light-color: #f8f9fa;
+    --lighter:#fbfbfb;
+    --light-gray: #eee;
+    --violet-color: #9954bb;
+    --primary-dark :#2a588c;
+    --danger-dark:#e00031;
+    --details-row-color: #fbfaf6;
+	--details-row-color-hover: #f5f3ed;
+	--border-color: #ccc;
+    --sidebar-text-color : #4a4a4a;
+    --muted-color: #aaa;
+	--text-color: #303030;
+	--bold-color: #222;
+ }

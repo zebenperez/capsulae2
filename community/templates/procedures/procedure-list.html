@@ -1,0 +1,24 @@
+{% load i18n %}
+
+
+<div class="row patient-list-head main-th small small p-3 m-0">
+    <div class="col-2"> {% trans 'Código' %} </div>
+    <div class="col-4"> {% trans 'Nombre' %} </div>
+    <div class="col-4"> {% trans 'Descripción' %} </div>
+    <div class="col-2"></div>
+</div>
+
+{% for item in items %}
+    <div class="row line pointer small pt-2 pb-2 m-0" id="row_{{item.id}}">
+            <div class="col-2">{{ item.code|default:"---" }}</div>
+            <div class="col-4">{{ item.name|default:"---" }}</div>
+            <div class="col-4">{{ item.desc }}</div>
+            <div class="col-2 text-right">
+                <a class="btn btn-xs ark p-2" title="{%trans 'Edit procedure'%}" data-url="{%url "procedure-form" %}"
+                    data-target-modal="common-modal" data-obj_id="{{item.id}}" title="{% trans "Editar" %}"> <i class="fas fa-edit"></i></a>
+                <a class="btn btn-xs ark" data-url="{% url "procedure-remove" %}" data-target="procedure-list" data-obj_id="{{item.id}}" 
+                    title="{% trans 'Remove' %}" data-confirm="{% trans "Are you sure to remove this element?" %}"><i class="fas fa-trash"></i></a> 
+            </div>
+    </div>
+{% endfor %}
+

@@ -1,0 +1,44 @@
+{% load i18n %}
+
+<div class="d-flex justify-content-end"> <button type="button" class="btn btn-lg" data-bs-dismiss="modal" title="{% trans "Close" %}">
+    <i class="fas fa-times"></i></button> </div>
+
+<h2>{% trans 'Editar parámetros' %}</h2>
+
+
+<form method="POST" action="{% url "patient-telegram-register-send" %}" class="form" id="register-send">
+    <div class="row justify-center">
+        <div class="col-12 text-left p-1">
+            <div class="greybox-sm p-1">
+                {% csrf_token %}
+                <input type="hidden" id="patient_id" name="patient_id" value="{{ obj.pk }}">
+
+                <div class="form-group">
+                    <label for="chat_code">Indique el codigo de Telegram: </label>
+                    <div class="row">
+                        <div class="col-11"><input class="form-control" id="chat_code" name="chat_code" type="text" value=""
+                            onchange="$('#btn-check').data('chat_code', $(this).val());$('#btn-check').click();"></div>
+                        <div class="col-1"><button class="btn"><i class="fas fa-search"></i></button></div>
+                    </div>
+                    <span class="text">El código de registro es enviado al usuario en el momento que accede al bot.</span>
+                    <span class="" id="chat-msg"></span>
+                </div>
+                <div class="form-group">
+                    <label for="observations">Observaciones: </label>
+                    <input class="form-control" id="observations" name="observations" type="text" value="">
+                </div>
+
+                <button class="hide ark" id="btn-check" data-url="{%url "patient-telegram-register-check"%}" data-target="chat-msg" 
+                    data-obj_id="{{obj.id}}" data-chat_code=""> </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-end">
+        <button type="button" id="btn-send" class="btn btn-sm saveform" data-bs-dismiss="modal" data-form="register-send"
+            data-target="div-container" data-obj_id="{{obj.patient.id}}" disabled>{% trans "Guardar" %}</button>
+
+        <button class="btn btn-sm cancel" data-bs-dismiss="modal"> {% trans "Cerrar" %}</a>
+    </div>
+</form>
+

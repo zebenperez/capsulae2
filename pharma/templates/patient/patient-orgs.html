@@ -1,0 +1,45 @@
+{% load i18n common_tags %}
+
+<div class="row spd-tab">
+    <div class="col-12 text-end">
+        <a href="{% url "evolutionary-referral-form" obj.n_historial %}" class="btn btn-sm p-2 new" target="_blank" rel="noopener noreferrer">
+            <i class="fa fa-arrow-right"></i> {% trans "Derivar paciente" %}</a>
+        |
+        <button type="button" class="btn btn-sm ark new" data-url="{% url "patient-org-form" %}" data-target-modal="common-modal" 
+            data-patient_id="{{obj.id}}"> <i class="fas fa-plus"></i> {% trans 'Añadir organización' %}</button> 
+    </div>
+</div>
+
+<table class="table table-striped table-hover">
+    <thead>
+        <tr class="small small">
+            <th class="row main-th">
+                <div class="col-5"> {% trans 'Organización' %} </div>
+                <div class="col-3"> {% trans 'Rol' %} </div>
+                <div class="col-2"> {% trans 'Observaciones' %} </div>
+                <div class="col-2"></div>
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in obj.patient_organizations.all %}
+            <tr class="small row-item" id="row_{{item.id}}">
+                <td class="row p-0">
+                    <div class="col-5 p-2">{{ item.organization.name }}</div>
+                    <div class="col-3 p-2">{{ item.rol }}</div>
+                    <div class="col-2 p-2">{{ item.obs }}</div>
+                    <div class="col-2 p-2 text-right">
+                        <a class="btn btn-xs ark p-2" title="{%trans 'Edit organización'%}" data-url="{%url "patient-org-form" %}"
+                            data-target-modal="common-modal" data-obj_id="{{item.id}}" data-patient_id="{{obj.id}}"
+                            title="{% trans "Editar" %}"> <i class="fas fa-edit"></i></a>
+
+                        <a class="btn btn-sm ark p-2" data-url="{% url "patient-org-remove" %}" data-obj_id="{{item.id}}" 
+                            data-target="patient-org-container" title="{% trans 'Remove' %}" 
+                            data-confirm="{% trans "Are you sure to remove this element?" %}"> <i class="fas fa-trash"></i></a>
+                    </div>
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+

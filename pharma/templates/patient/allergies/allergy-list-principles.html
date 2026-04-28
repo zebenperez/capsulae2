@@ -1,0 +1,20 @@
+{% load i18n %}
+
+<div class="row list-search m-0">
+    <div class="col-lg-1 col-1 text-right"><i class="fas fa-search"></i></div>
+    <div class="col-lg-10 col-10 p-0">
+        <input type="hidden" name="patient_id" id="patient_id" value="{{obj.id}}"/>
+        <input type="text" class="form-control form-control-dark w-100 autosearch" name="s-name-pri" id="s-name-pri" 
+           placeholder="{% trans 'Buscar por nombre' %}" data-url="{% url "patient-allergy-principles-search" %}" 
+           data-target="principles-list" data-related="patient_id,s-name-pri" />
+    </div>
+</div>
+
+<div class="row spd-tab mt-2">
+    <div class="col-12 text-end">
+        <button type="button" class="btn btn-sm ark new" data-url="{% url "patient-allergy-principles" %}" data-target-modal="common-modal" 
+            data-patient_id="{{obj.id}}"> <i class="fas fa-plus"></i> {% trans 'Nuevo principio' %}</button> 
+    </div>
+</div>
+
+<div id="principles-list">{% include "patient/allergies/allergy-list-principles-list.html" with pri_list=obj.alergias_principios.all %}</div>

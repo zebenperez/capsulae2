@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block central_content %} 
+    <div class="content"> 
+        <div class="patient-data-title p-4">
+            <div class="col-lg-11 col-10 col-offset-1">{{obj.name}}</div>
+        </div>
+    </div>
+
+    <div id="div-container">
+        {#{% include "organizations/organization-form2.html" %}#}
+        <div id="organization-container">
+            <div class="row w-100 patient-data-body-2 p-1" style="margin:0;">
+                <div class="col-11 patient-data">
+                    <div class="card"><div class="card-header">{%trans "Principal"%}</div><div class="card-body">
+                        {% include "organizations/organization-form-main.html" %}
+                    </div></div>
+                    <div class="card"><div class="card-header">{%trans "Dirección"%}</div><div class="card-body">
+                        {% include "organizations/organization-form-address.html" %}
+                    </div></div>
+                    <div class="card"><div class="card-header">{%trans "Social"%}</div><div class="card-body">
+                        {% include "organizations/organization-form-social.html" %}
+                    </div></div>
+                    <div class="card"><div class="card-header">{%trans "Recurso"%}</div><div class="card-body">
+                        {% include "organizations/organization-form-resource.html" %}
+                    </div></div>
+                    <div class="card"><div class="card-header">{%trans "Otra información"%}</div><div class="card-body">
+                        {% include "organizations/organization-form-info.html" %}
+                    </div></div>
+                </div>    
+                <div class="col-1 text-end">
+                    <button id="btn-edit" class="btn btn-sm toggle-edit new" data-class-name="input" data-text="{%trans "Edit"%}" 
+                        data-text-alt="{%trans "Hecho"%}">{%trans "Edit"%} </button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock central_content %}

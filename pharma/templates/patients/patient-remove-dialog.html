@@ -1,0 +1,33 @@
+{% load i18n common_tags %}
+
+
+<div class="d-flex justify-content-end"> <button type="button" class="btn btn-lg" data-bs-dismiss="modal" title="{% trans "Close" %}">
+    <i class="fas fa-times"></i></button> </div>
+
+<h2> Esta segur/a de que desea borrar este usuario? </h2>
+<div class="row justify-center">
+    <div class="col-12 text-left p-1">
+        Este usuario tiene:<br/>
+        {% if user|have_menu:"TRA" and patient.get_active_treatments > 0 %} - {{patient.get_active_treatments}} Tratamientos <br/>{% endif %}
+        {% if user|have_menu:"PTR" and patient.procedures.count > 0 %} - {{patient.procedures.count}} Tramites <br/>{% endif %}
+        {% if user|have_menu:"ALE" and patient.alergias_excipientes.count > 0 %} - {{patient.alergias_excipientes.count}} Alergias <br/>{% endif %}
+        {% if user|have_menu:"SPD" and patient.get_active_pillboxes > 0 %} - {{patient.get_active_pillboxes}} Pastilleros <br/>{% endif %}
+        {% if user|have_menu:"LOPD" and patient.lopd.count > 0 %} - {{patient.lopd.count}} LOPDs <br/>{% endif %}
+        {% if user|have_menu:"EVO" and patient.evolutionary.count > 0 %} - {{patient.evolutionary.count}} Evolutivos <br/>{% endif %}
+        {% if user|have_menu:"PARAM" and patient.blood_pressure.count > 0 %} - {{patient.blood_pressure.count}} Parámetros <br/>{% endif %}
+    </div>
+</div>
+
+<div class="d-flex justify-content-end">
+    <button type="button" class="btn btn-sm" data-bs-dismiss="modal">{% trans "Close" %}</button>
+
+    <button class="btn btn-sm ark" data-bs-dismiss="modal" data-url="{%url "patient-soft-remove"%}" data-obj_id="{{patient.id}}" 
+        data-target="patient-list" title="{% trans 'Eliminar' %}"> {% trans "Unactivate" %}</a>
+
+    {% if request.user|in_group:"admins" %}
+        <button class="btn btn-sm ark" data-bs-dismiss="modal" data-url="{%url "patient-remove"%}" data-obj_id="{{patient.id}}" 
+            data-target="patient-list" title="{% trans 'Eliminar' %}"> {% trans "Remove" %}</a>
+    {% endif %}
+</div>
+
+

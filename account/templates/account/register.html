@@ -1,0 +1,119 @@
+{% load i18n static account_tags %}
+	<script src="{% static "js/utils.js" %}"></script>
+
+	{%comment%}
+	<div class="heading"><h1 class="login">Regístrate ahora</h1></div>
+		<form action="/account/signup/" method="post" enctype="multipart/form-data" name="frmRegister" id="frmRegister" class="p-3">
+		    {% csrf_token %}
+
+			<div class="row m-1">
+			    <div class="form-group">
+				<label for="name">(*) Nombre</label>
+				<input type="text" id="name" name="name" class="form-control" title="Nombre" required/>
+			    </div>
+			    <div class="col-12 col-lg-6 form-group">
+				<label for="cif">(*) CIF/NIF</label>
+				<input type="text" id="cif" name="cif" class="form-control" title="CIF" required/>
+			    </div>
+			    <div class="form-group">
+				<label for="email">(*) Email&nbsp;</label>
+				<input name="email" type="text" value="" id="email" class="form-control" title="Correo electrónico" required/>
+			    </div>
+			    <div class="form-group">
+				<label for="confirmedemail">(*) Confirma email &nbsp;</label>
+				<input type="text" id="email2" name="email2" class="form-control" title="Confirmación de correo" required/>
+			    </div>
+			    <div class="form-group">
+				<label for="address">(*) Dirección</label>
+				<input type="text" id="address" name="address" class="form-control" title="Dirección" required/>
+			    </div>
+			    <div class="form-group">
+				<label for="town">(*) Localidad</label>
+				<input type="text" id="town" name="town" class="form-control" title="Localidad" required/>
+			    </div>
+			    <div class="form-group">
+				<label for="province">(*) Provincia</label>
+				<input type="text" id="province" name="province" class="form-control" title="Provincia" required/>
+			    </div>
+
+			    {% get_profile_select %}
+
+			    <div class="acceptCheck small mt-5 p-0">
+				<input type="checkbox" id="tos" name="tos"/> 
+				<label> Acepto las <a class="ark pointer" data-url="{% url "privacy-policy" %}" data-target-modal="common-modal"> 
+				    condiciones de uso</a> </label>
+				<br/>
+			    </div>
+			    <div class="">
+				<script src='https://www.google.com/recaptcha/api.js'></script>
+				<div class="g-recaptcha" data-sitekey="6Lex26gUAAAAAAz2BSZPNuHpj5-84MYnkIzvsTy4"></div>
+			    </div>
+			    <div class="text-right">
+				<button id="btn-register-send" class="btn btn-sm btn-primary"> Reg&iacute;strame</button> 
+			    </div>
+			</div>
+		</form>
+	</div>
+		(*) Campos obligatorios
+	<div id="div-errors"></div>
+
+	{%endcomment%}
+
+	<section class="contactDetails">
+        <div class="container"> 
+		<form action="/account/signup/" method="post" enctype="multipart/form-data" name="frmRegister" id="frmRegister" class="p-3">
+		    {% csrf_token %}
+		    <input type="hidden" id="profile" name="profile" value="1" />
+            <!--contact form start-->
+            <div class="row w-100 m-0">
+                <div class="col-lg-4 col-12">
+			<h1 class="login">Registro</h1>
+			<div class="text-center"><img src="/static/imgs/register-now.png" alt="Imagen registrate ahora"></div>
+		</div>
+                <div class="col-lg-8 col-12 conForm">
+				    <div class="form-group">
+					    <input type="text" id="name" name="name" class="form-control" title="Nombre" placeholder="(*) Nombre" required/> </div>
+				    <div class="form-group">
+					    <input type="text" id="cif" name="cif" class="form-control" title="CIF" placeholder="(*) CIF/NIF" required/> </div>
+				    <div class="form-group">
+					    <input type="text" id="email1" name="email1" class="form-control" title="Correo electrónico" placeholder="(*) Email&nbsp;" 
+                            required/> </div>
+				    <div class="form-group">
+					    <input type="text" id="email2" name="email2" class="form-control" title="Confirmación de correo" 
+                            placeholder="(*) Confirma email &nbsp;" required/> </div>
+		 		    <div class="form-group">
+					    <input type="text" id="address" name="address" class="form-control" title="Dirección" placeholder="(*) Dirección" 
+                            required/> </div>
+		    		<div class="form-group">
+					    <input type="text" id="town" name="town" class="form-control" title="Localidad" placeholder="(*) Localidad" required/>
+		    		</div>
+		    		<div class="form-group">
+					    <input type="text" id="province" name="province" class="form-control" title="Provincia" placeholder="(*) Provincia" 
+                            required/> </div>
+
+        			<div class="required-fields">(*) Campos obligatorios</div>
+
+                    {#{% get_profile_select %}#}
+
+				    <div class="acceptCheck small mt-5 p-0">
+					    <input type="checkbox" id="tos" name="tos"/> 
+                        {%comment%}
+					    <label>Acepto las <a class="ark pointer" data-url="{% url "privacy-policy" %}" 
+                            data-target-modal="common-modal"> condiciones de uso</a> </label>
+                        {%endcomment%}
+                        <label>
+                            Acepto las <a class="ark pointer" href="https://fundec.org/cms/politica/" target="_blank"> condiciones de uso</a></label>
+				    </div>
+				    <div class="">
+					    <script src='https://www.google.com/recaptcha/api.js'></script>
+					    <div class="g-recaptcha" data-sitekey="6Lex26gUAAAAAAz2BSZPNuHpj5-84MYnkIzvsTy4"></div>
+				    </div>
+				    <div class="mt-5"> <button id="btn-register-send" class="submitBnt register"> Reg&iacute;strame</button> </div>
+				    <div id="div-errors" class="alert-msg hideClass"></div>
+			    </div>
+		    </div>
+        </form>
+		</div>
+		<!--contact form end--> 
+</section> 
+

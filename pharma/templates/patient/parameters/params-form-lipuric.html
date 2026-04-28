@@ -1,0 +1,48 @@
+{% load i18n static %}
+
+
+<div class="row justify-center">
+    <div class="col-4 text-left p-1">
+        <div class="greybox-sm p-1">
+            {% trans "Col.Total (mg/dl)" %}
+            <input type="text" class="form-control autosave" id="total_choresterol" name="total_choresterol" 
+                value="{{obj.total_choresterol|default:""}}" title="{{obj.total_choresterol}}" data-model-name="pharma.bloodpressure" 
+                data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" data-target="div-notification"/><span id="total_choresterol__msg"></span>
+        </div>
+    </div>
+    <div class="col-4 text-left p-1">
+        <div class="greybox-sm p-1">
+            {% trans "HDL (mg/dl)" %}
+            <input type="text" class="form-control autosave" id="hdl" name="hdl" value="{{obj.hdl|default:""}}" 
+                title="{{obj.hdl}}" data-model-name="pharma.bloodpressure" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+                data-target="div-notification"/> <span id="hdl__msg"></span>
+        </div>
+    </div>
+    <div class="col-4 text-left p-1">
+        <div class="greybox-sm p-1">
+            {% trans "LDL (mg/dl)" %}
+            <input type="text" class="form-control autosave" id="ldl" name="ldl" value="{{obj.ldl|default:""}}" 
+                title="{{obj.ldl}}" data-model-name="pharma.bloodpressure" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+                data-target="div-notification"/> <span id="ldl__msg"></span>
+        </div>
+    </div>
+</div>
+<div class="row justify-center">
+    <div class="col-3 text-left p-1">
+        <div class="greybox-sm p-1">
+            {% trans "Triglicéridos (mg/dl)" %}
+            <input type="text" class="form-control autosave" id="triglycerides" name="triglycerides" value="{{obj.triglycerides|default:""}}" 
+                title="{{obj.triglycerides}}" data-model-name="pharma.bloodpressure" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+                data-target="div-notification"/> <span id="triglycerides__msg"></span>
+        </div>
+    </div>
+    <div class="col-3 text-left p-1">
+        <div class="greybox-sm p-1">
+            {% trans "Ácido úrico (mg(/dl)" %}
+            <input type="text" class="form-control autosave" id="uric_acid" name="uric_acid" value="{{obj.uric_acid|default:""}}" 
+                title="{{obj.uric_acid}}" data-model-name="pharma.bloodpressure" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+                data-target="div-notification"/> <span id="uric_acid__msg"></span>
+        </div>
+    </div>
+</div>
+

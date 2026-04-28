@@ -1,0 +1,21 @@
+{% load i18n %}
+
+
+<div class="row m-0 mb-2">
+    <div class="col-4 border rounded mt-1"> 
+        <input type="date" class="form-control" id="ini_date" value="{{ini_date|date:'Y-m-d'}}" 
+            onchange="$('#btn-update-note').data('ini', $(this).val());"/>
+    </div>
+    <div class="col-4 offset-1 border rounded mt-1 mt-1"> 
+        <input type="date" class="form-control" id="end_date" value="{{end_date|date:'Y-m-d'}}"
+            onchange="$('#btn-update-note').data('end', $(this).val());"/>
+    </div>
+    <div class="col-2 offset-1 mt-1 tex-center"> 
+        <a id="btn-update-note" class="btn btn shadowBox-btn ark w-100 p-2" data-url="{%url "notes-list"%}" data-target="note-details" 
+            data-obj_id="{{user.id}}" data-ini="{{ini_date|date:'Y-m-d'}}" data-end="{{end_date|date:'Y-m-d'}}">
+            <i class="fa">&#xf021;</i> Actualizar</a>
+    </div>
+</div>
+<div id="note-details">{% include "notes/note-list-details.html" %}</div>
+{% include "common-modal.html" %}
+

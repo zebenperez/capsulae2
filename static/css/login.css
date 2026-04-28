@@ -1,0 +1,445 @@
+html
+{
+	height:100%;
+}
+
+/****************************************************
+				LOGIN PAGE
+****************************************************/
+body#login
+{
+
+	background-size: auto 100%;
+	min-height:100%;
+	background: rgb(53,176,204); /* Old browsers */
+	background: #fff;
+}
+
+#divLoginMain
+{
+	width:100%;
+	font-family: impact,helvetica,sans-serif;
+	min-height: 400px;
+	background: url("/static/imgs/img-transp.png") no-repeat center top;
+}
+
+
+body#login #divTopBar
+{
+/*	height: 120px;*/
+	border:none !important;
+	background : #4f8e3a;
+	color: #fff !important;
+	background: #fafbfc;
+	box-shadow: 0px 6px 8px -2px rgb(0 0 0 / 15%);
+}
+body#login #divTopBar label {
+	color: #58575c;
+	font-size: 0.9rem;
+}
+
+body#main #divTopBar div.Languages
+{
+   height: 20px;
+   width: 70px;
+   margin-top: 25px;
+   float: right;
+}
+
+#divLoginMain div.leftSide
+{
+	color: #666; 
+	font-size: 0.9em;
+	font-weight:normal;
+	line-height: 25px;
+	text-align:justify;
+	padding-top:5% !important;
+	border:1px solid #ccc;
+	box-shadow: 3px 2px #ccc !importan;
+
+}
+
+#divLoginMain div.leftSide #divVideo
+{
+	border:2px solid #fff;
+	-webkit-border-radius: 5px;
+	border-radius: 5px;
+	width: 300px;
+	height:200px;
+	margin:auto;
+	-moz-box-shadow: 3px 3px 4px #111;
+	-webkit-box-shadow: 3px 3px 4px #111;
+	box-shadow: 3px 3px 4px #111;
+}
+
+#divLoginMain div.leftSide #divManual
+{
+	width: 300px;
+	height:100px;
+	margin:auto;
+}
+
+#divLoginMain div.leftSide #divManual a
+{
+	text-decoration: none;
+	font-weight: normal;
+	font-size: 0.6em;
+	color: #fff;
+}
+
+#divLoginMain div.leftSide #divManual a:hover
+{
+	text-decoration: underline;
+}
+
+#divLoginMain div.rightSide
+{
+	font-family: Arial,Helvetica,sans-serif;
+	text-align:left;
+	padding-top:0px !important;
+	padding-left:0px !important;
+	padding-right:0px !important;
+	padding-bottom:50px;
+	border: 1px solid #cccccc;
+}
+
+div.rightSide div.errorPanel
+{
+	color: #ffffff;
+	margin:auto;
+	margin-bottom:25px;
+	border-bottom: 2px solid #ccc;  
+	padding-bottom: 0.5em; 
+	font-style:italic;
+}
+
+div.rightSide #divRegister_form
+{
+	margin-top:0;
+	color:#333 !important;
+}
+
+div.rightSide #divRegister_form h1
+{
+	font-style:italic;
+	text-shadow: none;
+	display:inline-block;
+	width:100%;
+	text-align:center;
+	font-size: 1.5em;
+	font-weight:100;
+	color:#fff;
+	background:#717175 !important;
+}
+
+h1.login
+{
+    margin-top: 0px;
+    width: 100% !important;
+    padding: 10px;
+}
+
+div.rightSide #divRegister_form span.CompanyName
+{
+	color: #ccc;
+	font-size: 0.9em;
+	text-align:right;
+}
+
+div.rightSide #divRegister_form table.tableRegister
+{
+
+}
+
+div.rightSide #divRegister_form table.tableRegister th.Celda
+{
+	color:#ffffff;
+	text-align: right;
+	font-size: 0.8em;
+	font-weight: normal;
+}
+
+div.rightSide #divRegister_form table.tableRegister td input
+{
+	border:1px solid #ccc;
+	width: 100%;
+	background: #ddd;
+	height: 30px;
+	line-height: 30px;
+	padding-left: 5px;
+	color: #111;
+}
+
+div.rightSide #divRegister_form .btn_Save
+{
+	width:100%;
+	text-align:right;
+}
+
+a.btn_Register
+{
+	display:inline-block;
+	color: #108ae5;
+	color:#a4b357;
+	font-weight:bold;
+	font-size: 0.8em;
+	text-decoration:none;
+	background:white;
+	text-align:center;
+	padding:5px;
+	padding-left:15px;
+	padding-right:15px;
+	-webkit-border-radius: 5px;
+	border-radius: 5px;
+}
+
+div.rightSide #divRegister_form .btn_Save a:hover,
+{
+	color: #0063b1;
+}
+
+#divFootLogin
+{
+   font-family: Arial,sans-serif;
+   font-size: 11px;
+   color: #000;
+   line-height: 20px;
+	background: #e5e5e5;
+	position:fixed;
+	width:100%;
+	bottom:0px;
+}
+
+#divFootLogin a
+{
+   font-family: Arial,sans-serif;
+   font-size: 11px;
+	color: #108ae5;
+}
+
+div.miniLogo
+{
+	display:table-cell;
+	width:40%;
+	text-align:center;
+	vertical-align:middle;
+}
+
+#AppName
+{	
+	padding-left: 10px;
+	font-size: 1.8em;
+	color: #a4b357;
+	color: rgb(53,176,204); /* Old browsers */
+	text-shadow: 1px 1px #ccc;
+	/*height: 120px;
+	line-height: 120px;*/
+}
+
+#AppName span.Appdescription
+{
+	font-size: 0.5em;
+	font-weight: normal;
+	color: #999;
+	margin-left: 15px;
+	font-style:italic;
+	text-shadow: 0px 0px #fff;
+}
+
+/**************************************/
+
+div.dataForm
+{
+/*	height:120px;
+	padding-top:20px;*/
+}
+
+div.dataForm form#formLogin #divUser
+{
+	height:140px;
+}
+
+div.dataForm form#formLogin #divUser #usuario
+{
+	text-align: left;
+	font-style:italic;
+	font-size: 1em;
+	color: #0063b1;
+	color: #333;
+	margin-top:40px;
+	height: 25px;
+	line-height: 25px;
+}
+div.dataForm form#formLogin #divUser #input_usuario input
+{	
+	border:1px solid #ccc;
+	-webkit-border-radius: 5px;
+	border-radius: 5px;
+	color: #999;
+	background: #ffffff;
+	height: 25px;
+	line-height: 25px;
+	padding-left: 5px;
+	width:90%;
+}
+
+/**********************/
+div.dataForm form#formLogin #divPassword
+{
+	width:35%;
+	height:140px;
+	margin-left: 1%;
+	margin-top: 10px;
+	float:left;
+}
+
+div.dataForm form#formLogin #divPassword #passwordLabel
+{
+	text-align: left;
+	font-style:italic;
+	font-size: 1em;
+	color: #0063b1;
+	color: #333;
+	height: 25px;
+	line-height: 25px;
+	margin-top:40px;
+}
+
+div.dataForm form#formLogin #divPassword #input_password input
+{	
+	border:1px solid #ccc;
+	-webkit-border-radius: 5px;
+	border-radius: 5px;
+	color: #999;
+	background: #ffffff;
+	height: 25px;
+	line-height: 25px;
+	padding-left: 5px;
+	width:93%;
+}
+
+/**********************/
+
+#divSubmit
+{
+	width: 16%;
+	margin-top:70px;
+	float:right;
+	background: rgba(164,179,87,1);
+	background: -moz-linear-gradient(top, rgba(164,179,87,1) 0%, rgba(117,137,12,1) 100%);
+	background: -webkit-gradient(left top, left bottom, color-stop(0%, rgba(164,179,87,1)), color-stop(100%, rgba(117,137,12,1)));
+	background: -webkit-linear-gradient(top, rgba(164,179,87,1) 0%, rgba(117,137,12,1) 100%);
+	background: -o-linear-gradient(top, rgba(164,179,87,1) 0%, rgba(117,137,12,1) 100%);
+	background: -ms-linear-gradient(top, rgba(164,179,87,1) 0%, rgba(117,137,12,1) 100%);
+	background: linear-gradient(to bottom, rgba(164,179,87,1) 0%, rgba(117,137,12,1) 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#a4b357', endColorstr='#75890c', GradientType=0 );
+	-webkit-border-radius: 6px;
+	border-radius: 6px;
+	text-align:center;
+
+}
+
+#divSubmit a
+{
+	color:#ffffff;
+	background:none;
+	text-shadow:none;
+	border: none;
+}
+button#btn-submit.btn.btn-info {
+	color:#ffffff;
+	font-size: 0.9rem;
+}
+
+#remember a
+{
+   color: #fff;
+}
+
+ div.dataForm a
+{
+	font-family: Arial,Helvetica,sans-serif;
+}
+
+div#divLoginFooter
+{
+	bottom:0px;
+	width:100%;
+}
+
+div#divFootLogin
+{
+	font-family: Arial,sans-serif;
+	font-size: 11px;
+	color: #666;
+	line-height: 50px;
+	text-align:center;
+}
+
+.big-title {	
+	margin-bottom:3%;
+	font-size: 24px;
+	line-height:40px;
+	color: #58575c;
+}
+
+@media screen and (max-width: 1024px)
+{
+	#divSubmit
+	{
+		font-size:0.8em;
+	}
+}
+
+div.acceptCheck, div.acceptCheck a
+{
+	color: #757575;
+}
+
+div.acceptCheck a
+{
+	font-weight:bold;
+	font-style:italic;
+}
+
+#divRegister_form label
+{
+	font-size:1em;
+	color: #757575;
+    margin-top: 25px;
+    padding-bottom: 10px;
+}
+#frmRegister
+{
+	/*line-height: 0.4em;*/
+	line-height: 1.2em;
+}
+.regact p {
+	color: #333;
+	font-family: Roboto,sans-serif !important;
+}	
+.regact img {
+	padding-right: 25px;	
+}
+
+.form-control {
+    display: block;
+    width: 100%;
+    height: 34px;
+    padding: 6px 12px;
+    font-size: 14px;
+    line-height: 1.42857143;
+    color: #ccc;
+    background-color: #fff;
+    background-image: none;
+    border: 1px solid #ccc;
+    border-radius: 0px !important;
+}
+
+.pointer { cursor: pointer; }
+
+.greybox-xlg {
+	background: #fff;
+	border: none;
+	border-radius: 5px;
+}

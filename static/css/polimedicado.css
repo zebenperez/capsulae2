@@ -1,0 +1,45 @@
+:root
+{
+    --grey-poli:#717175;
+    --green-poli:rgb(79,142,58,1);
+    --green-poli-soft:rgb(79,142,58,0.5);
+}
+.btn-info
+{
+	color:#fff;
+	background:var(--grey-poli) !important;
+	border:#1c1c1c 1px solid!important;
+}
+
+.panel-primary
+{
+    border-color:var(--grey-poli);
+}
+
+.panel-primary>.panel-heading
+{
+	background:var(--grey-poli) !important;
+	border-color:var(--grey-poli) !important;
+}
+
+table 
+{
+    font-size: 14px !important;
+}
+
+tr.info>th
+{
+    background-color:var(--green-poli-soft) !important;
+    color:white;
+}
+
+.text-info
+{
+    color:var(--grey-poli);
+    font-family:"Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+li.mobile
+{
+    display:inline-block !important;
+}

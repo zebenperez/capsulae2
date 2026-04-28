@@ -1,0 +1,100 @@
+{% extends 'base-home.html' %}
+{% load i18n static account_tags %}
+
+{% block central_content %}
+    <script src="{% static "js/utils.js" %}"></script>
+
+    <section class="contactDetails" id="donation">
+        <div class="container mt-5"> 
+            <div class="row">
+                <div class="col-12">
+                    <div class="row"> <div class="col-lg-5 col-12"> <h1 class="login">Donaciones</h1> </div> </div>
+                </div>
+            </div>
+            <br/>
+            <div class="row p-2">
+                <div class="col-lg-4 col-12">
+                    <div class="grl-block pt-3 m-1">
+                        <h3 class="text-center">Ya soy donante</h3>
+                        <form class="form-horizontal p-2" method="post" action="{% url "auth_login" %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="next" value="{% url 'pharma-index' %}" />
+                            <div class="row">
+                                <div class="col-12 conForm form-group">
+                                    <input type="text" name="username" value="" id="username" class="form-control" placeholder="Nombre de usuario"/>
+                                </div>
+                                <div class="col-12 conForm form-group">
+                                    <input name="password" type="password" value="" id="password" class="form-control" placeholder="Contraseña"/>
+                                </div>
+                                <div class="mt-2">
+                                    <button id="btn-login" class="submitBnt register"> Acceder </button>
+                                    <a class="a-pass small pointer" onclick="$('#donation-new-passwd').toggle()">{% trans "¿Has olvidado tu contraseña?" %}</a> 
+                                </div>
+                            </div>
+                        </form>
+
+                        <div id="donation-new-passwd" class="hideClass">
+                            <form class="form-horizontal p-2" method="post" action="{% url "send_new_password_by_email" %}">
+                                {% csrf_token %}
+                        <div class="recover-pass text-center">
+                                    <input name="email" type="text" value="" id="email" class="form-control w-100" placeholder="Indique su correo electrónico"/>
+                                    <button type="submit" class="btn btn-info form-control w-50" id="btn-submit">{% trans "Enviar nuevo password" %}</button> 
+                        </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-8 col-12">
+                        <div class="grl-block pt-3 m-1">
+                            <h3 class="text-center">Soy un nuevo donante</h3>
+                            <form action="{%url "donation-send"%}" method="post" enctype="multipart/form-data" name="frmDonation" id="frmDonation" 
+                                class="">
+                                {% csrf_token %}
+                                <!--contact form start-->
+                                {#<div class="row w-100 m-0"> <div class="col-lg-5 col-12"> <h1 class="login">Donaciones</h1> </div> </div>#}
+
+                                {% get_donation_select %}
+
+                                <div class="row m-0">
+                                    <div class="col-lg-6 col-12 conForm form-group">
+                                        <input type="text" id="name-d" name="name-d" class="form-control" title="Nombre" placeholder="(*) Nombre" required/> 
+                                    </div>
+                                    <div class="col-lg-6 col-12 conForm form-group">
+                                        <input type="text" id="cif-d" name="cif-d" class="form-control" title="CIF" placeholder="(*) CIF/NIF" required/> 
+                                    </div>
+                                    <div class="col-lg-6 col-12 conForm form-group">
+                                        <input type="text" id="email-d1" name="email-d1" class="form-control" title="Correo electrónico" 
+                                        placeholder="(*) Email&nbsp;" required/> </div>
+                                    <div class="col-lg-6 col-12 conForm form-group">
+                                        <input type="text" id="email-d2" name="email-d2" class="form-control" title="Confirmación de correo" 
+                                        placeholder="(*) Confirma email &nbsp;" required/> </div>
+                                    <div class="required-fields">(*) Campos obligatorios</div>
+                                    <div class="acceptCheck small mt-3 p-0">
+                                        <input type="checkbox" id="tos-d" name="tos-d"/> 
+                                        {%comment%}
+                                        <label>Acepto las <a class="ark pointer" data-url="{% url "privacy-policy" %}" 
+                                            data-target-modal="common-modal"> condiciones de uso</a> </label><br/>
+                                        {%endcomment%}
+                                        <label>
+                                            Acepto las <a class="ark pointer" href="https://fundec.org/cms/politica/" target="_blank"> condiciones de uso</a>
+                                        </label>
+                                        <br/>
+                                    </div>
+                                </div>
+                                <div class="row m-0">
+                                    <div class="col-lg-4 col-12 text-center">
+                                        <script src='https://www.google.com/recaptcha/api.js'></script>
+                                        <div class="g-recaptcha" data-sitekey="6Lex26gUAAAAAAz2BSZPNuHpj5-84MYnkIzvsTy4"></div>
+                                    </div>
+                                    <div class="col-lg-7 offset-lg-1 col-12"> <button id="btn-donation-send" class="submitBnt register">Realizar donación</button> </div>
+                                    <div id="div-donation-errors" class="alert-msg hideClass"></div>
+                                </div>
+                            </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section> 
+{% endblock central_content %}
+

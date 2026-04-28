@@ -1,0 +1,51 @@
+{% load i18n %}
+
+
+{% if delivers|length > 0 %}
+    <div class="row toolbar-search pt-2 pb-2 m-0 border-bottom">
+        <div class="col-1"><i class="fas fa-search"></i></div>
+        <div class="col-11"> <input type="text" class="form-control front-search" id="search" data-row-class="row-deliver" 
+            placeholder="{% trans "Escriba código a buscar..." %}"/></div>
+    </div>
+
+    <div class="row">
+    <table class="table table-striped table-hover table-condensed col-xs-12">
+        <thead>
+            <tr class="info">
+	        <th><span class="d-block d-sm-none"><i class="fa fa-users"></i></span><span class="d-none d-sm-block"> Paciente</span> </th>
+	        <th><span class="d-block d-sm-none"><i class="fas fa-list-alt"></i></span><span class="d-none d-sm-block"> Descripción</span> </th>
+	        <th><span class="d-block d-sm-none"><i class="fas fa-flask"></i></span><span class="d-none d-sm-block"> Praparación</span> </th>
+	        <th><span class="d-block d-sm-none"><i class="fas fa-clipboard-check"></i></span><span class="d-none d-sm-block"> Entrega </span> </th>
+	        <th><span class="d-block d-sm-none"><i class="fas fa-hourglass-end"></i></span><span class="d-none d-sm-block"> Finalización </span> </th>
+            <th></th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for obj in delivers %} 
+                <tr class="small row-deliver" id="row-{{obj.pillbox.patient}}"> {% include "pillbox-list-row.html" %} </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% include "common-modal.html" %}
+    <script>
+        $("#div-pillbox-number").html("{{delivers|length}}");
+        /*$("#search").keyup(function(){
+            var value = $(this).val();
+            if(value == "")
+                $(".row-deliver").show();
+            else
+            {
+                $(".row-deliver").each(function(){
+                    var id = $(this).attr("id");
+                    if (id.indexOf(value.toUpperCase()) != -1)
+                        $(this).show();
+                    else
+                        $(this).hide();
+                });
+            }
+        });*/
+    </script>
+{% endif %}
+

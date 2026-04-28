@@ -1,0 +1,35 @@
+{% load i18n %}
+
+<div class="row m-0 pt-1">
+    <div class="col-10">
+        <h2 class="text-dark">{% trans "Ficheros" %}</h2>
+    </div>
+    <div class="col-2 text-end">
+        <label for ="id_files_{{ obj.id }}" class="btn btn-sm new async-load">
+            <i class="fas fa-upload"></i><span class="d-none d-sm-block">{% trans "Elegir" %}&nbsp;{% trans "Archivos" %}</span></label>
+        <input type="file" class="multiupload d-none" name="client_file" id="id_files_{{ obj.id }}" data-url="{% url 'note-file-add' %}"
+            data-target="div-files" data-obj-id="{{obj.id}}" data-field="" data-folder="" data-csrf-token="{{ csrf_token }}" 
+            multiple/>
+    </div>
+</div>
+
+
+<div class="row m-0">
+    {% for item in obj.files.all %}
+        <div class="files-list-item col-lg-3 col-6 py-1">
+            <a href="{{item.note_file.url}}" target="_blank"><div class="w3-xlarge"><i class="fa fa-file-pdf"></i></div> <div>{{item.name}}</div></a> 
+            <div>
+                <a class="btn btn-xs ark" title="{%trans 'Edit file'%}" data-url="{%url "note-file-form" %}"
+                    data-target-modal="common-modal" data-obj_id="{{item.id}}" data-note_id="{{obj.id}}"> <i class="fas fa-edit"></i></a>
+                {%comment%}
+                <a href="{% url "note-file-get" item.id %}" title="{% trans "Descargar fichero" %}" download class="download-btn"> 
+                    <i class="fas fa-download"></i> </a>
+                {%endcomment%}
+                <a class="btn btn-xs ark delete-btn" id="btn-photo-{{item.pk}}" title="{% trans "Borrar fichero" %}" 
+                    data-confirm="{% trans "Esta seguro/a de que desea borrar este fichero?" %}" data-url="{% url "note-file-remove" %}" 
+                    data-target="div-files" data-obj_id="{{item.id}}" data-field="file"> <i class="fas fa-times"></i></a>
+            </div>
+        </div>
+    {% endfor %}
+    {% include "common-modal.html" %}
+</div>

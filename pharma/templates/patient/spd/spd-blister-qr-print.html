@@ -1,0 +1,40 @@
+{% load pharma_tags i18n %}
+
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <style>
+            button{display:none;}    
+			@media screen{button{display:inline;}}
+
+            @page 
+			{
+				size: 2.5cm;
+                margin:0cm;
+                padding:0cm;
+                text-align:center;
+				/*@top-right{content: "Pág. " counter(page) " de " counter(pages);font-size:0.6em;}
+				@top-left{content: "CAPSULAE";} */
+				{% if interacciones|length > 0 %}
+					@top-center{content:"Plan de tratamiento - {{paciente.n_historial}} -";}
+				{%endif%}
+			}
+            body {font-size:9pt; }
+			.print-area
+			 {
+				 width:100%!important;
+				 margin-top: 10px!important;
+				 margin-bottom: 10px!important;
+			 }
+		</style>
+    </head>
+	<body>
+        <div>
+            <div id="" class="print-area" >
+                <center>
+                        <img src="{% userqr_code request paciente %}" style="display:block; width:2cm; height:2cm"/>
+                </center>
+            </div>
+        </div>
+    </body>
+</html>

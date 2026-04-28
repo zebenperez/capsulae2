@@ -1,0 +1,229 @@
+{% load i18n static %}
+
+<!DOCTYPE html>
+
+<html class="no-js" lang="en"><!--<![endif]-->
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!--main style-->
+<link rel="stylesheet" type="text/css" media="screen" href="/static/css/new-style.css">
+<link rel="stylesheet" type="text/css" media="screen" href="css/bootstrap.css">
+<!-- font icon css style-->
+<link rel="stylesheet" href="css/font-awesome.css">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+</head>
+
+<body onLoad="load()" onUnload="GUnload()">
+
+<!--wrapper start-->
+<div class="wrapper" id="wrapper">
+
+<!--Header start -->
+<header class="qba">
+  	<!--menu start-->
+	<div class="menu sticky-top">
+		<div class="navbar-wrapper">
+			<div class="container">
+				<div class="navwrapper">
+					<div class="navbar navbar-inverse navbar-static-top">
+						<div class="container">
+							<div class="logo"><a href="#"><img src="/static/imgs/logo-w.png" alt="white logo"></a></div> 
+							<div class="navArea">
+								<div class="navbar-collapse collapse">
+									<ul class="nav navbar-nav">
+										<li class="menuItem active"><a href="#wrapper">Home</a></li>
+										<li class="menuItem"><a href="#perfiles">Perfiles</a></li>
+										<li class="menuItem"><a href="#planes">Planes</a></li>
+										<li class="menuItem"><a href="#contact">Contact</a></li>
+									</ul>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+        	  <!-- End Navbar -->
+			</div>
+		</div>
+	</div>
+    <!--menu end-->     
+
+    <!--banner start-->
+    <div class="banner row" id="banner">
+        <!--background slide show start-->
+        <div class="slide"> 
+          <img src="/static/imgs/bg-slider.jpg" alt="bg-slider"> </div>        
+        <!--background slide show end--> 
+      </div>
+    <!--banner end--> 
+</header>
+  <!--Header end -->
+  
+  <!--perfiles start -->
+<section class="perfiles" id="perfiles">
+	<div class="container">
+		<div class="col-lg-10 offset-lg-1 col-12 heading">
+	        	<h2>Perfiles</h2>
+	        	<h3>Phasellus non dolor nibh. Nullam elementum  tellus pretium feugiat.<br> 
+			Cras dictum tellus dui, vitae sollicitudin ipsum tincidunt in. Sed tincidunt tristique enim sed sollcitudin.</h3>        
+	      	</div>	
+		<div class="perfil-box">        
+			<div class="expertiesico"><span class="ico"><i class="fas fa-clinic-medical"></i></span></div>
+			<div class="expertiesdesc col-xs-12 col-sm-9 col-md-9 col-lg-9">
+	            		<h4>SOY UNA FARMACIA</h4>
+	                	<p>Cras dictum tellus dui, vitae sollicitudin ipsum tincidunt adipiscing atgfnte varius at. Sed mollis vestibulum sapien sed mattis.Cras dictum tellus duvi, vitae sollicitud tyinstfg
+				duvipsum tincidunt adipiscing ante varius at. Sed mollis ves tibulum Sed mollis vestibu
+				lum sapien sed matti sapien sed mattis.</p>
+			</div>
+		</div>	
+	
+		<div class="perfil-box">        
+			<div class="expertiesico"><span class="ico"><i class="fas fa-users"></i></span></div>
+			<div class="expertiesdesc col-xs-12 col-sm-9 col-md-9 col-lg-9">
+	            		<h4>SOY UNA ASOCIACIÓN</h4>
+        	        	<p>Cras dictum tellus dui, vitae sollicitudin ipsum tincidunt adipiscing atgfnte varius at. Sed mollis vestibulum sapien sed mattis.Cras dictum tellus duvi, vitae sollicitud tyinstfg
+				duvipsum tincidunt adipiscing ante varius at. Sed mollis ves tibulum Sed mollis vestibu
+				lum sapien sed matti sapien sed mattis.</p>
+			</div>
+		</div>	       
+	</div>
+</section>
+  <!--perfiles end -->
+  
+    <!--planes start-->
+<section class="protfolio" id="planes">
+	<div class="container">
+		<div class="heading">
+			<h2>Planes</h2>
+			<h3>Phasellus non dolor nibh. Nullam elementum  tellus pretium feugiat.<br> 
+Cras dictum tellus dui, vitae sollicitudin ipsum tincidunt in. Sed tincidunt tristique enim sed sollcitudin.</h3>        
+		</div>
+	</div>	
+	<div class="planes">
+		<div class="plan-box-1"><a href=""><img src="/static/imgs/bg-plan1.png" height="164" width="244" /></a></div>
+		<div class="plan-box-2"><a href=""><img src="/static/imgs/bg-plan2.png" height="164" width="244" /></a></div>
+		<div class="plan-box-3"><a href=""><img src="/static/imgs/bg-plan3.png" height="164" width="244" /></a></div>
+		<div class="plan-box-4"><a href=""><img src="/static/imgs/bg-plan4.png" height="164" width="244" /></a></div>
+	</div>
+</section>
+  <!--planes end-->   
+  
+<!--contact start-->
+<section class="contact" id="contact">
+	<div class="container">
+		<div class="heading">
+			<h2>Contacto</h2>
+			<h3>We are happy to talk you through any projects or run live demos for those wishing to see what it is to use our products and how they look like.</h3>       
+		</div>
+	</div>    
+</section>
+
+<section class="contactDetails">
+	<div class="container"> 
+	<!--contact form start-->
+		<div class="row">
+			<div class="col-xs-12 col-sm-12 col-md-4 col-lg-4 left-contact">
+        	 		<h3>Dirección</h3>
+        	    		Tenerife, Canarias, España<br /><br />
+				<h3>Datos de contacto</h3>
+		        	+34 666 123 456, +34 922 123 456 info.capsulae.org<br /><br />
+			</div>
+	
+			<div class="col-xs-12 col-sm-12 col-md-8 col-lg-8 conForm right-contact">
+				<div id="message"></div>
+				<form method="post" action="php/contact.php" name="cform" id="cform">
+					<div class="w-100"><input name="name" id="name" type="text" class="w-100" placeholder="Your name" ></div>
+					<input name="email" id="email" type="email" class="noMarr" placeholder="Your email" >
+					<textarea name="comments" id="comments" cols="" rows="" class="" placeholder="Your message"></textarea>
+					<input type="submit" id="submit" name="send" class="submitBnt" value="Send message">
+					<div id="simple-msg"></div>
+				</form>
+			</div>
+		</div>
+	<!--contact form end--> 
+	</div>
+</section> 
+
+  <!--google map start-->
+<div class="row mapArea">
+	<iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d14028.34866574585!2d-16.30829755405033!3d28.476921461996984!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xc41cc5321823e09%3A0x1c9e218206d17096!2sFinca%20Espa%C3%B1a%2C%2038205%20La%20Laguna%2C%20Santa%20Cruz%20de%20Tenerife!5e0!3m2!1ses!2ses!4v1690279995640!5m2!1ses!2ses" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+	<div id="map" style="width: 100%; height: 100%"></div>
+</div> 
+    <!--google map end-->  
+  <!--contact end-->  
+  
+  <!--footer start-->
+<section class="footer" id="footer">
+	<div class="container">
+		<ul>
+			<li><a href="#"><i class="fab fa-twitter"></i></a></li>
+			<li><a href="#"><i class="fab fa-facebook-f"></i></a></li>
+			<li><a href="#"><i class="fab fa-linkedin"></i></a></li>
+		</ul>
+		<p>© 2023 capsulae.org. All Rights Reserved.<br>
+		Design created by <a href="https://www.shidix.com" target="_blank">Shidix Technologies</a></p>
+	</div>
+		<p class="text-center"><a href="#wrapper" class="gototop"><i class="fa fa-chevron-up fa-2x"></i></a></p>
+</section>
+  <!--footer end-->   
+
+</div>
+<!--wrapper end--> 
+
+<!--jquary min js--> 
+<script type="text/javascript" src="js/jquery.min.js"></script> 
+<script src="js/bootstrap.js"></script> 
+
+<!--for placeholder jquery--> 
+<script type="text/javascript" src="js/jquery.placeholder.js"></script> 
+
+<!--for header jquery--> 
+<script type="text/javascript" src="js/stickUp.js"></script> 
+<script type="text/javascript">
+jQuery(function($) {
+$(document).ready( function() {
+  //enabling stickUp on the '.navbar-wrapper' class
+	$('.navbar-wrapper').stickUp({
+		parts: {
+		  0: 'banner',
+		  1: 'perfiles',
+		  2: 'planes',
+		  5: 'contacto'
+		},
+		itemClass: 'menuItem',
+		itemHover: 'active',
+		topMargin: 'auto'
+		});		
+	});
+		
+	$('#da-slider').cslider({
+		autoplay	: true,
+		bgincrement	: 0,
+		interval    : 5000  
+	});
+
+});
+</script>
+
+<!--contact form js--> 
+<script type="text/javascript" src="js/jquery.contact.js"></script> 
+
+<!--about jquery--> 
+<script src="js/jquery.classyloader.min.js"></script>
+<script defer src="js/jquery.flexslider.js"></script> 
+
+<script src="js/jquery.easing.js"></script> 
+<script src="js/jquery.mousewheel.js"></script> 
+
+<script type="text/javascript" src="switcher/js/jquery.cookie.js"></script> <!-- jQuery cookie --> 
+
+<!--for theme custom jquery--> 
+<script src="js/custom.js"></script>
+
+<!-- Start Style Switcher -->
+<div class="switcher"></div>
+<!-- End Style Switcher -->
+</body>
+</html>

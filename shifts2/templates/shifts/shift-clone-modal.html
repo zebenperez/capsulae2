@@ -1,0 +1,30 @@
+{% load i18n %}
+
+<!-- Modal -->
+<div class="modal" id="shift-clone-modal" tabindex="-1" role="dialog" aria-labelledby="shiftModalLabel" aria-hidden="true">
+	<div class="modal-dialog  modal-dialog-centered modal-lg" role="document">
+		<div class="modal-content p-3">
+			<div class="modal-header">
+				<h5 class="modal-title" id="exampleModalLabel">{% trans "Clonar turnos" %}</h5>
+			</div>
+			<div class="modal-body" id="shift-modal-body">	
+                <form method="POST" action="{% url "shifts-clone-shifts" %}" class="form" id="shifts-clone-form">
+                    {% csrf_token %}
+                    {% trans "Año que se va a clonar:" %} 
+                    <input class="form-control" name="ini_year" id="ini_year" type="number" min="1900" max="2099" step="1" value="{{current_year}}"/>
+                    <br/>
+                    {% trans "Año donde se clonaran los turnos:" %} 
+                    <input class="form-control" name="end_year" id="end_year" type="number" min="1900" max="2099" step="1" value="{{next_year}}" />
+                    <div class="modal-footer"> 
+                        <a class="cancel btn btn-tools tools-danger btn-labeled saveform" data-dismiss="modal" data-form="shifts-clone-form" 
+                            data-target="div-calendar" data-confirm="{% trans "¿Está seguro/a de que desea clonar los turnos?" %}"> 
+                            <i class="fas fa-window-close"></i> {% trans "Clonar" %}</a> 
+				        <a class="cancel btn btn-tools btn-labeled" data-dismiss="modal" aria-label="Close">
+                            <i class="fas fa-window-close"></i> {% trans "Cerrar" %}</a>
+                    </div>
+                </form>
+			</div>
+		</div>
+	</div>
+</div>
+

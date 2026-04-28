@@ -1,0 +1,63 @@
+{#{% extends 'basenologin.html' %}#}
+{% extends 'base_simple.html' %}
+{% load i18n static account_tags %}
+
+
+{% block central_content %}
+
+    {% if error_code == 0 %}
+	<div class="row">
+		<div class="col-12">
+                	<div class="jumbotron text-center">
+				<div class="info">{% trans "Bienvenido a Capsulae, " %} <strong>{{user.first_name}}</strong></div>
+				<div class="mt-5">{% trans "Hemos enviado un email a la direcci&oacute;n de correo que nos ha proporcionado para que proceda a la activaci&oacute;n de su cuenta. Una vez la haya activado, se le solicitar&aacute; un password con el que podr&aacute; acceder a nuestros servicios." %} </div>
+				<div class="mt-5">{% trans "Por motivos operativos, dispone de 7 d&iacute;as para activar la cuenta. A partir de esa fecha, este enlace dejar&aacute; de ser v&aacute;lido." %}</div>
+				<div class="mt-5"><strong>{% trans "¡Gracias por su confianza!" %}</strong></div>
+                    		<div class="mt-5"><a href="{% url "pharma-index" %}" class="link">{% trans "Volver" %}</a></div> 
+			</div>
+		</div>
+	</div>
+    {% elif error_code == 1 %}
+        <div class="row">
+            <div class="col-12">
+                <div class="jumbotron text-center">
+		    <div class="info">{% trans 'Dirección de correo ya registrada, ' %} <strong>{{user|default_if_none:'usuario'}}</strong></div>
+                    <div class="mt-5">{% trans 'Si desea que le reenvíemos un password, pinche' %} 
+                        <a href="{% url 'send_new_password' user.pk %}" class="a-link">{% trans 'aquí' %}</a>.</div>
+                    <div class="mt-5"><strong>{% trans '¡Gracias por su confianza!' %}</strong></div>
+                    <div class="mt-5"><a href="{% url "pharma-index" %}" class="link">{% trans "Volver" %}</a></div> 
+                </div>
+            </div>
+        </div>
+    {% elif error_code == 2 %}
+        <div class="row">
+            <div class="col-12">
+                <div class="jumbotron text-center">
+			<div class="info">{% trans 'Lo sentimos pero no se ha encontrado esa dirección de correo.' %}</div>
+                        <div class="mt-5"><a href="{% url "pharma-index" %}" class="link">{% trans "Volver" %}</a></div> 
+                </div>
+            </div>
+        </div>
+    {% elif error_code == 3 %}
+        <div class="row">
+            <div class="col-12">
+                <div class="jumbotron text-center"> 
+                    <div class="info">{% trans 'Hemos enviado un correo con su nuevo password a la cuenta' %} {{user.email}}.</div> 
+                    <div class="mt-5"><a href="{% url "pharma-index" %}" class="link">{% trans "Volver" %}</a></div> 
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="row">
+            <div class="col-12">
+                <div class="jumbotron text-center">
+                    <div class="info">
+			    {% trans 'Upsssss. Lo sentimos, pero hemos detectado un error en el registro. Ya estamos solucionándolo. Inténtelo en unos minutos' %}</div>
+                    <div class="mt-5"> {{error_msg}}</div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+{% endblock central_content %}
+

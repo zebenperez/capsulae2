@@ -1,0 +1,40 @@
+{% load i18n common_tags %}
+
+{% if user.is_authenticated %}
+    <ul class="left-menu">
+    {% if menu == "admins" %}
+        <li class="nav-item"><a class="nav-link " href="{%url "pharma-index"%}"><i class="fa fa-home"></i> {%trans "Home"%} </a></li><hr/>
+        {% if user|have_menu:"PAC"%}
+            <li class="nav-item"><a class="nav-link " href="{%url "patients"%}"><i class="fa fa-user"></i> {%trans "Pacientes"%} </a></li><hr/>
+        {% endif %}
+        {% if user|have_menu:"MED"%}
+            <li class="nav-item"><a class="nav-link " href="{%url "medication"%}"><i class="fa fa-vial"></i> {%trans "Medicamentos"%} </a></li><hr/>
+        {% endif %}
+        {% if user|have_menu:"PRO"%}
+            <li class="nav-item"><a class="nav-link " href="{%url "projects"%}"><i class="fa fa-list"></i> {%trans "Proyectos"%} </a></li> <hr/>
+        {% endif %}
+        {% if user|have_menu:"ORG"%}
+            <li class="nav-item"><a class="nav-link " href="{%url "organizations"%}">
+                <i class="fa fa-sitemap"></i> {%trans "Organizaciones"%}</a></li><hr/>
+        {% endif %}
+        {% if user|have_menu:"TRM"%}
+            <li class="nav-item"><a class="nav-link " href="{%url "procedures"%}">
+                <i class="fa fa-project-diagram"></i> {%trans "Trámites"%}</a></li><hr/>
+        {% endif %}
+        {% if user|have_menu:"EMP"%}
+            <li class="nav-item"><a class="nav-link " href="{%url "employees"%}">
+                <i class="fa fa-users"></i> {%trans "Usuarios"%}</a></li><hr/>
+        {% endif %}
+        {% if user|have_menu:"TUR"%}
+            <li class="nav-item"><a class="nav-link " href="{%url "shifts-index"%}">
+                <i class="fa fa-calendar"></i> {%trans "Turnos"%}</a></li><hr/>
+        {% endif %}
+        {% if user|have_menu:"AGE"%}
+            <li class="nav-item"><a class="nav-link " href="{%url "notes-index"%}">
+                <i class="fa fa-calendar-alt"></i> {%trans "Agenda"%}</a></li><hr/>
+        {% endif %}
+    {% endif %}
+    </ul>
+{% else %}
+{% endif %}
+

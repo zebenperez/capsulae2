@@ -1,0 +1,31 @@
+{% load i18n %}
+
+<div class="row" style="margin:0;">
+    <div class="col-lg-2 col-6 mt-3">
+        <label class="label">{% trans "Teléfono" %}:</label>
+        <input type="text" class="form-control autosave input view" id="telefono1" name="telefono1" value="{{obj.telefono1|default:""}}" 
+            data-model-name="pharma.pacientes" data-obj-id="{{obj.id}}" data-url="{% url "autosave_field" %}" 
+            title="{% trans "El teléfono solo puede contener números. (p.e. 611111111)" %}" pattern="[0-9]*"
+            data-target="div-notification" disabled/> <small><span id="telefono1__msg" class="msg_error"></span></small>
+    </div>
+     <div class="col-lg-3 col-6 mt-3">
+        <label class="label">{% trans "Código postal" %}:</label>
+        <input type="text" class="form-control autosave input view" id="cod_postal" name="cod_postal" value="{{obj.cod_postal}}" 
+            title="{{obj.cod_postal}}" data-model-name="pharma.pacientes" data-obj-id="{{obj.id}}" data-url="{% url "autosave_field" %}" 
+            data-target="div-notification" disabled/> <span id="cod_postal__msg"></span>
+    </div>
+    <div class="col-lg-3 col-12 mt-3">
+        <label class="label">{% trans "Correo electrónico" %}:</label>
+        <input type="text" class="form-control autosave input view" id="email" name="email" value="{{obj.email}}" title="{{obj.email}}" 
+            data-model-name="pharma.pacientes" data-obj-id="{{obj.id}}" data-url="{% url "autosave_field" %}" data-target="div-notification"
+            disabled/>
+            <span id="email__msg"></span>
+    </div>
+    <div class="col-lg-4 col-12 mt-3">
+        <label class="label">{% trans "Domicilio" %}:</label>
+        <input type="text" class="form-control autosave input view" id="domicilio" name="domicilio" value="{{obj.domicilio}}" 
+            title="{{obj.domicilio}}" data-model-name="pharma.pacientes" data-obj-id="{{obj.id}}" data-url="{% url "autosave_field" %}" 
+            data-target="div-notification" disabled/> <span id="domicilio__msg"></span>
+    </div>
+</div>
+

@@ -1,0 +1,30 @@
+{% load i18n static %}
+
+<div class="content mt-4">
+    <div class="row toolbar-content">
+        <div class="col-12 bg-warning text-center">
+            <h2 class="text-white"><strong>{%trans 'Calendario colaborativo y acceso individual'%}</strong></h2>
+        </div>
+        <div class="col-12 pt-2">
+            <a class="ark pointer" data-url="{%url "notes-check-log"%}" data-target-modal="common-modal"><i class="fas fa-list"></i></a>
+            Tareas predefinidas:
+            {% for item in common_list %}
+                <a class="btn btn-sm new" href="{% url "notes-create-note" item.id %}" 
+                    onclick="return confirm('Esta seguro/a de que desea crear esta tarea?')"> 
+                    <i class="fas fa-chevron-right"></i> {{item.name}} </a>
+            {% endfor %}
+
+            {% if perms.create_notes %}
+                <a class="btn btn-sm ark new" data-url="{% url "notes-get-note" %}" data-target="div-notes"> 
+                    <i class="fas fa-plus"></i>{% trans "Añadir nota" %} </a>
+            {% endif %}
+            </div>
+        </div>
+    </div>
+
+<div id="div-calendar">{% include "notes/calendar.html" %}</div>
+<div id="load-notes"></div>
+
+{% include "common-modal.html" %}
+{#{% include "cam/event-modal.html" %}#}
+{#{% include "notes/note-clone-modal.html" %}#}

@@ -1,0 +1,22 @@
+{% extends 'base-home.html' %}
+{% load i18n static %}
+
+{% block central_content %}
+	<div class="banner d-none d-lg-block" id="banner"> <div class="slide"><img src="/static/imgs/bg-slider.jpg" alt="bg-slider"> </div> </div>
+
+    <!--perfiles start -->
+    {% include "home-profiles.html" %}
+          
+    <!--planes start-->
+    {% include "home-plans.html" %}
+          
+    <!--register start-->
+    {% include "account/register.html" %}
+
+    <!--contribute start-->
+    {#{% include "account/donations.html" %}#}
+
+    <!--contact start-->
+    {% include "home-contact.html" %}
+{% endblock central_content %}
+

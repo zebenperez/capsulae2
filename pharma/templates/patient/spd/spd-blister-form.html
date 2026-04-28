@@ -1,0 +1,93 @@
+{% load i18n %}
+
+
+<div class="row">
+    <div class="col-11"> <h2><i class="fa fa-history"></i>&nbsp; {% trans 'Modificar Blister' %}</h2></div>
+    <div class="col-1">
+        <div class="d-flex justify-content-end"> <button type="button" class="btn btn-lg" data-bs-dismiss="modal" title="{% trans "Close" %}">
+            <i class="fas fa-times"></i></button> </div>
+    </div>
+</div>
+
+{% comment %} <span id="div-notification"></span><br/> {% endcomment %}
+
+
+<div class="row justify-center">
+    <div class="col-3"> <strong> {% trans "Código" %}</strong> </div>
+    <div class="col-3"> <strong> {% trans "F. Preparación" %}</strong> </div>
+    <div class="col-3"> <strong> {% trans "F. Entrega" %}</strong> </div>
+    <div class="col-3"> <strong> {% trans "F. Fin" %}</strong> </div>
+
+    <div class="col-3 blister-code">{{obj.code}} </div>
+    <div class="col-3">
+        <input type="date" class="form-control autosave mb-4 blister-date" id="creation_date" name="creation_date" 
+            value="{{obj.creation_date|date:"Y-m-d"}}" data-model-name="pharma.pillboxdeliver" data-obj-id="{{obj.id}}" 
+            data-url="{%url "autosave_field"%}" data-target="div-notification"/> <span id="creation_date__msg"></span>
+    </div>
+    <div class="col-3">
+        <input type="date" class="form-control autosave mb-4 blister-date" id="deliver_date" name="deliver_date" 
+            value="{{obj.deliver_date|date:"Y-m-d"}}" data-model-name="pharma.pillboxdeliver" data-obj-id="{{obj.id}}" 
+            data-url="{%url "autosave_field"%}" data-target="div-notification" onfocusout="setFinishDate();"/> <span id="deliver_date__msg"></span>
+    </div>
+    <div class="col-3">
+        <input type="date" class="form-control autosave mb-4 blister-date" id="finish_date" name="finish_date" 
+            value="{{obj.finish_date|date:"Y-m-d"}}" data-model-name="pharma.pillboxdeliver" data-obj-id="{{obj.id}}" 
+            data-url="{%url "autosave_field"%}" data-target="div-notification"/> <span id="finish_date__msg"></span>
+    </div>
+    <div class="col-12 alert alert-warning"> {% trans "Caduca:" %} {{expiration_date}}</div>
+</div>
+
+<input type="text" class="form-control" id="deliver_med_qr_field" placeholder="{% trans "Código QR del medicamento" %}"/>
+
+<div class="row pt-2"> 
+    <div class="col-8"> <strong>{% trans "Dentro del SPD" %}</strong> </div>
+    <div class="col-2"> <strong>{% trans "Lote" %}</strong> </div>
+    <div class="col-2"> <strong>{% trans "Caducidad" %}</strong> </div>
+</div>
+<hr/>
+{% for dm in obj.deliver_meds.all %}
+    {% if dm.in_spd %} 
+        <div class="row treat-line pt-2" id="row-blister-{{dm.id}}"> {% include "patient/spd/spd-blister-form-row.html" %} </div> 
+    {% endif %}
+{% endfor %}
+
+<div class="row pt-2 mt-3"> 
+    <div class="col-8"> <strong>{% trans "Fuera del SPD" %}</strong> </div>
+    <div class="col-2"> <strong>{% trans "Lote" %}</strong> </div>
+    <div class="col-2"> <strong>{% trans "Caducidad" %}</strong> </div>
+</div>
+<hr/>
+{% for dm in obj.deliver_meds.all %}
+    {% if not dm.in_spd %} 
+        <div class="row treat-line pt-2" id="row-blister-{{dm.id}}"> {% include "patient/spd/spd-blister-form-row.html" %} </div> 
+    {% endif %}
+{% endfor %}
+
+<div class="d-flex justify-content-end">
+    <button type="button" class="btn btn-sm ark save" data-bs-dismiss="modal" data-url="{% url "spd-blisters" %}"
+        data-target="blister-list-{{obj.pillbox.id}}" data-obj_id="{{obj.pillbox.id}}">{% trans "Guardar" %}</button>
+</div>
+
+<script>
+    Date.prototype.toInputFormat = function() {
+       var yyyy = this.getFullYear().toString();
+       var mm = (this.getMonth()+1).toString(); // getMonth() is zero-based
+       var dd  = this.getDate().toString();
+       return yyyy + "-" + (mm[1]?mm:"0"+mm[0]) + "-" + (dd[1]?dd:"0"+dd[0]); // padding
+    };
+
+    function setFinishDate()
+    {
+        var d = new Date($("#deliver_date").val());
+        d.setDate(d.getDate() + 7);
+        $("#finish_date").val(d.toInputFormat());
+        $("#finish_date").change();
+    }
+
+    $("#deliver_med_qr_field").change(function(){
+        var url = "{% url 'spd-search-by-qr' %}";
+        var datas = {"qr_data": $(this).val(), "pd_id": "{{obj.id}}"}
+        ajaxGetSearchMed(url, datas, "code", "expiration_date");
+    });
+</script>
+

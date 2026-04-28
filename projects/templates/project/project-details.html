@@ -1,0 +1,43 @@
+{% load i18n %}
+
+
+<div class="row spd-tab">
+    <div class="col-12 text-end">
+        <button type="button" class="btn btn-sm ark new" data-url="{% url "project-form" %}" data-target-modal="common-modal" 
+            data-obj_id="{{obj.id}}"> <i class="fas fa-plus"></i> {% trans 'Editar' %}</button> 
+    </div>
+</div>
+
+<div id="patient-container">
+    <div class="row w-100 patient-data-body-2 p-1" style="margin:0;">
+        <div class="col-11 patient-data">
+            <div class="row" style="margin:0;">
+                <div class="col-10 mt-3">
+        		<div class="greybox-sm p-1">
+				<label class="label">{% trans "Nombre" %}</label>
+				<span class="view">{{obj.name}}</span>
+			</div>
+		</div>
+                <div class="col-2 mt-3">
+        		<div class="greybox-sm p-1">
+				<label class="label">{% trans "Fecha de ejecución" %}</label>
+				<span class="view">{{obj.end_date}}</span>
+			</div>
+		</div>
+                <div class="col-12 mt-3">
+        		<div class="greybox-sm p-1">
+				<label class="label">{% trans "Descripción" %}</label>
+				<span class="view">{{obj.desc|safe}}</span>
+			</div>
+		</div>
+            </div>
+        </div>    
+        {%comment%}
+        <div class="col-1 text-end">
+            <button id="btn-edit" class="btn btn-sm toggle-edit new" data-class-name="input" data-text="{%trans "Edit"%}" 
+                data-text-alt="{%trans "Hecho"%}">{%trans "Edit"%} </button>
+        </div>
+        {%endcomment%}
+    </div>
+</div>
+

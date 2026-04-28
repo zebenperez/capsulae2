@@ -1,0 +1,49 @@
+{% load i18n static %}
+
+
+<div class="row justify-center">
+    <div class="col-6 text-left p-1">
+        <div class="greybox-sm p-1">
+            {% trans "GOT (U/l)" %}
+            <input type="text" class="form-control autosave" id="got" name="got" value="{{obj.got|default:""}}" 
+                title="{{obj.got}}" data-model-name="pharma.bloodpressure" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+                data-target="div-notification"/> <span id="got__msg"></span>
+        </div>
+    </div>
+    <div class="col-6 text-left p-1">
+        <div class="greybox-sm p-1">
+            {% trans "GPT(U/l)" %}
+            <input type="text" class="form-control autosave" id="gpt" name="gpt" value="{{obj.gpt|default:""}}" 
+                title="{{obj.gpt}}" data-model-name="pharma.bloodpressure" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+                data-target="div-notification"/> <span id="gpt__msg"></span>
+        </div>
+    </div>
+</div>
+<div class="row justify-center">
+    <div class="col-4 text-left p-1">
+        <div class="greybox-sm p-1">
+            {% trans "GOT / GPT" %}
+            <input type="text" class="form-control autosave" id="got_gpt" name="got_gpt" value="{{obj.got_gpt|default:""}}" 
+                title="{{obj.got_gpt}}" data-model-name="pharma.bloodpressure" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+                data-target="div-notification" readonly/> <span id="got_gpt__msg"></span>
+        </div>
+    </div>
+    <div class="col-4 text-left p-1">
+        <div class="greybox-sm p-1">
+            {% trans "GGT (U/l)" %}
+            <input type="text" class="form-control autosave" id="ggt" name="ggt" value="{{obj.ggt|default:""}}" 
+                title="{{obj.ggt}}" data-model-name="pharma.bloodpressure" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+                data-target="div-notification"/> <span id="ggt__msg"></span>
+        </div>
+    </div>
+    <div class="col-4 text-left p-1">
+        <div class="greybox-sm p-1">
+            {% trans "Fosfatasa alcalina (U/l)" %}
+            <input type="text" class="form-control autosave" id="alkaline_phosphatase" name="alkaline_phosphatase" 
+                value="{{obj.alkaline_phosphatase|default:""}}" title="{{obj.alkaline_phosphatase}}" data-model-name="pharma.bloodpressure" 
+                data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" data-target="div-notification"/> 
+            <span id="alkaline_phosphatase__msg"></span>
+        </div>
+    </div>
+</div>
+

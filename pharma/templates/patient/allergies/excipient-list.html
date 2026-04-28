@@ -1,0 +1,22 @@
+{% load i18n %}
+
+
+<div class="d-flex justify-content-end"> 
+    <button type="button" class="btn btn-lg ark" data-url="{% url "patient-allergy" %}" data-target="div-container" data-obj_id="{{obj.id}}" 
+        data-bs-dismiss="modal" title="{% trans "Close" %}"> <i class="fas fa-times"></i></button> 
+</div>
+
+<div class="row list-search m-0">
+    <div class="col-lg-1 col-1 text-right"><i class="fas fa-search"></i></div>
+    <div class="col-lg-10 col-10 p-0">
+        <input type="hidden" name="patient_id" id="patient_id" value="{{obj.id}}"/>
+        <input type="text" class="form-control form-control-dark w-100 autosearch" name="s-exc-name" id="s-exc-name" 
+           placeholder="{% trans 'Buscar por nombre' %}" data-url="{% url "patient-allergy-excipient-list-search" %}" 
+           data-target="div-exc-list" data-related="patient_id,s-exc-name" />
+    </div>
+</div>
+
+<h2>{% trans 'Añadir excipiente' %}</h2>
+
+<div id="div-exc-list">{% include "patient/allergies/excipient-list-rows.html" %}</div>
+

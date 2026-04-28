@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block central_content %}
+    {% include "store-menu.html" %}
+
+    <div class="tpv-box mt-0"> 
+        <strong>{{company}}</strong>
+        <div class="d-flex flex-row-reverse ">
+            <a class="btn btn-outline-secondary sales ml-2 mr-2" href="{% url 'zeta' %}">
+                <i class="fa fa-cash-register"></i>&nbsp;Zeta</a>
+            <a class="btn btn-outline-secondary sales pl-3 pr-3 ml-2 mr-2" href="{% url 'get-sales' %}">
+                <i class="fas fa-list"></i>&nbsp;Lista de ventas</a>
+            <a class="btn btn-outline-secondary sales pl-3 pr-3 ml-2 mr-2" href="{% url 'get-orders' %}">
+                <i class="fas fa-euro-sign"></i>&nbsp;Pedidos web (<span id="get-n-pendings">{{morders}}</span>)</a>
+        </div>
+        <div class="row mt-3">
+            <div class="col-6">
+                <input type="text" class="form-control ark_keyup" autocomplete="off" name="code" id="code" value="" 
+                    placeholder="{%trans "Codigo de producto"%}" data-url="{% url "tpv-product-by-code" %}" 
+                    data-target="div-result-query" data-hashinv="{{invoice.hashinv}}" /><span id="div-result-query"></span>
+            </div>
+            <div class="col-6">
+                <input type="text" class="form-control ark_change" id="invoiceClient" aria-describedby="clientHelp" 
+                    placeholder="C&oacute;digo Cliente" value="{{invoice.client.code|default:''}}" 
+                    data-target="div-result-client" data-hashinv="{{invoice.hashinv}}" 
+                    data-url="{% url "tpv-client-by-code" %}"> <span id="div-result-client"></span>
+            </div>
+        </div>
+
+        <div id="div-calc-tpv">{%include "tpv/tpv-calc.html" with invoice=invoice%}</div> 
+
+        {%include "tpv/tpv-footer.html" with invoice=invoice%}
+
+        <div class="row mt-3">
+            <div class="col-6 btnfinish">
+                <a href="{%url "confirm-sale" hashinv=invoice.hashinv%}" class="btn btn-outline-primary btn-block text-center p-2 fs-2"
+                    onclick="return confirmSale();"> <strong>Finalizar Compra</strong></a>
+            </div>
+            <div class="col-6 btncancel">
+                <a href="{%url "cancel-sale" hashinv=invoice.hashinv%}" class="btn btn-outline-danger btn-block text-center p-2 fs-2" 
+                    onclick="return cancelSale();" > <strong>Cancelar</strong></a>
+            </div>
+        </div>
+    </div>
+
+    <script> 
+        function confirmSale() {
+            const content = $('#table-products').text();
+            if (content.includes("No hay art"))
+            {
+                alert("No hay artículos seleccionados!")
+                return false;
+            }
+            return (confirm('Va a finalizar la compra. ¿Es correcto?'));
+        }
+
+        function cancelSale() {
+            const content = $('#table-products').text();
+            if (content.includes("No hay art"))
+            {
+                alert("No hay artículos seleccionados!")
+                return false;
+            }
+            return (confirm('Va a cancelar la compra y limpiar el TPV. ¿Es correcto?'));
+        }
+
+        {%comment%}
+        function get_order_counter() {
+            setTimeout(get_order_counter, 600000);  // every 10 minutos
+            {% ark 'get-n-orders' 'get-n-pendings' %};
+        }
+
+        get_order_counter();
+        {%endcomment%}
+
+        $(document).ready(function(){ if ($(window).width() < 1200){ $('#sidebar').removeClass('expanded').addClass('closed'); }}); 
+
+        $(window).resize(function(){ 
+            if ($(window).width() < 1200){ 
+                $('#sidebar').removeClass('expanded').addClass('closed'); 
+            } else { 
+                $('#sidebar').removeClass('closed').addClass('expanded'); 
+            }
+        }); 
+
+        $(".card-cash").click(function(){
+            $(".card-cash").removeClass("option-on");
+            $(this).addClass("option-on");
+            $("input", this).prop("checked", true);
+        });
+    </script>
+{% endblock central_content %}

@@ -1,0 +1,27 @@
+{% load i18n %}
+
+{% comment %}
+<div class="row spd-tab">
+    <div class="col-12 text-end">
+        <button type="button" class="btn btn-sm ark new" data-url="{% url "spd-form" %}" data-target-modal="common-modal" 
+            data-patient_id="{{obj.id}}"> 
+            <i class="fas fa-plus"></i> {% trans 'Crear Alergia' %}</button> 
+    </div>
+</div>
+{% endcomment %}
+
+<div class="row">
+    <div class="col-6">
+        <div class="card">
+            <div class="card-header">{% trans "Excipientes" %}</div>
+            <div class="card-body"> {% include "patient/allergies/allergy-list-excipient.html" %} </div>
+        </div>
+    </div>
+    <div class="col-6">
+        <div class="card">
+            <div class="card-header">{% trans "Principio Activo" %}</div>
+            <div class="card-body"> {% include "patient/allergies/allergy-list-principles.html" %} </div>
+        </div>
+    </div>
+</div>
+

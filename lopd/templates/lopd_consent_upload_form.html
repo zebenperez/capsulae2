@@ -1,0 +1,37 @@
+{% load i18n crispy_forms_tags %}
+
+<div class="col-md-12">
+	<div class="panel panel-primary">
+		<div class="panel-heading">
+			<div class="row">
+				<div class="col-xs-8"> {% trans 'Subir autorizacion LOPD' %} </div>
+
+			</div>
+		</div>
+		<div class="panel-body">
+			<div class="col-xs-12">
+
+				{% if form.errors %}
+					<div class="alert alert-danger"> {{ form.errors }}</div>
+				{% endif %}
+				<form  action="{% url 'lopd_consent_upload' paciente.pk %}" method="post" enctype="multipart/form-data" id="upload_document"
+					class="form ga-ajax-file-form" data-ga-target="#cap-panel-form-lopd" data-ga-loading="true">
+					{% crispy form %}
+					<div class="col-xs-12 ">
+						<hr/>
+						<button type="submit" class="btn btn-success btn-large col-xs-offset-1 col-xs-5" id="lopd_doc_save">
+							<i class="glyphicon glyphicon-floppy-save"></i> Guardar</button>&nbsp;
+						<button class="btn btn-danger btn-large  ga-clean col-xs-5" style="margin-left:10px" data-ga-target="#cap-panel-form-lopd" id="reset_form_btn">
+							<i class="glyphicon glyphicon-ban-circle"></i> Cancelar </button>
+
+
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+
+

@@ -1,0 +1,125 @@
+{% load i18n static %}
+
+
+<div class="row justify-center">
+    <div class="col-4 text-left p-1">
+        <div class="greybox-sm p-1">
+            {% trans "Peso (Kg)" %}
+            <input type="text" class="form-control autosave" id="weight" name="weight" value="{{obj.weight|default:""}}" 
+                title="{{obj.weight}}" data-model-name="pharma.bloodpressure" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+                data-target="div-notification"/> <span id="weight__msg"></span>
+        </div>
+    </div>
+    <div class="col-4 text-left p-1">
+        <div class="greybox-sm p-1">
+            {% trans "Altura (m)" %}
+            <input type="text" class="form-control autosave" id="height" name="height" value="{{obj.height|default:""}}" 
+                title="{{obj.height}}" data-model-name="pharma.bloodpressure" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+                data-target="div-notification"/> <span id="height__msg"></span>
+        </div>
+    </div>
+    <div class="col-4 text-left p-1">
+        <div class="greybox-sm p-1">
+            {% trans "IMC" %}
+            <input type="text" class="form-control autosave" id="bmi" name="bmi" value="{{obj.bmi|default:""}}" 
+                title="{{obj.bmi}}" data-model-name="pharma.bloodpressure" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+                data-target="div-notification" readonly/> <span id="bmi__msg"></span>
+        </div>
+    </div>
+</div>
+<div class="row justify-center">
+    <div class="col-3 text-left p-1">
+        <div class="greybox-sm p-1">
+            {% trans "Pl. bicipital" %}
+            <input type="text" class="form-control fold_value autosave" id="bicipital" name="bicipital" value="{{obj.bicipital|default:""}}" 
+                title="{{obj.bicipital}}" data-model-name="pharma.bloodpressure" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+                data-target="div-notification"/> <span id="bicipital__msg"></span>
+        </div>
+    </div>
+    <div class="col-3 text-left p-1">
+        <div class="greybox-sm p-1">
+            {% trans "Pl. tricipital" %}
+            <input type="text" class="form-control fold_value autosave" id="tricipital" name="tricipital" value="{{obj.tricipital|default:""}}" 
+                title="{{obj.tricipital}}" data-model-name="pharma.bloodpressure" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+                data-target="div-notification"/> <span id="tricipital__msg"></span>
+        </div>
+    </div>
+    <div class="col-3 text-left p-1">
+        <div class="greybox-sm p-1">
+            {% trans "Pl. suprailiaco" %}
+            <input type="text" class="form-control fold_value autosave" id="suprailiac" name="suprailiac" value="{{obj.suprailiac|default:""}}" 
+                title="{{obj.suprailiac}}" data-model-name="pharma.bloodpressure" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+                data-target="div-notification"/> <span id="suprailiac__msg"></span>
+        </div>
+    </div>
+    <div class="col-3 text-left p-1">
+        <div class="greybox-sm p-1">
+            {% trans "Pl. subescapular" %}
+            <input type="text" class="form-control fold_value autosave" id="subscapular" name="subscapular" value="{{obj.subscapular|default:""}}" 
+                title="{{obj.subscapular}}" data-model-name="pharma.bloodpressure" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+                data-target="div-notification"/> <span id="subscapular__msg"></span>
+        </div>
+    </div>
+</div>
+<div class="row justify-center">
+    <div class="col-3 text-left p-1">
+        <div class="greybox-sm p-1">
+            {% trans "Pl. abdominal" %}
+            <input type="text" class="form-control autosave" id="abdominal" name="abdominal" value="{{obj.abdominal|default:""}}" 
+                title="{{obj.abdominal}}" data-model-name="pharma.bloodpressure" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+                data-target="div-notification"/> <span id="abdominal__msg"></span>
+        </div>
+    </div>
+    <div class="col-3 text-left p-1">
+        <div class="greybox-sm p-1">
+            {% trans "Per. cintura" %}
+            <input type="text" class="form-control autosave" id="belt" name="belt" value="{{obj.belt|default:""}}" 
+                title="{{obj.belt}}" data-model-name="pharma.bloodpressure" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+                data-target="div-notification"/> <span id="belt__msg"></span>
+        </div>
+    </div>
+    <div class="col-3 text-left p-1">
+        <div class="greybox-sm p-1">
+            {% trans "Per. cadera" %}
+            <input type="text" class="form-control autosave" id="hip" name="hip" value="{{obj.hip|default:""}}" 
+                title="{{obj.hip}}" data-model-name="pharma.bloodpressure" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+                data-target="div-notification"/> <span id="hip__msg"></span>
+        </div>
+    </div>
+</div>
+<div class="row justify-center">
+    <div class="col-3 text-left p-1">
+        <div class="greybox-sm p-1">
+            {% trans "Ind. cint/cad" %}
+            <input type="text" class="form-control autosave" id="belt_hip_index" name="belt_hip_index" value="{{obj.belt_hip_index|default:""}}" 
+                title="{{obj.belt_hip_index}}" data-model-name="pharma.bloodpressure" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+                data-target="div-notification" readonly/> <span id="belt_hip_index__msg"></span>
+        </div>
+    </div>
+    <div class="col-3 text-left p-1">
+        <div class="greybox-sm p-1">
+            {% trans "% Graso" %}
+            <input type="text" class="form-control autosave" id="fat_index" name="fat_index" value="{{obj.fat_index|default:""}}" 
+                title="{{obj.fat_index}}" data-model-name="pharma.bloodpressure" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+                data-target="div-notification" readonly/> <span id="fat_index__msg"></span>
+        </div>
+    </div>
+    <div class="col-3 text-left p-1">
+        <div class="greybox-sm p-1">
+            {% trans "Kg grasa" %}
+            <input type="text" class="form-control autosave" id="fat_weight" name="fat_weight" value="{{obj.fat_weight|default:""}}" 
+                title="{{obj.fat_weight}}" data-model-name="pharma.bloodpressure" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+                data-target="div-notification"/> <span id="fat_weight__msg"></span>
+        </div>
+    </div>
+    <div class="col-3 text-left p-1">
+        <div class="greybox-sm p-1">
+            {% trans "Kg músculo" %}
+            <input type="text" class="form-control autosave" id="muscle_weight" name="muscle_weight" value="{{obj.muscle_weight|default:""}}" 
+                title="{{obj.muscle_weight}}" data-model-name="pharma.bloodpressure" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" 
+                data-target="div-notification"/> <span id="muscle_weight__msg"></span>
+        </div>
+    </div>
+    <i class="fas fa-into-circle"></i>C = None , M = None ; Valores calculados para una persona de sexo Masculino de 84  años de edad 
+</div>
+

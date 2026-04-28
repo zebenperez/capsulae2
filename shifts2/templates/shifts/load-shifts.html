@@ -1,0 +1,17 @@
+{% load i18n static %}
+
+<script>
+    var ev_list = calendar.getEvents();
+    for(let ev of ev_list) { ev.remove(); }
+            
+    {% for item in shift_list%}
+        calendar.addEvent({
+            id: '{{item.pk}}',
+            title: '{%if item.name != ""%}<b>{{item.name}}</b>{%else%}{{item.pk}}{%endif%}<br/> - {{item.employee_list}}',
+            start: '{{item.ini_date|date:"Y-m-d"}} {{item.ini_time|date:"h:i:s"}}',
+            end: '{{item.end_date|date:"Y-m-d"}} {{item.end_time|date:"H:i"}}',
+            display: 'block',
+        });
+    {% endfor %}
+</script>
+

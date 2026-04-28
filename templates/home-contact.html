@@ -1,0 +1,38 @@
+{% load i18n static %}
+
+<section class="contact" id="contact">
+    <div class="container">
+        <div class="heading">
+            <h2>Contacto</h2>
+            <h3>Estamos abiertos a cualquier sugerencia o simplemente para charlar.</h3>       
+        </div>
+    </div>    
+</section>
+
+<section class="contactDetails">
+    <div class="container"> 
+    <!--contact form start-->
+        <div class=" w-100">
+            <div class="left-contact">
+                <h3>Dirección</h3>
+                Calle la Hoyita, 22. 38611. San Isidro. Santa Cruz de Tenerife<br /><br />
+                <h3>Datos de contacto</h3>
+                <a href="mailto:info@fundec.org" class="contactLink">info@fundec.org</a><br />
+                <a href="www.fundec.org" class="contactLink">www.fundec.org</a>
+            </div>
+    
+            <div class="conForm right-contact">
+                <div id="message"></div>
+                <form method="post" action="php/contact.php" name="cform" id="cform">
+                    <div class="w-100"><input name="name" id="name" type="text" class="w-100" placeholder="Su nombre" ></div>
+                    <input name="email" id="email" type="email" class="noMarr" placeholder="Su correo electrónico" >
+                    <textarea name="comments" id="comments" cols="" rows="" class="" placeholder="Su mensaje"></textarea>
+                    <input type="submit" id="submit" name="send" class="submitBnt" value="Enviar mensaje">
+                    <div id="simple-msg"></div>
+                </form>
+            </div>
+        </div>
+    <!--contact form end--> 
+    </div>
+</section> 
+
