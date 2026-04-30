@@ -7,6 +7,7 @@ from capsulae2.commons import get_param, get_or_none
 from pharma.models import Pacientes, PatientOrigin, Etnia, Paises
 from account.models import Company
 from community.models import Procedure, PatientProcedure, PatientProcedureDoc
+from capsulae2.email_lib import send_import_doc_email
 
 
 def regulariza(request, org):
