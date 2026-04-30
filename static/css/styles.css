@@ -89,6 +89,20 @@ body.loading .overlay{
 .table-striped>tbody>tr:hover { --bs-table-accent-bg: #eee !important; }
 
 
+.btn.btn-options {
+	border:1px solid #dfdfdf;
+	border-radius: 0.25rem;
+}
+.btn.btn-options:hover {
+	border:1px solid #36abfc;
+}
+.btn.btn-options a,
+.btn.btn-options label {
+	color:#36abfc;
+	font-size: 0.8rem;
+	text-transform: uppercase;
+}
+
 .patient-list-head {
 	border-bottom:1px solid #dee2e6 !important;
 	background: #f2f2f2;
@@ -101,15 +115,27 @@ body.loading .overlay{
 	margin-right:0;
 }
 #patient-list {
+/*
 	overflow-y: scroll;
 	max-height: 50vh;
+*/
+	padding-bottom: 150px;
+}
+
+.btn-search input {
+	border:1px solid #36abfc !important;
+	color:#36abfc !important; 
+	background:#fff;
+}
+.btn-search input:hover {
+	background:#eef8ff;
 }
 
 .row.line {
 	border-bottom: 1px solid #dee2e6;
 }
 .row.line:hover {
-	background: #f2f2f2;
+	background: #f9f9f9;
 }
 
 /****************************************/
@@ -278,7 +304,7 @@ a.btn.btn-secondary.ark {
 .toolbar-search input {
     height:2em;
     margin: 5px 0 0 0 ;
-    padding-top: 5px !important;
+/*    padding-top: 5px !important;*/
 }
 .toolbar-search a {
     height:2.5em;
@@ -310,9 +336,6 @@ a.btn.btn-secondary.ark {
 
 input#s-name.autosearch.form-control.form-control-dark.w-100 {
     border: 0;
-}
-.form-control {
-	border:none !important;
 }
 .row.btn-dark i.fas.fa-exchange-alt, 
 .row.btn-dark a {
@@ -530,7 +553,7 @@ textarea.form-control {
 	text-transform: uppercase;
 }
 .save, .new, 
-.save i, .new i.fas.fa-plus, i.fas.fa-upload, i.fas.fa-arrow-left, i.fas.fa-arrow-right, i.fas.fa-trash { color: #36abfc; font-size: 0.8rem;}
+.save i, .new i.fas.fa-plus, i.fas.fa-upload, i.fas.fa-arrow-left, i.fas.fa-arrow-right, i.fas.fa-trash, i.fas.fa-plus { color: #36abfc; font-size: 0.8rem;}
 .new i.fas.fa-plus:hover { color: #212529; font-size: 0.8rem; }
 .new i.fas.fa-plus:hover { color: #212529; font-size: 0.8rem; }
 
@@ -1042,6 +1065,7 @@ i.fas.fa-home:hover, i.far.fa-folder-open:hover, i.fas.fa-users:hover, i.fas.fa-
 	background:black;
 }
 
+
 #sidebar {
     width: 50px;
     border-right:  1px solid rgba(0, 0, 0, 0.0625);
@@ -1398,7 +1422,7 @@ a.btn.btn-green {
 }
 
 
-/**** Menu top ficha patiente ****/
+/**** Menu top ficha paciente ****/
 
 .top-menu {
 	display: grid;
@@ -1464,6 +1488,7 @@ i.fa.fa-gavel { color: #d9534f;}
 	padding: 12px !important;
 	height: auto !important;
 	border-width: 0px 0px 1px 0px !important;
+	border:none !important;
 }
 
 .form-control:disabled {
@@ -1477,6 +1502,13 @@ i.fa.fa-gavel { color: #d9534f;}
 	margin-left: 0px !important;
 	margin-right: 0px !important;
 }
+
+input.border-grey, select.border-grey {
+	border:1px solid #dee2e6 !important;
+	border-radius: 0.25rem !important;
+	color: #6c757d !important;
+}
+
 
 /**************  Estilo del Paciente ****************/
 

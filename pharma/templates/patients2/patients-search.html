@@ -1,0 +1,37 @@
+{% load i18n pharma_tags common_tags %}
+
+<div class="my-2 pt-2" style="background: #ecf4f7;">
+    <form action="{% url 'patients2-search' %}" method="GET" id="form-search">
+        {%csrf_token%}
+        <div class="row">
+            <div class="col-3"><small>{%trans "NOMBRE"%}</small></div>
+            <div class="col-2"><small>{%trans "NIF"%}</small></div>
+            <div class="col-3"><small>{%trans "CIP"%}</small></div>
+            <div class="col-3"><small>{%trans "LOPD"%}</small></div>
+        </div>
+        <div class="row">
+            <div class="col-3">
+                <input type="text" class="form-control form-control-dark w-100 border-grey" name="s_name" id="s_name" 
+                    placeholder="{% trans 'Nombre' %}" value="{{request.session.s_name}}"/>
+            </div>
+            <div class="col-2">
+                <input type="text" class="form-control form-control-dark w-100 border-grey" name="s_nif" id="s_nif" 
+                    placeholder="{% trans 'NIF' %}" value="{{request.session.s_nif}}"/>
+            </div>
+            <div class="col-3">
+                <input type="text" class="form-control form-control-dark w-100 border-grey" name="s_cip" id="s_cip" 
+                    placeholder="{% trans 'CIP' %}"  value="{{request.session.s_cip}}"/>
+            </div>
+            <div class="col-2">
+                <select class="form-control border-grey" name="s_lopd" id="s_lopd">
+                    <option value="" {%if request.session.s_lopd == ""%}selected{%endif%}>{% trans "Todos" %}</option>
+                    <option value="1" {%if request.session.s_lopd == "1"%}selected{%endif%}>{% trans "Firmada" %}</option>
+                    <option value="0" {%if request.session.s_lopd == "0"%}selected{%endif%}>{% trans "Sin firmar" %}</option>
+                </select>
+            </div>
+            <div class="col-2 text-center btn-search">
+                <input type="submit" class="form-control  w-100" value="{%trans "BUSCAR"%}"/>
+            </div>
+        </div>
+    </form>
+</div>
