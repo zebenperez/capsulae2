@@ -1,0 +1,61 @@
+<tfoot>
+    <div class="row footer-pagination m-0">
+        <div class="col-4 offset-3 text-end">
+            Mostrando {{ items.start_index }} - {{ items.end_index }} de {{ items.paginator.count }} ítems | Ver</div>
+        <div class="col-1 select-wrapper">
+            <select class="form-control py-1" id="select-rows">
+                <option value="10" {%if rows == 10%}selected{%endif%}>10</option>
+                <option value="25" {%if rows == 25%}selected{%endif%}>25</option>
+                <option value="50" {%if rows == 50%}selected{%endif%}>50</option>
+            </select>
+        </div>
+        <div class="col-1 text-start">a la vez</div>
+        <div class="col-3">
+            <div class="row foot-pages m-0">
+                <div class="col-10 pt-3">
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination">
+                            {% if items.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="{% url page_url 1 rows %}" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                            {% else %}
+                            {%comment%}
+                            <li class="page-item disabled py-1">
+                                <span class="page-link" aria-label="Previous"> <span aria-hidden="true">&laquo;</span> </span>
+                            </li>
+                            {%endcomment%}
+                            {% endif %}
+                            
+                            {% for num in items.paginator.page_range %}
+                                {% if items.number == num %}
+                                    <li class="page-item current"><span class="page-link">{{ num }}</span></li>
+                                {% elif num > items.number|add:'-3' and num < items.number|add:'3' %}
+                                    <li class="page-item"><a class="page-link" href="{% url page_url num rows %}">{{ num }}</a></li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if items.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="{% url page_url items.paginator.count rows %}" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                            {% else %}
+                            {%comment%}
+                            <li class="page-item disabled">
+                                <span class="page-link" aria-label="Next"> <span aria-hidden="true">&raquo;</span> </span>
+                            </li>
+                            {%endcomment%}
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+                <div class="col-2">Páginas</div>
+            </div>
+        </div>
+    </div>
+</tfoot>
+<script>$("#select-rows").change(function(){window.location.href = "{% url page_url items.number %}"+$(this).val();});</script>

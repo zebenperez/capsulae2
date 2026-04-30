@@ -1,5 +1,6 @@
 from django.core.files import File
 from django.core.files.base import ContentFile
+from django.core.paginator import Paginator
 #from django.contrib.auth import logout
 from django.db.models import Q
 from django.http import HttpResponse, JsonResponse
@@ -15,7 +16,7 @@ from weasyprint import HTML, CSS
 import os, csv
 
 from capsulae2.decorators import group_required
-from capsulae2.commons import get_or_none, get_param, show_exc, generate_qr, get_int
+from capsulae2.commons import get_or_none, get_param, show_exc, generate_qr, get_int, set_session
 from capsulae2.settings import MEDIA_ROOT, PATIENT_URL, BASE_DIR 
 from capsulae2.capsulae_lib import check_user_payment
 from capsulae2.email_lib import send_import_doc_email
@@ -63,6 +64,66 @@ def home(request):
 #def payment_error(request):
 #    up = UserPayment.objects.all().order_by('-expire_date').first()
 #    return render(request, "error-payments.html", {'payment': up})
+
+'''
+    Patients 2
+'''
+def get_patients2(request):
+    comp = Company.get_by_user(request.user)
+    name = request.session["s_name"] if "s_name" in request.session else ""
+    nif = request.session["s_nif"] if "s_nif" in request.session else ""
+    cip = request.session["s_cip"] if "s_cip" in request.session else ""
+    lopd = request.session["s_lopd"] if "s_lopd" in request.session else ""
+
+    full_query = Q()
+    full_query &= (Q(**{'id_user__company': comp}) | Q(**{'id_user__user_companies__in': [comp]}))
+    if name != "":
+        full_query &= (Q(**{'nombre__icontains': name}) | Q(**{'apellido__icontains': name}))
+    if nif != "":
+        full_query &= Q(**{'nif__icontains': nif})
+    if cip != "":
+        full_query &= Q(**{'cip__icontains': cip})
+    if lopd != "":
+        full_query &= Q(**{'lopd__isnull': False}) if lopd == "1" else Q(**{'lopd__isnull': True})
+    print(full_query)
+    items = Pacientes.objects.filter(full_query)
+
+    return items, items.count()
+
+def init_session(request):
+    if "b_page" not in request.session:
+        request.session["b_page"] = 1
+    if "b_rows" not in request.session:
+        request.session["b_rows"] = 10
+
+@group_required("admins","managers", "employee")
+def patients2_page_rows(request, page=1, rows=10):
+    request.session["b_page"] = page
+    request.session["b_rows"] = rows
+    return redirect("patients2")
+
+@group_required("admins","managers", "employee")
+def patients2(request):
+    init_session(request)
+    items, total_count = get_patients2(request)
+    paginator = Paginator(items, get_int(request.session["b_rows"]))
+    page_obj = paginator.get_page(request.session["b_page"])
+    context = {
+        'total_items': total_count, 
+        'items': page_obj, 
+        'rows': request.session["b_rows"], 
+        'page_url': 'patients2-page-rows', 
+    }
+    return render(request, "patients2/patients.html", context)
+
+@group_required("admins","managers", "employee")
+def patients2_search(request):
+    set_session(request, "s_name")
+    set_session(request, "s_nif")
+    set_session(request, "s_cip")
+    set_session(request, "s_lopd")
+    return redirect("patients2")
+
 
 '''
     Patients

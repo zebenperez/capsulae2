@@ -1,0 +1,63 @@
+{% load i18n static %}
+
+<!DOCTYPE html>
+<html class="no-js" lang="en"><!--<![endif]-->
+    <head>
+        <title>Fundec</title>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <!--main style-->
+        <link rel="stylesheet" type="text/css" media="screen" href="/static/css/new-style.css">
+
+        <!-- font icon css style-->
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" 
+            integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+        <script src="https://code.jquery.com/jquery-3.6.1.min.js" integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" 
+            crossorigin="anonymous"></script>
+
+	    <!-- Bootstrap core CSS -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+            integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" 
+            integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+
+
+        <style>html{scroll-behavior:smooth}</style>
+    </head>
+
+    <!--<body onLoad="load()" onUnload="GUnload()">-->
+    <body>
+        <header class="qba">
+            <div class="menu sticky-top m-0">
+                <nav class="navbar navbar-expand-lg navbar-dark topnav">
+                    <div class="container-fluid">
+		 	            <div class="row m-0 d-flex align-items-center">
+		 		            <div class="col-12">
+					            <a class="navbar-brand p-0" href="#">
+                                    <img src="/static/imgs/logo-w.png" alt="Logo CAPSULAE" width="270px"></a>
+				            </div>
+			            </div>
+                    </div>
+                </nav>
+            </div>
+        </header>
+  
+        {% block central_content %}{% endblock central_content %}
+
+        <!--footer start-->
+        <section class="footer" id="footer">
+            <div class="container">
+                <ul>
+                    <li><a href="#"><i class="fab fa-twitter"></i></a></li>
+                    <li><a href="#"><i class="fab fa-facebook-f"></i></a></li>
+                    <li><a href="#"><i class="fab fa-linkedin"></i></a></li>
+                </ul>
+                <p>© 2023 capsulae.org. Todos los derechos reservados.<br>
+                Diseño creado por <a href="https://www.shidix.com" target="_blank">Shidix Technologies</a></p>
+            </div>
+                <p class="text-center"><a href="#wrapper" class="gototop"><i class="fa fa-chevron-up fa-2x"></i></a></p>
+        </section>
+    </body>
+</html>

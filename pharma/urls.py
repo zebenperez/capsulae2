@@ -9,6 +9,12 @@ urlpatterns = [
     #------------------------- VIEWS ACCOUNT -----------------------
     #path('signup/', views_account.signup, name='account-signup'),
     
+    #------------------------- PATIENTS 2--------------------
+    path('patients2/', views.patients2, name='patients2'),
+    path('patients2/page-rows/<int:page>/', views.patients2_page_rows, name='patients2-page-rows'),
+    path('patients2/page-rows/<int:page>/<int:rows>', views.patients2_page_rows, name='patients2-page-rows'),
+    path('patients2/search/', views.patients2_search, name='patients2-search'),
+
     #------------------------- PATIENTS --------------------
     path('patients/', views.patients, name='patients'),
     path('patients/list/', views.patient_list, name='patient-list'),

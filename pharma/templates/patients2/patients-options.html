@@ -1,0 +1,33 @@
+{% load i18n pharma_tags common_tags %}
+
+<h2 class="pathway b-right">
+    {% if request.user|is_pharma %}{% trans 'Pacientes' %} {% else %} {% trans 'Usuarios' %} {% endif %}
+    <span id="items-counter" class="badge badge-secondary">{{items|length}}</span></h2>
+
+{% if request.user|in_group:"admins" or request.user|in_group:"managers" %}
+    <div class="btn btn-options"><a href="{%url "patient-evolutionaries"%}"><i class="fas fa-arrow-right"></i><br />{%trans "Derivaciones"%} </a></div>
+{% endif %}
+
+{% if request.user|in_group:"admins" %}
+    <div class="btn btn-options">
+        <label for="file"> <i class="fas fa-upload"></i><br />
+            <span class="d-none d-sm-block">{%trans "Elegir"%}&nbsp;{%trans "Archivo de Pacientes"%}</span></label>
+
+        <input type="file" class="multiupload d-none" name="file" id="file" data-url="{%url 'patient-import'%}" 
+            data-target="patient-list" data-obj-id="" data-field="" data-folder="" data-csrf-token="{{csrf_token}}" multiple/>
+    </div>
+
+    <div class="btn btn-options">
+        <label for="file_docs"> <i class="fas fa-upload"></i><br />
+            <span class="d-none d-sm-block">{%trans "Elegir"%}&nbsp;{%trans "Documentos"%}</span></label>
+
+        <input type="file" class="multiupload d-none" name="file_docs" id="file_docs" data-url="{%url 'patient-import-documents'%}" 
+            data-target="import-result" data-obj-id="" data-field="" data-folder="" data-csrf-token="{{csrf_token}}" multiple/>
+    </div>
+{% endif %}
+
+<div class="btn btn-options">
+    <a href="{% url "patient-new" %}"> <i class="fas fa-plus"></i> <br />
+        {%if request.user|is_pharma%}{%trans "Nuevo paciente"%}{%else%}{%trans "Nuevo usuario"%}{%endif%}</a></div>
+ 
+<div id="import-result"></div>

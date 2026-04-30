@@ -1,0 +1,24 @@
+{% extends 'base-forms.html' %}
+{% load i18n static %}
+
+
+{% block central_content %}
+    <div class="text-center p-4" style="background: #fdf1e3; border:1px solid red;">
+        <img src="{%static "imgs/regulariza.png"%}" alt="cabecera"/>
+        <h1>DATOS IDENTIFICATIVOS</h1>
+        <p>Estos datos son necesarios para poder añadirle a la lista de próximas citas, gracias por la colaboración.</p>
+        <hr/>
+        <p>El nombre, el correo y la foto asociados a tu cuenta de Google se registrarán cuando subas archivos y envíes este formulario</p>
+        <hr/>
+        <p class="text-danger">* Indica que la pregunta es obligatoria</p>
+
+        <div class="container py-4">
+            {% if err != "" %}
+                <div class="alert alert-success">Su formulario se ha enviado con éxito, en breve recibirá un email para acceder su árepa personal donde podrá continuar con sus trámites.</div>
+            {% else %}
+                <div class="alert alert-warning">{{err}}</div>
+            {% endif %}
+            <a class="btn btn-success" href="{%url "forms-regulariza" comp %}">Volver</a>
+        </div>
+    </div>
+{% endblock central_content %}

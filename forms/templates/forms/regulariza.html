@@ -1,0 +1,188 @@
+{% extends 'base-forms.html' %}
+{% load i18n static %}
+
+
+{% block central_content %}
+	<div class="form-body mt-5 p-2">
+		<div class="text-center"><img src="{%static "imgs/regulariza.png"%}" class="form-img" alt="cabecera"/></div>
+
+		<div class="form-container">
+
+		<div class="form-card-header my-3 p-4">
+			<h1>DATOS IDENTIFICATIVOS</h1>
+			<p>Estos datos son necesarios para poder añadirle a la lista de próximas citas, gracias por la colaboración.</p>
+			<hr/>
+			<p>El nombre, el correo y la foto asociados a tu cuenta de Google se registrarán cuando subas archivos y envíes este formulario</p>
+			<hr/>
+			<p class="text-danger">* Indica que la pregunta es obligatoria</p>
+		</div>
+
+
+		<form method="POST" action="{% url "forms-regulariza-save" %}" enctype="multipart/form-data">
+	               {%csrf_token%}
+	               <input type="hidden" name="comp" value="{{comp}}" />
+
+		<!-- Nombre -->
+		<div class="form-card my-3 p-4">
+			<div class="mb-3"> <label class="form-label"><strong>NOMBRE COMPLETO <span class="text-danger">*</span></strong></label>
+				<input type="text" class="form-control" name="name" required>
+			</div>
+		</div>
+
+                <!-- Sexo -->
+		<div class="form-card my-3 p-4">
+                    <div class="mb-3"> <label class="form-label"><strong>SEXO <span class="text-danger">*</span></strong></label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="sex" value="mujer" required>
+                            <label class="form-check-label">Mujer</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="sex" value="hombre">
+                            <label class="form-check-label">Hombre</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="sex" value="">
+                            <label class="form-check-label">Prefiero no decirlo</label>
+                        </div>
+                    </div>
+		</div>
+
+                <!-- Pasaporte -->
+		<div class="form-card my-3 p-4">
+                    <div class="mb-3"> <label class="form-label"><strong>NÚMERO DE PASAPORTE <span class="text-danger">*</span></strong></label>
+                        <input type="text" class="form-control" name="passport" required>
+                    </div>
+                </div> 
+
+                <!-- Fecha nacimiento -->
+		<div class="form-card my-3 p-4">
+                    <div class="mb-3"> <label class="form-label"><strong>FECHA DE NACIMIENTO <span class="text-danger">*</span></strong></label>
+                        <input type="date" class="form-control" name="born_date" required>
+                    </div>
+                </div>
+
+                <!-- Nacionalidad -->
+		<div class="form-card my-3 p-4">
+                    <div class="mb-3"> <label class="form-label"><strong>NACIONALIDAD Y PAÍS DONDE NACISTE <span class="text-danger">*</span></strong></label>
+                        <input type="text" class="form-control" name="nationality" required>
+                    </div>
+                </div>
+
+                <!-- Localidad -->
+		<div class="form-card my-3 p-4">
+                    <div class="mb-3"> <label class="form-label"><strong>LOCALIDAD <span class="text-danger">*</span></strong></label>
+                        <input type="text" class="form-control" name="locality" required>
+                    </div>
+                </div>
+
+                <!-- Domicilio -->
+		<div class="form-card my-3 p-4">
+                    <div class="mb-3"> <label class="form-label"><strong>DOMICILIO <span class="text-danger">*</span></strong></label>
+                        <input type="text" class="form-control" name="address" required>
+                    </div>
+                </div>
+
+                <!-- Provincia -->
+		<div class="form-card my-3 p-4">
+                    <div class="mb-3"> <label class="form-label"><strong>PROVINCIA <span class="text-danger">*</span></strong></label>
+                        <input type="text" class="form-control" name="province" required>
+                    </div>
+                </div>
+
+                <!-- Código Postal -->
+		<div class="form-card my-3 p-4">
+                    <div class="mb-3"> <label class="form-label"><strong>CÓDIGO POSTAL <span class="text-danger">*</span></strong></label>
+                        <input type="text" class="form-control" name="cp" required>
+                    </div>
+                </div>
+
+                <!-- Teléfono -->
+		<div class="form-card my-3 p-4">
+                    <div class="mb-3"> <label class="form-label"><strong>TEL DE CONTACTO <span class="text-danger">*</span></strong></label>
+                        <input type="tel" class="form-control" name="phone" required>
+                    </div>
+                </div>
+
+                <!-- Email -->
+		<div class="form-card my-3 p-4">
+                    <div class="mb-3"> <label class="form-label"><strong>E-MAIL <span class="text-danger">*</span></strong></label>
+                        <input type="email" class="form-control" name="email" required>
+                    </div>
+                </div>
+
+                <!-- Idiomas -->
+		<div class="form-card my-3 p-4">
+                    <div class="mb-3"> <label class="form-label"><strong>¿QUÉ IDIOMAS HABLAS?</strong></label>
+                        <input type="text" class="form-control" name="languaje">
+                    </div>
+                </div>
+
+                <!-- Fecha solicitud -->
+		<div class="form-card my-3 p-4">
+                    <div class="mb-3"> <label class="form-label"><strong>País <span class="text-danger">*</span></strong></label>
+                        <select class="form-control form" name="country" required>
+                            <option value="">---</option>
+                            {% for co in countries %}
+                                <option value="{{co.id}}">{{co.nombre}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Etnia -->
+		<div class="form-card my-3 p-4">
+                    <div class="mb-3"> <label class="form-label"><strong>Etnia <span class="text-danger">*</span></strong></label>
+                        <select class="form-control form" name="etnia" required>
+                            <option value="">---</option>
+                            {% for et in etnias %}
+                                <option value="{{et.id}}">{{et.name}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div> 
+
+                <!-- Protección de datos -->
+		<div class="form-card my-3 p-4">
+                    <div class="mb-3"> <label class="form-label">Acepta política de privacidad <span class="text-danger">*</span></label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="privacy" required>
+                            <label class="form-check-label"> 
+                                <a href="https://www.fundec.es/politica-de-privacidad/" target="_blank">
+                                    Acepto la política de privacidad </a>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Protección de datos -->
+		<div class="form-card my-3 p-4">
+                    <div class="mb-3"> <label class="form-label">Acepta política de protección de datos <span class="text-danger">*</span></label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="tos" required>
+                            <label class="form-check-label"> 
+                                <a href="https://docs.google.com/document/d/e/2PACX-1vQwfKLSQD3XzDyYkO1P6mceVZeRDCoA2nc2EFwrhrxTmVCQFMUi-g4evQiKoX6_c2epVIaIAvqICS9M/pub" target="_blank">Acepto la política de protección de datos </a></label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Documento -->
+		<div class="form-card my-3 p-4">
+                    <div class="mb-3"> <label class="form-label">Documento identificación (NIE o PASAPORTE)</label>
+                        <input type="file" class="form-control" name="doc">
+                    </div>
+                </div>
+
+                <!-- Botón -->
+		<div class="text-center my-3 py-4 px-5">
+                    <button type="submit" class="btn btn-submit">ENVIAR</button>
+                </div>
+              
+		</form>
+
+          </div>
+        </div>
+
+    </div>
+
+    </div>
+{% endblock central_content %}
