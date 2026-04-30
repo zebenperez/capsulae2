@@ -7,7 +7,7 @@
             <strong>Pacientes sin informe de vulnerabilidad</strong>
             {% for item in no_info_list %}
                 <div class="row">
-                    <div class="col-12">{{item.nombre}}</div>
+                    <div class="col-12"><a href="{%url "patient-view" item.id%}" class="btn">{{item.nombre}}</a></div>
                 </div>
             {% endfor %}
         </div>
@@ -15,7 +15,7 @@
             <strong>Pacientes con informe de vulnerabilidad NO firmado</strong>
             {% for item in no_signed_list %}
                 <div class="row">
-                    <div class="col-12">{{item.nombre}}</div>
+                    <div class="col-12"><a href="{%url "patient-view" item.id%}" class="btn">{{item.nombre}}</a></div>
                 </div>
             {% endfor %}
 
@@ -24,7 +24,7 @@
             <strong>Pacientes con informe de vulnerabilidad firmado</strong>
             {% for item in signed_list %}
                 <div class="row">
-                    <div class="col-12">{{item.nombre}}</div>
+                    <div class="col-12"><a href="{%url "patient-view" item.id%}" class="btn">{{item.nombre}}</a></div>
                 </div>
             {% endfor %}
         </div>
