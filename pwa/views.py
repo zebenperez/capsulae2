@@ -30,7 +30,7 @@ def pin_login(request, patient_id=""):
         pin = request.POST.get('pin', None)
         patient = request.POST.get('patient', None)
         control_key = request.POST.get('control_key', None)
-        if pin != None and control_key != None:
+        if pin != None and pin != "" and control_key != None:
             if control_key == CONTROL_KEY:
                 try:
                     #Acceso de paciente
