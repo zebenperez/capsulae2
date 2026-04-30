@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% load i18n pharma_tags common_tags %}
+
+{% block central_content %}
+    <div class="row">
+        <div class="col-4">
+            <strong>Pacientes sin informe de vulnerabilidad</strong>
+            {% for item in no_info_list %}
+                <div class="row">
+                    <div class="col-12">{{item.nombre}}</div>
+                </div>
+            {% endfor %}
+        </div>
+        <div class="col-4">
+            <strong>Pacientes con informe de vulnerabilidad NO firmado</strong>
+            {% for item in no_signed_list %}
+                <div class="row">
+                    <div class="col-12">{{item.nombre}}</div>
+                </div>
+            {% endfor %}
+
+        </div>
+        <div class="col-4">
+            <strong>Pacientes con informe de vulnerabilidad firmado</strong>
+            {% for item in signed_list %}
+                <div class="row">
+                    <div class="col-12">{{item.nombre}}</div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock central_content %}
