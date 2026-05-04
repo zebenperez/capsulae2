@@ -5,10 +5,23 @@ from django.views.decorators.csrf import csrf_exempt
 
 from capsulae2.commons import get_param, get_or_none
 from pharma.models import Pacientes, PatientOrigin, Etnia, Paises
-from account.models import Company
+from account.models import Company, Config
 from community.models import Procedure, PatientProcedure, PatientProcedureDoc
-from capsulae2.email_lib import send_import_doc_email
+from capsulae2.email_lib import send_import_doc_email, send_forms_vulnera_email
 
+
+def get_config_value(key, default=""):
+    try:
+        config = Config.objects.get(key=key)
+        return config.value
+    except Exception as e:
+        return ""
+
+def get_vulnera_subject():
+    return get_config_value("email_vulnera_subject")
+
+def get_vulnera_body(name, host):
+    return get_config_value("email_vulnera_body").replace("__NAME__", name).replace("__URL__", f'https://{host}/pwa/')
 
 def regulariza(request, org):
     etnias = Etnia.objects.all()
@@ -66,7 +79,8 @@ def regulariza_save(request):
                 doc_name = doc.name
 
             try:
-                send_import_doc_email(request.META['HTTP_HOST'], [p.email], p.full_name, doc_name)
+                #send_import_doc_email(request.META['HTTP_HOST'], [p.email], p.full_name, doc_name)
+                send_forms_vulnera_email([p.email], get_vulnera_subject(), get_vulnera_body(p.full_name, request.META['HTTP_HOST']))
             except Exception as e:
                 print(f"Email error: {e}")
                 #pass

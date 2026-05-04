@@ -34,4 +34,15 @@ def send_import_doc_email(host, email_to, name, file_name):
     subject = 'Notificación Fundec. Ha recibido un nuevo documento'
     send_email(subject, '', email_to, html_message)
 
+def send_forms_vulnera_email(email_to, subject, body):
+    #html_message = f'Estimada {name},<br/>'
+    #html_message += f'GRACIAS POR CONFIAR EN NUESTRA FUNDACIÓN. POR FAVOR LEA ATENTAMENTE EL CORREO COMPLETO ANTES DE EMPEZAR, gracias.<br/>'
+    #html_message += f'PASOS A SEGUIR:<br/>'
+    #html_message += f'entra en <a href="https://{host}/pwa/">nuestra web</a>. Te pedirá un PIN: debes introducir tu nº de PASAPORTE o NIE<br/>'
+    #html_message += f'Pinchas en “INFORME DE VULNERABILIDAD”, comprueba que tus datos están correctos, luego clicas las situaciones en las que te veas identificada/o.<br/>'
+    #html_message += f'Después toca esperar a que revisemos tus datos y firmemos el informe de vulnerabilidad cuando lo hagámos recibirás un correo electrónico automático y te lo podrás descargar directamente <a href="https://{host}/pwa/">en la app</a><br/>'
+    #html_message += f'Saludos afectuosos,<br/>'
+    #html_message += f'Equipo FÜNDEC'
+    #subject = 'Notificación Fundec. Ha recibido un nuevo documento'
+    send_email(subject, '', email_to, body)
 
