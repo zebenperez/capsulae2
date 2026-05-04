@@ -58,18 +58,21 @@ def regulariza_save(request):
             po.country = country
             po.save()
 
+            doc_name = ""
             if doc is not None:
                 procedure = Procedure.objects.filter(code="01").first()
                 patpro = PatientProcedure.objects.create(procedure=procedure, obs="Creada solicitud", patient=p)
                 patprodoc = PatientProcedureDoc.objects.create(procedure=patpro, doc=doc)
+                doc_name = doc.name
 
             try:
-                send_import_doc_email(request.META['HTTP_HOST'], [p.email], p.full_name, f.name)
-            except:
-                pass
+                send_import_doc_email(request.META['HTTP_HOST'], [p.email], p.full_name, doc_name)
+            except Exception as e:
+                print(f"Email error: {e}")
+                #pass
 
             return render(request, "forms/regulariza-save.html", {'comp': comp.id,})
         else:
-            return render(request, "forms/regulariza-save.html", {'err': "Este usuario ya ha sido dado de alta!."})
-    return render(request, "forms/regulariza-save.html", {'err': "Se ha producido un error, disculpe las molestias!."})
+            return render(request, "forms/regulariza-save.html", {'err': "Este usuario ya ha sido dado de alta!.",'comp': comp.id})
+    return render(request, "forms/regulariza-save.html", {'err': "Se ha producido un error, disculpe las molestias!.",'comp':comp.id})
 

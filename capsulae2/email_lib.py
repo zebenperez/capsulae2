@@ -24,8 +24,10 @@ def send_derivation_email(emails, html):
 
 def send_import_doc_email(host, email_to, name, file_name):
     html_message = f'Hola {name}.<br/>'
-    html_message += f'La fundación FÜNDEC ha subido un nuevo documento ({file_name}) a su carpeta personal de la app capsulae.<br/>'
-    html_message += f'Puede consultarlo accediendo al siguiente enlace introduciendo su PIN (NIF/NIE/Pasaporte):'
+    html_message = f'Se ha registrado correctamente en la fundación FÜNDEC.<br/>'
+    if file_name != "":
+        html_message += f'Ha subido un nuevo documento ({file_name}) a su carpeta personal de la app capsulae.<br/>'
+    html_message += f'Puede consultar su información accediendo al siguiente enlace introduciendo su PIN (NIF/NIE/Pasaporte):'
     html_message += f'<a href="https://{host}/pwa/">aqu&iacute;</a>'
     html_message += f'<br/><br/>Un afectuoso saludo<br/>'
     html_message += f'El equipo de Fundec'
