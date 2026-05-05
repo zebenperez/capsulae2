@@ -158,6 +158,7 @@ urlpatterns = [
 
     #------------------------- AUX --------------------
     path('patients/aux/vulnera-list/<int:comp>', aux_views.vulnera_list, name='patient-aux-vulnera-list'),
+    path('patients/aux/vulnera-files/<int:comp>', aux_views.vulnera_files, name='patient-aux-vulnera-files'),
 
     #---------------------- AUTO -----------------------
     path('autosave_field/', auto_views.autosave_field, name='autosave_field'),
