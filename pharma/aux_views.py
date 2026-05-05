@@ -35,7 +35,7 @@ def vulnera_list(request, comp):
 
 @group_required("admins","managers")
 def vulnera_files(request, comp):
-    import zipfile
+    import zipfile, os
     from io import BytesIO
 
     comp = get_or_none(Company, comp)
