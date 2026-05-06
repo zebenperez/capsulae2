@@ -1,5 +1,5 @@
 {% extends "pwa-base.html" %}
-{% load static i18n pharma_tags %}
+{% load static i18n common_tags pharma_tags %}
 
 {% block content%}
     <div class="row m-2">
@@ -16,8 +16,14 @@
     {% for item in obj.lopd.all %}
     	<div class="row p-0 m-0">
             <div class="col-12 recipe-header">
-    	        <div class="row py-1">
-	                <div class="col-6 py-2"><strong>Fecha: {{item.date|date:"d-m-Y"}}</strong></div>
+                {% if "vulnerabilidad" in item.document.name and "firmado" in item.document.name|lower %}
+    	            <div class="row py-1 alert-warning">
+                {% else %}
+    	            <div class="row py-1">
+                {% endif %}
+                    <div class="col-6 py-2">
+                        <strong>Fecha: {{item.date|date:"d-m-Y"}}<br/><br/>{{item.document.name|substr:11|truncatechars:35}}</strong>
+                    </div>
  	                <div class="col-6">
                         <a class="btn btn-primary w-100 py-2" href="{{item.document|get_lopd_url}}" target="_blank">
                  	        <i class="fas fa-pdf"></i> &nbsp; VER</a>
