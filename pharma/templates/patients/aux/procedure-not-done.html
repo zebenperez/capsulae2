@@ -5,6 +5,11 @@
     <div class="row">
         <div class="col-12">
             <strong>Trámites no firmados</strong>
+            <div class="row">
+                <div class="col-4"><strong>Paciente</strong></div>
+                <div class="col-4"><strong>Trámite</strong></div>
+                <div class="col-4"><strong>Fecha</strong></div>
+            </div>
             {% for item in item_list %}
                 <div class="row">
                     <div class="col-4"><a href="{%url "patient-view" item.patient.id%}" class="btn">{{item.patient.nombre}}</a></div>
