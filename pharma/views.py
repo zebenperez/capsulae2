@@ -19,7 +19,7 @@ from capsulae2.decorators import group_required
 from capsulae2.commons import get_or_none, get_param, show_exc, generate_qr, get_int, set_session
 from capsulae2.settings import MEDIA_ROOT, PATIENT_URL, BASE_DIR 
 from capsulae2.capsulae_lib import check_user_payment
-from capsulae2.email_lib import send_import_doc_email
+from capsulae2.email_lib import send_common_email
 #from account.models import Company, UserPayment
 from account.models import Company
 from lopd.models import LOPDConsents
@@ -33,7 +33,7 @@ from .spd_models import Pillbox
 from .treatment_models import Tratamiento, MedicamentoTratamiento, ComplementoTratamiento
 from .evolutionary_models import Evolutionary
 from .allergy_models import AlergiasExcipientes, AlergiasPrincipios, Excipientesedo, PrincipiosActivos
-from .common_lib import LOPD_LIMIT, PILLBOX_ADVISE, get_config_value
+from .common_lib import LOPD_LIMIT, PILLBOX_ADVISE, get_config_value, get_account_config_value
 from .pharma_lib import get_values_to_interactions_print, get_values_to_summary_print
 from .telegram_models import TelegramUserChat
 
@@ -374,9 +374,13 @@ def patient_import_documents(request):
             patient_list.append(p)
             lopd = LOPDConsents.objects.create(paciente=p, document=f, company=comp)
             try:
-                send_import_doc_email(request.META['HTTP_HOST'], [p.email], p.full_name, f.name)
-            except:
-                pass
+                #send_import_doc_email(request.META['HTTP_HOST'], [p.email], p.full_name, f.name)
+                subject = get_account_config_value("email_vulnera_file_subject")
+                body = get_account_config_value("email_vulnera_file_body")
+                body = body.replace("__NAME__", p.full_name).replace("__URL__", f'https://{request.META["HTTP_HOST"]}/pwa/')
+                send_common_email([p.email], subject, body)
+            except Exception as e:
+                print(e)
         #send_import_doc_email(request.META['HTTP_HOST'], ["zebenperez@gmail.com"], "Zeben Pérez", file_name)
     except Exception as e:
         print(e)

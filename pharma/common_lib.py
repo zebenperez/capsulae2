@@ -1,3 +1,4 @@
+from account.models import Config as AConfig
 from .models import Config
 
 PILLBOX_ADVISE = 7  # days
@@ -6,6 +7,13 @@ LOPD_LIMIT = 15  # days
 def get_config_value(key, default=""):
     try:
         config = Config.objects.get(key=key)
+        return config.value
+    except Exception as e:
+        return ""
+
+def get_account_config_value(key, default=""):
+    try:
+        config = AConfig.objects.get(key=key)
         return config.value
     except Exception as e:
         return ""

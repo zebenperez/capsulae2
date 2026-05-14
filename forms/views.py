@@ -7,7 +7,7 @@ from capsulae2.commons import get_param, get_or_none
 from pharma.models import Pacientes, PatientOrigin, Etnia, Paises
 from account.models import Company, Config
 from community.models import Procedure, PatientProcedure, PatientProcedureDoc
-from capsulae2.email_lib import send_import_doc_email, send_forms_vulnera_email
+from capsulae2.email_lib import send_common_email
 
 
 def get_config_value(key, default=""):
@@ -80,7 +80,7 @@ def regulariza_save(request):
 
             try:
                 #send_import_doc_email(request.META['HTTP_HOST'], [p.email], p.full_name, doc_name)
-                send_forms_vulnera_email([p.email], get_vulnera_subject(), get_vulnera_body(p.full_name, request.META['HTTP_HOST']))
+                send_common_email([p.email], get_vulnera_subject(), get_vulnera_body(p.full_name, request.META['HTTP_HOST']))
             except Exception as e:
                 print(f"Email error: {e}")
                 #pass
