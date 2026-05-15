@@ -75,7 +75,8 @@ def regulariza_save(request):
             if doc is not None:
                 procedure = Procedure.objects.filter(code="01").first()
                 patpro = PatientProcedure.objects.create(procedure=procedure, obs="Creada solicitud", patient=p)
-                patprodoc = PatientProcedureDoc.objects.create(procedure=patpro, doc=doc)
+                if patpro != None:
+                    patprodoc = PatientProcedureDoc.objects.create(procedure=patpro, doc=doc)
                 doc_name = doc.name
 
             try:
