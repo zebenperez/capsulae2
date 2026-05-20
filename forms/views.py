@@ -47,6 +47,7 @@ def regulariza_save(request):
         country = get_or_none(Paises, get_param(request.POST, "country"))
         privacy = get_param(request.POST, "privacy")
         tos = get_param(request.POST, "tos")
+        obs = get_param(request.POST, "obs")
         doc = request.FILES["doc"] if "doc" in request.FILES else None
         #print(f"{name} {sex} {passport} {tos} {privacy}")
         #print(doc)
@@ -63,6 +64,7 @@ def regulariza_save(request):
             p.cod_postal = cp
             p.telefono1 = phone
             p.email = email
+            p.observaciones = obs
             p.save()
 
             po = PatientOrigin(patient = p)

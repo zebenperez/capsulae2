@@ -8,6 +8,16 @@
             {% include "patient/patient-form-personal.html" %}
             {% include "patient/patient-form-contact.html" %}
             {% include "patient/patient-form-social.html" %}
+            <div class="row m-0">
+                <div class="col-12 mt-1">
+                    <label class="label">{% trans "Observaciones" %}:</label>
+                    <textarea class="form-control autosave input view" id="observaciones" name="observaciones" 
+                        title="{{obj.observaciones}}" data-model-name="pharma.pacientes" data-obj-id="{{obj.id}}" 
+                        data-url="{% url "autosave_field" %}" data-target="div-notification" disabled/>{{obj.observaciones|default:""}}
+                    </textarea>
+                    <span id="observaciones__msg"></span>
+                </div>
+            </div>
         </div>    
         <div class="col-1 text-end">
             <button id="btn-edit" class="btn btn-sm toggle-edit new" data-class-name="input" data-text="{%trans "Edit"%}" 
