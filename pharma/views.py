@@ -61,6 +61,9 @@ def index(request):
 def home(request):
     return render(request, "home.html", {})
 
+def about(request):
+    return render(request, "about.html", {})
+
 #def payment_error(request):
 #    up = UserPayment.objects.all().order_by('-expire_date').first()
 #    return render(request, "error-payments.html", {'payment': up})

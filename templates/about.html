@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CAPSULAE - Presentación Comercial</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family:'Poppins',sans-serif;
+    background:#f5f5f5;
+    color:#56555a;
+}
+
+.slide{
+    width:1366px;
+    height:768px;
+    margin:40px auto;
+    background:white;
+    position:relative;
+    overflow:hidden;
+    box-shadow:0 10px 30px rgba(0,0,0,0.15);
+    page-break-after:always;
+}
+
+.logo{
+    width:340px;
+}
+
+.container{
+    padding:70px;
+    height:100%;
+}
+
+h1{
+    font-size:58px;
+    color:#56555a;
+    line-height:1.1;
+}
+
+h2{
+    font-size:42px;
+    color:#56555a;
+    margin-bottom:30px;
+}
+
+h3{
+    font-size:28px;
+    margin-bottom:15px;
+}
+
+p{
+    font-size:22px;
+    line-height:1.6;
+}
+
+.highlight-yellow{color:#f2bc1b;}
+.highlight-orange{color:#f27a2c;}
+.highlight-pink{color:#c83689;}
+.highlight-purple{color:#973c8c;}
+
+.hero{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    height:100%;
+}
+
+.hero-text{
+    width:52%;
+}
+
+.hero-image{
+    width:38%;
+    height:520px;
+    border-radius:30px;
+    background:linear-gradient(135deg,#f27a2c,#973c8c);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:white;
+    font-size:34px;
+    font-weight:600;
+    text-align:center;
+    padding:40px;
+}
+
+.section-number{
+    font-size:80px;
+    font-weight:700;
+    color:#f27a2c;
+    opacity:0.2;
+    position:absolute;
+    top:30px;
+    right:50px;
+}
+
+.grid-2{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:40px;
+    margin-top:40px;
+}
+
+.card{
+    border-radius:24px;
+    padding:30px;
+    background:#ffffff;
+    border:2px solid #f1f1f1;
+    transition:0.3s;
+}
+
+.card:hover{
+    transform:translateY(-5px);
+}
+
+.icon-circle{
+    width:60px;
+    height:60px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:white;
+    font-weight:700;
+    margin-bottom:20px;
+}
+
+.yellow{background:#f2bc1b;}
+.orange{background:#f27a2c;}
+.pink{background:#c83689;}
+.purple{background:#973c8c;}
+.dark{background:#56555a;}
+
+.feature-list{
+    margin-top:20px;
+}
+
+.feature-list li{
+    font-size:22px;
+    margin-bottom:16px;
+    list-style:none;
+    padding-left:35px;
+    position:relative;
+}
+
+.feature-list li::before{
+    content:'✓';
+    position:absolute;
+    left:0;
+    color:#c83689;
+    font-weight:bold;
+}
+
+.modules{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:25px;
+    margin-top:30px;
+}
+
+.module{
+    padding:25px;
+    border-radius:22px;
+    background:linear-gradient(135deg,rgba(242,188,27,0.1),rgba(200,54,137,0.08));
+    border-left:8px solid #973c8c;
+}
+
+.module h4{
+    font-size:26px;
+    margin-bottom:12px;
+    color:#56555a;
+}
+
+.module p{
+    font-size:18px;
+}
+
+.footer-bar{
+    position:absolute;
+    bottom:0;
+    left:0;
+    width:100%;
+    height:18px;
+    background:linear-gradient(90deg,#f2bc1b,#f27a2c,#c83689,#973c8c);
+}
+
+.big-center{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    height:100%;
+}
+
+.big-center p{
+    width:70%;
+    margin-top:30px;
+}
+
+.contact-box{
+    margin-top:40px;
+    background:#fafafa;
+    padding:30px;
+    border-radius:25px;
+}
+
+.contact-box div{
+    font-size:24px;
+    margin-bottom:15px;
+}
+
+.tagline{
+    margin-top:30px;
+    font-size:30px;
+    font-weight:600;
+}
+
+</style>
+</head>
+<body>
+
+<!-- SLIDE 1 -->
+<section class="slide">
+<div class="container hero">
+<div class="hero-text">
+<img src="/static/imgs/logo-capsulae.png" class="logo">
+
+<h1 style="margin-top:40px;">
+La plataforma que conecta
+<span class="highlight-orange">farmacias</span>,
+<span class="highlight-pink">pacientes</span> y
+<span class="highlight-purple">comunidades</span>
+</h1>
+
+<p style="margin-top:35px;">
+Una solución digital diseñada para optimizar la gestión farmacéutica,
+mejorar la atención al paciente y fortalecer la comunicación entre
+farmacias y organizaciones.
+</p>
+
+<div class="tagline">
+Más control. Más eficiencia. Más cercanía.
+</div>
+</div>
+
+<div class="hero-image">
+Gestión integral de pacientes y medicamentos
+</div>
+</div>
+<div class="footer-bar"></div>
+</section>
+
+<!-- SLIDE 2 -->
+<section class="slide">
+<div class="section-number">01</div>
+<div class="container">
+<h2>¿Qué es CAPSULAE?</h2>
+
+<div class="grid-2">
+<div class="card">
+<div class="icon-circle yellow">A</div>
+<h3>Plataforma Integral</h3>
+<p>
+CAPSULAE centraliza toda la información clínica, farmacológica y administrativa en una única herramienta.
+</p>
+</div>
+
+<div class="card">
+<div class="icon-circle orange">B</div>
+<h3>Atención Personalizada</h3>
+<p>
+Facilita el seguimiento de pacientes y mejora la adherencia terapéutica mediante una gestión organizada.
+</p>
+</div>
+
+<div class="card">
+<div class="icon-circle pink">C</div>
+<h3>Comunicación Eficiente</h3>
+<p>
+Permite una interacción más fluida entre farmacia, profesionales y pacientes.
+</p>
+</div>
+
+<div class="card">
+<div class="icon-circle purple">D</div>
+<h3>Escalable y Moderna</h3>
+<p>
+Diseñada para colegios oficiales de farmacia, farmacias individuales y redes colaborativas.
+</p>
+</div>
+</div>
+</div>
+<div class="footer-bar"></div>
+</section>
+
+<!-- SLIDE 3 -->
+<section class="slide">
+<div class="section-number">02</div>
+<div class="container">
+<h2>¿A quién va dirigida?</h2>
+
+<div class="grid-2">
+<div class="card">
+<h3 class="highlight-purple">Colegios Oficiales de Farmacia</h3>
+<ul class="feature-list">
+<li>Coordinación entre farmacias colegiadas.</li>
+<li>Seguimiento centralizado de programas.</li>
+<li>Acceso a métricas e informes.</li>
+<li>Comunicación más eficiente.</li>
+<li>Digitalización de procesos.</li>
+</ul>
+</div>
+
+<div class="card">
+<h3 class="highlight-orange">Farmacias</h3>
+<ul class="feature-list">
+<li>Gestión integral de pacientes.</li>
+<li>Control de tratamientos y medicamentos.</li>
+<li>Optimización del trabajo diario.</li>
+<li>Atención más personalizada.</li>
+<li>Mayor fidelización de pacientes.</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="footer-bar"></div>
+</section>
+
+<!-- SLIDE 4 -->
+<section class="slide">
+<div class="section-number">03</div>
+<div class="container">
+<h2>Módulo Principal: Pacientes</h2>
+
+<p>
+El módulo de pacientes es el núcleo de CAPSULAE.
+Permite gestionar toda la información clínica y administrativa del paciente desde una única plataforma.
+</p>
+
+<div class="modules">
+<div class="module">
+<h4>Información Personal</h4>
+<p>Datos básicos, contacto y perfil clínico del paciente.</p>
+</div>
+
+<div class="module">
+<h4>Diagnósticos</h4>
+<p>Registro y seguimiento de patologías y observaciones clínicas.</p>
+</div>
+
+<div class="module">
+<h4>Tratamientos</h4>
+<p>Control de medicación, dosis y adherencia terapéutica.</p>
+</div>
+
+<div class="module">
+<h4>Parámetros</h4>
+<p>Monitorización de peso, glucosa, presión arterial y otros indicadores.</p>
+</div>
+</div>
+</div>
+<div class="footer-bar"></div>
+</section>
+
+<!-- SLIDE 5 -->
+<section class="slide">
+<div class="section-number">04</div>
+<div class="container">
+<h2>Opciones Avanzadas del Paciente</h2>
+
+<div class="modules">
+<div class="module">
+<h4>Pastilleros</h4>
+<p>Organización y control de tomas diarias o semanales.</p>
+</div>
+
+<div class="module">
+<h4>Evolutivo</h4>
+<p>Seguimiento cronológico de la evolución del paciente.</p>
+</div>
+
+<div class="module">
+<h4>Trámites</h4>
+<p>Gestión documental y administrativa integrada.</p>
+</div>
+
+<div class="module">
+<h4>Mensajería</h4>
+<p>Comunicación directa entre farmacia y paciente.</p>
+</div>
+</div>
+
+<div class="contact-box">
+<div><strong>Objetivo:</strong> ofrecer una atención más humana, organizada y eficiente.</div>
+</div>
+</div>
+<div class="footer-bar"></div>
+</section>
+
+<!-- SLIDE 6 -->
+<section class="slide">
+<div class="section-number">05</div>
+<div class="container">
+<h2>Gestión Inteligente de Medicamentos</h2>
+
+<div class="grid-2">
+<div>
+<ul class="feature-list">
+<li>Catálogo completo de medicamentos.</li>
+<li>Historial farmacológico del paciente.</li>
+<li>Control de stock y dispensaciones.</li>
+<li>Alertas e interacciones.</li>
+<li>Seguimiento terapéutico.</li>
+<li>Información actualizada.</li>
+</ul>
+</div>
+
+<div class="card" style="background:linear-gradient(135deg,#56555a,#973c8c); color:white;">
+<h3 style="color:white;">Beneficios para la Farmacia</h3>
+<p style="margin-top:20px;">
+✔ Mayor seguridad.
+<br><br>
+✔ Reducción de errores.
+<br><br>
+✔ Mejor adherencia terapéutica.
+<br><br>
+✔ Más eficiencia operativa.
+</p>
+</div>
+</div>
+</div>
+<div class="footer-bar"></div>
+</section>
+
+<!-- SLIDE 7 -->
+<section class="slide">
+<div class="section-number">06</div>
+<div class="container">
+<h2>Ventajas Competitivas</h2>
+
+<div class="grid-2">
+<div class="card">
+<div class="icon-circle yellow">1</div>
+<h3>Ahorro de Tiempo</h3>
+<p>
+Automatización y centralización de procesos.
+</p>
+</div>
+
+<div class="card">
+<div class="icon-circle orange">2</div>
+<h3>Mayor Organización</h3>
+<p>
+Toda la información accesible en un único entorno.
+</p>
+</div>
+
+<div class="card">
+<div class="icon-circle pink">3</div>
+<h3>Atención Más Humana</h3>
+<p>
+Seguimiento personalizado y comunicación más cercana.
+</p>
+</div>
+
+<div class="card">
+<div class="icon-circle purple">4</div>
+<h3>Transformación Digital</h3>
+<p>
+Modernización de la farmacia y adaptación al futuro.
+</p>
+</div>
+</div>
+</div>
+<div class="footer-bar"></div>
+</section>
+
+<!-- SLIDE 8 -->
+<section class="slide">
+<div class="container big-center">
+<img src="/static/imgs/logo-capsulae.png" class="logo">
+
+<h1 style="margin-top:40px;">
+Una plataforma.
+<br>
+Muchas soluciones.
+</h1>
+
+<p>
+CAPSULAE ayuda a farmacias y colegios oficiales a ofrecer un servicio más eficiente, conectado y centrado en las personas.
+</p>
+
+<div class="contact-box">
+<div><strong>Web:</strong> www.capsulae.es</div>
+<div><strong>Email:</strong> hola@capsulae.es</div>
+<div><strong>Teléfono:</strong> +34 900 123 456</div>
+</div>
+</div>
+<div class="footer-bar"></div>
+</section>
+
+</body>
+</html>
