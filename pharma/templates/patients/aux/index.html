@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block central_content %}
+    <div class="row justify-content-center g-4">
+        <div class="col-12 col-md-3 d-flex justify-content-center">
+            <a href="{% url 'patients-aux-vulnera-list' %}"
+                class="card text-center shadow-sm text-decoration-none w-100 p-4 btn-card border border-primary">
+                <i class="fas fa-user-shield fa-3x mb-3 text-primary"></i>
+                <div class="fw-semibold text-dark"> {% trans "Informes de vulnerabilidad" %} </div>
+            </a>
+        </div>
+
+        <div class="col-12 col-md-3 d-flex justify-content-center">
+            <a href="{% url 'patients-aux-procedure-not-done' %}"
+                class="card text-center shadow-sm text-decoration-none w-100 p-4 btn-card border border-warning">
+                <i class="fas fa-hourglass-half fa-3x mb-3 text-warning"></i>
+                <div class="fw-semibold text-dark"> {% trans "Trámites no terminados" %} </div>
+            </a>
+        </div>
+
+        <div class="col-12 col-md-3 d-flex justify-content-center">
+            <a href="{% url 'patients-aux-vulnera-files' %}"
+                class="card text-center shadow-sm text-decoration-none w-100 p-4 btn-card border border-success">
+                <i class="fas fa-folder-open fa-3x mb-3 text-success"></i>
+                <div class="fw-semibold text-dark"> {% trans "Ficheros de vulnerabilidad" %} </div>
+            </a>
+        </div>
+    </div>
+{% endblock central_content %}

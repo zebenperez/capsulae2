@@ -158,9 +158,13 @@ urlpatterns = [
     path('patients/api/get-patients/', views.patient_api_get_patients, name='patient-api-get-patients'),
 
     #------------------------- AUX --------------------
-    path('patients/aux/vulnera-list/<int:comp>', aux_views.vulnera_list, name='patient-aux-vulnera-list'),
-    path('patients/aux/vulnera-files/<int:comp>', aux_views.vulnera_files, name='patient-aux-vulnera-files'),
-    path('patients/aux/procedure-not-done/<int:comp>', aux_views.procedure_not_done, name='patient-aux-procedure-not-done'),
+    path('patients/aux/index/', aux_views.index, name='patients-aux-index'),
+    path('patients/aux/vulnera-list/', aux_views.vulnera_list, name='patients-aux-vulnera-list'),
+    #path('patients/aux/vulnera-list/<int:comp>', aux_views.vulnera_list, name='patient-aux-vulnera-list'),
+    path('patients/aux/vulnera-files/', aux_views.vulnera_files, name='patients-aux-vulnera-files'),
+    #path('patients/aux/vulnera-files/<int:comp>', aux_views.vulnera_files, name='patient-aux-vulnera-files'),
+    path('patients/aux/procedure-not-done/', aux_views.procedure_not_done, name='patients-aux-procedure-not-done'),
+    #path('patients/aux/procedure-not-done/<int:comp>', aux_views.procedure_not_done, name='patient-aux-procedure-not-done'),
 
     #---------------------- AUTO -----------------------
     path('autosave_field/', auto_views.autosave_field, name='autosave_field'),

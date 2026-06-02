@@ -3,30 +3,53 @@
 
 {% block central_content %}
     <div class="row">
+        <div class="col-12 text-end"><a href="{% url "patients-aux-index" %}" class="btn">{% trans "Volver" %}</a></div>
+    </div>
+    <div class="row mt-4">
         <div class="col-4">
-            <strong>Pacientes sin informe de vulnerabilidad</strong>
-            {% for item in no_info_list %}
-                <div class="row">
-                    <div class="col-12"><a href="{%url "patient-view" item.id%}" class="btn">{{item.nombre}}</a></div>
+            <div class="card">
+                <div class="card-header">
+                    <strong>Pacientes sin informe de vulnerabilidad</strong><br/>
+                    <small>(Pacientes SIN documento cuyo nombre contiene "vulnerabilidad")</small>
                 </div>
-            {% endfor %}
+                <div class="card-body">
+                    {% for item in no_info_list %}
+                        <div class="row">
+                            <div class="col-12"><a href="{%url "patient-view" item.id%}" class="btn">{{item.nombre}}</a></div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
         </div>
         <div class="col-4">
-            <strong>Pacientes con informe de vulnerabilidad NO firmado</strong>
-            {% for item in no_signed_list %}
-                <div class="row">
-                    <div class="col-12"><a href="{%url "patient-view" item.id%}" class="btn">{{item.nombre}}</a></div>
+            <div class="card">
+                <div class="card-header">
+                    <strong>Pacientes con informe de vulnerabilidad NO firmado</strong><br/>
+                    <small>(Pacientes con al menos un documento cuyo nombre contiene "vulnerabilidad" y NO "signed" o "firmado)</small>
                 </div>
-            {% endfor %}
-
+                <div class="card-body">
+                    {% for item in no_signed_list %}
+                        <div class="row">
+                            <div class="col-12"><a href="{%url "patient-view" item.id%}" class="btn">{{item.nombre}}</a></div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
         </div>
         <div class="col-4">
-            <strong>Pacientes con informe de vulnerabilidad firmado</strong>
-            {% for item in signed_list %}
-                <div class="row">
-                    <div class="col-12"><a href="{%url "patient-view" item.id%}" class="btn">{{item.nombre}}</a></div>
+            <div class="card">
+                <div class="card-header">
+                    <strong>Pacientes con informe de vulnerabilidad firmado</strong><br/>
+                    <small>(Pacientes con al menos un documento cuyo nombre contiene "vulnerabilidad" y "signed" o "firmado)</small>
                 </div>
-            {% endfor %}
+                <div class="card-body">
+                    {% for item in signed_list %}
+                        <div class="row">
+                            <div class="col-12"><a href="{%url "patient-view" item.id%}" class="btn">{{item.nombre}}</a></div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
         </div>
     </div>
 {% endblock central_content %}

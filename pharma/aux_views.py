@@ -8,8 +8,14 @@ from account.models import Company
 from community.models import PatientProcedure
 
 @group_required("admins","managers")
-def vulnera_list(request, comp):
-    comp = get_or_none(Company, comp)
+def index(request):
+    return render(request, "patients/aux/index.html", {})
+
+@group_required("admins","managers")
+#def vulnera_list(request, comp):
+def vulnera_list(request):
+    #comp = get_or_none(Company, comp)
+    comp = Company.get_by_user(request.user)
     full_query = Q()
     full_query &= (Q(**{'id_user__company': comp}) | Q(**{'id_user__user_companies__in': [comp]}))
     p_list = Pacientes.objects.filter(full_query)
@@ -35,19 +41,23 @@ def vulnera_list(request, comp):
     return render(request, "patients/aux/vulnera-list.html", {"no_info_list": no_info_list, "signed_list": signed_list, "no_signed_list": not_signed_list})
 
 @group_required("admins","managers")
-def procedure_not_done(request, comp):
-    comp = get_or_none(Company, comp)
+#def procedure_not_done(request, comp):
+def procedure_not_done(request):
+    #comp = get_or_none(Company, comp)
+    comp = Company.get_by_user(request.user)
     full_query = Q(**{'done': False})
     full_query &= (Q(**{'patient__id_user__company': comp}) | Q(**{'patient__id_user__user_companies__in': [comp]}))
     p_list = PatientProcedure.objects.filter(full_query)
     return render(request, "patients/aux/procedure-not-done.html", {"item_list": p_list,})
 
 @group_required("admins","managers")
-def vulnera_files(request, comp):
+#def vulnera_files(request, comp):
+def vulnera_files(request):
     import zipfile, os
     from io import BytesIO
 
-    comp = get_or_none(Company, comp)
+    #comp = get_or_none(Company, comp)
+    comp = Company.get_by_user(request.user)
     full_query = Q()
     full_query &= (Q(**{'id_user__company': comp}) | Q(**{'id_user__user_companies__in': [comp]}))
     p_list = Pacientes.objects.filter(full_query)
