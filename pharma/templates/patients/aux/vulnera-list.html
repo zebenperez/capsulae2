@@ -9,7 +9,7 @@
         <div class="col-4">
             <div class="card">
                 <div class="card-header">
-                    <strong>Pacientes sin informe de vulnerabilidad</strong><br/>
+                    <strong>Pacientes sin informe de vulnerabilidad (Total: {{no_info_list|length}})</strong><br/>
                     <small>(Pacientes SIN documento cuyo nombre contiene "vulnerabilidad")</small>
                 </div>
                 <div class="card-body">
@@ -24,7 +24,7 @@
         <div class="col-4">
             <div class="card">
                 <div class="card-header">
-                    <strong>Pacientes con informe de vulnerabilidad NO firmado</strong><br/>
+                    <strong>Pacientes con informe de vulnerabilidad NO firmado (Total: {{no_signed_list|length}})</strong><br/>
                     <small>(Pacientes con al menos un documento cuyo nombre contiene "vulnerabilidad" y NO "signed" o "firmado")
                     </small>
                 </div>
@@ -40,7 +40,7 @@
         <div class="col-4">
             <div class="card">
                 <div class="card-header">
-                    <strong>Pacientes con informe de vulnerabilidad firmado</strong><br/>
+                    <strong>Pacientes con informe de vulnerabilidad firmado (Total: {{signed_list|length}})</strong><br/>
                     <small>(Pacientes con al menos un documento cuyo nombre contiene "vulnerabilidad" y "signed" o "firmado")</small>
                 </div>
                 <div class="card-body">
