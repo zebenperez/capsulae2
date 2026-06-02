@@ -25,7 +25,8 @@
             <div class="card">
                 <div class="card-header">
                     <strong>Pacientes con informe de vulnerabilidad NO firmado</strong><br/>
-                    <small>(Pacientes con al menos un documento cuyo nombre contiene "vulnerabilidad" y NO "signed" o "firmado)</small>
+                    <small>(Pacientes con al menos un documento cuyo nombre contiene "vulnerabilidad" y NO "signed" o "firmado")
+                    </small>
                 </div>
                 <div class="card-body">
                     {% for item in no_signed_list %}
@@ -40,7 +41,7 @@
             <div class="card">
                 <div class="card-header">
                     <strong>Pacientes con informe de vulnerabilidad firmado</strong><br/>
-                    <small>(Pacientes con al menos un documento cuyo nombre contiene "vulnerabilidad" y "signed" o "firmado)</small>
+                    <small>(Pacientes con al menos un documento cuyo nombre contiene "vulnerabilidad" y "signed" o "firmado")</small>
                 </div>
                 <div class="card-body">
                     {% for item in signed_list %}
