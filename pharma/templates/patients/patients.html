@@ -42,7 +42,7 @@
             {% endif %}
 
             {% if request.user|in_group:"admins" %}
-                <a class="btn btn-sm new" href="{% url "patients-aux-index" %}"><i class="fas fa-list"></i> {%trans "Informes"%} </a>
+                {#<a class="btn btn-sm new" href="{%url "patients-aux-index"%}"><i class="fas fa-list"></i> {%trans "Informes"%} </a>#}
 
                 <label for="file" class="btn btn-sm new">
                     <i class="fas fa-upload"></i>
