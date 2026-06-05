@@ -17,9 +17,10 @@
         <style>
             .signature-box{
                 display:inline-block; 
-                width:35% text-align:center; 
+                width:100%;
+                /*text-align:center; */
                 background-color:white; 
-                border: 1px solid black;
+                /*border: 1px solid black;*/
                 text-align: center;
             }
 
@@ -30,34 +31,19 @@
         </style>
     </head>
     <body>
-    {%comment%}
-        AAAAAAAAAA
-	<div id="signature"></div>
-	<script>
-	    $(document).ready(function() {
-	        $("#signature").jSignature()
-	    })
-	</script>
-    </body>
-    {%endcomment%}
         <div class="content" style="font-size:12pt">
             <div class="page" >
-		{% if company.id == 9 %} {# FUNDEC #}
+		        {% if company.id == 9 %} {# FUNDEC #}
                 	{% include "patient/lopd/lopd-consent-content-fundec.html"%}
-		{% elif temp != "" %}
-            {{temp|safe}}
-		{% else %}
+		        {% elif temp != "" %}
+                    {{temp|safe}}
+		        {% else %}
                 	{% include "patient/lopd/lopd-consent-content.html"%}
-		{% endif %}
+		        {% endif %}
+
                 <div class="signature-box">
 	                <div id="signature"></div>
                     <button class="btn btn-sm sign-capture-btn new" id="reset_signature">Limpiar</button> 
-                    {%comment%}
-                    <canvas id="patient_signature_field" style="border: 1px solid lightgray; min-height:3em;"></canvas>
-                    <br>
-                    <button class="btn btn-sm sign-capture-btn new" id="sign_patient_btn" data-target="#patient_signature_field" 
-                        data-name="{{ patient.nombre }} {{ patient.apellido }}" data-input="#id_patient_signature">Firmar </button>
-                    {%endcomment%}
                 </div>
                 
                 <div>               
@@ -66,7 +52,6 @@
                         {% csrf_token %}
                         <input type="hidden" value="{{company.id}}" name="company"/>
                         <input type="hidden" value="" name="patient_signature" id="id_patient_signature"/>
-                        {#<input type="hidden" value="" name="professional_signature" id="id_professional_signature"/>#}
                         <input type="hidden" value="True" name="check1" id="check1"/>
                         <input type="hidden" value="True" name="check2" id="check2"/>
                         <input type="hidden" value="True" name="check3" id="check3"/>
@@ -80,41 +65,19 @@
     <script>
         $(document).ready(function() {
 	        var sigdiv = $("#signature").jSignature();
-	        //var sigdiv = $("#patient_signature_field").jSignature();
-			sigdiv.attr("heigth",120);
+			sigdiv.attr("heigth",100);
 
-			//var sigdivPro= $('#professional_signature_field').jSignature();
-			//sigdivPro.attr("height",120);
-	
 			$('#guardar').on('click', function(e){
 				e.preventDefault();
 				e.stopPropagation();
 				var datapair = sigdiv.jSignature("getData", "svgbase64") 
 				img_data=datapair[0] + "," + datapair[1];
 						
-				//var datapairpro = sigdivPro.jSignature("getData", "svgbase64")
-				//img_data_pro = datapairpro[0]+","+datapairpro[1];
-
 				$('#id_patient_signature').val(img_data);
-				//$('#id_professional_signature').val(img_data_pro);
 				$('#signature_form').submit();
 			});
 
 			$('#reset_signature').on('click', function(e){sigdiv.jSignature("reset");});
-
-            /*
-				$('#clean_patient').on('click', function(e){
-					e.stopPropagation();
-					e.preventDefault();
-					sigdiv.jSignature("reset");	
-				});
-				$('#clean_professional').on('click', function(e){
-					e.stopPropagation();
-					e.preventDefault();
-					sigdivPro.jSignature("reset");	
-
-				})
-            */
         });
     </script>
 </html>
