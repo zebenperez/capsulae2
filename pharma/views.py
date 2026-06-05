@@ -922,14 +922,42 @@ def patient_lopd_remove(request):
         print(e)
         return render(request, 'error_exception.html', {'msg': str(e)})
 
+def get_lopd_template(template, patient):
+    if template == None:
+        return ""
+
+    MESES = {
+        1: "enero", 2: "febrero", 3: "marzo", 4: "abril", 5: "mayo", 6: "junio", 7: "julio", 8: "agosto",
+        9: "septiembre", 10: "octubre", 11: "noviembre", 12: "diciembre"
+    }
+    now = datetime.now()
+    date = f"{now.day:02d} de {MESES[now.month]} de {now.year}"
+
+    temp = template.temp.replace("__PATIENT_HIST__", patient.n_historial)
+    temp = temp.replace("__PATIENT_QR__", patient.qr.url)
+    temp = temp.replace("__PATIENT_NAME__", patient.nombre)
+    temp = temp.replace("__PATIENT_SURNAME__", patient.apellido)
+    temp = temp.replace("__PATIENT_NIF__", patient.nif)
+    temp = temp.replace("__PATIENT_CIP__", patient.cip)
+    temp = temp.replace("__DATE__", date)
+    return temp
+
+
 @group_required("admins","managers","employee")
 def patient_lopd_generate_document(request, patient_id):
     context={}
 
     try:
         patient = Pacientes.objects.get(pk=patient_id)
+        #comp = Company.get_by_user(request.user)
+        comp = Company.get_by_user(patient.owner)
+        template = comp.lopd_temps.filter(name="consent").first()
+        #print(template)
+        temp = get_lopd_template(template, patient)
+
         context['patient'] = patient
-        context['company'] = Company.get_by_user(request.user)
+        context['company'] = comp 
+        context['temp'] = temp
         #context['company'] = request.user.company
     except Exception as e:
         print(e)
@@ -941,8 +969,14 @@ def patient_lopd_generate_document2(request, patient_id):
 
     try:
         patient = Pacientes.objects.get(pk=patient_id)
+        comp = Company.get_by_user(patient.owner)
+        template = comp.lopd_temps.filter(name="consent").first()
+        temp = get_lopd_template(template, patient)
+
         context['patient'] = patient
-        context['company'] = Company.get_by_user(patient.owner)
+        context['company'] = comp 
+        context['temp'] = temp
+        #context['company'] = Company.get_by_user(patient.owner)
         #context['company'] = request.user.company
     except Exception as e:
         print(e)

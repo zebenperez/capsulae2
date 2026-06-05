@@ -44,6 +44,8 @@
             <div class="page" >
 		{% if company.id == 9 %} {# FUNDEC #}
                 	{% include "patient/lopd/lopd-consent-content-fundec.html"%}
+		{% elif temp != "" %}
+            {{temp|safe}}
 		{% else %}
                 	{% include "patient/lopd/lopd-consent-content.html"%}
 		{% endif %}

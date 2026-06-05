@@ -19,4 +19,13 @@ class LOPDConsents(models.Model):
     class Meta:
         ordering = ["-date"]
 
+class LOPDTemplate(models.Model):
+    name = models.SlugField(max_length=200, verbose_name="clave", default="")
+    temp = models.TextField(verbose_name="valor", default="")
+    company = models.ForeignKey(Company, verbose_name="empresa", on_delete=models.SET_NULL, related_name="lopd_temps", null=True, blank=True)
+
+    class Meta:
+        verbose_name="Plantilla de lopd"
+        verbose_name_plural = "Plantillas de lopd"
+
 
