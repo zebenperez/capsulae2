@@ -497,6 +497,19 @@ def test(request):
         code = "ERROR"
     return HttpResponse(code)
 
+'''
+    DASHBOARD
+'''
+@group_required("admins")
+def account_dashboard(request):
+    try:
+        item_list = Company.objects.all()
+        return render(request, "account/dashboard.html", {"item_list": item_list,})
+    except Exception as e:
+        print(e)
+        return render(request, 'error_exception.html', {'exc':show_exc(e)})
+
+
 #def donor_create_user(email, password, name, cif):
 #    user = User.objects.create_user(email, email, password)
 #    user.first_name = name

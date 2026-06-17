@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% load i18n pharma_tags %}
+
+{% block central_content %}
+{%comment%}
+    <div class="row toolbar-search pt-2 pb-2 m-0">
+        <div class="col-lg-1 col-1"><i class="fas fa-search"></i></div>
+        <div class="col-lg-11 col-11 text-left p-0">
+            <input type="text" class="autosearch form-control form-control-dark w-100" name="s-name" id="s-name" 
+               placeholder="{%trans 'Nombre'%}" data-url="{%url "project-search"%}" data-target="project-list" data-related="s-name"/>
+        </div>
+    </div>
+{%endcomment%}
+    <div class="content m-4">
+        <div class="toolbar-content"> <h2 class="pathway b-right"> {%trans 'Entidades'%} </h2> </div>
+        <div id="companies-list">
+            <div class="row patient-list-head main-th small small p-3 m-0">
+                <div class="col-3"> {% trans 'Nombre' %} </div>
+                <div class="col-3"> {% trans 'Gestor' %} </div>
+                <div class="col-3"> {% trans 'Último pago' %} </div>
+                <div class="col-3"> {% trans 'Usuarios asociados' %} </div>
+            </div>
+
+            {% for item in item_list %}
+                <div class="row line pointer small pt-2 pb-2 m-0" id="row_{{item.id}}">
+                    <div class="col-3">{{ item.name }}</div>
+                    <div class="col-3">{{ item.manager.username }}</div>
+                    <div class="col-3"> {{item.last_payment|safe}} </div>
+                    <div class="col-3">{% for us in item.users.all %}{{ us.username }}<br/>{% endfor %}</div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% include "common-modal.html" %}
+{% endblock central_content %}

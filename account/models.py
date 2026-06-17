@@ -54,6 +54,17 @@ class Company(models.Model):
     company_options = models.ManyToManyField(CompanyOptions, verbose_name="Opciones", related_name="options_company", blank=True)
     uuid = models.CharField(verbose_name='UUID', max_length=255, default='', unique=False)
 
+    def last_payment(self):
+        if self.manager == None:
+            return '<span class="text-danger">No tiene manager asignado</span>'
+        pay = self.manager.payments.last()
+        if pay == None:
+            return '<span class="text-danger">No hay pago registrado</span>'
+        if pay.expire_date < date.today():
+            return f'<span class="text-danger">{pay.amount} € (Finaliza: {pay.expire_date.strftime("%d-%m-%Y")})</span>'
+        else:
+            return f'<span class="text-success">{pay.amount} € (Finaliza: {pay.expire_date.strftime("%d-%m-%Y")})</span>'
+
     @staticmethod
     def get_by_user(user):
         comp = Company.objects.filter(manager = user).first()
@@ -63,8 +74,8 @@ class Company(models.Model):
 
     class Meta:
         db_table = 'companies_company'
-        verbose_name="Empresa"
-        verbose_name_plural = "Empresas"
+        verbose_name="1. Empresa"
+        verbose_name_plural = "1. Empresas"
 
     def __str__(self):
         return "%s"%(self.name)
@@ -135,8 +146,8 @@ class EmployeeProfile(models.Model):
 
     class Meta:
         db_table = 'companies_employeeprofile'
-        verbose_name="Perfil Empleado"
-        verbose_name_plural ="Perfiles Empleados"
+        verbose_name="4. Perfil Empleado"
+        verbose_name_plural ="4. Perfiles Empleados"
 
 
 class Menu(models.Model):
@@ -156,7 +167,7 @@ class UserMenu(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="menus")
 
     class Meta:
-        verbose_name = "Menu de usuario"
+        verbose_name = "5. Menu de usuario"
 
 class Profile(models.Model):
     active = models.BooleanField(verbose_name="Activo", default=False)
@@ -206,7 +217,7 @@ class UserProfile(models.Model):
         return company
 
     class Meta:
-        verbose_name = "Perfil de usuario"
+        verbose_name = "2. Perfil manager empresa"
 
 class UserPayment(models.Model):
     #donation = models.BooleanField(verbose_name="Donación", default=False)
@@ -220,8 +231,8 @@ class UserPayment(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="payments")
 
     class Meta:
-        verbose_name = "Pago de usuario"
-        verbose_name_plural="Pagos de usuarios"
+        verbose_name = "3. Pago manager empresa"
+        verbose_name_plural="3. Pagos managers empresa"
 
 class Donation(models.Model):
     confirm = models.BooleanField(verbose_name="Confirmación", default=False)

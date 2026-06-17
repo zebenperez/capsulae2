@@ -10,6 +10,7 @@ urlpatterns = [
     path('activate_account/<slug:activation_key>/', views.activate_account, name='activate_account'),
     path('change_password/<int:user_id>/', views.change_password, name='change_password'),
     path('reactivate/<slug:activation_key>/', views.reactivate, name='reactivate'),
+    path('dashboard/', views.account_dashboard, name='account-dashboard'),
 
     #------------------------- PROFILE --------------------
     path('profile/view/', views.profile_view, name='profile-view'),
