@@ -47,6 +47,8 @@
             <option value="">{% trans "---" %}</option>
             <option value="M" {%if obj.sexo == "M"%}selected{%endif%}>{% trans "Mujer" %}</option>
             <option value="H" {%if obj.sexo == "H"%}selected{%endif%}>{% trans "Hombre" %}</option>
+            <option value="PNB" {%if obj.sexo == "PNB"%}selected{%endif%}>{% trans "Persona no Binaria" %}</option>
+            <option value="O" {%if obj.sexo == "O"%}selected{%endif%}>{% trans "Otros" %}</option>
         </select>
         <span id="sexo__msg"></span>
     </div>
