@@ -76,6 +76,14 @@ def set_obj_field(obj, field, value):
             date = datetime.datetime.strptime(value, '%Y-%m-%d')
             if date >= datetime.datetime(1970,1,1):
                 setattr(obj, field, date)
+    elif obj_field.get_internal_type() == "DateField":
+        if value == "":
+            if obj_field.null:
+                setattr(obj, field, None)
+        elif "-" in value:
+            date = datetime.datetime.strptime(value, '%Y-%m-%d').date()
+            if date >= datetime.date(1970,1,1):
+                setattr(obj, field, date)
     else:
         setattr(obj, field, value)
     obj.save()
@@ -158,4 +166,3 @@ def generate_qr(data, logo):
 
 def new_uuid():
     return uuid.uuid4()
-

@@ -1,31 +1,44 @@
 {% load i18n project_tags %}
 
-<h2>{% trans "Carpetas" %}</h2>
-{% get_folder_pathway folder obj.pk %}
+<div class="project-drive-section">
+    <div class="project-section-header">
+        <div>
+            <h2>{% trans "Carpetas" %}</h2>
+            <div class="project-muted">{% get_folder_pathway folder obj.pk %}</div>
+        </div>
+        <button type="button" class="project-btn project-btn-primary ark" data-url="{% url "project-folder-form" %}"
+            data-target-modal="common-modal" data-project_id="{{obj.id}}" data-parent_id="{{folder.id}}">
+            <i class="fas fa-plus"></i> {% trans 'Nueva carpeta' %}
+        </button>
+    </div>
 
-<div class="row spd-tab">
-    <div class="col-12 text-end">
-        <button type="button" class="btn btn-sm ark new" data-url="{% url "project-folder-form" %}" data-target-modal="common-modal" 
-            data-project_id="{{obj.id}}" data-parent_id="{{folder.id}}"> <i class="fas fa-plus"></i> {% trans 'Nueva carpeta' %}</button> 
+    <div class="project-drive-grid">
+    {% for item in folder_list %}
+        <div class="project-folder-card">
+            <div class="project-folder-main pointer ark" data-url="{% url "project-folder-change" %}" data-target="div-container" data-obj_id="{{item.id|safe}}"
+                data-enter="True">
+                <i class="far fa-folder"></i>
+                <div>
+                    <span class="project-folder-name">{{ item.name|default:"Nombre de la carpeta" }}</span>
+                    {% if item.read_only %}<span class="project-muted">{% trans "Solo lectura" %}</span>{% endif %}
+                </div>
+            </div>
+            <div class="project-actions mt-2">
+                <a class="project-icon-btn ark" title="{% trans 'Editar carpeta' %}" data-url="{% url "project-folder-form" %}"
+                    data-target-modal="common-modal" data-obj_id="{{item.id}}" data-project_id="{{obj.id}}">
+                    <i class="fas fa-edit"></i>
+                </a>
+                {% if item.files.all.count == 0 and item.childs.count == 0 %}
+                    <a class="project-icon-btn danger ark" data-url="{% url "project-folder-remove" %}" data-target="div-container"
+                        data-obj_id="{{item.id}}" data-folder_id="{{item.parent.id}}" title="{% trans 'Eliminar' %}"
+                        data-confirm="{% trans "Are you sure to remove this element?" %}">
+                        <i class="fas fa-trash"></i>
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    {% empty %}
+        <div class="project-empty">{% trans "No hay carpetas en esta ubicación." %}</div>
+    {% endfor %}
     </div>
 </div>
-
-<div class="row">
-    {% for item in folder_list %}
-        <div class="col-3">
-            <div class="pointer ark" data-url="{%url "project-folder-change"%}" data-target="div-container" data-obj_id="{{item.id|safe}}" 
-                data-enter="True">
-                <div> <i class="far fa-folder"></i> <span>{{ item.name|default:"Nombre de la carpeta" }}</span> </div>
-                <div class="only-read"> {%if item.read_only%}<span>{% trans "(Solo lectura)" %}</span>{%endif%} </div>
-            </div>
-            <a class="btn btn-xs ark" title="{%trans 'Edit folder'%}" data-url="{%url "project-folder-form" %}"
-                data-target-modal="common-modal" data-obj_id="{{item.id}}" data-project_id="{{obj.id}}"> <i class="fas fa-edit"></i></a>
-            {% if item.files.all.count == 0 and item.childs.count == 0 %}
-                <a class="btn btn-sm ark" data-url="{%url "project-folder-remove"%}" data-target="div-container" data-obj_id="{{item.id}}" 
-                    data-folder_id="{{item.parent.id}}" title="{% trans 'Remove' %}" data-confirm="{%trans "Are you sure to remove this element?"%}">
-                    <i class="fas fa-trash"></i></a>
-            {% endif %}
-        </div>
-    {% endfor %}
-</div>
-

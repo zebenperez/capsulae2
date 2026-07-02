@@ -1,16 +1,22 @@
 {% load i18n %}
 
-<div class="row p-2">
-    <div class="col-6">
-        <div class="card">
-            <div class="card-header">{% trans "Ingresos" %}</div>
-            <div class="card-body">{% include "project/budget/income-list.html" %}</div>
+<div class="project-budget-grid">
+    <div class="project-budget-panel">
+        <div class="project-section-header">
+            <div>
+                <h2>{% trans "Ingresos" %}</h2>
+                <p class="project-muted">{{ obj.incomes.all.count }} {% trans "registros" %}</p>
+            </div>
         </div>
+        {% include "project/budget/income-list.html" %}
     </div>
-    <div class="col-6">
-        <div class="card">
-            <div class="card-header">{% trans "Gastos" %}</div>
-            <div class="card-body">{% include "project/budget/expense-list.html" %}</div>
+    <div class="project-budget-panel">
+        <div class="project-section-header">
+            <div>
+                <h2>{% trans "Gastos" %}</h2>
+                <p class="project-muted">{{ obj.expenses.all.count }} {% trans "registros" %}</p>
+            </div>
         </div>
+        {% include "project/budget/expense-list.html" %}
     </div>
 </div>

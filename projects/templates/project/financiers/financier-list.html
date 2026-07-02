@@ -1,0 +1,68 @@
+{% load i18n %}
+
+<div class="project-panel">
+    <div class="project-section-header">
+        <div>
+            <h2>{% trans "Financiadores" %}</h2>
+            <p class="project-muted">{% trans "Financiadores vinculados al proyecto y cantidad comprometida." %}</p>
+        </div>
+        <button type="button" class="project-btn project-btn-primary ark" data-url="{% url "project-financier-form" %}"
+            data-target-modal="common-modal" data-project_id="{{obj.id}}">
+            <i class="fas fa-plus"></i> {% trans "Agregar financiador" %}
+        </button>
+    </div>
+
+    <div class="project-budget-line-summary">
+        <div class="project-stat">
+            <span class="project-stat-label">{% trans "Presupuesto proyecto" %}</span>
+            <span class="project-stat-value">{{ obj.approved_budget|default:"0.00" }}</span>
+        </div>
+        <div class="project-stat">
+            <span class="project-stat-label">{% trans "Comprometido" %}</span>
+            <span class="project-stat-value">{{ obj.project_financiers.all|length }}</span>
+        </div>
+        <div class="project-stat">
+            <span class="project-stat-label">{% trans "Aportaciones a partidas" %}</span>
+            <span class="project-stat-value">{{ obj.financier_contributions.all.count }}</span>
+        </div>
+    </div>
+
+    <div class="project-table project-financiers-table">
+        <div class="project-table-head">
+            <div>{% trans "Financiador" %}</div>
+            <div>{% trans "Comprometido" %}</div>
+            <div>{% trans "Concedido" %}</div>
+            <div>{% trans "Desembolsado" %}</div>
+            <div>{% trans "Disponible" %}</div>
+            <div></div>
+        </div>
+        {% for item in project_financiers %}
+            <div class="project-table-row" id="project-financier-{{item.id}}">
+                <div class="project-table-main">
+                    <span class="project-table-title">{{ item.financier.name|default:"Sin nombre" }}</span>
+                    <div class="project-table-desc">
+                        {{ item.financier.get_financier_type_display }}
+                        {% if item.financier.tax_id %} · {{ item.financier.tax_id }}{% endif %}
+                    </div>
+                </div>
+                <div class="project-table-title">{{ item.committed_amount }}</div>
+                <div class="project-table-title">{{ item.granted_amount }}</div>
+                <div class="project-table-title">{{ item.disbursed_amount }}</div>
+                <div class="project-table-title">{{ item.available_amount }}</div>
+                <div class="project-actions">
+                    <a class="project-icon-btn ark" title="{% trans 'Editar financiador' %}" data-url="{% url "project-financier-form" %}"
+                        data-target-modal="common-modal" data-obj_id="{{item.id}}" data-project_id="{{obj.id}}">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                    <a class="project-icon-btn danger ark" data-url="{% url "project-financier-remove" %}" data-obj_id="{{item.id}}"
+                        data-target="div-container" title="{% trans 'Eliminar' %}"
+                        data-confirm="{% trans "¿Seguro que quieres eliminar este financiador del proyecto?" %}">
+                        <i class="fas fa-trash"></i>
+                    </a>
+                </div>
+            </div>
+        {% empty %}
+            <div class="project-empty">{% trans "No hay financiadores vinculados al proyecto." %}</div>
+        {% endfor %}
+    </div>
+</div>

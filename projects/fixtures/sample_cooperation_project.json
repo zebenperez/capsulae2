@@ -1,0 +1,289 @@
+[
+  {
+    "model": "projects.project",
+    "pk": 1,
+    "fields": {
+      "code": "COOP-001",
+      "name": "Fortalecimiento comunitario",
+      "desc": "Proyecto de cooperación para mejorar servicios comunitarios básicos.",
+      "status": "active",
+      "start_date": "2026-01-01",
+      "end_date": "2026",
+      "finish_date": "2026-12-31",
+      "country": "Guatemala",
+      "region": "Alta Verapaz",
+      "locality": "Cobán",
+      "technical_manager": null,
+      "financial_manager": null,
+      "manager": null,
+      "approved_budget": "120000.00",
+      "notes": "Fixture de ejemplo para el módulo de proyectos."
+    }
+  },
+  {
+    "model": "projects.objective",
+    "pk": 1,
+    "fields": {
+      "project": 1,
+      "code": "OG",
+      "name": "Mejorar la resiliencia comunitaria",
+      "description": "Objetivo general del proyecto.",
+      "objective_type": "general",
+      "status": "in_progress",
+      "progress_percentage": "40.00",
+      "notes": ""
+    }
+  },
+  {
+    "model": "projects.objective",
+    "pk": 2,
+    "fields": {
+      "project": 1,
+      "code": "OE1",
+      "name": "Aumentar el acceso a servicios básicos",
+      "description": "Objetivo específico vinculado a actividades de campo.",
+      "objective_type": "specific",
+      "status": "in_progress",
+      "progress_percentage": "55.00",
+      "notes": ""
+    }
+  },
+  {
+    "model": "projects.indicator",
+    "pk": 1,
+    "fields": {
+      "objective": 2,
+      "name": "Hogares atendidos",
+      "description": "Número de hogares participantes.",
+      "baseline": "0.00",
+      "target": "500.00",
+      "current_value": "225.00",
+      "unit": "hogares",
+      "measurement_frequency": "Mensual",
+      "verification_source": "Listados de asistencia y actas comunitarias.",
+      "responsible": null,
+      "last_update": "2026-06-30"
+    }
+  },
+  {
+    "model": "projects.activity",
+    "pk": 1,
+    "fields": {
+      "project": 1,
+      "objective": 2,
+      "code": "A1",
+      "name": "Talleres comunitarios",
+      "desc": "Diseño e impartición de talleres en comunidades priorizadas.",
+      "responsible": null,
+      "location": "Cobán",
+      "planned_start_date": "2026-02-01",
+      "planned_end_date": "2026-07-31",
+      "real_start_date": "2026-02-05",
+      "real_end_date": null,
+      "status": "in_progress",
+      "progress_percentage": "60.00"
+    }
+  },
+  {
+    "model": "projects.result",
+    "pk": 1,
+    "fields": {
+      "objective": 2,
+      "description": "Participación comunitaria fortalecida.",
+      "expected_result": "Al menos 500 hogares participan en actividades formativas.",
+      "obtained_result": "225 hogares registrados hasta la fecha.",
+      "evidence": "Actas, fotografías y listados firmados.",
+      "compliance_percentage": "45.00",
+      "status": "in_progress"
+    }
+  },
+  {
+    "model": "projects.budgetline",
+    "pk": 1,
+    "fields": {
+      "project": 1,
+      "code": "1",
+      "name": "Personal",
+      "description": "Costes de personal técnico y facilitadores.",
+      "approved_budget": "60000.00",
+      "modified_budget": "0.00"
+    }
+  },
+  {
+    "model": "projects.budgetline",
+    "pk": 2,
+    "fields": {
+      "project": 1,
+      "code": "2",
+      "name": "Actividades",
+      "description": "Materiales, logística y servicios de actividades.",
+      "approved_budget": "60000.00",
+      "modified_budget": "0.00"
+    }
+  },
+  {
+    "model": "projects.subbudgetline",
+    "pk": 1,
+    "fields": {
+      "budget_line": 1,
+      "code": "1.1",
+      "name": "Facilitadores",
+      "description": "Honorarios de facilitación.",
+      "assigned_budget": "30000.00"
+    }
+  },
+  {
+    "model": "projects.subbudgetline",
+    "pk": 2,
+    "fields": {
+      "budget_line": 2,
+      "code": "2.1",
+      "name": "Material didáctico",
+      "description": "Impresión de materiales y kits.",
+      "assigned_budget": "20000.00"
+    }
+  },
+  {
+    "model": "projects.financier",
+    "pk": 1,
+    "fields": {
+      "name": "Agencia Española de Cooperación",
+      "financier_type": "public",
+      "tax_id": "Q0000001A",
+      "address": "Madrid",
+      "contact_person": "Área de cooperación",
+      "email": "cooperacion@example.org",
+      "phone": "+34000000001",
+      "notes": ""
+    }
+  },
+  {
+    "model": "projects.financier",
+    "pk": 2,
+    "fields": {
+      "name": "Fundación Aliada",
+      "financier_type": "foundation",
+      "tax_id": "G0000002B",
+      "address": "Barcelona",
+      "contact_person": "Programas",
+      "email": "programas@example.org",
+      "phone": "+34000000002",
+      "notes": ""
+    }
+  },
+  {
+    "model": "projects.financier",
+    "pk": 3,
+    "fields": {
+      "name": "Fondos propios ONG",
+      "financier_type": "own_funds",
+      "tax_id": "",
+      "address": "",
+      "contact_person": "Dirección financiera",
+      "email": "finanzas@example.org",
+      "phone": "+34000000003",
+      "notes": ""
+    }
+  },
+  {
+    "model": "projects.projectfinancier",
+    "pk": 1,
+    "fields": {
+      "project": 1,
+      "financier": 1,
+      "committed_amount": "80000.00",
+      "granted_amount": "80000.00",
+      "disbursed_amount": "40000.00",
+      "agreement_date": "2026-01-15",
+      "agreement_document": ""
+    }
+  },
+  {
+    "model": "projects.projectfinancier",
+    "pk": 2,
+    "fields": {
+      "project": 1,
+      "financier": 2,
+      "committed_amount": "30000.00",
+      "granted_amount": "30000.00",
+      "disbursed_amount": "15000.00",
+      "agreement_date": "2026-01-20",
+      "agreement_document": ""
+    }
+  },
+  {
+    "model": "projects.projectfinancier",
+    "pk": 3,
+    "fields": {
+      "project": 1,
+      "financier": 3,
+      "committed_amount": "10000.00",
+      "granted_amount": "10000.00",
+      "disbursed_amount": "10000.00",
+      "agreement_date": null,
+      "agreement_document": ""
+    }
+  },
+  {
+    "model": "projects.financiercontribution",
+    "pk": 1,
+    "fields": {
+      "project": 1,
+      "financier": 1,
+      "budget_line": 2,
+      "sub_budget_line": 2,
+      "amount": "15000.00",
+      "percentage": "75.00",
+      "notes": "Financiación principal para materiales."
+    }
+  },
+  {
+    "model": "projects.financiercontribution",
+    "pk": 2,
+    "fields": {
+      "project": 1,
+      "financier": 2,
+      "budget_line": 2,
+      "sub_budget_line": 2,
+      "amount": "5000.00",
+      "percentage": "25.00",
+      "notes": "Cofinanciación de materiales."
+    }
+  },
+  {
+    "model": "projects.invoice",
+    "pk": 1,
+    "fields": {
+      "project": 1,
+      "activity": 1,
+      "provider": "Imprenta Social SL",
+      "number": "F-2026-001",
+      "issue_date": "2026-03-15",
+      "payment_date": "2026-03-30",
+      "concept": "Impresión de material didáctico",
+      "taxable_base": "2500.00",
+      "taxes": "525.00",
+      "total_amount": "3025.00",
+      "currency": "EUR",
+      "document_pdf": "",
+      "status": "paid",
+      "notes": ""
+    }
+  },
+  {
+    "model": "projects.invoiceallocation",
+    "pk": 1,
+    "fields": {
+      "invoice": 1,
+      "project": 1,
+      "activity": 1,
+      "budget_line": 2,
+      "sub_budget_line": 2,
+      "financier": 1,
+      "allocated_amount": "3025.00",
+      "allocated_percentage": "100.00",
+      "allocation_date": "2026-04-01",
+      "notes": "Imputación completa a material didáctico."
+    }
+  }
+]

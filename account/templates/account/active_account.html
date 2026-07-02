@@ -42,7 +42,7 @@
 							</div>
 						</div>
 	
-						<div class="mt-5 mb-5"><a href="#" class="link" onclick="javascript:if (checkConfirmedPasswd('frmChangePasswd')) document.frmChangePasswd.submit(); else alert('No coinciden los passwords');">{% trans 'SEND' %}</a>
+						<div class="mt-5 mb-5"><a href="#" class="link" onclick="javascript:if (checkConfirmedPasswd('frmChangePasswd')) document.frmChangePasswd.submit(); else Swal.fire({icon: 'warning', text: 'No coinciden los passwords', confirmButtonText: 'Aceptar'});">{% trans 'SEND' %}</a>
 						</div>
 				</form>
 

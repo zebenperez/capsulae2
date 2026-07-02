@@ -1,6 +1,76 @@
 function setWait() { $("body").addClass("loading"); }
 function unsetWait() { $("body").removeClass("loading"); }
 
+function swalAvailable() {
+    return typeof Swal !== "undefined";
+}
+
+function showSwal(icon, title, text) {
+    if (swalAvailable()) {
+        Swal.fire({
+            icon: icon,
+            title: title,
+            text: text,
+            confirmButtonText: "Aceptar"
+        });
+    }
+    else {
+        console.error(title + ": " + text);
+    }
+}
+
+function showError(message) {
+    showSwal("error", "Error", message);
+}
+
+function showInfo(message) {
+    if (swalAvailable()) {
+        Swal.fire({
+            icon: "success",
+            text: message,
+            toast: true,
+            position: "top-end",
+            showConfirmButton: false,
+            timer: 2200,
+            timerProgressBar: true
+        });
+    }
+    else {
+        console.info(message);
+    }
+}
+
+function showConfirm(message, onConfirm) {
+    if (swalAvailable()) {
+        Swal.fire({
+            icon: "warning",
+            title: "Confirmación",
+            text: message,
+            showCancelButton: true,
+            confirmButtonText: "Aceptar",
+            cancelButtonText: "Cancelar",
+            reverseButtons: true
+        }).then(function(result) {
+            if (result.isConfirmed)
+                onConfirm();
+        });
+    }
+    else {
+        console.warn("SweetAlert2 no está disponible para confirmar: " + message);
+    }
+}
+
+function runWithOptionalConfirm(obj, callback) {
+    if (obj.data("confirm"))
+        showConfirm(obj.data("confirm"), callback);
+    else
+        callback();
+}
+
+function getAjaxErrorMessage(e) {
+    return e && e.responseText ? e.responseText : "No se pudo completar la operación.";
+}
+
 function ajaxGet(url, datas, target, modal_target)
 {
     setWait();
@@ -24,7 +94,7 @@ function ajaxGet(url, datas, target, modal_target)
                 if (target != "")
                     $('#'+target).html(data);
         },
-        error : function(e){alert("Error: "+e.responseText);},
+        error : function(e){showError(getAjaxErrorMessage(e));},
         complete : function(){unsetWait();}
         //complete : function(){$("body").css("cursor", "default"); $("body").removeClass("loading-");}
     });
@@ -50,12 +120,12 @@ function ajaxGetAppend(url, datas, target, modal_target)
                 if (target != "")
                     $('#'+target).append(data);
         },
-        error : function(e){alert("Error: "+e.responseText);},
+        error : function(e){showError(getAjaxErrorMessage(e));},
         complete : function(){$("body").css("cursor", "default");}
     });
 };
 
-function ajaxGetAutosave(url, datas, target)
+function ajaxGetAutosave(url, datas, target, obj)
 {
     $("body").css("cursor", "progress");
     $.ajax({
@@ -66,11 +136,17 @@ function ajaxGetAutosave(url, datas, target)
         cache : false,
         beforeSend : function(){},
         success : function(data){
-            $("#"+target).html(data).show().fadeTo(5000, 500).slideUp(500, function(){
-                $("#"+target).slideUp(500);
-            });
+            if (obj)
+                obj.removeClass("invalid");
+            if (target)
+                $("#"+target).empty();
+            showInfo(data);
         },
-        error : function(e){alert("Error: "+e.responseText);},
+        error : function(e){
+            if (obj)
+                obj.addClass("invalid");
+            showError(getAjaxErrorMessage(e));
+        },
         complete : function(){$("body").css("cursor", "default");}
     }); 
 };
@@ -99,7 +175,7 @@ function ajaxGetEnabled(url, datas, target, modal_target, obj)
                     $('#'+target).html(data);
             obj.prop("disabled", "")
         },
-        error : function(e){alert("Error: "+e.responseText);},
+        error : function(e){showError(getAjaxErrorMessage(e));},
         complete : function(){$("body").css("cursor", "default");}
     });
 };
@@ -126,7 +202,7 @@ function ajaxGetSearchMed(url, datas, target_prefix1, target_prefix2)
 		//console.log(data.batch_code);
 		//console.log(expiration_date);
         },
-        error : function(e){alert("Error: "+e.responseText);},
+        error : function(e){showError(getAjaxErrorMessage(e));},
         complete : function(){unsetWait();}
     });
 };
@@ -143,11 +219,11 @@ function ajaxPostAutosave(url, datas, target)
         cache : false,
         beforeSend : function(){},
         success : function(data){
-            $("#"+target).html(data).show().fadeTo(5000, 500).slideUp(500, function(){
-                $("#"+target).slideUp(500);
-            });
+            if (target)
+                $("#"+target).empty();
+            showInfo(data);
         },
-        error : function(e){alert("Error: "+e.responseText);},
+        error : function(e){showError(getAjaxErrorMessage(e));},
         complete : function(){$("body").css("cursor", "default");}
     }); 
 };
@@ -168,7 +244,7 @@ function ajaxGetRemove(url, datas, target)
             else
                 $('#'+target).remove();
         },
-        error : function(e){alert("Error: "+e.responseText);},
+        error : function(e){showError(getAjaxErrorMessage(e));},
         complete : function(){}
     }); 
 };
@@ -213,7 +289,7 @@ function uploadObjFile(obj, url, target, obj_id, field, token)
             $('#'+target).html(data);
             //$('#'+target).trigger('create');
         },
-        error : function(e){alert("Error: "+e.responseText);},
+        error : function(e){showError(getAjaxErrorMessage(e));},
     });
 }
 
@@ -227,7 +303,7 @@ function submitForm(frm, target)
         success: function (data) {
             $('#'+target).html(data);
         },
-        error: function (data) { alert("Error: "+data.responseText); },
+        error: function (data) { showError(getAjaxErrorMessage(data)); },
         complete : function(){unsetWait();}
         //complete : function(){$("body").css("cursor", "default");}
     });
@@ -265,7 +341,7 @@ function uploadMulti(obj, url, target, obj_id, field, folder, token)
 				$('#'+target).trigger('create');
             }
         },
-        error : function(e){alert("Error: "+e.responseText);},
+        error : function(e){showError(getAjaxErrorMessage(e));},
         complete : function(){unsetWait();}
     });
 }
@@ -352,21 +428,50 @@ function validateCheckIn()
 function pushHistory(url) { history.pushState({}, 'main', window.location.href); }
 
 function showAlert(body, close) {
-    var text="<p>"+body+"</p><div class='text-end'><button type='button' class='btn btn-marine' data-bs-dismiss='modal'>"+close+"</button></div>";
-    $('#common-modal-body').html(text);
-    $('#common-modal').modal('show');
+    if (swalAvailable()) {
+        Swal.fire({
+            icon: "info",
+            text: body,
+            confirmButtonText: close
+        });
+    }
+    else {
+        console.info(body);
+    }
+}
+
+function loadCkeditor(callback) {
+    if (window.CKEDITOR) {
+        callback();
+        return;
+    }
+
+    var scriptId = "ckeditor-script";
+    var script = document.getElementById(scriptId);
+    if (!script) {
+        script = document.createElement("script");
+        script.id = scriptId;
+        script.src = "https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js";
+        document.head.appendChild(script);
+    }
+    script.addEventListener("load", callback, { once: true });
 }
 
 function activeEditor(obj) {
     var id = obj.attr("id");
     var ref = obj.data("ref");
-    CKEDITOR.replace(id).on('change', function(){$("#"+ref).html(this.getData()).change();});
+    loadCkeditor(function(){
+        if (!document.getElementById(id))
+            return;
+        if (CKEDITOR.instances[id])
+            CKEDITOR.instances[id].destroy(true);
+        CKEDITOR.replace(id).on('change', function(){$("#"+ref).val(this.getData()).change();});
+    });
 }
 
 function arkKeyUp(obj){
     value = obj.val();
-    if (((obj.data("confirm")) && confirm(obj.data("confirm"))) || !(obj.data("confirm")))
-    {
+    runWithOptionalConfirm(obj, function(){
         url = obj.data("url");
         var target = "";
         var target_modal = "";
@@ -382,7 +487,7 @@ function arkKeyUp(obj){
                 datas[i] = args[i]
         datas['value'] = value;
         ajaxGet(url, datas, target, target_modal);
-    }
+    });
 
 }
 
@@ -411,8 +516,7 @@ $(document).ready(()=>{
 
     $("body").on("click", ".ark", function(e){
         var obj = $(this);
-        if (((obj.data("confirm")) && confirm(obj.data("confirm"))) || !(obj.data("confirm")))
-        {
+        runWithOptionalConfirm(obj, function(){
             url = obj.data("url");
             var target = "";
             var target_modal = "";
@@ -434,13 +538,59 @@ $(document).ready(()=>{
 
             e.preventDefault();
             e.stopImmediatePropagation();
-        }
+        });
+        e.preventDefault();
+        e.stopImmediatePropagation();
+    });
+
+    $("body").on("click", ".ajax-form-get", function(e){
+        var obj = $(this);
+        var form = $("#" + obj.data("form"));
+        var datas = {};
+        form.find("input, select, textarea").each(function(){
+            var field = $(this);
+            if (field.attr("name"))
+                datas[field.attr("name")] = field.val();
+        });
+        setWait();
+        $.ajax({
+            url: obj.data("url"),
+            type: "GET",
+            data: datas,
+            cache: false,
+            dataType: "html",
+            success: function(data){
+                if (obj.data("target"))
+                    $("#" + obj.data("target")).html(data);
+                if (obj.data("dismiss-modal"))
+                    $("#" + obj.data("dismiss-modal")).modal("hide");
+            },
+            error: function(e){showError(getAjaxErrorMessage(e));},
+            complete: function(){unsetWait();}
+        });
+        e.preventDefault();
+        e.stopImmediatePropagation();
+    });
+
+    $("body").on("change", ".project-financier-selector", function(){
+        var modal = $(this).closest(".project-modal");
+        if ($(this).val() == "__new__")
+            modal.addClass("show-new-financier");
+        else
+            modal.removeClass("show-new-financier");
+    });
+
+    $("body").on("click", ".confirm-link", function(e){
+        var obj = $(this);
+        e.preventDefault();
+        showConfirm(obj.data("confirm"), function(){
+            window.location.href = obj.attr("href");
+        });
     });
 
     $("body").on("click", ".ark-append", function(e){
         var obj = $(this);
-        if (((obj.data("confirm")) && confirm(obj.data("confirm"))) || !(obj.data("confirm")))
-        {
+        runWithOptionalConfirm(obj, function(){
             url = obj.data("url");
             var target = "";
             var target_modal = "";
@@ -460,13 +610,13 @@ $(document).ready(()=>{
             if (obj.data("hide"))
                 $("#" + obj.data("hide")).hide();
             e.preventDefault();
-        }
+        });
+        e.preventDefault();
     });
 
     $("body").on("click", ".ark-disabled", function(e){
         var obj = $(this);
-        if (((obj.data("confirm")) && confirm(obj.data("confirm"))) || !(obj.data("confirm")))
-        {
+        runWithOptionalConfirm(obj, function(){
             obj.prop("disabled", "disabled");
             url = obj.data("url");
             var target = "";
@@ -489,14 +639,15 @@ $(document).ready(()=>{
 
             e.preventDefault();
             e.stopImmediatePropagation();
-        }
+        });
+        e.preventDefault();
+        e.stopImmediatePropagation();
     });
 
 
     $("body").on("change", ".ark_change", function(e){
         var obj = $(this);
-        if (((obj.data("confirm")) && confirm(obj.data("confirm"))) || !(obj.data("confirm")))
-        {
+        runWithOptionalConfirm(obj, function(){
             var url = obj.data("url");
             var value = obj.val();
             var target = "";
@@ -518,13 +669,13 @@ $(document).ready(()=>{
             if (obj.data("show"))
                 $("#" + obj.data("show")).show();
             e.preventDefault();
-        }
+        });
+        e.preventDefault();
     });
 
     $("body").on("focusout", ".ark_date_change", function(e){
         var obj = $(this);
-        if (((obj.data("confirm")) && confirm(obj.data("confirm"))) || !(obj.data("confirm")))
-        {
+        runWithOptionalConfirm(obj, function(){
             var url = obj.data("url");
             var value = obj.val();
             var target = "";
@@ -546,7 +697,8 @@ $(document).ready(()=>{
             if (obj.data("show"))
                 $("#" + obj.data("show")).show();
             e.preventDefault();
-        }
+        });
+        e.preventDefault();
     });
 
     $("body").on("click", ".ark-validate", function(e){
@@ -581,8 +733,7 @@ $(document).ready(()=>{
 
     $("body").on("click", ".ark_new_obj", function(e){
         var obj = $(this);
-        if (((obj.data("confirm")) && confirm(obj.data("confirm"))) || !(obj.data("confirm")))
-        {
+        runWithOptionalConfirm(obj, function(){
             url_save = obj.data("url-save");
             model_name = obj.data("model-name");
             args_save = obj.data("args-save").split(",");
@@ -623,7 +774,9 @@ $(document).ready(()=>{
 
             e.preventDefault();
             e.stopImmediatePropagation();
-        }
+        });
+        e.preventDefault();
+        e.stopImmediatePropagation();
     });
 
     $("body").on("keyup", ".ark_keyup", function(e){
@@ -687,7 +840,7 @@ $(document).ready(()=>{
         datas = {'model_name': model_name, 'obj_id': obj_id, 'field': field, 'value': value, "ref_field":ref_field};
         if (obj.data('lang'))
             datas['lang'] = obj.data('lang');
-        ajaxGetAutosave(url, datas, target);
+        ajaxGetAutosave(url, datas, target, obj);
         e.preventDefault();
     });
 
@@ -731,22 +884,23 @@ $(document).ready(()=>{
     });
 
     $("body").on("click", ".autoremove", function(e){
+        var obj = $(this);
         var confirmMsg = "Esta seguro/a de que desea borrar el elemento?";
-        if ($(this).data("confirm"))
-            confirmMsg = $(this).data("confirm");
+        if (obj.data("confirm"))
+            confirmMsg = obj.data("confirm");
 
-        if (confirm(confirmMsg))
-        {
-            model_name = $(this).data("model-name");
-            obj_id = $(this).data("obj-id");
-            url = $(this).data("url");
-            target = $(this).data("target");
+        showConfirm(confirmMsg, function(){
+            model_name = obj.data("model-name");
+            obj_id = obj.data("obj-id");
+            url = obj.data("url");
+            target = obj.data("target");
             datas = {'model_name': model_name, 'obj_id': obj_id};
             ajaxGetRemove(url, datas, target);
-            if ($(this).data("hide"))
-                $("#" + $(this).data("hide")).hide();
+            if (obj.data("hide"))
+                $("#" + obj.data("hide")).hide();
             e.preventDefault();
-        }
+        });
+        e.preventDefault();
     });
 
     $("body").on("change", ".upload", function(e){
@@ -764,15 +918,14 @@ $(document).ready(()=>{
 
     $("body").on("click", ".saveform", function(e){
         var obj = $(this);
-        if (((obj.data("confirm")) && confirm(obj.data("confirm"))) || !(obj.data("confirm")))
-        {
-            form_id = $(this).data("form");
+        runWithOptionalConfirm(obj, function(){
+            form_id = obj.data("form");
             frm = $('#'+form_id);
-            target = $(this).data("target");
+            target = obj.data("target");
             submitForm(frm, target);
             if (obj.data("update"))
                 $("#"+obj.data("update")).html($("#"+obj.data("update-val")).val())
-        }
+        });
         e.preventDefault();
         e.stopImmediatePropagation();
     });
@@ -919,5 +1072,3 @@ $(document).ready(()=>{
     });
 
 });
-
-

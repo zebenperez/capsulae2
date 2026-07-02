@@ -1,0 +1,73 @@
+{% load i18n %}
+
+<div class="project-modal">
+    <div class="project-modal-close">
+        <button type="button" class="project-icon-btn" data-bs-dismiss="modal" aria-label="{% trans 'Cerrar' %}">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    <h2>{% trans 'Financiador' %}</h2>
+
+    <div class="project-form-grid project-form-grid-two">
+        <div class="project-form-field">
+            <label for="name">{% trans 'Nombre' %}</label>
+            <input type="text" class="form-control autosave" id="name" name="name" value="{{obj.name}}"
+                data-model-name="projects.financier" data-obj-id="{{obj.id}}" data-url="{% url "autosave_field" %}"
+                data-target="div-notification"/>
+        </div>
+        <div class="project-form-field">
+            <label for="financier_type">{% trans 'Tipo' %}</label>
+            <select class="form-control autosave" id="financier_type" name="financier_type"
+                data-model-name="projects.financier" data-obj-id="{{obj.id}}" data-url="{% url "autosave_field" %}"
+                data-target="div-notification">
+                {% for value, label in financier_types %}
+                    <option value="{{value}}" {% if obj.financier_type == value %}selected{% endif %}>{{label}}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="project-form-field">
+            <label for="tax_id">{% trans 'CIF/NIF' %}</label>
+            <input type="text" class="form-control autosave" id="tax_id" name="tax_id" value="{{obj.tax_id}}"
+                data-model-name="projects.financier" data-obj-id="{{obj.id}}" data-url="{% url "autosave_field" %}"
+                data-target="div-notification"/>
+        </div>
+        <div class="project-form-field">
+            <label for="contact_person">{% trans 'Persona de contacto' %}</label>
+            <input type="text" class="form-control autosave" id="contact_person" name="contact_person" value="{{obj.contact_person}}"
+                data-model-name="projects.financier" data-obj-id="{{obj.id}}" data-url="{% url "autosave_field" %}"
+                data-target="div-notification"/>
+        </div>
+        <div class="project-form-field">
+            <label for="email">{% trans 'Email' %}</label>
+            <input type="email" class="form-control autosave" id="email" name="email" value="{{obj.email}}"
+                data-model-name="projects.financier" data-obj-id="{{obj.id}}" data-url="{% url "autosave_field" %}"
+                data-target="div-notification"/>
+        </div>
+        <div class="project-form-field">
+            <label for="phone">{% trans 'Teléfono' %}</label>
+            <input type="text" class="form-control autosave" id="phone" name="phone" value="{{obj.phone}}"
+                data-model-name="projects.financier" data-obj-id="{{obj.id}}" data-url="{% url "autosave_field" %}"
+                data-target="div-notification"/>
+        </div>
+        <div class="project-form-field project-form-field-wide">
+            <label for="address">{% trans 'Dirección' %}</label>
+            <textarea class="form-control autosave" id="address" name="address"
+                data-model-name="projects.financier" data-obj-id="{{obj.id}}" data-url="{% url "autosave_field" %}"
+                data-target="div-notification">{{obj.address}}</textarea>
+        </div>
+        <div class="project-form-field project-form-field-wide">
+            <label for="notes">{% trans 'Observaciones' %}</label>
+            <textarea class="form-control autosave" id="notes" name="notes"
+                data-model-name="projects.financier" data-obj-id="{{obj.id}}" data-url="{% url "autosave_field" %}"
+                data-target="div-notification">{{obj.notes}}</textarea>
+        </div>
+    </div>
+
+    <div id="div-notification"></div>
+    <div class="project-modal-actions">
+        <button type="button" class="project-btn project-btn-primary ark save" data-bs-dismiss="modal"
+            data-url="{% url "financier-list" %}" data-target="financier-list">
+            <i class="fas fa-check"></i> {% trans 'Guardar' %}
+        </button>
+    </div>
+</div>

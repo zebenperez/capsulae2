@@ -1,43 +1,73 @@
 {% load i18n %}
 
-
-<div class="row spd-tab">
-    <div class="col-12 text-end">
-        <button type="button" class="btn btn-sm ark new" data-url="{% url "project-form" %}" data-target-modal="common-modal" 
-            data-obj_id="{{obj.id}}"> <i class="fas fa-plus"></i> {% trans 'Editar' %}</button> 
-    </div>
-</div>
-
-<div id="patient-container">
-    <div class="row w-100 patient-data-body-2 p-1" style="margin:0;">
-        <div class="col-11 patient-data">
-            <div class="row" style="margin:0;">
-                <div class="col-10 mt-3">
-        		<div class="greybox-sm p-1">
-				<label class="label">{% trans "Nombre" %}</label>
-				<span class="view">{{obj.name}}</span>
-			</div>
-		</div>
-                <div class="col-2 mt-3">
-        		<div class="greybox-sm p-1">
-				<label class="label">{% trans "Fecha de ejecución" %}</label>
-				<span class="view">{{obj.end_date}}</span>
-			</div>
-		</div>
-                <div class="col-12 mt-3">
-        		<div class="greybox-sm p-1">
-				<label class="label">{% trans "Descripción" %}</label>
-				<span class="view">{{obj.desc|safe}}</span>
-			</div>
-		</div>
-            </div>
-        </div>    
-        {%comment%}
-        <div class="col-1 text-end">
-            <button id="btn-edit" class="btn btn-sm toggle-edit new" data-class-name="input" data-text="{%trans "Edit"%}" 
-                data-text-alt="{%trans "Hecho"%}">{%trans "Edit"%} </button>
+<div class="project-panel">
+    <div class="project-section-header">
+        <div>
+            <h2>{% trans "Datos principales" %}</h2>
+            <p class="project-muted">{% trans "Información general del proyecto y responsables." %}</p>
         </div>
-        {%endcomment%}
+        <button type="button" class="project-btn project-btn-primary ark" data-url="{% url "project-form" %}" data-target-modal="common-modal"
+            data-obj_id="{{obj.id}}">
+            <i class="fas fa-edit"></i> {% trans 'Editar' %}
+        </button>
+    </div>
+
+    <div class="project-detail-grid">
+        <div class="project-field">
+            <label>{% trans "Código" %}</label>
+            <div class="project-field-value">{{ obj.code|default:"---" }}</div>
+        </div>
+        <div class="project-field">
+            <label>{% trans "Estado" %}</label>
+            <div class="project-field-value">{{ obj.get_status_display|default:"---" }}</div>
+        </div>
+        <div class="project-field">
+            <label>{% trans "Fecha inicio" %}</label>
+            <div class="project-field-value">{{ obj.start_date|default:"---" }}</div>
+        </div>
+        <div class="project-field">
+            <label>{% trans "Fecha fin" %}</label>
+            <div class="project-field-value">{{ obj.finish_date|default:obj.end_date|default:"---" }}</div>
+        </div>
+        <div class="project-field">
+            <label>{% trans "País" %}</label>
+            <div class="project-field-value">{{ obj.country|default:"---" }}</div>
+        </div>
+        <div class="project-field">
+            <label>{% trans "Región" %}</label>
+            <div class="project-field-value">{{ obj.region|default:"---" }}</div>
+        </div>
+        <div class="project-field">
+            <label>{% trans "Localidad" %}</label>
+            <div class="project-field-value">{{ obj.locality|default:"---" }}</div>
+        </div>
+        <div class="project-field">
+            <label>{% trans "Presupuesto aprobado" %}</label>
+            <div class="project-field-value">{{ obj.approved_budget|default:"0.00" }}</div>
+        </div>
+        <div class="project-field">
+            <label>{% trans "Responsable técnico" %}</label>
+            <div class="project-field-value">{{ obj.technical_manager|default:obj.manager|default:"---" }}</div>
+        </div>
+        <div class="project-field">
+            <label>{% trans "Responsable financiero" %}</label>
+            <div class="project-field-value">{{ obj.financial_manager|default:"---" }}</div>
+        </div>
+        <div class="project-field">
+            <label>{% trans "Presupuesto ejecutado" %}</label>
+            <div class="project-field-value">{{ obj.executed_budget|default:"0.00" }}</div>
+        </div>
+        <div class="project-field">
+            <label>{% trans "Actividades completadas" %}</label>
+            <div class="project-field-value">{{ obj.completed_activities_count|default:"0" }}</div>
+        </div>
+        <div class="project-field wide">
+            <label>{% trans "Descripción" %}</label>
+            <div class="view">{{ obj.desc|safe|default:"---" }}</div>
+        </div>
+        <div class="project-field wide">
+            <label>{% trans "Observaciones" %}</label>
+            <div class="view">{{ obj.notes|linebreaksbr|default:"---" }}</div>
+        </div>
     </div>
 </div>
-

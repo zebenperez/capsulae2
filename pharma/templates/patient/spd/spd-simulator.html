@@ -263,7 +263,11 @@
                         }
                     },
                     error: function (error) {
-                        alert("Error al buscar el código del pastillero: " + error.error_msg);
+                        Swal.fire({
+                            icon: "error",
+                            text: "Error al buscar el código del pastillero: " + error.error_msg,
+                            confirmButtonText: "Aceptar"
+                        });
                         console.error(error);
                     }
                 });
@@ -274,4 +278,3 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 {% endblock central_content %}
-
