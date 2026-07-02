@@ -1,41 +1,149 @@
 {% load i18n %}
 
-<div class="d-flex justify-content-end"> <button type="button" class="btn btn-lg" data-bs-dismiss="modal" title="{% trans "Close" %}">
-    <i class="fas fa-times"></i></button> </div>
+<div class="project-modal">
+<div class="project-modal-close">
+    <button type="button" class="project-icon-btn" data-bs-dismiss="modal" title="{% trans "Close" %}">
+        <i class="fas fa-times"></i>
+    </button>
+</div>
 
-<h2>{% trans 'Editar Detalles' %}</h2>
+<h2>{% trans 'Editar proyecto' %}</h2>
 
 <span id="div-notification"></span>
-<div class="row justify-center">
-    <div class="col-12 mt-3 p-1">
-        <div class="greybox-sm p-1">
-            {% trans "Nombre" %}:
-            <input type="text" class="form-control autosave" id="name" name="name" value="{{obj.name}}" 
-                title="{{obj.name}}" data-model-name="projects.project" data-obj-id="{{obj.id}}" data-url="{% url "autosave_field" %}" 
-                data-target="div-notification"/> <span id="name__msg"></span>
-        </div>
+<div class="project-form-grid project-form-grid-project">
+    <div class="project-form-field">
+        <label>{% trans "Código" %}</label>
+        <input type="text" class="form-control autosave" id="code" name="code" value="{{obj.code}}"
+            title="{{obj.code}}" data-model-name="projects.project" data-obj-id="{{obj.id}}"
+            data-url="{% url "autosave_field" %}" data-target="div-notification"/>
+        <span id="code__msg"></span>
     </div>
-    <div class="col-12 mt-3 p-1">
-        <div class="greybox-sm p-1">
-            {% trans "Fecha de ejecución" %}:
-            <input type="text" class="form-control autosave" id="end_date" name="end_date" value="{{obj.end_date}}" 
-                title="{{obj.end_date}}" data-model-name="projects.project" data-obj-id="{{obj.id}}" data-url="{% url "autosave_field" %}" 
-                data-target="div-notification"/> <span id="end_date__msg"></span>
-        </div>
+    <div class="project-form-field">
+        <label>{% trans "Estado" %}</label>
+        <select class="form-control autosave" id="status" name="status" data-model-name="projects.project"
+            data-obj-id="{{obj.id}}" data-url="{% url "autosave_field" %}" data-target="div-notification">
+            {% for value, label in status_choices %}
+                <option value="{{value}}" {% if obj.status == value %}selected{% endif %}>{{label}}</option>
+            {% endfor %}
+        </select>
+        <span id="status__msg"></span>
     </div>
-    <div class="col-12 mt-3 p-1">
-        <div class="greybox-sm p-1">
-            {% trans "Descripción" %}
-            <textarea class="hide autosave" id="desc" name="desc"
-                title="{{obj.desc}}" data-model-name="projects.project" data-obj-id="{{obj.id}}" data-url="{% url "autosave_field" %}" 
-                data-target="div-notification" disabled>{{obj.desc}}</textarea> <span id="desc__msg"></span>
-            <textarea id="desc-editor" class="active-editor" data-ref="desc">{{obj.desc}}</textarea>
-        </div>
+    <div class="project-form-field">
+        <label>{% trans "Presupuesto aprobado" %}</label>
+        <input type="number" step="0.01" min="0" class="form-control autosave" id="approved_budget" name="approved_budget"
+            value="{{obj.approved_budget}}" title="{{obj.approved_budget}}" data-model-name="projects.project"
+            data-obj-id="{{obj.id}}" data-url="{% url "project-budget-autosave" %}" data-target="div-notification"/>
+        <span id="approved_budget__msg"></span>
     </div>
-</div>    
-<div class="d-flex justify-content-end">
-    <button type="button" class="btn btn-sm ark save" data-bs-dismiss="modal" data-url="{% url "project-details" %}"
+    <div class="project-form-field project-form-field-wide">
+        <label>{% trans "Nombre" %}</label>
+        <input type="text" class="form-control autosave" id="name" name="name" value="{{obj.name}}"
+            title="{{obj.name}}" data-model-name="projects.project" data-obj-id="{{obj.id}}"
+            data-url="{% url "autosave_field" %}" data-target="div-notification"/>
+        <span id="name__msg"></span>
+    </div>
+
+    <div class="project-form-field">
+        <label>{% trans "Fecha de inicio" %}</label>
+        <input type="date" class="form-control autosave" id="start_date" name="start_date"
+            value="{{obj.start_date|date:"Y-m-d"}}" title="{{obj.start_date|date:"Y-m-d"}}"
+            data-model-name="projects.project" data-obj-id="{{obj.id}}" data-url="{% url "autosave_field" %}"
+            data-target="div-notification"/>
+        <span id="start_date__msg"></span>
+    </div>
+    <div class="project-form-field">
+        <label>{% trans "Fecha de fin" %}</label>
+        <input type="date" class="form-control autosave" id="finish_date" name="finish_date"
+            value="{{obj.finish_date|date:"Y-m-d"}}" title="{{obj.finish_date|date:"Y-m-d"}}"
+            data-model-name="projects.project" data-obj-id="{{obj.id}}" data-url="{% url "autosave_field" %}"
+            data-target="div-notification"/>
+        <span id="finish_date__msg"></span>
+    </div>
+    <div class="project-form-field">
+        <label>{% trans "Fecha de ejecución" %}</label>
+        <input type="text" class="form-control autosave" id="end_date" name="end_date" value="{{obj.end_date}}"
+            title="{{obj.end_date}}" data-model-name="projects.project" data-obj-id="{{obj.id}}"
+            data-url="{% url "autosave_field" %}" data-target="div-notification"/>
+        <span id="end_date__msg"></span>
+    </div>
+
+    <div class="project-form-field">
+        <label>{% trans "País" %}</label>
+        <input type="text" class="form-control autosave" id="country" name="country" value="{{obj.country}}"
+            title="{{obj.country}}" data-model-name="projects.project" data-obj-id="{{obj.id}}"
+            data-url="{% url "autosave_field" %}" data-target="div-notification"/>
+        <span id="country__msg"></span>
+    </div>
+    <div class="project-form-field">
+        <label>{% trans "Región" %}</label>
+        <input type="text" class="form-control autosave" id="region" name="region" value="{{obj.region}}"
+            title="{{obj.region}}" data-model-name="projects.project" data-obj-id="{{obj.id}}"
+            data-url="{% url "autosave_field" %}" data-target="div-notification"/>
+        <span id="region__msg"></span>
+    </div>
+    <div class="project-form-field">
+        <label>{% trans "Localidad" %}</label>
+        <input type="text" class="form-control autosave" id="locality" name="locality" value="{{obj.locality}}"
+            title="{{obj.locality}}" data-model-name="projects.project" data-obj-id="{{obj.id}}"
+            data-url="{% url "autosave_field" %}" data-target="div-notification"/>
+        <span id="locality__msg"></span>
+    </div>
+
+    <div class="project-form-field">
+        <label>{% trans "Responsable principal" %}</label>
+        <select class="form-control autosave" id="manager" name="manager" data-model-name="projects.project"
+            data-obj-id="{{obj.id}}" data-url="{% url "autosave_field" %}" data-target="div-notification">
+            <option value="">---</option>
+            {% for user in users %}
+                <option value="{{user.id}}" {% if obj.manager_id == user.id %}selected{% endif %}>{{user.get_full_name|default:user.username}}</option>
+            {% endfor %}
+        </select>
+        <span id="manager__msg"></span>
+    </div>
+    <div class="project-form-field">
+        <label>{% trans "Responsable técnico" %}</label>
+        <select class="form-control autosave" id="technical_manager" name="technical_manager" data-model-name="projects.project"
+            data-obj-id="{{obj.id}}" data-url="{% url "autosave_field" %}" data-target="div-notification">
+            <option value="">---</option>
+            {% for user in users %}
+                <option value="{{user.id}}" {% if obj.technical_manager_id == user.id %}selected{% endif %}>{{user.get_full_name|default:user.username}}</option>
+            {% endfor %}
+        </select>
+        <span id="technical_manager__msg"></span>
+    </div>
+    <div class="project-form-field">
+        <label>{% trans "Responsable financiero" %}</label>
+        <select class="form-control autosave" id="financial_manager" name="financial_manager" data-model-name="projects.project"
+            data-obj-id="{{obj.id}}" data-url="{% url "autosave_field" %}" data-target="div-notification">
+            <option value="">---</option>
+            {% for user in users %}
+                <option value="{{user.id}}" {% if obj.financial_manager_id == user.id %}selected{% endif %}>{{user.get_full_name|default:user.username}}</option>
+            {% endfor %}
+        </select>
+        <span id="financial_manager__msg"></span>
+    </div>
+
+    <div class="project-form-field project-form-field-half">
+        <label>{% trans "Descripción" %}</label>
+        <textarea class="hide autosave" id="desc" name="desc"
+            title="{{obj.desc}}" data-model-name="projects.project" data-obj-id="{{obj.id}}" data-url="{% url "autosave_field" %}"
+            data-target="div-notification" disabled>{{obj.desc}}</textarea>
+        <span id="desc__msg"></span>
+        <textarea id="desc-editor-{{obj.id}}" class="active-editor" data-ref="desc">{{obj.desc}}</textarea>
+    </div>
+    <div class="project-form-field project-form-field-half">
+        <label>{% trans "Observaciones" %}</label>
+        <textarea class="hide autosave" id="notes" name="notes"
+            title="{{obj.notes}}" data-model-name="projects.project" data-obj-id="{{obj.id}}" data-url="{% url "autosave_field" %}"
+            data-target="div-notification" disabled>{{obj.notes}}</textarea>
+        <span id="notes__msg"></span>
+        <textarea id="notes-editor-{{obj.id}}" class="active-editor" data-ref="notes">{{obj.notes}}</textarea>
+    </div>
+</div>
+<div class="project-modal-actions">
+    <button type="button" class="project-btn project-btn-primary ark save" data-bs-dismiss="modal" data-url="{% url "project-details" %}"
         data-target="div-container" data-obj_id="{{obj.id}}">{% trans "Guardar" %}</button>
+</div>
 </div>
 
 <script> $(".active-editor").each(function(){activeEditor($(this))}); </script>

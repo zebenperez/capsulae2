@@ -1,25 +1,45 @@
 {% load i18n %}
 
+<div class="project-list-card">
+    <div class="project-list-head">
+        <div>{% trans 'Proyecto' %}</div>
+        <div>{% trans 'Descripción' %}</div>
+        <div>{% trans 'Estado' %}</div>
+        <div></div>
+    </div>
 
-<div class="row patient-list-head main-th small small pt-3 pb-3 m-0">
-            <div class="col-5"> {% trans 'Nombre' %} </div>
-            <div class="col-5"> {% trans 'Descripción' %} </div>
-            <div class="col-2"></div>
-</div>
-
-{% for item in items %}
-    <div class="row line small pt-2 pb-2 m-0" id="row_{{item.id}}">
-        <div class="col-10">
-            <div class="row pointer" onclick="window.location='{%url "project-view" item.id%}'">
-                <div class="col-6">{{ item.name|default:"---" }}</div>
-                <div class="col-6">{{ item.desc|safe|truncatechars:150 }}</div>
+    {% for item in items %}
+        <div class="project-list-row" id="row_{{item.id}}">
+            <div class="project-row-main" onclick="window.location='{% url "project-view" item.id %}'">
+                <span class="project-row-title">{{ item.name|default:"Proyecto sin nombre" }}</span>
+                <span class="project-row-subtitle">
+                    {% if item.code %}{{ item.code }}{% else %}{% trans "Sin código" %}{% endif %}
+                    {% if item.country %} · {{ item.country }}{% endif %}
+                </span>
+            </div>
+            <div class="project-row-desc">{{ item.desc|safe|striptags|truncatechars:180|default:"Sin descripción" }}</div>
+            <div>
+                {% if item.status %}
+                    <span class="project-badge">{{ item.get_status_display }}</span>
+                {% else %}
+                    <span class="project-badge">{% trans "Activo" %}</span>
+                {% endif %}
+            </div>
+            <div class="project-actions">
+                <a class="project-icon-btn" href="{% url "project-view" item.id %}" title="{% trans 'Abrir proyecto' %}">
+                    <i class="fas fa-arrow-right"></i>
+                </a>
+                <a class="project-icon-btn danger ark" data-url="{% url "project-remove" %}" data-target="project-list"
+                    data-obj_id="{{item.id}}" title="{% trans 'Eliminar' %}"
+                    data-confirm="{% trans "Are you sure to remove this element?" %}">
+                    <i class="fas fa-trash"></i>
+                </a>
             </div>
         </div>
-        <div class="col-2 text-right">
-            <a class="btn btn-sm ark" data-url="{% url "project-remove" %}" data-target="project-list" data-obj_id="{{item.id}}" 
-                title="{%trans 'Remove'%}" data-confirm="{%trans "Are you sure to remove this element?"%}"><i class="fas fa-trash"></i>
-            </a> 
+    {% empty %}
+        <div class="project-empty">
+            <i class="far fa-folder-open"></i>
+            <div>{% trans "No hay proyectos que mostrar." %}</div>
         </div>
-    </div>
-{% endfor %}
-
+    {% endfor %}
+</div>

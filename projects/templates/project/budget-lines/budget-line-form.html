@@ -1,0 +1,53 @@
+{% load i18n %}
+
+<div class="project-modal">
+<div class="project-modal-close">
+    <button type="button" class="project-icon-btn" data-bs-dismiss="modal" title="{% trans "Close" %}">
+        <i class="fas fa-times"></i>
+    </button>
+</div>
+
+<h2>{% trans "Editar partida presupuestaria" %}</h2>
+
+<span id="div-notification"></span>
+<div class="project-form-grid project-form-grid-two">
+    <div class="project-form-field">
+        <label>{% trans "Código" %}</label>
+        <input type="text" class="form-control autosave" id="code" name="code" value="{{obj.code}}" title="{{obj.code}}"
+            data-model-name="projects.budgetline" data-obj-id="{{obj.id}}" data-url="{% url "autosave_field" %}" data-target="div-notification"/>
+        <span id="code__msg"></span>
+    </div>
+    <div class="project-form-field">
+        <label>{% trans "Nombre" %}</label>
+        <input type="text" class="form-control autosave" id="name" name="name" value="{{obj.name}}" title="{{obj.name}}"
+            data-model-name="projects.budgetline" data-obj-id="{{obj.id}}" data-url="{% url "autosave_field" %}" data-target="div-notification"/>
+        <span id="name__msg"></span>
+    </div>
+    <div class="project-form-field">
+        <label>{% trans "Presupuesto aprobado" %}</label>
+        <input type="number" step="0.01" min="0" class="form-control autosave" id="approved_budget" name="approved_budget"
+            value="{{obj.approved_budget}}" title="{{obj.approved_budget}}" data-model-name="projects.budgetline"
+            data-obj-id="{{obj.id}}" data-url="{% url "project-budget-autosave" %}" data-target="div-notification"/>
+        <span id="approved_budget__msg"></span>
+    </div>
+    <div class="project-form-field">
+        <label>{% trans "Presupuesto modificado" %}</label>
+        <input type="number" step="0.01" min="0" class="form-control autosave" id="modified_budget" name="modified_budget"
+            value="{{obj.modified_budget}}" title="{{obj.modified_budget}}" data-model-name="projects.budgetline"
+            data-obj-id="{{obj.id}}" data-url="{% url "project-budget-autosave" %}" data-target="div-notification"/>
+        <span id="modified_budget__msg"></span>
+    </div>
+    <div class="project-form-field project-form-field-wide">
+        <label>{% trans "Descripción" %}</label>
+        <textarea class="form-control autosave" id="description" name="description" title="{{obj.description}}"
+            data-model-name="projects.budgetline" data-obj-id="{{obj.id}}" data-url="{% url "autosave_field" %}"
+            data-target="div-notification">{{obj.description}}</textarea>
+        <span id="description__msg"></span>
+    </div>
+</div>
+
+<div class="project-modal-actions">
+    <button type="button" class="project-btn project-btn-primary ark save" data-bs-dismiss="modal" data-url="{% url "project-budget-lines" %}"
+        data-target="div-container" data-obj_id="{{obj.project.id}}">{% trans "Guardar" %}</button>
+</div>
+</div>

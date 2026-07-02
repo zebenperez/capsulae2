@@ -1,0 +1,111 @@
+{% load i18n %}
+
+<div class="project-panel">
+    <div class="project-section-header">
+        <div>
+            <h2>{% trans "Partidas Presupuestarias" %}</h2>
+            <p class="project-muted">
+                {{ obj.budget_lines_count }} {% trans "partidas" %}
+            </p>
+        </div>
+        <button type="button" class="project-btn project-btn-primary ark" data-url="{% url "project-budget-line-form" %}"
+            data-target-modal="common-modal" data-project_id="{{obj.id}}">
+            <i class="fas fa-plus"></i> {% trans "Nueva partida" %}
+        </button>
+    </div>
+
+    <div class="project-budget-line-summary">
+        <div class="project-stat">
+            <span class="project-stat-label">{% trans "Presupuesto proyecto" %}</span>
+            <span class="project-stat-value">{{ obj.approved_budget|default:"0.00" }}</span>
+        </div>
+        <div class="project-stat">
+            <span class="project-stat-label">{% trans "Ejecutado" %}</span>
+            <span class="project-stat-value">{{ obj.executed_budget|default:"0.00" }}</span>
+        </div>
+        <div class="project-stat">
+            <span class="project-stat-label">{% trans "Partidas" %}</span>
+            <span class="project-stat-value">{{ obj.budget_lines_count }}</span>
+        </div>
+    </div>
+
+    <div class="project-table budget-lines">
+        <div class="project-table-head">
+            <div>{% trans "Partida" %}</div>
+            <div>{% trans "Aprobado" %}</div>
+            <div>{% trans "Modificado" %}</div>
+            <div>{% trans "Ejecutado" %}</div>
+            <div>{% trans "Saldo" %}</div>
+            <div></div>
+        </div>
+        {% for item in budget_lines %}
+            <div class="project-table-row budget-line-row" id="row_{{item.id}}">
+                <div class="project-table-main">
+                    <span class="project-table-title">{{ item.code|default:"---" }} - {{ item.name|default:"Sin nombre" }}</span>
+                    {% if item.description %}
+                        <div class="project-table-desc">{{ item.description }}</div>
+                    {% endif %}
+                    <div class="project-subline-count">
+                        {{ item.child_lines.all.count }} {% trans "subpartidas" %}
+                    </div>
+                </div>
+                <div class="project-table-title">{{ item.approved_budget }}</div>
+                <div class="project-table-title">{{ item.modified_budget }}</div>
+                <div class="project-table-title">{{ item.executed_amount }}</div>
+                <div class="project-table-title">{{ item.available_balance }}</div>
+                <div class="project-actions">
+                    <a class="project-icon-btn ark" title="{% trans 'Añadir subpartida' %}" data-url="{% url "project-sub-budget-line-form" %}"
+                        data-target-modal="common-modal" data-budget_line_id="{{item.id}}">
+                        <i class="fas fa-plus"></i>
+                    </a>
+                    <a class="project-icon-btn ark" title="{% trans 'Editar partida' %}" data-url="{% url "project-budget-line-form" %}"
+                        data-target-modal="common-modal" data-obj_id="{{item.id}}" data-project_id="{{obj.id}}">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                    <a class="project-icon-btn danger ark" data-url="{% url "project-budget-line-remove" %}" data-obj_id="{{item.id}}"
+                        data-target="div-container" title="{% trans 'Eliminar' %}"
+                        data-confirm="{% trans "Are you sure to remove this element?" %}">
+                        <i class="fas fa-trash"></i>
+                    </a>
+                </div>
+            </div>
+            {% for row in item.tree_sub_lines %}
+                <div class="project-table-row sub-budget-line-row sub-budget-line-level-{{row.level}}" id="row_sub_{{row.item.id}}">
+                    <div class="project-table-main">
+                        <span class="project-table-title">{{ row.item.full_code|default:"---" }} - {{ row.item.name|default:"Sin nombre" }}</span>
+                        {% if row.item.description %}
+                            <div class="project-table-desc">{{ row.item.description }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="project-table-title">---</div>
+                    <div class="project-table-title">{{ row.item.assigned_budget }}</div>
+                    <div class="project-table-title">{{ row.item.executed_amount }}</div>
+                    <div class="project-table-title">{{ row.item.available_balance }}</div>
+                    <div class="project-actions">
+                        {% if row.can_add_child %}
+                            <a class="project-icon-btn ark" title="{% trans 'Añadir subpartida' %}" data-url="{% url "project-sub-budget-line-form" %}"
+                                data-target-modal="common-modal" data-parent_id="{{row.item.id}}">
+                                <i class="fas fa-plus"></i>
+                            </a>
+                        {% endif %}
+                        <a class="project-icon-btn ark" title="{% trans 'Editar subpartida' %}" data-url="{% url "project-sub-budget-line-form" %}"
+                            data-target-modal="common-modal" data-obj_id="{{row.item.id}}">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <a class="project-icon-btn ark" title="{% trans 'Aportación de financiador' %}" data-url="{% url "project-financier-contribution-form" %}"
+                            data-target-modal="common-modal" data-budget_line_id="{{row.item.id}}">
+                            <i class="fas fa-hand-holding-usd"></i>
+                        </a>
+                        <a class="project-icon-btn danger ark" data-url="{% url "project-sub-budget-line-remove" %}" data-obj_id="{{row.item.id}}"
+                            data-target="div-container" title="{% trans 'Eliminar' %}"
+                            data-confirm="{% trans "Are you sure to remove this element?" %}">
+                            <i class="fas fa-trash"></i>
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
+        {% empty %}
+            <div class="project-empty">{% trans "No hay partidas presupuestarias." %}</div>
+        {% endfor %}
+    </div>
+</div>

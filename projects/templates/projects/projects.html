@@ -1,22 +1,303 @@
 {% extends 'base.html' %}
-{% load i18n %}
+{% load i18n static %}
 
 {% block central_content %}
-    <div class="row toolbar-search pt-2 pb-2 m-0">
-        <div class="col-lg-1 col-1"><i class="fas fa-search"></i></div>
-        <div class="col-lg-11 col-11 text-left p-0">
-            <input type="text" class="autosearch form-control form-control-dark w-100" name="s-name" id="s-name" 
-               placeholder="{% trans 'Nombre' %}" data-url="{% url "project-search" %}" data-target="project-list" data-related="s-name" />
+    <link rel="stylesheet" href="{% static 'css/projects.css' %}">
+    <div class="projects-ui">
+        <div class="projects-shell">
+            <div class="projects-dashboard-hero">
+                <div class="projects-title">
+                    <span class="project-kicker">{% trans 'Dashboard' %}</span>
+                    <h1>{% trans 'Gestión de proyectos' %}</h1>
+                    <p>{% trans 'Resumen operativo, técnico y financiero de los proyectos asignados.' %}</p>
+                </div>
+                <div class="projects-dashboard-actions">
+                    <button class="project-btn project-btn-ghost" type="button">
+                        <i class="far fa-calendar-alt"></i> {% trans 'Periodo actual' %}
+                    </button>
+                    <a class="project-btn project-btn-primary" href="{% url "project-new" %}">
+                        <i class="fas fa-plus"></i> {% trans "Nuevo proyecto"%}
+                    </a>
+                </div>
+            </div>
+
+            <div class="projects-area-tabs" role="tablist" aria-label="{% trans 'Áreas de proyectos' %}">
+                <button class="projects-area-tab active" type="button" data-dashboard-tab="dashboard" role="tab" aria-selected="true">
+                    <i class="fas fa-home"></i> {% trans 'Dashboard' %}
+                </button>
+                <button class="projects-area-tab" type="button" data-dashboard-tab="projects" role="tab" aria-selected="false">
+                    <i class="fas fa-briefcase"></i> {% trans 'Proyectos' %}
+                </button>
+                <button class="projects-area-tab" type="button" data-dashboard-tab="financiers" role="tab" aria-selected="false">
+                    <i class="fas fa-hand-holding-usd"></i> {% trans 'Financiadores' %}
+                </button>
+                <button class="projects-area-tab" type="button" data-dashboard-tab="invoices" role="tab" aria-selected="false">
+                    <i class="fas fa-file-invoice"></i> {% trans 'Facturas' %}
+                </button>
+            </div>
+
+            <section class="projects-area-section active" data-dashboard-section="dashboard">
+                <div class="dashboard-kpis">
+                    <div class="dashboard-kpi">
+                        <span class="dashboard-kpi-icon success"><i class="fas fa-briefcase"></i></span>
+                        <span class="dashboard-kpi-label">{% trans 'Proyectos activos' %}</span>
+                        <strong>{{ active_projects }}</strong>
+                        <span class="dashboard-kpi-note">{% blocktrans %}De {{ projects_total }} proyectos en total{% endblocktrans %}</span>
+                    </div>
+                    <div class="dashboard-kpi">
+                        <span class="dashboard-kpi-icon primary"><i class="fas fa-bullseye"></i></span>
+                        <span class="dashboard-kpi-label">{% trans 'Presupuesto aprobado' %}</span>
+                        <strong>{{ approved_budget_display }} €</strong>
+                        <span class="dashboard-kpi-note">{% trans 'Total de proyectos asignados' %}</span>
+                    </div>
+                    <div class="dashboard-kpi">
+                        <span class="dashboard-kpi-icon warm"><i class="fas fa-coins"></i></span>
+                        <span class="dashboard-kpi-label">{% trans 'Gasto ejecutado' %}</span>
+                        <strong>{{ executed_budget_display }} €</strong>
+                        <span class="dashboard-kpi-note">{{ execution_percentage|floatformat:2 }}% {% trans 'del presupuesto' %}</span>
+                    </div>
+                    <div class="dashboard-kpi">
+                        <span class="dashboard-kpi-icon accent"><i class="fas fa-chart-line"></i></span>
+                        <span class="dashboard-kpi-label">{% trans 'Actividades en ejecución' %}</span>
+                        <strong>{{ activities_in_progress }}</strong>
+                        <span class="dashboard-kpi-note">{% blocktrans %}De {{ activities_total }} actividades totales{% endblocktrans %}</span>
+                    </div>
+                    <div class="dashboard-kpi">
+                        <span class="dashboard-kpi-icon teal"><i class="fas fa-chart-pie"></i></span>
+                        <span class="dashboard-kpi-label">{% trans 'Indicadores en seguimiento' %}</span>
+                        <strong>{{ indicators_total }}</strong>
+                        <span class="dashboard-kpi-note">{% trans 'Indicadores registrados' %}</span>
+                    </div>
+                </div>
+
+                <div class="dashboard-main-grid">
+                    <section class="dashboard-panel dashboard-panel-large">
+                        <div class="dashboard-panel-header">
+                            <h2>{% trans 'Ejecución financiera por proyecto' %}</h2>
+                        </div>
+                        <div class="dashboard-project-bars">
+                            {% for row in project_execution %}
+                                <div class="dashboard-project-bar">
+                                    <span>{{ row.project.name|default:"Proyecto sin nombre"|truncatechars:28 }}</span>
+                                    <div class="dashboard-bar-track">
+                                        <div class="dashboard-bar-fill" style="width: {{ row.executed_percentage }}%;"></div>
+                                    </div>
+                                    <strong>{{ row.executed_percentage|floatformat:0 }}%</strong>
+                                </div>
+                            {% empty %}
+                                <div class="project-empty">{% trans 'Todavía no hay proyectos para calcular ejecución.' %}</div>
+                            {% endfor %}
+                        </div>
+                    </section>
+
+                    <section class="dashboard-panel">
+                        <div class="dashboard-panel-header">
+                            <h2>{% trans 'Ejecución presupuestaria global' %}</h2>
+                        </div>
+                        <div class="dashboard-donut-layout">
+                            <div class="dashboard-donut" style="--angle: {{ execution_angle }}deg;">
+                                <div>
+                                    <strong>{{ execution_percentage|floatformat:2 }}%</strong>
+                                    <span>{% trans 'Ejecutado' %}</span>
+                                </div>
+                            </div>
+                            <div class="dashboard-legend">
+                                <div>
+                                    <span class="dashboard-legend-label"><span class="legend-dot success"></span>{% trans 'Ejecutado' %}</span>
+                                    <strong>{{ executed_budget_display }}&nbsp;€</strong>
+                                </div>
+                                <div>
+                                    <span class="dashboard-legend-label"><span class="legend-dot muted"></span>{% trans 'Pendiente' %}</span>
+                                    <strong>{{ pending_budget_display }}&nbsp;€</strong>
+                                </div>
+                                <div class="dashboard-total">
+                                    <span class="dashboard-legend-label">{% trans 'Total' %}</span>
+                                    <strong>{{ approved_budget_display }}&nbsp;€</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="dashboard-panel">
+                        <div class="dashboard-panel-header">
+                            <h2>{% trans 'Ejecución por financiador' %}</h2>
+                        </div>
+                        <div class="dashboard-financiers">
+                            {% for row in financier_rows %}
+                                <div class="dashboard-financier-row">
+                                    <span><i class="fas fa-circle"></i> {{ row.name|truncatechars:26 }}</span>
+                                    <strong>{{ row.amount|floatformat:2 }} €</strong>
+                                    <em>{{ row.percentage|floatformat:2 }}%</em>
+                                </div>
+                            {% empty %}
+                                <div class="project-empty">{% trans 'No hay financiadores registrados.' %}</div>
+                            {% endfor %}
+                        </div>
+                    </section>
+
+                    <section class="dashboard-panel">
+                        <div class="dashboard-panel-header">
+                            <h2>{% trans 'Actividades por estado' %}</h2>
+                        </div>
+                        <div class="dashboard-status-list">
+                            {% for item in activity_statuses %}
+                                <div class="dashboard-status-row">
+                                    <span><i style="color: {{ item.color }};" class="fas fa-circle"></i>{{ item.label }}</span>
+                                    <strong>{{ item.count }}</strong>
+                                    <em>{{ item.percentage|floatformat:2 }}%</em>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </section>
+
+                    <section class="dashboard-panel">
+                        <div class="dashboard-panel-header">
+                            <h2>{% trans 'Indicadores de avance' %}</h2>
+                        </div>
+                        <div class="dashboard-indicator-grid">
+                            {% for item in indicator_cards %}
+                                <div class="dashboard-indicator-card {{ item.class }}">
+                                    <i class="fas {{ item.icon }}"></i>
+                                    <strong>{{ item.count }}</strong>
+                                    <span>{{ item.label }}</span>
+                                    <em>{{ item.percentage|floatformat:2 }}%</em>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </section>
+
+                    <section class="dashboard-panel dashboard-panel-wide">
+                        <div class="dashboard-panel-header">
+                            <h2>{% trans 'Últimas facturas registradas' %}</h2>
+                        </div>
+                        <div class="dashboard-table">
+                            <div class="dashboard-table-head">
+                                <span>{% trans 'Factura' %}</span>
+                                <span>{% trans 'Proyecto' %}</span>
+                                <span>{% trans 'Proveedor' %}</span>
+                                <span>{% trans 'Importe' %}</span>
+                                <span>{% trans 'Estado' %}</span>
+                            </div>
+                            {% for invoice in latest_invoices %}
+                                <div class="dashboard-table-row">
+                                    <span>{{ invoice.number }}</span>
+                                    <span>{{ invoice.project.name|truncatechars:24 }}</span>
+                                    <span>{{ invoice.provider|truncatechars:24 }}</span>
+                                    <span>{{ invoice.total_amount|floatformat:2 }} €</span>
+                                    <span><mark class="dashboard-status-pill">{{ invoice.get_status_display }}</mark></span>
+                                </div>
+                            {% empty %}
+                                <div class="project-empty">{% trans 'No hay facturas registradas.' %}</div>
+                            {% endfor %}
+                        </div>
+                    </section>
+                </div>
+
+                <div class="dashboard-alerts">
+                    <div>
+                        <i class="far fa-file-alt danger"></i>
+                        <strong>{% blocktrans %}{{ pending_invoices }} facturas pendientes{% endblocktrans %}</strong>
+                        <span>{% trans 'Con importe pendiente de imputar' %}</span>
+                    </div>
+                    <div>
+                        <i class="fas fa-exclamation-triangle warning"></i>
+                        <strong>{% blocktrans %}{{ delayed_activities }} actividades retrasadas{% endblocktrans %}</strong>
+                        <span>{% trans 'Requieren actualización' %}</span>
+                    </div>
+                    <div>
+                        <i class="fas fa-info-circle primary"></i>
+                        <strong>{% blocktrans %}{{ stale_indicators }} indicadores sin actualizar{% endblocktrans %}</strong>
+                        <span>{% trans 'Sin fecha de última actualización' %}</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="projects-area-section" data-dashboard-section="projects">
+                <div class="dashboard-panel">
+                    <div class="dashboard-panel-header">
+                        <div>
+                            <h2>{% trans 'Cartera de proyectos' %}</h2>
+                            <p class="project-muted">{% trans 'Listado y búsqueda de proyectos asignados.' %}</p>
+                        </div>
+                        <a class="project-btn project-btn-primary" href="{% url "project-new" %}">
+                            <i class="fas fa-plus"></i> {% trans 'Nuevo proyecto' %}
+                        </a>
+                    </div>
+                    <div class="project-search dashboard-inline-search">
+                        <i class="fas fa-search"></i>
+                        <input type="text" class="autosearch form-control form-control-dark w-100" name="s-name" id="s-name"
+                            placeholder="{% trans 'Buscar por nombre de proyecto' %}" data-url="{% url "project-search" %}"
+                            data-target="project-list" data-related="s-name" />
+                    </div>
+                    <div id="project-list">
+                        {% include "projects/project-list.html" %}
+                    </div>
+                </div>
+            </section>
+
+            <section class="projects-area-section" data-dashboard-section="financiers">
+                <div class="dashboard-panel">
+                    <div class="dashboard-panel-header">
+                        <div>
+                            <h2>{% trans 'Financiadores' %}</h2>
+                            <p class="project-muted">{% trans 'Listado y búsqueda de entidades financiadoras.' %}</p>
+                        </div>
+                        <button type="button" class="project-btn project-btn-primary ark" data-url="{% url "financier-form" %}"
+                            data-target-modal="common-modal">
+                            <i class="fas fa-plus"></i> {% trans 'Nuevo Financiador' %}
+                        </button>
+                    </div>
+                    <div class="project-search dashboard-inline-search">
+                        <i class="fas fa-search"></i>
+                        <input type="text" class="autosearch form-control form-control-dark w-100" name="s-financier" id="s-financier"
+                            placeholder="{% trans 'Buscar por nombre, CIF/NIF, contacto o email' %}" data-url="{% url "financier-search" %}"
+                            data-target="financier-list" data-related="s-financier" />
+                    </div>
+                    <div id="financier-list">
+                        {% include "projects/financier-list.html" with items=financiers %}
+                    </div>
+                </div>
+            </section>
+
+            <section class="projects-area-section" data-dashboard-section="invoices">
+                <div class="dashboard-panel">
+                    <div class="dashboard-panel-header">
+                        <h2>{% trans 'Facturas' %}</h2>
+                    </div>
+                    <div class="dashboard-table">
+                        <div class="dashboard-table-head">
+                            <span>{% trans 'Factura' %}</span>
+                            <span>{% trans 'Proyecto' %}</span>
+                            <span>{% trans 'Proveedor' %}</span>
+                            <span>{% trans 'Importe' %}</span>
+                            <span>{% trans 'Estado' %}</span>
+                        </div>
+                        {% for invoice in latest_invoices %}
+                            <div class="dashboard-table-row">
+                                <span>{{ invoice.number }}</span>
+                                <span>{{ invoice.project.name|truncatechars:24 }}</span>
+                                <span>{{ invoice.provider|truncatechars:24 }}</span>
+                                <span>{{ invoice.total_amount|floatformat:2 }} €</span>
+                                <span><mark class="dashboard-status-pill">{{ invoice.get_status_display }}</mark></span>
+                            </div>
+                        {% empty %}
+                            <div class="project-empty">{% trans 'No hay facturas registradas.' %}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </section>
         </div>
     </div>
-    <div class="content mt-4">
-        <div class="toolbar-content">
-	        <h2 class="pathway b-right">{% trans 'Proyectos' %} <span id="items-counter" class="badge badge-secondary">{{items|length}}</span></h2>
-            <a class="btn btn-sm new" href="{% url "project-new" %}"><i class="fas fa-plus"></i> {% trans "Nuevo proyecto"%}</a>
-        </div>
-        <div id="project-list"></div>
-    </div>
-    <a class="hide ark" id="load-project-list" data-url="{% url "project-list" %}" data-target="project-list"></a>
-    <script>$(document).ready(function() {$("#load-project-list").click()})</script>
+    <script>
+        $(document).ready(function() {
+            $(".projects-area-tab").on("click", function() {
+                var sectionName = $(this).data("dashboard-tab");
+                $(".projects-area-tab").removeClass("active").attr("aria-selected", "false");
+                $(this).addClass("active").attr("aria-selected", "true");
+                $(".projects-area-section").removeClass("active");
+                $('.projects-area-section[data-dashboard-section="' + sectionName + '"]').addClass("active");
+            });
+        });
+    </script>
     {% include "common-modal.html" %}
 {% endblock central_content %}

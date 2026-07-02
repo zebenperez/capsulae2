@@ -1,0 +1,45 @@
+{% load i18n %}
+
+<div class="project-list-card financier-list-card">
+    <div class="project-list-head financier-list-head">
+        <div>{% trans 'Financiador' %}</div>
+        <div>{% trans 'Contacto' %}</div>
+        <div>{% trans 'Tipo' %}</div>
+        <div></div>
+    </div>
+
+    {% for item in items %}
+        <div class="project-list-row financier-list-row" id="financier-row-{{item.id}}">
+            <div class="project-row-main">
+                <span class="project-row-title">{{ item.name|default:"Financiador sin nombre" }}</span>
+                <span class="project-row-subtitle">
+                    {% if item.tax_id %}{{ item.tax_id }}{% else %}{% trans "Sin CIF/NIF" %}{% endif %}
+                </span>
+            </div>
+            <div class="project-row-desc">
+                {% if item.contact_person %}{{ item.contact_person }}{% endif %}
+                {% if item.email %}{% if item.contact_person %} · {% endif %}{{ item.email }}{% endif %}
+                {% if item.phone %} · {{ item.phone }}{% endif %}
+            </div>
+            <div>
+                <span class="project-badge fundec-badge">{{ item.get_financier_type_display }}</span>
+            </div>
+            <div class="project-actions">
+                <a class="project-icon-btn ark" data-url="{% url "financier-form" %}" data-target-modal="common-modal"
+                    data-obj_id="{{item.id}}" title="{% trans 'Editar financiador' %}">
+                    <i class="fas fa-pen"></i>
+                </a>
+                <a class="project-icon-btn danger ark" data-url="{% url "financier-remove" %}" data-target="financier-list"
+                    data-obj_id="{{item.id}}" title="{% trans 'Eliminar' %}"
+                    data-confirm="{% trans "¿Seguro que quieres eliminar este financiador?" %}">
+                    <i class="fas fa-trash"></i>
+                </a>
+            </div>
+        </div>
+    {% empty %}
+        <div class="project-empty">
+            <i class="far fa-address-card"></i>
+            <div>{% trans "No hay financiadores que mostrar." %}</div>
+        </div>
+    {% endfor %}
+</div>

@@ -1,0 +1,72 @@
+{% load i18n %}
+
+<div class="project-modal">
+    <div class="project-modal-close">
+        <button type="button" class="project-icon-btn" data-bs-dismiss="modal" title="{% trans "Close" %}">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+
+    <h2>{% trans "Financiador del proyecto" %}</h2>
+
+    <div id="project-financier-form" class="project-form-grid project-form-grid-two">
+        <input type="hidden" name="project_id" value="{{project.id}}">
+        <input type="hidden" name="obj_id" value="{% if obj %}{{obj.id}}{% endif %}">
+
+        <div class="project-form-field project-form-field-wide">
+            <label>{% trans "Financiador" %}</label>
+            <select class="form-control project-financier-selector" name="financier">
+                <option value="">{% trans "--- Selecciona financiador ---" %}</option>
+                {% for financier in financiers %}
+                    <option value="{{financier.id}}" {% if obj and obj.financier_id == financier.id %}selected{% endif %}>{{financier.name}}</option>
+                {% endfor %}
+                <option value="__new__">{% trans "Agregar nuevo financiador" %}</option>
+            </select>
+        </div>
+
+        <div class="project-form-field project-new-financier-field">
+            <label>{% trans "Nuevo financiador" %}</label>
+            <input type="text" class="form-control" name="new_financier_name">
+        </div>
+        <div class="project-form-field project-new-financier-field">
+            <label>{% trans "Tipo" %}</label>
+            <select class="form-control" name="new_financier_type">
+                {% for value, label in financier_types %}
+                    <option value="{{value}}">{{label}}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="project-form-field project-new-financier-field">
+            <label>{% trans "CIF/NIF" %}</label>
+            <input type="text" class="form-control" name="new_financier_tax_id">
+        </div>
+        <div class="project-form-field project-new-financier-field">
+            <label>{% trans "Email" %}</label>
+            <input type="email" class="form-control" name="new_financier_email">
+        </div>
+
+        <div class="project-form-field">
+            <label>{% trans "Cantidad comprometida" %}</label>
+            <input type="number" step="0.01" min="0" class="form-control" name="committed_amount" value="{% if obj %}{{obj.committed_amount}}{% else %}0.00{% endif %}">
+        </div>
+        <div class="project-form-field">
+            <label>{% trans "Cantidad concedida" %}</label>
+            <input type="number" step="0.01" min="0" class="form-control" name="granted_amount" value="{% if obj %}{{obj.granted_amount}}{% else %}0.00{% endif %}">
+        </div>
+        <div class="project-form-field">
+            <label>{% trans "Cantidad desembolsada" %}</label>
+            <input type="number" step="0.01" min="0" class="form-control" name="disbursed_amount" value="{% if obj %}{{obj.disbursed_amount}}{% else %}0.00{% endif %}">
+        </div>
+        <div class="project-form-field">
+            <label>{% trans "Fecha convenio" %}</label>
+            <input type="date" class="form-control" name="agreement_date" value="{% if obj.agreement_date %}{{obj.agreement_date|date:'Y-m-d'}}{% endif %}">
+        </div>
+    </div>
+
+    <div class="project-modal-actions">
+        <button type="button" class="project-btn project-btn-primary ajax-form-get" data-form="project-financier-form"
+            data-url="{% url "project-financier-save" %}" data-target="div-container" data-dismiss-modal="common-modal">
+            <i class="fas fa-check"></i> {% trans "Guardar" %}
+        </button>
+    </div>
+</div>

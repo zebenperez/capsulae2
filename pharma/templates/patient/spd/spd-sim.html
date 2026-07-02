@@ -6,6 +6,7 @@
 <head>
 	<meta charset="UTF-8">
 	<link rel="stylesheet" href="{% static '/css/spd-sim.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <div class="row box-container w-100 my-2 mx-0">
@@ -99,18 +100,14 @@
             $("#resolution-display").text(`Resolución: ${width} x ${height}`);
         });
 
-        $(".treat-btn").click(function () {
-            if ($(this).css('background-color') === 'rgb(200, 200, 200)') 
-                if (!confirm("¿Ya ha usado este medicamento, desea usarlo de nuevo?"))
-                    return false;
-
+        function useTreatmentButton(obj) {
             resetAll();
-            $(this).addClass("btn-warning");
+            obj.addClass("btn-warning");
     
-            var m = $(this).data("morning");
-            var l = $(this).data("lunch");
-            var d = $(this).data("dinner");
-            var o = $(this).data("others");
+            var m = obj.data("morning");
+            var l = obj.data("lunch");
+            var d = obj.data("dinner");
+            var o = obj.data("others");
             json_list = {'seg0': [], 'seg1': [], 'seg2': [], 'seg3': []}
             for (let i = 0; i < 7; i++) {
                 setButtonState(i, 0, m);
@@ -123,11 +120,32 @@
                 json_list['seg3'].push(o);
             }
 
-            var id = $(this).attr("id").split("-")[1];
+            var id = obj.attr("id").split("-")[1];
             let str = JSON.stringify(json_list);
             $("#treat-json-"+id).data("values", str);
             $("#treat-json-"+id).click();
-            $(this).css("background", "rgb(200, 200, 200)");
+            obj.css("background", "rgb(200, 200, 200)");
+        }
+
+        $(".treat-btn").click(function () {
+            var obj = $(this);
+            if (obj.css('background-color') === 'rgb(200, 200, 200)') {
+                Swal.fire({
+                    icon: "warning",
+                    title: "Confirmación",
+                    text: "¿Ya ha usado este medicamento, desea usarlo de nuevo?",
+                    showCancelButton: true,
+                    confirmButtonText: "Aceptar",
+                    cancelButtonText: "Cancelar",
+                    reverseButtons: true
+                }).then(function(result) {
+                    if (result.isConfirmed)
+                        useTreatmentButton(obj);
+                });
+                return false;
+            }
+
+            useTreatmentButton(obj);
         });
 
         {%comment%}
@@ -180,12 +198,16 @@
                             }
                         });
                     }
-                },
-                error: function (error) {
-                    alert("Error al buscar el código del pastillero: " + error.error_msg);
-                    console.error(error);
-                }
-            });
+                    },
+                    error: function (error) {
+                        Swal.fire({
+                            icon: "error",
+                            text: "Error al buscar el código del pastillero: " + error.error_msg,
+                            confirmButtonText: "Aceptar"
+                        });
+                        console.error(error);
+                    }
+                });
         });
         {%endcomment%}
 
@@ -193,4 +215,3 @@
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-

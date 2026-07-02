@@ -1,34 +1,34 @@
 {% load i18n %}
 
-
-<div class="d-flex justify-content-end"> <button type="button" class="btn btn-lg" data-bs-dismiss="modal" title="{% trans "Close" %}">
-    <i class="fas fa-times"></i></button> </div>
+<div class="project-modal">
+<div class="project-modal-close">
+    <button type="button" class="project-icon-btn" data-bs-dismiss="modal" title="{% trans "Close" %}">
+        <i class="fas fa-times"></i>
+    </button>
+</div>
 
 <h2>{% trans 'Editar Anexo' %}</h2>
 
-<div class="row justify-center">
-    <div class="col-12 mt-3 p-2">
-        <div class="greybox-xlg p-2">
-            {% trans "Nombre" %}
+<div class="project-form-grid">
+    <div class="project-form-field">
+            <label>{% trans "Nombre" %}</label>
             <input type="text" class="form-control autosave" id="name" name="name" value="{{obj.name}}" title="{{obj.name}}" 
                 data-model-name="projects.text" data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" data-target="div-notification"/>
                 <span id="name__msg"></span>
-        </div>
     </div>
-    <div class="col-12 mt-3 p-2">
-        <div class="greybox-xlg p-2">
-            {% trans "Descripción" %}
+    <div class="project-form-field">
+            <label>{% trans "Descripción" %}</label>
             <textarea class="hide autosave" id="desc" name="desc" title="{{obj.desc}}" data-model-name="projects.text" 
                 data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" data-target="div-notification">{{obj.desc}}</textarea> 
                 <span id="desc__msg"></span>
             <textarea id="desc-editor" class="active-editor" data-ref="desc" onload="activeEditor($(this))">{{obj.desc}}</textarea>
-        </div>
     </div>
 </div>
 
-<div class="d-flex justify-content-end">
-    <button type="button" class="btn btn-sm ark save" data-bs-dismiss="modal" data-url="{% url "project-texts" %}"
+<div class="project-modal-actions">
+    <button type="button" class="project-btn project-btn-primary ark save" data-bs-dismiss="modal" data-url="{% url "project-texts" %}"
         data-target="div-container" data-obj_id="{{obj.project.id}}">{% trans "Guardar" %}</button>
+</div>
 </div>
 
 <script> $(".active-editor").each(function(){activeEditor($(this))}); </script>
