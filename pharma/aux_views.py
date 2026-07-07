@@ -91,8 +91,8 @@ def vulnera_list_export(request, list_type):
     for item in item_list:
         try:
             nationality = item.origin.nationality
-            country = item.origin.country
-            etnia = item.origin.etnia
+            country = item.origin.country.nombre
+            etnia = item.origin.etnia.name
         except:
             nationality = ""
             country = ""
