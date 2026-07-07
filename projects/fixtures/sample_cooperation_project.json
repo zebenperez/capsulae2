@@ -254,9 +254,7 @@
     "model": "projects.invoice",
     "pk": 1,
     "fields": {
-      "project": 1,
-      "activity": 1,
-      "provider": "Imprenta Social SL",
+      "provider_tax_id": "B12345678",
       "number": "F-2026-001",
       "issue_date": "2026-03-15",
       "payment_date": "2026-03-30",

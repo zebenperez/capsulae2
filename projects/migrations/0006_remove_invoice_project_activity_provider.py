@@ -1,0 +1,54 @@
+from django.db import migrations, models
+
+
+class Migration(migrations.Migration):
+
+    dependencies = [
+        ("projects", "0005_invoice_locator_code_provider_tax_id"),
+    ]
+
+    operations = [
+        migrations.SeparateDatabaseAndState(
+            database_operations=[],
+            state_operations=[
+                migrations.AlterUniqueTogether(
+                    name="invoice",
+                    unique_together=None,
+                ),
+            ],
+        ),
+
+        migrations.SeparateDatabaseAndState(
+            database_operations=[],
+            state_operations=[
+                migrations.RemoveIndex(
+                    model_name="invoice",
+                    name="projects_in_project_7b9f13_idx",
+                ),
+            ],
+        ),
+
+        migrations.RemoveField(
+            model_name="invoice",
+            name="activity",
+        ),
+
+        migrations.RemoveField(
+            model_name="invoice",
+            name="project",
+        ),
+
+        migrations.RemoveField(
+            model_name="invoice",
+            name="provider",
+        ),
+
+        migrations.AlterField(
+            model_name="invoice",
+            name="provider_tax_id",
+            field=models.CharField(
+                max_length=32,
+                verbose_name="NIF del proveedor",
+            ),
+        ),
+    ]
