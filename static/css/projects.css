@@ -1058,10 +1058,26 @@
     margin-top: 12px;
 }
 
+.project-hero-side {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.project-dashboard-back {
+    height: 100%;
+    white-space: nowrap;
+    width: max-content;
+}
+
 .project-stat-grid {
     display: grid;
     gap: 10px;
-    grid-template-columns: repeat(3, minmax(120px, 1fr));
+    grid-template-columns: repeat(3, minmax(120px, 1fr)) auto;
+}
+
+.project-stat-action {
+    display: flex;
+    align-items: stretch;
 }
 
 .project-stat {
@@ -1581,6 +1597,10 @@
     }
 
     .projects-dashboard-actions {
+        justify-content: flex-start;
+    }
+
+    .project-hero-side {
         justify-content: flex-start;
     }
 
