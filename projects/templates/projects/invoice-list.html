@@ -1,0 +1,59 @@
+{% load i18n project_tags %}
+
+<div class="project-list-card invoice-list-card">
+    <div class="invoice-list-head">
+        <span>{% trans "Factura" %}</span>
+        <span>{% trans "Fechas" %}</span>
+        <span>{% trans "NIF proveedor" %}</span>
+        <span>{% trans "Importes" %}</span>
+        <span>{% trans "Imputación" %}</span>
+        <span></span>
+    </div>
+    {% for invoice in invoices %}
+        {% with imputation=invoice.imputation_summary %}
+        <div class="invoice-list-row" id="invoice-row-{{ invoice.id }}">
+            <div class="project-row-main">
+                <span class="project-row-title">{{ invoice.locator|default:"-----" }} · {{ invoice.invoice_code|default:"Pendiente" }}</span>
+                <span class="project-row-subtitle">{{ invoice.number }}</span>
+            </div>
+            <div class="project-row-desc">
+                <strong>{% trans "Factura" %}:</strong> {{ invoice.issue_date|date_es|default:"---" }}<br>
+                <strong>{% trans "Pago" %}:</strong> {{ invoice.payment_date|date_es|default:"---" }}
+            </div>
+            <div class="project-row-desc">
+                <strong>{% trans "NIF" %}:</strong><br>
+                {{ invoice.provider_tax_id|default:"---" }}
+            </div>
+            <div class="project-row-desc">
+                <strong>{% trans "Base" %}:</strong> {{ invoice.taxable_base|floatformat:2 }} €<br>
+                <strong>{% trans "Impuestos" %}:</strong> {{ invoice.taxes|floatformat:2 }} €<br>
+                <strong>{% trans "Total" %}:</strong> {{ invoice.total_amount|floatformat:2 }} €
+            </div>
+            <div class="invoice-imputation invoice-imputation--{{ imputation.estado_imputacion }}">
+                <div class="invoice-imputation__bar" role="img" aria-label="{{ imputation.aria_label }}">
+                    <span class="invoice-imputation__fill" style="width: {{ imputation.barra_porcentaje_style }}%;"></span>
+                </div>
+                <div class="invoice-imputation__meta">
+                    <span class="invoice-imputation__label">{{ imputation.porcentaje_display }}</span>
+                    <span class="invoice-imputation__badge">{{ imputation.estado_label }}</span>
+                </div>
+            </div>
+            <div class="project-actions">
+                <a class="project-icon-btn ark" title="{% trans 'Imputar' %}" data-url="{% url "invoice-allocation-wizard" %}"
+                    data-target-modal="common-modal" data-invoice_id="{{ invoice.id }}">
+                    <i class="fas fa-random"></i>
+                </a>
+                <a class="project-icon-btn ark" title="{% trans 'Editar factura' %}" data-url="{% url "invoice-form" %}"
+                    data-target-modal="common-modal" data-obj_id="{{ invoice.id }}">
+                    <i class="fas fa-edit"></i>
+                </a>
+            </div>
+            <div class="invoice-list-concept">{{ invoice.concept|truncatechars:180|default:"---" }}</div>
+        </div>
+        {% endwith %}
+    {% empty %}
+        <div class="project-empty">
+            {% blocktrans with start_date=invoice_start_date|date_es %}No hay facturas registradas desde {{ start_date }}.{% endblocktrans %}
+        </div>
+    {% endfor %}
+</div>

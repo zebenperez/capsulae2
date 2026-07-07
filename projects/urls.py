@@ -12,9 +12,15 @@ urlpatterns = [
     path('projects/financiers/search/', views.financier_search, name='financier-search'),
     path('projects/financiers/form/', views.financier_form, name='financier-form'),
     path('projects/financiers/remove/', views.financier_remove, name='financier-remove'),
+    path('projects/invoices/', views.invoice_list, name='invoice-list'),
+    path('projects/invoices/form/', views.invoice_form, name='invoice-form'),
+    path('projects/invoices/save/', views.invoice_save, name='invoice-save'),
+    path('projects/invoices/allocation-wizard/', views.invoice_allocation_wizard, name='invoice-allocation-wizard'),
+    path('projects/invoices/allocation-save/', views.invoice_allocation_save, name='invoice-allocation-save'),
 
     #------------------------- PROJECT --------------------
     path('projects/view/<int:project_id>', views.project_view, name='project-view'),
+    path('projects/shell/', views.project_shell, name='project-shell'),
     path('projects/details/', views.project_details, name='project-details'),
     path('projects/form/', views.project_form, name='project-form'),
     path('projects/budget-autosave/', views.project_budget_autosave, name='project-budget-autosave'),

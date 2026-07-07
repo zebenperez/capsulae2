@@ -1,10 +1,14 @@
-from decimal import Decimal, InvalidOperation
+from datetime import timedelta
+from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 from django.db.models.deletion import ProtectedError
-from django.db.models import F, Q, Sum
+from django.db.models import DecimalField, F, Q, Sum, Value
+from django.db.models.functions import Coalesce
 from django.http import HttpResponse
 from django.shortcuts import render, redirect, reverse
+from django.utils import timezone
 
 from capsulae2.decorators import group_required
 from capsulae2.commons import get_or_none, get_param, show_exc, validate_captcha
@@ -20,6 +24,7 @@ from .models import (
     Income,
     Invoice,
     InvoiceAllocation,
+    InvoiceStatus,
     File,
     Folder,
     Project,
@@ -64,6 +69,64 @@ def get_financier_context(search_value=""):
     return {"items": get_financiers(search_value)}
 
 
+def get_recent_invoice_start_date():
+    return timezone.localdate() - timedelta(days=365)
+
+
+def get_project_ids_for_user(user):
+    return list(get_projects(user).values_list("id", flat=True))
+
+
+def get_recent_invoices(user):
+    return (
+        Invoice.objects.filter(issue_date__gte=get_recent_invoice_start_date())
+        .annotate(
+            allocated_amount_total=Coalesce(
+                Sum("allocations__allocated_amount"),
+                Value(Decimal("0.00")),
+                output_field=DecimalField(max_digits=14, decimal_places=2),
+            )
+        )
+        .order_by("-issue_date", "-id")
+    )
+
+
+def get_invoice_context(user):
+    return {
+        "invoices": get_recent_invoices(user),
+        "invoice_start_date": get_recent_invoice_start_date(),
+    }
+
+
+def get_invoice_allocation_wizard_context(user, invoice):
+    projects_qs = get_projects(user).order_by("name")
+    project_ids = list(projects_qs.values_list("id", flat=True))
+    budget_lines = (
+        BudgetLine.objects.filter(project_id__in=project_ids)
+        .select_related("project", "parent")
+        .order_by("project__name", "code", "name")
+    )
+    contributions = (
+        FinancierContribution.objects.filter(project_id__in=project_ids)
+        .select_related("project", "financier", "budget_line", "sub_budget_line")
+        .order_by("project__name", "financier__name", "budget_line__code", "sub_budget_line__code")
+    )
+    activities = Activity.objects.filter(project_id__in=project_ids).select_related("project").order_by("project__name", "name")
+    remaining_amount = invoice.pending_amount if invoice else Decimal("0.00")
+    allocated_amount = invoice.allocated_amount if invoice else Decimal("0.00")
+    return {
+        "invoice": invoice,
+        "projects": projects_qs,
+        "budget_lines": budget_lines,
+        "contributions": contributions,
+        "activities": activities,
+        "allocated_amount": allocated_amount,
+        "allocated_amount_display": format_decimal(allocated_amount),
+        "remaining_amount": remaining_amount,
+        "remaining_amount_display": format_decimal(remaining_amount),
+    }
+
+
 def parse_decimal(value, default="0.00"):
     try:
         return Decimal(str(value or default).replace(",", "."))
@@ -100,7 +163,7 @@ def get_projects_dashboard_context(user):
     activities_qs = Activity.objects.filter(project_id__in=project_ids)
     indicators_qs = Indicator.objects.filter(objective__project_id__in=project_ids)
 
-    invoices_qs = Invoice.objects.filter(project_id__in=project_ids)
+    invoices_qs = Invoice.objects.all()
     activities_total = activities_qs.count()
     indicators_total = indicators_qs.count()
 
@@ -173,7 +236,8 @@ def get_projects_dashboard_context(user):
             "pending": max(project.approved_budget - executed, Decimal("0.00")),
         })
 
-    latest_invoices = invoices_qs.select_related("project").order_by("-issue_date", "-id")[:5]
+    invoice_items = get_recent_invoices(user)
+    latest_invoices = invoice_items[:5]
     pending_invoices = sum(1 for invoice in invoices_qs if invoice.pending_amount > 0)
     delayed_activities = activities_qs.filter(status=ProgressStatus.DELAYED).count()
     stale_indicators = indicators_qs.filter(last_update__isnull=True).count() if indicators_total else 0
@@ -181,6 +245,8 @@ def get_projects_dashboard_context(user):
     return {
         "items": projects_qs.order_by("name"),
         "financiers": get_financiers(),
+        "invoices": invoice_items,
+        "invoice_start_date": get_recent_invoice_start_date(),
         "projects_total": projects_total,
         "active_projects": active_projects,
         "approved_budget": approved_budget,
@@ -261,6 +327,127 @@ def financier_remove(request):
     except ProtectedError:
         return HttpResponse("No se puede eliminar este financiador porque está vinculado a proyectos o facturas.", status=400)
 
+
+@group_required("admins","managers", "employee")
+def invoice_list(request):
+    return render(request, "projects/invoice-list.html", get_invoice_context(request.user))
+
+
+@group_required("admins","managers", "employee")
+def invoice_form(request):
+    obj = get_or_none(Invoice, get_param(request.GET, "obj_id")) if get_param(request.GET, "obj_id") else None
+    return render(request, "projects/invoice-form.html", {
+        "obj": obj,
+    })
+
+
+@group_required("admins","managers", "employee")
+def invoice_save(request):
+    try:
+        obj = get_or_none(Invoice, get_param(request.GET, "obj_id")) if get_param(request.GET, "obj_id") else Invoice()
+        if obj == None:
+            return HttpResponse("Factura no encontrada.", status=404)
+
+        obj.provider_tax_id = get_param(request.GET, "provider_tax_id").strip().upper()
+        obj.number = get_param(request.GET, "number").strip()
+        obj.issue_date = get_param(request.GET, "issue_date") or None
+        obj.payment_date = get_param(request.GET, "payment_date") or None
+        obj.concept = get_param(request.GET, "concept").strip()
+        obj.taxable_base = parse_decimal(get_param(request.GET, "taxable_base"))
+        obj.taxes = parse_decimal(get_param(request.GET, "taxes"))
+        obj.currency = "EUR"
+        if not obj.pk:
+            obj.status = InvoiceStatus.DRAFT
+        obj.total_amount = obj.taxable_base + obj.taxes
+        obj.full_clean()
+        obj.save()
+        return render(request, "projects/invoice-list.html", get_invoice_context(request.user))
+    except ValidationError as e:
+        if hasattr(e, "message_dict"):
+            messages = []
+            for field_errors in e.message_dict.values():
+                messages.extend(field_errors)
+            return HttpResponse(" ".join(messages), status=400)
+        return HttpResponse(" ".join(e.messages), status=400)
+    except Exception as e:
+        return HttpResponse(show_exc(e), status=400)
+
+
+@group_required("admins","managers", "employee")
+def invoice_allocation_wizard(request):
+    invoice = get_or_none(Invoice, get_param(request.GET, "invoice_id"))
+    if invoice == None:
+        return HttpResponse("Factura no encontrada.", status=404)
+    return render(request, "projects/invoice-allocation-wizard.html", get_invoice_allocation_wizard_context(request.user, invoice))
+
+
+@group_required("admins","managers", "employee")
+def invoice_allocation_save(request):
+    try:
+        invoice = get_or_none(Invoice, get_param(request.GET, "invoice_id"))
+        if invoice == None:
+            return HttpResponse("Factura no encontrada.", status=404)
+        if invoice.pending_amount <= 0:
+            return HttpResponse("La factura ya está completamente imputada.", status=400)
+
+        project = get_or_none(Project, get_param(request.GET, "project"))
+        allowed_project_ids = get_project_ids_for_user(request.user)
+        if project == None or project.id not in allowed_project_ids:
+            return HttpResponse("Debes seleccionar un proyecto válido.", status=400)
+
+        contribution = get_or_none(FinancierContribution, get_param(request.GET, "financier_contribution"))
+        if contribution == None or contribution.project_id != project.id:
+            return HttpResponse("Debes seleccionar una aportación válida para el proyecto.", status=400)
+
+        selected_budget_line = get_or_none(BudgetLine, get_param(request.GET, "budget_line"))
+        contribution_target = contribution.sub_budget_line or contribution.budget_line
+        if selected_budget_line == None or contribution_target == None or selected_budget_line.id != contribution_target.id:
+            return HttpResponse("La aportación no pertenece a la partida seleccionada.", status=400)
+
+        activity = get_or_none(Activity, get_param(request.GET, "activity")) if get_param(request.GET, "activity") else None
+        if activity != None and activity.project_id != project.id:
+            return HttpResponse("La actividad debe pertenecer al proyecto seleccionado.", status=400)
+
+        allocation_mode = get_param(request.GET, "allocation_mode", "amount")
+        max_available = min(invoice.pending_amount, contribution.available_amount)
+        if allocation_mode == "percentage":
+            allocated_percentage = parse_decimal(get_param(request.GET, "allocated_percentage"))
+            if allocated_percentage <= 0:
+                return HttpResponse("El porcentaje a imputar debe ser mayor que cero.", status=400)
+            allocated_amount = ((invoice.total_amount * allocated_percentage) / Decimal("100")).quantize(
+                Decimal("0.01"),
+                rounding=ROUND_HALF_UP,
+            )
+        else:
+            allocated_amount = parse_decimal(get_param(request.GET, "allocated_amount"))
+        if allocated_amount <= 0:
+            return HttpResponse("El importe a imputar debe ser mayor que cero.", status=400)
+        if allocated_amount > max_available:
+            return HttpResponse("No se puede imputar más que el máximo disponible para esta factura y aportación.", status=400)
+
+        allocation = InvoiceAllocation(
+            invoice=invoice,
+            project=project,
+            activity=activity,
+            budget_line=contribution.budget_line or contribution_target.root_line,
+            sub_budget_line=contribution.sub_budget_line,
+            financier_contribution=contribution,
+            financier=contribution.financier,
+            allocated_amount=allocated_amount,
+        )
+        allocation.full_clean()
+        allocation.save()
+        return render(request, "projects/invoice-list.html", get_invoice_context(request.user))
+    except ValidationError as e:
+        if hasattr(e, "message_dict"):
+            messages = []
+            for field_errors in e.message_dict.values():
+                messages.extend(field_errors)
+            return HttpResponse(" ".join(messages), status=400)
+        return HttpResponse(" ".join(e.messages), status=400)
+    except Exception as e:
+        return HttpResponse(show_exc(e), status=400)
+
 '''
     Project
 '''
@@ -268,6 +455,11 @@ def financier_remove(request):
 def project_view(request, project_id):
     project = get_or_none(Project, project_id)
     return render(request, "project/project-view.html", {'obj': project})
+
+@group_required("admins","managers", "employee")
+def project_shell(request):
+    project = get_or_none(Project, get_param(request.GET, "obj_id"))
+    return render(request, "project/project-shell.html", {'obj': project})
 
 @group_required("admins","managers", "employee")
 def project_details(request):

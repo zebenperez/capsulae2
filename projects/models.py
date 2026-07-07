@@ -1,9 +1,12 @@
 import datetime
+import random
+import string
 from decimal import Decimal
 
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
+from django.core.validators import RegexValidator
 from django.db import models
 from django.db.models import Q, Sum
 
@@ -608,7 +611,9 @@ class FinancierContribution(models.Model):
 
     @property
     def allocated_to_invoices(self):
-        return money_sum(self.project.invoice_allocations.filter(financier=self.financier), "allocated_amount")
+        if self.pk:
+            return money_sum(self.invoice_allocations.all(), "allocated_amount")
+        return Decimal("0.00")
 
     @property
     def available_amount(self):
@@ -672,9 +677,19 @@ class FinancierContribution(models.Model):
 
 
 class Invoice(models.Model):
-    project = models.ForeignKey(Project, verbose_name="Proyecto", on_delete=models.CASCADE, related_name="invoices")
-    activity = models.ForeignKey(Activity, verbose_name="Actividad", on_delete=models.PROTECT, related_name="invoices")
-    provider = models.CharField("Proveedor", max_length=255)
+    LOCATOR_CHARS = string.ascii_uppercase + string.digits
+
+    locator = models.CharField(
+        "Localizador",
+        max_length=5,
+        unique=True,
+        blank=True,
+        null=True,
+        editable=False,
+        validators=[RegexValidator(r"^[A-Z0-9]{5}$", "El localizador debe tener 5 caracteres alfanuméricos en mayúsculas.")],
+    )
+    invoice_code = models.CharField("Código de factura", max_length=32, unique=True, blank=True, null=True, editable=False)
+    provider_tax_id = models.CharField("NIF del proveedor", max_length=32)
     number = models.CharField("Número", max_length=120)
     issue_date = models.DateField("Fecha emisión")
     payment_date = models.DateField("Fecha pago", blank=True, null=True)
@@ -694,28 +709,108 @@ class Invoice(models.Model):
 
     @property
     def allocated_amount(self):
+        annotated_amount = getattr(self, "allocated_amount_total", None)
+        if annotated_amount is not None:
+            return annotated_amount
         return money_sum(self.allocations.all(), "allocated_amount")
 
     @property
     def pending_amount(self):
         return self.total_amount - self.allocated_amount
 
+    @property
+    def imputation_summary(self):
+        importe_total_imputado = self.allocated_amount
+        total_amount = self.total_amount or Decimal("0.00")
+        if total_amount <= 0:
+            return {
+                "importe_total_imputado": importe_total_imputado,
+                "porcentaje_imputado": None,
+                "estado_imputacion": "unknown",
+                "porcentaje_display": "N/A",
+                "barra_porcentaje": Decimal("0.00"),
+                "barra_porcentaje_style": "0",
+                "estado_label": "Sin importe",
+                "aria_label": "Sin importe total para calcular el porcentaje imputado",
+            }
+
+        porcentaje_imputado = (importe_total_imputado * Decimal("100")) / total_amount
+        if porcentaje_imputado == 0:
+            estado_imputacion = "zero"
+            estado_label = "Sin imputar"
+        elif porcentaje_imputado < Decimal("100"):
+            estado_imputacion = "partial"
+            estado_label = "Parcial"
+        elif porcentaje_imputado == Decimal("100"):
+            estado_imputacion = "complete"
+            estado_label = "Completa"
+        else:
+            estado_imputacion = "over"
+            estado_label = "Sobreimputada"
+
+        porcentaje_display = "{:.1f}".format(porcentaje_imputado.quantize(Decimal("0.1"))).rstrip("0").rstrip(".")
+        porcentaje_display = porcentaje_display.replace(".", ",") + "%"
+        barra_porcentaje = min(max(porcentaje_imputado, Decimal("0.00")), Decimal("100.00"))
+        barra_porcentaje_style = "{:.1f}".format(barra_porcentaje.quantize(Decimal("0.1"))).rstrip("0").rstrip(".")
+        return {
+            "importe_total_imputado": importe_total_imputado,
+            "porcentaje_imputado": porcentaje_imputado,
+            "estado_imputacion": estado_imputacion,
+            "porcentaje_display": porcentaje_display,
+            "barra_porcentaje": barra_porcentaje,
+            "barra_porcentaje_style": barra_porcentaje_style,
+            "estado_label": estado_label,
+            "aria_label": "Porcentaje imputado de la factura: {}".format(porcentaje_display),
+        }
+
+    def build_invoice_code(self):
+        if not self.issue_date or not self.pk:
+            return ""
+        return "{}-{}".format(self.issue_date.year, self.pk)
+
+    @classmethod
+    def generate_unique_locator(cls):
+        for _ in range(100):
+            locator = "".join(random.choice(cls.LOCATOR_CHARS) for _ in range(5))
+            if not cls.objects.filter(locator=locator).exists():
+                return locator
+        raise ValidationError({"locator": "No se pudo generar un localizador único para la factura."})
+
     def clean(self):
         super().clean()
-        if self.activity and self.project and self.activity.project_id != self.project_id:
-            raise ValidationError({"activity": "La actividad debe pertenecer al mismo proyecto que la factura."})
-        if self.taxable_base is not None and self.taxes is not None and self.total_amount is not None:
-            if self.total_amount < self.taxable_base + self.taxes:
-                raise ValidationError({"total_amount": "El importe total no puede ser inferior a base imponible más impuestos."})
+        if self.locator:
+            self.locator = self.locator.strip().upper()
+        if self.provider_tax_id:
+            self.provider_tax_id = self.provider_tax_id.strip().upper()
+        if self.taxable_base is not None and self.taxes is not None:
+            self.total_amount = self.taxable_base + self.taxes
+
+    def save(self, *args, **kwargs):
+        if self.locator:
+            self.locator = self.locator.strip().upper()
+        else:
+            self.locator = self.generate_unique_locator()
+        if self.provider_tax_id:
+            self.provider_tax_id = self.provider_tax_id.strip().upper()
+        if self.taxable_base is not None and self.taxes is not None:
+            self.total_amount = self.taxable_base + self.taxes
+        super().save(*args, **kwargs)
+        invoice_code = self.build_invoice_code()
+        if invoice_code and self.invoice_code != invoice_code:
+            type(self).objects.filter(pk=self.pk).update(invoice_code=invoice_code)
+            self.invoice_code = invoice_code
 
     def __str__(self):
-        return "%s - %s" % (self.number, self.provider)
+        return "%s - %s" % (self.number, self.provider_tax_id)
 
     class Meta:
         verbose_name = "Factura"
         verbose_name_plural = "Facturas"
-        unique_together = ("project", "provider", "number")
-        indexes = [models.Index(fields=["project", "status"]), models.Index(fields=["number"])]
+        indexes = [
+            models.Index(fields=["number"]),
+            models.Index(fields=["issue_date"]),
+            models.Index(fields=["locator"]),
+        ]
         constraints = [
             models.CheckConstraint(check=Q(taxable_base__gte=0), name="invoice_taxable_base_gte_0"),
             models.CheckConstraint(check=Q(taxes__gte=0), name="invoice_taxes_gte_0"),
@@ -740,7 +835,14 @@ class InvoiceDocument(models.Model):
 class InvoiceAllocation(models.Model):
     invoice = models.ForeignKey(Invoice, verbose_name="Factura", on_delete=models.CASCADE, related_name="allocations")
     project = models.ForeignKey(Project, verbose_name="Proyecto", on_delete=models.CASCADE, related_name="invoice_allocations")
-    activity = models.ForeignKey(Activity, verbose_name="Actividad", on_delete=models.PROTECT, related_name="invoice_allocations")
+    activity = models.ForeignKey(
+        Activity,
+        verbose_name="Actividad",
+        on_delete=models.PROTECT,
+        blank=True,
+        null=True,
+        related_name="invoice_allocations",
+    )
     budget_line = models.ForeignKey(
         BudgetLine,
         verbose_name="Partida",
@@ -751,7 +853,17 @@ class InvoiceAllocation(models.Model):
         BudgetLine,
         verbose_name="Subpartida",
         on_delete=models.PROTECT,
+        blank=True,
+        null=True,
         related_name="sub_invoice_allocations",
+    )
+    financier_contribution = models.ForeignKey(
+        FinancierContribution,
+        verbose_name="Aportación de financiador",
+        on_delete=models.PROTECT,
+        blank=True,
+        null=True,
+        related_name="invoice_allocations",
     )
     financier = models.ForeignKey(
         Financier,
@@ -773,12 +885,8 @@ class InvoiceAllocation(models.Model):
     def clean(self):
         super().clean()
         errors = {}
-        if self.invoice and self.project and self.invoice.project_id != self.project_id:
-            errors["invoice"] = "La factura debe pertenecer al proyecto."
         if self.activity and self.project and self.activity.project_id != self.project_id:
             errors["activity"] = "La actividad debe pertenecer al proyecto."
-        if self.invoice and self.activity and self.invoice.activity_id != self.activity_id:
-            errors["activity"] = "La actividad debe coincidir con la actividad de la factura."
         if self.budget_line and self.budget_line.project_id != self.project_id:
             errors["budget_line"] = "La partida debe pertenecer al proyecto."
         if self.sub_budget_line:
@@ -789,6 +897,14 @@ class InvoiceAllocation(models.Model):
         if self.financier and self.project:
             if not ProjectFinancier.objects.filter(project=self.project, financier=self.financier).exists():
                 errors["financier"] = "El financiador debe pertenecer al proyecto."
+        if self.financier_contribution:
+            contribution_target = self.financier_contribution.sub_budget_line or self.financier_contribution.budget_line
+            if self.financier_contribution.project_id != self.project_id:
+                errors["financier_contribution"] = "La aportación debe pertenecer al proyecto."
+            if self.financier_contribution.financier_id != self.financier_id:
+                errors["financier_contribution"] = "La aportación debe pertenecer al financiador indicado."
+            if contribution_target and contribution_target.id != (self.sub_budget_line_id or self.budget_line_id):
+                errors["financier_contribution"] = "La aportación debe pertenecer a la partida seleccionada."
         if self.invoice_id and self.allocated_amount:
             current_total = money_sum(self.invoice.allocations.exclude(pk=self.pk), "allocated_amount")
             if current_total + self.allocated_amount > self.invoice.total_amount:
@@ -797,15 +913,21 @@ class InvoiceAllocation(models.Model):
             current_sub_total = money_sum(self.sub_budget_line.sub_invoice_allocations.exclude(pk=self.pk), "allocated_amount")
             if current_sub_total + self.allocated_amount + self.sub_budget_line.child_assigned_budget > self.sub_budget_line.effective_budget:
                 errors["allocated_amount"] = "No puede imputarse más dinero del disponible en la subpartida."
-        if self.financier_id and self.project_id and self.allocated_amount:
-            financed = money_sum(
-                self.project.financier_contributions.filter(financier=self.financier),
-                "amount",
-            )
-            allocated = money_sum(
-                self.project.invoice_allocations.filter(financier=self.financier).exclude(pk=self.pk),
+        elif self.budget_line_id and self.allocated_amount:
+            current_budget_total = money_sum(
+                self.budget_line.invoice_allocations.filter(sub_budget_line__isnull=True).exclude(pk=self.pk),
                 "allocated_amount",
             )
+            if current_budget_total + self.allocated_amount + self.budget_line.child_assigned_budget > self.budget_line.effective_budget:
+                errors["allocated_amount"] = "No puede imputarse más dinero del disponible en la partida."
+        if self.financier_id and self.project_id and self.allocated_amount:
+            contribution_filter = self.project.financier_contributions.filter(financier=self.financier)
+            allocation_filter = self.project.invoice_allocations.filter(financier=self.financier)
+            if self.financier_contribution_id:
+                contribution_filter = contribution_filter.filter(pk=self.financier_contribution_id)
+                allocation_filter = allocation_filter.filter(financier_contribution_id=self.financier_contribution_id)
+            financed = money_sum(contribution_filter, "amount")
+            allocated = money_sum(allocation_filter.exclude(pk=self.pk), "allocated_amount")
             if allocated + self.allocated_amount > financed:
                 errors["financier"] = "No puede imputarse más dinero del financiado por el financiador."
         if errors:
@@ -826,6 +948,7 @@ class InvoiceAllocation(models.Model):
             models.Index(fields=["project", "activity"]),
             models.Index(fields=["budget_line", "sub_budget_line"]),
             models.Index(fields=["financier"]),
+            models.Index(fields=["financier_contribution"]),
         ]
         constraints = [
             models.CheckConstraint(check=Q(allocated_amount__gte=0), name="invoice_allocation_amount_gte_0"),

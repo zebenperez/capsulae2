@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load i18n static %}
+{% load i18n static project_tags %}
 
 {% block central_content %}
     <link rel="stylesheet" href="{% static 'css/projects.css' %}">
@@ -31,7 +31,8 @@
                 <button class="projects-area-tab" type="button" data-dashboard-tab="financiers" role="tab" aria-selected="false">
                     <i class="fas fa-hand-holding-usd"></i> {% trans 'Financiadores' %}
                 </button>
-                <button class="projects-area-tab" type="button" data-dashboard-tab="invoices" role="tab" aria-selected="false">
+                <button class="projects-area-tab" type="button" data-dashboard-tab="invoices" data-load-url="{% url "invoice-list" %}"
+                    data-load-target="invoice-list" role="tab" aria-selected="false">
                     <i class="fas fa-file-invoice"></i> {% trans 'Facturas' %}
                 </button>
             </div>
@@ -173,19 +174,31 @@
                         <div class="dashboard-table">
                             <div class="dashboard-table-head">
                                 <span>{% trans 'Factura' %}</span>
-                                <span>{% trans 'Proyecto' %}</span>
-                                <span>{% trans 'Proveedor' %}</span>
+                                <span>{% trans 'NIF proveedor' %}</span>
+                                <span>{% trans 'Concepto' %}</span>
                                 <span>{% trans 'Importe' %}</span>
+                                <span>{% trans 'Imputación' %}</span>
                                 <span>{% trans 'Estado' %}</span>
                             </div>
                             {% for invoice in latest_invoices %}
+                                {% with imputation=invoice.imputation_summary %}
                                 <div class="dashboard-table-row">
                                     <span>{{ invoice.number }}</span>
-                                    <span>{{ invoice.project.name|truncatechars:24 }}</span>
-                                    <span>{{ invoice.provider|truncatechars:24 }}</span>
+                                    <span>{{ invoice.provider_tax_id|truncatechars:24 }}</span>
+                                    <span>{{ invoice.concept|truncatechars:24 }}</span>
                                     <span>{{ invoice.total_amount|floatformat:2 }} €</span>
+                                    <span class="invoice-imputation invoice-imputation--{{ imputation.estado_imputacion }}">
+                                        <span class="invoice-imputation__bar" role="img" aria-label="{{ imputation.aria_label }}">
+                                            <span class="invoice-imputation__fill" style="width: {{ imputation.barra_porcentaje_style }}%;"></span>
+                                        </span>
+                                        <span class="invoice-imputation__meta">
+                                            <span class="invoice-imputation__label">{{ imputation.porcentaje_display }}</span>
+                                            <span class="invoice-imputation__badge">{{ imputation.estado_label }}</span>
+                                        </span>
+                                    </span>
                                     <span><mark class="dashboard-status-pill">{{ invoice.get_status_display }}</mark></span>
                                 </div>
+                                {% endwith %}
                             {% empty %}
                                 <div class="project-empty">{% trans 'No hay facturas registradas.' %}</div>
                             {% endfor %}
@@ -262,27 +275,19 @@
             <section class="projects-area-section" data-dashboard-section="invoices">
                 <div class="dashboard-panel">
                     <div class="dashboard-panel-header">
-                        <h2>{% trans 'Facturas' %}</h2>
-                    </div>
-                    <div class="dashboard-table">
-                        <div class="dashboard-table-head">
-                            <span>{% trans 'Factura' %}</span>
-                            <span>{% trans 'Proyecto' %}</span>
-                            <span>{% trans 'Proveedor' %}</span>
-                            <span>{% trans 'Importe' %}</span>
-                            <span>{% trans 'Estado' %}</span>
+                        <div>
+                            <h2>{% trans 'Facturas' %}</h2>
+                            <p class="project-muted">
+                                {% blocktrans with start_date=invoice_start_date|date_es %}Facturas registradas desde {{ start_date }}.{% endblocktrans %}
+                            </p>
                         </div>
-                        {% for invoice in latest_invoices %}
-                            <div class="dashboard-table-row">
-                                <span>{{ invoice.number }}</span>
-                                <span>{{ invoice.project.name|truncatechars:24 }}</span>
-                                <span>{{ invoice.provider|truncatechars:24 }}</span>
-                                <span>{{ invoice.total_amount|floatformat:2 }} €</span>
-                                <span><mark class="dashboard-status-pill">{{ invoice.get_status_display }}</mark></span>
-                            </div>
-                        {% empty %}
-                            <div class="project-empty">{% trans 'No hay facturas registradas.' %}</div>
-                        {% endfor %}
+                        <button type="button" class="project-btn project-btn-primary ark" data-url="{% url "invoice-form" %}"
+                            data-target-modal="common-modal">
+                            <i class="fas fa-plus"></i> {% trans 'Nueva factura' %}
+                        </button>
+                    </div>
+                    <div id="invoice-list">
+                        {% include "projects/invoice-list.html" with invoices=invoices invoice_start_date=invoice_start_date %}
                     </div>
                 </div>
             </section>
@@ -296,6 +301,9 @@
                 $(this).addClass("active").attr("aria-selected", "true");
                 $(".projects-area-section").removeClass("active");
                 $('.projects-area-section[data-dashboard-section="' + sectionName + '"]').addClass("active");
+                if ($(this).data("load-url") && $(this).data("load-target")) {
+                    ajaxGet($(this).data("load-url"), {}, $(this).data("load-target"), "");
+                }
             });
         });
     </script>
