@@ -6,7 +6,7 @@ from django.core.exceptions import ValidationError
 from django.db.models.deletion import ProtectedError
 from django.db.models import DecimalField, F, Q, Sum, Value
 from django.db.models.functions import Coalesce
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, reverse
 from django.utils import timezone
 
@@ -460,6 +460,20 @@ def project_view(request, project_id):
 def project_shell(request):
     project = get_or_none(Project, get_param(request.GET, "obj_id"))
     return render(request, "project/project-shell.html", {'obj': project})
+
+@group_required("admins","managers", "employee")
+def project_tab_counts(request):
+    project = get_or_none(Project, get_param(request.GET, "obj_id"))
+    if project == None:
+        return JsonResponse({"error": "Proyecto no encontrado."}, status=404)
+    return JsonResponse({
+        "texts": project.texts.count(),
+        "activities": project.activities.count(),
+        "financiers": project.project_financiers.count(),
+        "budget_lines": project.budget_lines.filter(parent__isnull=True).count(),
+        "incomes": project.incomes.count(),
+        "expenses": project.expenses.count(),
+    })
 
 @group_required("admins","managers", "employee")
 def project_details(request):

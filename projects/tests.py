@@ -9,9 +9,11 @@ from django.urls import reverse
 from .models import (
     Activity,
     BudgetLine,
+    Expense,
     Financier,
     FinancierContribution,
     FinancierType,
+    Income,
     Indicator,
     Invoice,
     InvoiceAllocation,
@@ -20,6 +22,7 @@ from .models import (
     Project,
     ProjectFinancier,
     ProgressStatus,
+    Text,
 )
 
 
@@ -439,6 +442,30 @@ class ProjectViewTests(TestCase):
         self.assertContains(response, "31 de julio de 2026")
         self.assertNotContains(response, "July")
         self.assertNotContains(response, "20/01/2023 13:00")
+        self.assertContains(response, 'data-project-tab-count="activities"')
+        self.assertContains(response, 'data-count-url="{}"'.format(reverse("project-tab-counts")))
+
+    def test_project_tab_counts_returns_current_counts(self):
+        financier = Financier.objects.create(name="Financiador")
+        budget_line = BudgetLine.objects.create(project=self.project, code="1", name="Partida")
+        BudgetLine.objects.create(project=self.project, code="1.1", name="Subpartida", parent=budget_line)
+        Activity.objects.create(project=self.project, code="A1", name="Actividad")
+        Text.objects.create(project=self.project, name="Anexo")
+        ProjectFinancier.objects.create(project=self.project, financier=financier)
+        Income.objects.create(project=self.project, desc="Ingreso")
+        Expense.objects.create(project=self.project, desc="Gasto")
+
+        response = self.client.get(reverse("project-tab-counts"), {"obj_id": self.project.id})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {
+            "texts": 1,
+            "activities": 1,
+            "financiers": 1,
+            "budget_lines": 1,
+            "incomes": 1,
+            "expenses": 1,
+        })
 
     def test_project_form_hides_execution_date(self):
         response = self.client.get(reverse("project-form"), {"obj_id": self.project.id})

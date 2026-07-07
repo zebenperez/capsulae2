@@ -71,6 +71,33 @@ function getAjaxErrorMessage(e) {
     return e && e.responseText ? e.responseText : "No se pudo completar la operación.";
 }
 
+function refreshProjectTabCounts() {
+    var tabs = $(".project-tabs[data-project-id]").first();
+    if (!tabs.length)
+        return;
+
+    var projectId = tabs.data("project-id");
+    var countUrl = tabs.data("count-url");
+    if (!projectId || !countUrl)
+        return;
+
+    $.ajax({
+        url: countUrl,
+        type: "GET",
+        data: { obj_id: projectId },
+        cache: false,
+        dataType: "json",
+        success: function(data) {
+            tabs.find('[data-project-tab-count="texts"]').text(data.texts);
+            tabs.find('[data-project-tab-count="activities"]').text(data.activities);
+            tabs.find('[data-project-tab-count="financiers"]').text(data.financiers);
+            tabs.find('[data-project-tab-count="budget_lines"]').text(data.budget_lines);
+            tabs.find('[data-project-tab-count="incomes"]').text(data.incomes);
+            tabs.find('[data-project-tab-count="expenses"]').text(data.expenses);
+        }
+    });
+}
+
 function ajaxGet(url, datas, target, modal_target)
 {
     setWait();
@@ -93,6 +120,7 @@ function ajaxGet(url, datas, target, modal_target)
             else
                 if (target != "")
                     $('#'+target).html(data);
+            refreshProjectTabCounts();
         },
         error : function(e){showError(getAjaxErrorMessage(e));},
         complete : function(){unsetWait();}
@@ -564,6 +592,7 @@ $(document).ready(()=>{
                     $("#" + obj.data("target")).html(data);
                 if (obj.data("dismiss-modal"))
                     $("#" + obj.data("dismiss-modal")).modal("hide");
+                refreshProjectTabCounts();
             },
             error: function(e){showError(getAjaxErrorMessage(e));},
             complete: function(){unsetWait();}
