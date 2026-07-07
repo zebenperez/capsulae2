@@ -160,6 +160,7 @@ urlpatterns = [
     #------------------------- AUX --------------------
     path('patients/aux/index/', aux_views.index, name='patients-aux-index'),
     path('patients/aux/vulnera-list/', aux_views.vulnera_list, name='patients-aux-vulnera-list'),
+    path('patients/aux/vulnera-list-export/<int:list_type>', aux_views.vulnera_list_export, name='patients-aux-vulnera-list-export'),
     #path('patients/aux/vulnera-list/<int:comp>', aux_views.vulnera_list, name='patient-aux-vulnera-list'),
     path('patients/aux/vulnera-files/', aux_views.vulnera_files, name='patients-aux-vulnera-files'),
     #path('patients/aux/vulnera-files/<int:comp>', aux_views.vulnera_files, name='patient-aux-vulnera-files'),
