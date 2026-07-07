@@ -1261,8 +1261,8 @@
 
 .project-table.budget-lines .project-table-head,
 .project-table.budget-lines .project-table-row {
-    grid-template-columns: minmax(260px, 1.5fr) repeat(4, minmax(92px, 0.6fr)) minmax(176px, auto);
-    min-width: 980px;
+    grid-template-columns: minmax(280px, 1.5fr) repeat(4, minmax(132px, 0.68fr)) minmax(176px, auto);
+    min-width: 1080px;
 }
 
 .project-table.budget-lines {
@@ -1312,10 +1312,14 @@
 .project-table.budget-lines .project-actions {
     display: flex;
     gap: 8px;
-    justify-content: flex-end;
+    justify-content: center;
     min-width: 176px;
     overflow: visible;
     white-space: nowrap;
+}
+
+.project-table.budget-lines .project-table-head > div:nth-child(n+2):nth-child(-n+5) {
+    text-align: right;
 }
 
 .project-table.budget-lines .project-icon-btn {
@@ -1339,12 +1343,33 @@
     font-weight: 700;
 }
 
+.project-subline-prefix {
+    color: var(--project-warm);
+    display: inline-block;
+    font-weight: 800;
+    margin-right: 8px;
+}
+
 .project-subline-count {
     color: var(--project-primary);
     font-size: 0.78rem;
-    font-weight: 800;
+    font-weight: 700;
     margin-top: 6px;
-    text-transform: uppercase;
+}
+
+.project-money-kicker {
+    color: var(--project-muted);
+    display: block;
+    font-size: 0.68rem;
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 3px;
+}
+
+.project-not-applicable {
+    color: var(--project-muted);
+    font-weight: 700;
+    text-align: right;
 }
 
 .project-budget-grid {
@@ -1681,6 +1706,10 @@
     .project-actions {
         text-align: left;
     }
+
+    .project-table.budget-lines .project-actions {
+        justify-content: flex-start;
+    }
 }
 
 @media (max-width: 640px) {
@@ -1737,7 +1766,8 @@
     }
 
     .project-financiers-table .project-actions,
-    .project-money-cell {
+    .project-money-cell,
+    .project-not-applicable {
         text-align: left;
     }
 }

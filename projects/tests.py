@@ -496,6 +496,36 @@ class ProjectViewTests(TestCase):
         self.assertEqual(money_es(Decimal("50000.00")), "50.000,00 €")
         self.assertEqual(money_es(Decimal("750.00")), "750,00 €")
 
+    def test_budget_lines_tab_uses_clear_budget_labels(self):
+        budget_line = BudgetLine.objects.create(
+            project=self.project,
+            code="P001",
+            name="Contratación de personal",
+            approved_budget=Decimal("30000.00"),
+        )
+        BudgetLine.objects.create(
+            project=self.project,
+            parent=budget_line,
+            code="S001",
+            name="Técnico de campo",
+            approved_budget=Decimal("3000.00"),
+        )
+
+        response = self.client.get(reverse("project-budget-lines"), {"obj_id": self.project.id})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Partidas presupuestarias")
+        self.assertContains(response, "Aprobado en partidas")
+        self.assertContains(response, "Presupuesto modificado / asignado")
+        self.assertContains(response, "Saldo disponible")
+        self.assertContains(response, "Partidas / Subpartidas")
+        self.assertContains(response, "No aplica")
+        self.assertContains(response, "30.000,00 €")
+        self.assertContains(response, "3.000,00 €")
+        self.assertContains(response, 'aria-label="Editar partida P001 - Contratación de personal"')
+        self.assertContains(response, 'aria-label="Asignar financiación a P001.S001 - Técnico de campo"')
+        self.assertContains(response, "¿Seguro que quieres eliminar esta partida?")
+
     def test_project_form_hides_execution_date(self):
         response = self.client.get(reverse("project-form"), {"obj_id": self.project.id})
 

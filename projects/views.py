@@ -675,9 +675,22 @@ def get_budget_lines_context(project):
             append_tree_rows(rows, sub_line, 1)
         budget_line.tree_sub_lines = rows
 
+    approved_in_budget_lines = decimal_sum(project.budget_lines.filter(parent__isnull=True), "approved_budget")
+    assigned_to_sub_lines = decimal_sum(project.budget_lines.filter(parent__isnull=False), "approved_budget")
+    pending_assignment = max((project.approved_budget or Decimal("0.00")) - approved_in_budget_lines, Decimal("0.00"))
+
     return {
         'obj': project,
         'budget_lines': budget_lines,
+        'budget_line_summary': {
+            'approved_budget': project.approved_budget or Decimal("0.00"),
+            'approved_in_budget_lines': approved_in_budget_lines,
+            'assigned_to_sub_lines': assigned_to_sub_lines,
+            'executed_amount': project.executed_budget,
+            'pending_assignment': pending_assignment,
+            'budget_line_count': len(budget_lines),
+            'sub_budget_line_count': len(sub_lines),
+        },
     }
 
 @group_required("admins","managers", "employee")
