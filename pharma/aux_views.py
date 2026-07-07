@@ -87,9 +87,14 @@ def vulnera_list_export(request, list_type):
         'Etnia'
     ])
     for item in item_list:
-        nationality = item.origin.nationality if item.origin != None else ""
-        country = item.origin.country if item.origin != None else ""
-        etnia = item.origin.etnia if item.origin != None else ""
+        try:
+            nationality = item.origin.nationality
+            country = item.origin.country
+            etnia = item.origin.etnia
+        except:
+            nationality = ""
+            country = ""
+            etnia = ""
         writer.writerow([
             item.nombre,
             item.sexo,
