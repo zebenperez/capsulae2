@@ -104,6 +104,7 @@ def vulnera_list_export(request, list_type):
             item.fecha_nacimiento,
             nationality,
             item.domicilio,
+            item.locality,
             item.province,
             item.cod_postal,
             item.telefono1,
