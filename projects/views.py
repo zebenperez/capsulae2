@@ -6,7 +6,7 @@ from django.core.exceptions import ValidationError
 from django.db.models.deletion import ProtectedError
 from django.db.models import DecimalField, F, Q, Sum, Value
 from django.db.models.functions import Coalesce
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, reverse
 from django.utils import timezone
 
@@ -462,15 +462,42 @@ def project_shell(request):
     return render(request, "project/project-shell.html", {'obj': project})
 
 @group_required("admins","managers", "employee")
+def project_tab_counts(request):
+    project = get_or_none(Project, get_param(request.GET, "obj_id"))
+    if project == None:
+        return JsonResponse({"error": "Proyecto no encontrado."}, status=404)
+    return JsonResponse({
+        "texts": project.texts.count(),
+        "activities": project.activities.count(),
+        "financiers": project.project_financiers.count(),
+        "budget_lines": project.budget_lines.filter(parent__isnull=True).count(),
+        "incomes": project.incomes.count(),
+        "expenses": project.expenses.count(),
+    })
+
+@group_required("admins","managers", "employee")
 def project_details(request):
     project = get_or_none(Project, get_param(request.GET, "obj_id"))
     return render(request, "project/project-details.html", {'obj': project})
 
 
 def get_project_financiers_context(project):
+    project_financiers = project.project_financiers.select_related("financier").order_by("financier__name")
+    committed_amount = decimal_sum(project_financiers, "committed_amount")
+    granted_amount = decimal_sum(project_financiers, "granted_amount")
+    disbursed_amount = decimal_sum(project_financiers, "disbursed_amount")
+    pending_execution = max((project.approved_budget or Decimal("0.00")) - project.executed_budget, Decimal("0.00"))
     return {
         "obj": project,
-        "project_financiers": project.project_financiers.select_related("financier").order_by("financier__name"),
+        "project_financiers": project_financiers,
+        "financier_summary": {
+            "approved_budget": project.approved_budget or Decimal("0.00"),
+            "committed_amount": committed_amount,
+            "granted_amount": granted_amount,
+            "disbursed_amount": disbursed_amount,
+            "pending_execution": pending_execution,
+            "financier_count": project_financiers.count(),
+        },
     }
 
 
@@ -648,9 +675,22 @@ def get_budget_lines_context(project):
             append_tree_rows(rows, sub_line, 1)
         budget_line.tree_sub_lines = rows
 
+    approved_in_budget_lines = decimal_sum(project.budget_lines.filter(parent__isnull=True), "approved_budget")
+    assigned_to_sub_lines = decimal_sum(project.budget_lines.filter(parent__isnull=False), "approved_budget")
+    pending_assignment = max((project.approved_budget or Decimal("0.00")) - approved_in_budget_lines, Decimal("0.00"))
+
     return {
         'obj': project,
         'budget_lines': budget_lines,
+        'budget_line_summary': {
+            'approved_budget': project.approved_budget or Decimal("0.00"),
+            'approved_in_budget_lines': approved_in_budget_lines,
+            'assigned_to_sub_lines': assigned_to_sub_lines,
+            'executed_amount': project.executed_budget,
+            'pending_assignment': pending_assignment,
+            'budget_line_count': len(budget_lines),
+            'sub_budget_line_count': len(sub_lines),
+        },
     }
 
 @group_required("admins","managers", "employee")

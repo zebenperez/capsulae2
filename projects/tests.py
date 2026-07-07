@@ -9,9 +9,11 @@ from django.urls import reverse
 from .models import (
     Activity,
     BudgetLine,
+    Expense,
     Financier,
     FinancierContribution,
     FinancierType,
+    Income,
     Indicator,
     Invoice,
     InvoiceAllocation,
@@ -20,7 +22,9 @@ from .models import (
     Project,
     ProjectFinancier,
     ProgressStatus,
+    Text,
 )
+from .templatetags.project_tags import money_es
 
 
 class ProjectModelTests(TestCase):
@@ -439,6 +443,88 @@ class ProjectViewTests(TestCase):
         self.assertContains(response, "31 de julio de 2026")
         self.assertNotContains(response, "July")
         self.assertNotContains(response, "20/01/2023 13:00")
+        self.assertContains(response, 'data-project-tab-count="activities"')
+        self.assertContains(response, 'data-count-url="{}"'.format(reverse("project-tab-counts")))
+
+    def test_project_tab_counts_returns_current_counts(self):
+        financier = Financier.objects.create(name="Financiador")
+        budget_line = BudgetLine.objects.create(project=self.project, code="1", name="Partida")
+        BudgetLine.objects.create(project=self.project, code="1.1", name="Subpartida", parent=budget_line)
+        Activity.objects.create(project=self.project, code="A1", name="Actividad")
+        Text.objects.create(project=self.project, name="Anexo")
+        ProjectFinancier.objects.create(project=self.project, financier=financier)
+        Income.objects.create(project=self.project, desc="Ingreso")
+        Expense.objects.create(project=self.project, desc="Gasto")
+
+        response = self.client.get(reverse("project-tab-counts"), {"obj_id": self.project.id})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {
+            "texts": 1,
+            "activities": 1,
+            "financiers": 1,
+            "budget_lines": 1,
+            "incomes": 1,
+            "expenses": 1,
+        })
+
+    def test_project_financiers_tab_uses_clear_financial_labels(self):
+        financier = Financier.objects.create(
+            name="Caixa",
+            financier_type=FinancierType.PUBLIC,
+            tax_id="A00000000",
+        )
+        ProjectFinancier.objects.create(
+            project=self.project,
+            financier=financier,
+            committed_amount=Decimal("30000.00"),
+            granted_amount=Decimal("28000.00"),
+            disbursed_amount=Decimal("25000.00"),
+        )
+
+        response = self.client.get(reverse("project-financiers"), {"obj_id": self.project.id})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Financiación comprometida")
+        self.assertContains(response, "Fondos desembolsados")
+        self.assertContains(response, "Disponible para partidas")
+        self.assertContains(response, "30.000,00 €")
+        self.assertContains(response, 'aria-label="Editar financiador Caixa"')
+        self.assertNotContains(response, ">Comprometido</span>\n            <span class=\"project-stat-value\">1</span>")
+
+    def test_money_es_formats_spanish_currency(self):
+        self.assertEqual(money_es(Decimal("50000.00")), "50.000,00 €")
+        self.assertEqual(money_es(Decimal("750.00")), "750,00 €")
+
+    def test_budget_lines_tab_uses_clear_budget_labels(self):
+        budget_line = BudgetLine.objects.create(
+            project=self.project,
+            code="P001",
+            name="Contratación de personal",
+            approved_budget=Decimal("30000.00"),
+        )
+        BudgetLine.objects.create(
+            project=self.project,
+            parent=budget_line,
+            code="S001",
+            name="Técnico de campo",
+            approved_budget=Decimal("3000.00"),
+        )
+
+        response = self.client.get(reverse("project-budget-lines"), {"obj_id": self.project.id})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Partidas presupuestarias")
+        self.assertContains(response, "Aprobado en partidas")
+        self.assertContains(response, "Presupuesto modificado / asignado")
+        self.assertContains(response, "Saldo disponible")
+        self.assertContains(response, "Partidas / Subpartidas")
+        self.assertContains(response, "No aplica")
+        self.assertContains(response, "30.000,00 €")
+        self.assertContains(response, "3.000,00 €")
+        self.assertContains(response, 'aria-label="Editar partida P001 - Contratación de personal"')
+        self.assertContains(response, 'aria-label="Asignar financiación a P001.S001 - Técnico de campo"')
+        self.assertContains(response, "¿Seguro que quieres eliminar esta partida?")
 
     def test_project_form_hides_execution_date(self):
         response = self.client.get(reverse("project-form"), {"obj_id": self.project.id})

@@ -1058,10 +1058,26 @@
     margin-top: 12px;
 }
 
+.project-hero-side {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.project-dashboard-back {
+    height: 100%;
+    white-space: nowrap;
+    width: max-content;
+}
+
 .project-stat-grid {
     display: grid;
     gap: 10px;
-    grid-template-columns: repeat(3, minmax(120px, 1fr));
+    grid-template-columns: repeat(3, minmax(120px, 1fr)) auto;
+}
+
+.project-stat-action {
+    display: flex;
+    align-items: stretch;
 }
 
 .project-stat {
@@ -1104,11 +1120,11 @@
     align-items: center;
     border: 1px solid transparent;
     border-radius: 6px;
-    color: var(--project-muted);
+    color: #81748a;
     cursor: pointer;
     display: inline-flex;
     flex: 0 0 auto;
-    font-weight: 700;
+    font-weight: 600;
     gap: 8px;
     min-height: 38px;
     padding: 8px 12px;
@@ -1119,6 +1135,7 @@
     background: var(--project-primary-soft);
     border-color: #cfe4f4;
     color: var(--project-primary-dark);
+    font-weight: 800;
 }
 
 .project-panel {
@@ -1244,8 +1261,8 @@
 
 .project-table.budget-lines .project-table-head,
 .project-table.budget-lines .project-table-row {
-    grid-template-columns: minmax(260px, 1.5fr) repeat(4, minmax(92px, 0.6fr)) minmax(176px, auto);
-    min-width: 980px;
+    grid-template-columns: minmax(280px, 1.5fr) repeat(4, minmax(132px, 0.68fr)) minmax(176px, auto);
+    min-width: 1080px;
 }
 
 .project-table.budget-lines {
@@ -1257,6 +1274,29 @@
     gap: 10px;
     grid-template-columns: repeat(3, minmax(140px, 1fr));
     margin-bottom: 14px;
+}
+
+.project-financier-summary {
+    grid-template-columns: repeat(3, minmax(150px, 1fr));
+}
+
+.project-financiers-table {
+    overflow-x: auto;
+}
+
+.project-financiers-table .project-table-head,
+.project-financiers-table .project-table-row {
+    grid-template-columns: minmax(230px, 1.6fr) repeat(4, minmax(128px, 0.75fr)) minmax(92px, auto);
+    min-width: 980px;
+}
+
+.project-financiers-table .project-table-head > div:nth-child(n+2):nth-child(-n+5),
+.project-money-cell {
+    text-align: right;
+}
+
+.project-financiers-table .project-actions {
+    text-align: center;
 }
 
 .project-table-row.budget-line-row {
@@ -1272,10 +1312,14 @@
 .project-table.budget-lines .project-actions {
     display: flex;
     gap: 8px;
-    justify-content: flex-end;
+    justify-content: center;
     min-width: 176px;
     overflow: visible;
     white-space: nowrap;
+}
+
+.project-table.budget-lines .project-table-head > div:nth-child(n+2):nth-child(-n+5) {
+    text-align: right;
 }
 
 .project-table.budget-lines .project-icon-btn {
@@ -1299,12 +1343,33 @@
     font-weight: 700;
 }
 
+.project-subline-prefix {
+    color: var(--project-warm);
+    display: inline-block;
+    font-weight: 800;
+    margin-right: 8px;
+}
+
 .project-subline-count {
     color: var(--project-primary);
     font-size: 0.78rem;
-    font-weight: 800;
+    font-weight: 700;
     margin-top: 6px;
-    text-transform: uppercase;
+}
+
+.project-money-kicker {
+    color: var(--project-muted);
+    display: block;
+    font-size: 0.68rem;
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 3px;
+}
+
+.project-not-applicable {
+    color: var(--project-muted);
+    font-weight: 700;
+    text-align: right;
 }
 
 .project-budget-grid {
@@ -1584,6 +1649,10 @@
         justify-content: flex-start;
     }
 
+    .project-hero-side {
+        justify-content: flex-start;
+    }
+
     .projects-area-grid,
     .dashboard-kpis,
     .dashboard-main-grid,
@@ -1637,6 +1706,10 @@
     .project-actions {
         text-align: left;
     }
+
+    .project-table.budget-lines .project-actions {
+        justify-content: flex-start;
+    }
 }
 
 @media (max-width: 640px) {
@@ -1684,5 +1757,17 @@
 
     .project-table-head {
         display: none;
+    }
+
+    .project-financiers-table .project-table-row {
+        align-items: flex-start;
+        grid-template-columns: 1fr;
+        min-width: 0;
+    }
+
+    .project-financiers-table .project-actions,
+    .project-money-cell,
+    .project-not-applicable {
+        text-align: left;
     }
 }
