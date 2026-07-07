@@ -11,6 +11,10 @@
                 <div class="card-header">
                     <strong>Pacientes sin informe de vulnerabilidad (Total: {{no_info_list|length}})</strong><br/>
                     <small>(Pacientes SIN documento cuyo nombre contiene "vulnerabilidad")</small>
+                    <div class="text-end mt-2">
+                        <a href="{% url "patients-aux-vulnera-list-export" 0 %}" target="_blank" style="color:#333">
+                            <i class="fas fa-download"></i> Exportar</a>
+                    </div>
                 </div>
                 <div class="card-body">
                     {% for item in no_info_list %}
@@ -27,6 +31,10 @@
                     <strong>Pacientes con informe de vulnerabilidad NO firmado (Total: {{no_signed_list|length}})</strong><br/>
                     <small>(Pacientes con al menos un documento cuyo nombre contiene "vulnerabilidad" y NO "signed" o "firmado")
                     </small>
+                    <div class="text-end mt-2">
+                        <a href="{% url "patients-aux-vulnera-list-export" 1 %}" target="_blank" style="color:#333">
+                            <i class="fas fa-download"></i> Exportar</a>
+                    </div>
                 </div>
                 <div class="card-body">
                     {% for item in no_signed_list %}
@@ -42,6 +50,10 @@
                 <div class="card-header">
                     <strong>Pacientes con informe de vulnerabilidad firmado (Total: {{signed_list|length}})</strong><br/>
                     <small>(Pacientes con al menos un documento cuyo nombre contiene "vulnerabilidad" y "signed" o "firmado")</small>
+                    <div class="text-end mt-2">
+                        <a href="{% url "patients-aux-vulnera-list-export" 2 %}" target="_blank" style="color:#333">
+                            <i class="fas fa-download"></i> Exportar</a>
+                    </div>
                 </div>
                 <div class="card-body">
                     {% for item in signed_list %}
