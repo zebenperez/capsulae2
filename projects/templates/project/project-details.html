@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n project_tags %}
 
 <div class="project-panel">
     <div class="project-section-header">
@@ -23,11 +23,11 @@
         </div>
         <div class="project-field">
             <label>{% trans "Fecha inicio" %}</label>
-            <div class="project-field-value">{{ obj.start_date|default:"---" }}</div>
+            <div class="project-field-value">{{ obj.start_date|date_es|default:"---" }}</div>
         </div>
         <div class="project-field">
             <label>{% trans "Fecha fin" %}</label>
-            <div class="project-field-value">{{ obj.finish_date|default:obj.end_date|default:"---" }}</div>
+            <div class="project-field-value">{{ obj.finish_date|date_es|default:"---" }}</div>
         </div>
         <div class="project-field">
             <label>{% trans "País" %}</label>

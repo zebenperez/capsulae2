@@ -1,0 +1,224 @@
+{% load i18n %}
+
+<div class="project-modal invoice-allocation-wizard">
+    <div class="project-modal-close">
+        <button type="button" class="project-icon-btn" data-bs-dismiss="modal" aria-label="{% trans 'Cerrar' %}">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+
+    <h2>{% trans "Imputar factura" %}</h2>
+    <p class="project-muted">
+        {{ invoice.locator }} · {{ invoice.number }} · {% trans "Imputado" %}: {{ allocated_amount_display }} € · {% trans "Pendiente" %}: {{ remaining_amount_display }} €
+    </p>
+
+    <form id="invoice-allocation-form">
+        <input type="hidden" name="invoice_id" value="{{ invoice.id }}">
+        <div class="invoice-wizard-steps">
+            <span class="active" data-step-indicator="1">1</span>
+            <span data-step-indicator="2">2</span>
+            <span data-step-indicator="3">3</span>
+            <span data-step-indicator="4">4</span>
+        </div>
+
+        <div class="invoice-wizard-step active" data-step="1">
+            <div class="project-form-field project-form-field-wide">
+                <label>{% trans "Proyecto" %}</label>
+                <select class="form-control" name="project" required>
+                    <option value="">---</option>
+                    {% for project in projects %}
+                        <option value="{{ project.id }}">{{ project.code|default:"" }} {{ project.name|default:"Proyecto sin nombre" }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="invoice-wizard-step" data-step="2">
+            <div class="project-form-field project-form-field-wide">
+                <label>{% trans "Partida / Subpartida" %}</label>
+                <select class="form-control" name="budget_line" required>
+                    <option value="">---</option>
+                    {% for budget_line in budget_lines %}
+                        <option value="{{ budget_line.id }}" data-project="{{ budget_line.project_id }}">
+                            {{ budget_line.project.code|default:budget_line.project.name }} · {{ budget_line.full_code }} · {{ budget_line.name|default:"Sin nombre" }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="invoice-wizard-step" data-step="3">
+            <div class="project-form-field project-form-field-wide">
+                <label>{% trans "Aportación de financiador" %}</label>
+                <select class="form-control" name="financier_contribution" required>
+                    <option value="">---</option>
+                    {% for contribution in contributions %}
+                        <option value="{{ contribution.id }}"
+                            data-project="{{ contribution.project_id }}"
+                            data-budget-line="{% if contribution.sub_budget_line_id %}{{ contribution.sub_budget_line_id }}{% else %}{{ contribution.budget_line_id }}{% endif %}"
+                            data-available="{{ contribution.available_amount }}">
+                            {{ contribution.financier.name }} · {{ contribution.amount }} € · {% trans "Disponible" %}: {{ contribution.available_amount }} €
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="project-form-field project-form-field-wide">
+                <label>
+                    {% trans "Importe a imputar" %}
+                    <span class="invoice-allocation-max-label">· {% trans "Máximo disponible" %}: {{ remaining_amount_display }} €</span>
+                </label>
+                <div class="invoice-allocation-mode">
+                    <label>
+                        <input type="radio" name="allocation_mode" value="amount" checked>
+                        {% trans "Cantidad" %}
+                    </label>
+                    <label>
+                        <input type="radio" name="allocation_mode" value="percentage">
+                        {% trans "Porcentaje" %}
+                    </label>
+                </div>
+                <input type="number" step="0.01" min="0.01" class="form-control" name="allocated_amount"
+                    value="{{ remaining_amount }}" max="{{ remaining_amount }}" required>
+                <input type="number" step="0.01" min="0.01" class="form-control invoice-allocation-percentage-input"
+                    name="allocated_percentage" value="100.00" max="100" required>
+            </div>
+        </div>
+
+        <div class="invoice-wizard-step" data-step="4">
+            <div class="project-form-field project-form-field-wide">
+                <label>{% trans "Actividad" %}</label>
+                <select class="form-control" name="activity">
+                    <option value="">{% trans "--- Sin actividad ---" %}</option>
+                    {% for activity in activities %}
+                        <option value="{{ activity.id }}" data-project="{{ activity.project_id }}">
+                            {{ activity.code|default:"" }} {{ activity.name|default:"Actividad sin nombre" }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+    </form>
+
+    <div class="project-modal-actions invoice-wizard-actions">
+        <button type="button" class="project-btn project-btn-ghost invoice-wizard-prev">{% trans "Anterior" %}</button>
+        <button type="button" class="project-btn project-btn-primary invoice-wizard-next">{% trans "Siguiente" %}</button>
+        <button type="button" class="project-btn project-btn-primary ajax-form-get invoice-wizard-save" data-form="invoice-allocation-form"
+            data-url="{% url "invoice-allocation-save" %}" data-target="invoice-list" data-dismiss-modal="common-modal">
+            {% trans "Guardar" %}
+        </button>
+    </div>
+</div>
+
+<script>
+    (function(){
+        var currentStep = 1;
+        var maxStep = 4;
+        var remainingAmount = parseFloat("{{ remaining_amount|default:"0" }}");
+        var invoiceTotal = parseFloat("{{ invoice.total_amount|default:"0" }}");
+        var currentMaxAmount = remainingAmount;
+
+        function formatMoney(value) {
+            return value.toLocaleString("es-ES", {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        }
+
+        function updateMaxLabel() {
+            var maxPercentage = invoiceTotal > 0 ? (currentMaxAmount * 100 / invoiceTotal) : 0;
+            $(".invoice-allocation-max-label").text("· {% trans "Máximo disponible" %}: " + formatMoney(currentMaxAmount) + " € (" + maxPercentage.toFixed(2) + "%)");
+        }
+
+        function syncAllocationMode() {
+            var mode = $('[name="allocation_mode"]:checked').val();
+            var amountField = $('[name="allocated_amount"]');
+            var percentageField = $('[name="allocated_percentage"]');
+            var maxPercentage = invoiceTotal > 0 ? (currentMaxAmount * 100 / invoiceTotal) : 0;
+            amountField.attr("max", currentMaxAmount.toFixed(2));
+            percentageField.attr("max", maxPercentage.toFixed(2));
+            if (mode === "percentage") {
+                amountField.hide().prop("required", false);
+                percentageField.show().prop("required", true);
+                if (parseFloat(percentageField.val() || "0") > maxPercentage) {
+                    percentageField.val(maxPercentage.toFixed(2));
+                }
+            } else {
+                percentageField.hide().prop("required", false);
+                amountField.show().prop("required", true);
+                if (parseFloat(amountField.val() || "0") > currentMaxAmount) {
+                    amountField.val(currentMaxAmount.toFixed(2));
+                }
+            }
+            updateMaxLabel();
+        }
+
+        function showStep(step) {
+            currentStep = Math.max(1, Math.min(maxStep, step));
+            $(".invoice-wizard-step").removeClass("active");
+            $('.invoice-wizard-step[data-step="' + currentStep + '"]').addClass("active");
+            $("[data-step-indicator]").removeClass("active");
+            $('[data-step-indicator="' + currentStep + '"]').addClass("active");
+            $(".invoice-wizard-prev").toggle(currentStep > 1);
+            $(".invoice-wizard-next").toggle(currentStep < maxStep);
+            $(".invoice-wizard-save").toggle(currentStep === maxStep);
+        }
+
+        function filterOptions(selectName, predicate) {
+            $('[name="' + selectName + '"] option').each(function(){
+                var value = $(this).attr("value");
+                var visible = !value || predicate($(this));
+                $(this).prop("disabled", !visible).toggle(visible);
+            });
+            if ($('[name="' + selectName + '"] option:selected').prop("disabled")) {
+                $('[name="' + selectName + '"]').val("");
+            }
+        }
+
+        function filterDependentFields() {
+            var projectId = $('[name="project"]').val();
+            var budgetLineId = $('[name="budget_line"]').val();
+            filterOptions("budget_line", function(option){
+                return String(option.data("project")) === String(projectId);
+            });
+            filterOptions("financier_contribution", function(option){
+                return String(option.data("project")) === String(projectId) &&
+                    String(option.data("budget-line")) === String(budgetLineId);
+            });
+            filterOptions("activity", function(option){
+                return String(option.data("project")) === String(projectId);
+            });
+        }
+
+        function updateAmountFromContribution() {
+            var selected = $('[name="financier_contribution"] option:selected');
+            var available = parseFloat(selected.data("available") || "0");
+            var amount = Math.min(remainingAmount, available);
+            currentMaxAmount = amount;
+            if (amount > 0) {
+                $('[name="allocated_amount"]').val(amount.toFixed(2));
+            }
+            syncAllocationMode();
+        }
+
+        $(".invoice-wizard-next").on("click", function(){
+            var field = $('.invoice-wizard-step[data-step="' + currentStep + '"]').find("select[required], input[required]").first();
+            if (field.length && !field.val()) {
+                field.addClass("invalid").focus();
+                return;
+            }
+            field.removeClass("invalid");
+            showStep(currentStep + 1);
+        });
+        $(".invoice-wizard-prev").on("click", function(){ showStep(currentStep - 1); });
+        $('[name="project"]').on("change", function(){
+            $('[name="budget_line"], [name="financier_contribution"], [name="activity"]').val("");
+            filterDependentFields();
+        });
+        $('[name="budget_line"]').on("change", function(){
+            $('[name="financier_contribution"]').val("");
+            filterDependentFields();
+        });
+        $('[name="financier_contribution"]').on("change", updateAmountFromContribution);
+        $('[name="allocation_mode"]').on("change", syncAllocationMode);
+        filterDependentFields();
+        syncAllocationMode();
+        showStep(1);
+    })();
+</script>

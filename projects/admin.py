@@ -147,25 +147,24 @@ class InvoiceDocumentInline(admin.TabularInline):
 class InvoiceAllocationInline(admin.TabularInline):
     model = InvoiceAllocation
     extra = 0
-    autocomplete_fields = ("project", "activity", "budget_line", "sub_budget_line", "financier")
+    autocomplete_fields = ("project", "activity", "budget_line", "sub_budget_line", "financier_contribution", "financier")
 
 
 @admin.register(Invoice)
 class InvoiceAdmin(admin.ModelAdmin):
-    list_display = ("number", "provider", "project", "activity", "issue_date", "total_amount", "allocated_amount", "status")
-    list_filter = ("status", "currency", "issue_date", "payment_date", "project")
-    search_fields = ("number", "provider", "concept", "project__name", "activity__name")
-    autocomplete_fields = ("project", "activity")
-    readonly_fields = ("allocated_amount", "pending_amount")
+    list_display = ("locator", "invoice_code", "number", "provider_tax_id", "issue_date", "total_amount", "allocated_amount", "status")
+    list_filter = ("status", "currency", "issue_date", "payment_date")
+    search_fields = ("locator", "invoice_code", "number", "provider_tax_id", "concept")
+    readonly_fields = ("invoice_code", "allocated_amount", "pending_amount")
     inlines = (InvoiceDocumentInline, InvoiceAllocationInline)
 
 
 @admin.register(InvoiceAllocation)
 class InvoiceAllocationAdmin(admin.ModelAdmin):
-    list_display = ("invoice", "project", "activity", "sub_budget_line", "financier", "allocated_amount", "allocated_percentage")
+    list_display = ("invoice", "project", "activity", "sub_budget_line", "financier_contribution", "financier", "allocated_amount", "allocated_percentage")
     list_filter = ("project", "financier", "allocation_date")
-    search_fields = ("invoice__number", "invoice__provider", "activity__name", "sub_budget_line__name", "financier__name")
-    autocomplete_fields = ("invoice", "project", "activity", "budget_line", "sub_budget_line", "financier")
+    search_fields = ("invoice__number", "invoice__provider_tax_id", "activity__name", "sub_budget_line__name", "financier__name")
+    autocomplete_fields = ("invoice", "project", "activity", "budget_line", "sub_budget_line", "financier_contribution", "financier")
 
 
 admin.site.register(InvoiceDocument)

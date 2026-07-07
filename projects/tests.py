@@ -4,6 +4,7 @@ from decimal import Decimal
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.test import TestCase
+from django.urls import reverse
 
 from .models import (
     Activity,
@@ -85,9 +86,8 @@ class ProjectModelTests(TestCase):
             percentage=Decimal("100.00"),
         )
         self.invoice = Invoice.objects.create(
-            project=self.project,
-            activity=self.activity,
-            provider="Proveedor SL",
+            locator="TST01",
+            provider_tax_id="B00000000",
             number="F-001",
             issue_date=date(2026, 2, 1),
             payment_date=date(2026, 2, 15),
@@ -152,21 +152,160 @@ class ProjectModelTests(TestCase):
         with self.assertRaises(ValidationError):
             allocation.full_clean()
 
-    def test_cross_project_activity_is_rejected(self):
-        other_project = Project.objects.create(code="OTHER", name="Otro", approved_budget=Decimal("100.00"))
-        invoice = Invoice(
-            project=other_project,
-            activity=self.activity,
-            provider="Proveedor SL",
-            number="F-002",
-            issue_date=date(2026, 2, 1),
+    def test_invoice_allocation_can_have_no_activity(self):
+        allocation = InvoiceAllocation(
+            invoice=self.invoice,
+            project=self.project,
+            activity=None,
+            budget_line=self.budget_line,
+            sub_budget_line=self.sub_budget_line,
+            financier_contribution=self.contribution,
+            financier=self.financier,
+            allocated_amount=Decimal("100.00"),
+        )
+
+        allocation.full_clean()
+
+    def test_invoice_code_and_total_are_generated(self):
+        invoice = Invoice.objects.create(
+            locator="ab12c",
+            provider_tax_id="B11111111",
+            number="F-100",
+            issue_date=date(2026, 5, 2),
+            concept="Servicios",
+            taxable_base=Decimal("10.50"),
+            taxes=Decimal("2.10"),
+            total_amount=Decimal("0.00"),
+        )
+
+        self.assertEqual(invoice.locator, "AB12C")
+        self.assertEqual(invoice.invoice_code, "2026-{}".format(invoice.id))
+        self.assertEqual(invoice.total_amount, Decimal("12.60"))
+
+    def test_invoice_locator_is_generated_on_create(self):
+        first = Invoice.objects.create(
+            provider_tax_id="B12121212",
+            number="F-GEN-1",
+            issue_date=date(2026, 5, 3),
             concept="Servicios",
             taxable_base=Decimal("10.00"),
-            taxes=Decimal("0.00"),
-            total_amount=Decimal("10.00"),
+            taxes=Decimal("2.00"),
+            total_amount=Decimal("0.00"),
         )
-        with self.assertRaises(ValidationError):
-            invoice.full_clean()
+        second = Invoice.objects.create(
+            provider_tax_id="B12121212",
+            number="F-GEN-2",
+            issue_date=date(2026, 5, 4),
+            concept="Servicios",
+            taxable_base=Decimal("20.00"),
+            taxes=Decimal("4.00"),
+            total_amount=Decimal("0.00"),
+        )
+
+        self.assertRegex(first.locator, r"^[A-Z0-9]{5}$")
+        self.assertRegex(second.locator, r"^[A-Z0-9]{5}$")
+        self.assertNotEqual(first.locator, second.locator)
+
+    def test_invoice_imputation_summary_without_amount_is_unknown(self):
+        invoice = Invoice.objects.create(
+            provider_tax_id="B12121212",
+            number="F-NO-AMOUNT",
+            issue_date=date(2026, 5, 5),
+            concept="Factura sin importe",
+            taxable_base=Decimal("0.00"),
+            taxes=Decimal("0.00"),
+            total_amount=Decimal("0.00"),
+        )
+
+        summary = invoice.imputation_summary
+
+        self.assertEqual(summary["importe_total_imputado"], Decimal("0.00"))
+        self.assertIsNone(summary["porcentaje_imputado"])
+        self.assertEqual(summary["estado_imputacion"], "unknown")
+        self.assertEqual(summary["porcentaje_display"], "N/A")
+
+    def test_invoice_imputation_summary_zero(self):
+        summary = self.invoice.imputation_summary
+
+        self.assertEqual(summary["importe_total_imputado"], Decimal("0.00"))
+        self.assertEqual(summary["porcentaje_imputado"], Decimal("0.00"))
+        self.assertEqual(summary["estado_imputacion"], "zero")
+        self.assertEqual(summary["porcentaje_display"], "0%")
+
+    def test_invoice_imputation_summary_partial(self):
+        InvoiceAllocation.objects.create(
+            invoice=self.invoice,
+            project=self.project,
+            activity=self.activity,
+            budget_line=self.budget_line,
+            sub_budget_line=self.sub_budget_line,
+            financier_contribution=self.contribution,
+            financier=self.financier,
+            allocated_amount=Decimal("605.00"),
+        )
+
+        summary = self.invoice.imputation_summary
+
+        self.assertEqual(summary["importe_total_imputado"], Decimal("605.00"))
+        self.assertEqual(summary["estado_imputacion"], "partial")
+        self.assertEqual(summary["porcentaje_display"], "50%")
+
+    def test_invoice_imputation_summary_complete(self):
+        InvoiceAllocation.objects.create(
+            invoice=self.invoice,
+            project=self.project,
+            activity=self.activity,
+            budget_line=self.budget_line,
+            sub_budget_line=self.sub_budget_line,
+            financier_contribution=self.contribution,
+            financier=self.financier,
+            allocated_amount=Decimal("1210.00"),
+        )
+
+        summary = self.invoice.imputation_summary
+
+        self.assertEqual(summary["importe_total_imputado"], Decimal("1210.00"))
+        self.assertEqual(summary["estado_imputacion"], "complete")
+        self.assertEqual(summary["porcentaje_display"], "100%")
+
+    def test_invoice_imputation_summary_over(self):
+        over_invoice = Invoice.objects.create(
+            locator="OVR01",
+            provider_tax_id="B12121212",
+            number="F-OVER",
+            issue_date=date(2026, 5, 6),
+            concept="Factura sobreimputada",
+            taxable_base=Decimal("100.00"),
+            taxes=Decimal("0.00"),
+            total_amount=Decimal("100.00"),
+        )
+        InvoiceAllocation.objects.create(
+            invoice=over_invoice,
+            project=self.project,
+            activity=self.activity,
+            budget_line=self.budget_line,
+            sub_budget_line=self.sub_budget_line,
+            financier_contribution=self.contribution,
+            financier=self.financier,
+            allocated_amount=Decimal("70.00"),
+        )
+        InvoiceAllocation.objects.create(
+            invoice=over_invoice,
+            project=self.project,
+            activity=self.activity,
+            budget_line=self.budget_line,
+            sub_budget_line=self.sub_budget_line,
+            financier_contribution=self.contribution,
+            financier=self.financier,
+            allocated_amount=Decimal("55.00"),
+        )
+
+        summary = over_invoice.imputation_summary
+
+        self.assertEqual(summary["importe_total_imputado"], Decimal("125.00"))
+        self.assertEqual(summary["estado_imputacion"], "over")
+        self.assertEqual(summary["porcentaje_display"], "125%")
+        self.assertEqual(summary["barra_porcentaje_style"], "100")
 
     def test_financier_contribution_cannot_exceed_committed_amount(self):
         contribution = FinancierContribution(
@@ -267,3 +406,280 @@ class ProjectModelTests(TestCase):
         )
         with self.assertRaises(ValidationError):
             allocation.full_clean()
+
+
+class ProjectViewTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_superuser(
+            username="admin",
+            email="admin@example.com",
+            password="test",
+        )
+        self.project = Project.objects.create(
+            code="TEST01",
+            name="Proyecto de prueba",
+            status="draft",
+            start_date=date(2026, 7, 1),
+            finish_date=date(2026, 7, 31),
+            end_date="20/01/2023 13:00",
+            approved_budget=Decimal("50000.00"),
+        )
+        self.client.force_login(self.user)
+
+    def test_project_shell_renders_updated_project_header(self):
+        self.project.name = "Proyecto actualizado"
+        self.project.save(update_fields=["name"])
+
+        response = self.client.get(reverse("project-shell"), {"obj_id": self.project.id})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Proyecto actualizado")
+        self.assertContains(response, 'id="div-container"')
+        self.assertContains(response, "1 de julio de 2026")
+        self.assertContains(response, "31 de julio de 2026")
+        self.assertNotContains(response, "July")
+        self.assertNotContains(response, "20/01/2023 13:00")
+
+    def test_project_form_hides_execution_date(self):
+        response = self.client.get(reverse("project-form"), {"obj_id": self.project.id})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, "Fecha de ejecución")
+        self.assertNotContains(response, 'name="end_date"')
+
+
+class ProjectInvoiceDashboardTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_superuser(
+            username="invoice-admin",
+            email="invoice-admin@example.com",
+            password="test",
+        )
+        self.project = Project.objects.create(
+            code="INV",
+            name="Proyecto facturas",
+            manager=self.user,
+            status="active",
+            approved_budget=Decimal("1000.00"),
+        )
+        self.activity = Activity.objects.create(
+            project=self.project,
+            code="A1",
+            name="Actividad facturable",
+            status=ProgressStatus.IN_PROGRESS,
+        )
+        self.budget_line = BudgetLine.objects.create(
+            project=self.project,
+            code="1",
+            name="Partida facturable",
+            approved_budget=Decimal("1000.00"),
+        )
+        self.financier = Financier.objects.create(name="Financiador wizard")
+        ProjectFinancier.objects.create(
+            project=self.project,
+            financier=self.financier,
+            committed_amount=Decimal("1000.00"),
+            granted_amount=Decimal("1000.00"),
+        )
+        self.contribution = FinancierContribution.objects.create(
+            project=self.project,
+            financier=self.financier,
+            budget_line=self.budget_line,
+            amount=Decimal("1000.00"),
+            percentage=Decimal("100.00"),
+        )
+        self.client.force_login(self.user)
+
+    def test_invoice_list_shows_only_last_year_invoices(self):
+        Invoice.objects.create(
+            locator="REC01",
+            provider_tax_id="B22222222",
+            number="F-REC",
+            issue_date=date(2026, 2, 1),
+            concept="Factura reciente",
+            taxable_base=Decimal("100.00"),
+            taxes=Decimal("21.00"),
+            total_amount=Decimal("121.00"),
+        )
+        Invoice.objects.create(
+            locator="OLD01",
+            provider_tax_id="B33333333",
+            number="F-OLD",
+            issue_date=date(2024, 1, 1),
+            concept="Factura antigua",
+            taxable_base=Decimal("100.00"),
+            taxes=Decimal("21.00"),
+            total_amount=Decimal("121.00"),
+        )
+
+        response = self.client.get(reverse("invoice-list"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "REC01")
+        self.assertContains(response, "1 de febrero de 2026")
+        self.assertNotContains(response, "February")
+        self.assertNotContains(response, "OLD01")
+
+    def test_invoice_list_shows_imputation_indicator(self):
+        invoice = Invoice.objects.create(
+            locator="PCT01",
+            provider_tax_id="B22222222",
+            number="F-PARTIAL",
+            issue_date=date(2026, 2, 2),
+            concept="Factura parcialmente imputada",
+            taxable_base=Decimal("200.00"),
+            taxes=Decimal("42.00"),
+            total_amount=Decimal("242.00"),
+        )
+        InvoiceAllocation.objects.create(
+            invoice=invoice,
+            project=self.project,
+            activity=self.activity,
+            budget_line=self.budget_line,
+            financier_contribution=self.contribution,
+            financier=self.financier,
+            allocated_amount=Decimal("121.00"),
+        )
+
+        response = self.client.get(reverse("invoice-list"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "invoice-imputation--partial")
+        self.assertContains(response, "50%")
+        self.assertContains(response, "Porcentaje imputado de la factura: 50%")
+
+    def test_recent_invoice_query_preloads_imputed_amount(self):
+        invoice = Invoice.objects.create(
+            locator="ANN01",
+            provider_tax_id="B22222222",
+            number="F-ANNOTATED",
+            issue_date=date(2026, 2, 3),
+            concept="Factura anotada",
+            taxable_base=Decimal("200.00"),
+            taxes=Decimal("42.00"),
+            total_amount=Decimal("242.00"),
+        )
+        InvoiceAllocation.objects.create(
+            invoice=invoice,
+            project=self.project,
+            activity=self.activity,
+            budget_line=self.budget_line,
+            financier_contribution=self.contribution,
+            financier=self.financier,
+            allocated_amount=Decimal("121.00"),
+        )
+        from .views import get_recent_invoices
+
+        invoice = list(get_recent_invoices(self.user).filter(pk=invoice.pk))[0]
+
+        self.assertEqual(invoice.allocated_amount_total, Decimal("121.00"))
+        with self.assertNumQueries(0):
+            self.assertEqual(invoice.imputation_summary["porcentaje_display"], "50%")
+
+    def test_invoice_save_creates_invoice_with_generated_locator_and_calculated_total(self):
+        response = self.client.get(reverse("invoice-save"), {
+            "provider_tax_id": "b44444444",
+            "number": "F-NEW",
+            "issue_date": "2026-06-01",
+            "payment_date": "2026-06-10",
+            "concept": "Factura nueva",
+            "taxable_base": "200.00",
+            "taxes": "42.00",
+        })
+
+        self.assertEqual(response.status_code, 200)
+        invoice = Invoice.objects.get(number="F-NEW")
+        self.assertRegex(invoice.locator, r"^[A-Z0-9]{5}$")
+        self.assertEqual(invoice.invoice_code, "2026-{}".format(invoice.id))
+        self.assertEqual(invoice.provider_tax_id, "B44444444")
+        self.assertEqual(invoice.total_amount, Decimal("242.00"))
+        self.assertContains(response, invoice.locator)
+
+    def test_invoice_allocation_wizard_saves_allocation_without_activity(self):
+        invoice = Invoice.objects.create(
+            provider_tax_id="B55555555",
+            number="F-WIZ",
+            issue_date=date(2026, 6, 2),
+            concept="Factura imputable",
+            taxable_base=Decimal("300.00"),
+            taxes=Decimal("63.00"),
+            total_amount=Decimal("363.00"),
+        )
+
+        response = self.client.get(reverse("invoice-allocation-save"), {
+            "invoice_id": invoice.id,
+            "project": self.project.id,
+            "budget_line": self.budget_line.id,
+            "financier_contribution": self.contribution.id,
+            "allocated_amount": "200.00",
+            "activity": "",
+        })
+
+        self.assertEqual(response.status_code, 200)
+        allocation = InvoiceAllocation.objects.get(invoice=invoice)
+        self.assertEqual(allocation.project, self.project)
+        self.assertEqual(allocation.budget_line, self.budget_line)
+        self.assertIsNone(allocation.sub_budget_line)
+        self.assertEqual(allocation.financier_contribution, self.contribution)
+        self.assertEqual(allocation.financier, self.financier)
+        self.assertIsNone(allocation.activity)
+        self.assertEqual(allocation.allocated_amount, Decimal("200.00"))
+
+    def test_invoice_allocation_wizard_saves_percentage_amount(self):
+        invoice = Invoice.objects.create(
+            provider_tax_id="B66666666",
+            number="F-PCT",
+            issue_date=date(2026, 6, 3),
+            concept="Factura por porcentaje",
+            taxable_base=Decimal("200.00"),
+            taxes=Decimal("42.00"),
+            total_amount=Decimal("242.00"),
+        )
+
+        response = self.client.get(reverse("invoice-allocation-save"), {
+            "invoice_id": invoice.id,
+            "project": self.project.id,
+            "budget_line": self.budget_line.id,
+            "financier_contribution": self.contribution.id,
+            "allocation_mode": "percentage",
+            "allocated_percentage": "50.00",
+            "activity": self.activity.id,
+        })
+
+        self.assertEqual(response.status_code, 200)
+        allocation = InvoiceAllocation.objects.get(invoice=invoice)
+        self.assertEqual(allocation.activity, self.activity)
+        self.assertEqual(allocation.allocated_amount, Decimal("121.00"))
+
+    def test_invoice_allocation_wizard_rejects_amount_over_pending_invoice_total(self):
+        invoice = Invoice.objects.create(
+            provider_tax_id="B77777777",
+            number="F-LIMIT",
+            issue_date=date(2026, 6, 4),
+            concept="Factura parcialmente imputada",
+            taxable_base=Decimal("300.00"),
+            taxes=Decimal("63.00"),
+            total_amount=Decimal("363.00"),
+        )
+        InvoiceAllocation.objects.create(
+            invoice=invoice,
+            project=self.project,
+            activity=self.activity,
+            budget_line=self.budget_line,
+            financier_contribution=self.contribution,
+            financier=self.financier,
+            allocated_amount=Decimal("300.00"),
+        )
+
+        response = self.client.get(reverse("invoice-allocation-save"), {
+            "invoice_id": invoice.id,
+            "project": self.project.id,
+            "budget_line": self.budget_line.id,
+            "financier_contribution": self.contribution.id,
+            "allocation_mode": "amount",
+            "allocated_amount": "100.00",
+            "activity": "",
+        })
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(InvoiceAllocation.objects.filter(invoice=invoice).count(), 1)

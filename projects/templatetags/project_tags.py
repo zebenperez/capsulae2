@@ -9,3 +9,25 @@ register = template.Library()
 def get_folder_pathway(folder, project_id):
     return mark_safe(get_folder_path_link(folder, folder, project_id))
 
+
+@register.filter()
+def date_es(value):
+    if not value:
+        return ""
+    months = [
+        "",
+        "enero",
+        "febrero",
+        "marzo",
+        "abril",
+        "mayo",
+        "junio",
+        "julio",
+        "agosto",
+        "septiembre",
+        "octubre",
+        "noviembre",
+        "diciembre",
+    ]
+    date_value = value.date() if hasattr(value, "date") else value
+    return "{} de {} de {}".format(date_value.day, months[date_value.month], date_value.year)

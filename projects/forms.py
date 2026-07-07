@@ -127,16 +127,14 @@ class InvoiceForm(forms.ModelForm):
     class Meta:
         model = Invoice
         fields = (
-            "project",
-            "activity",
-            "provider",
+            "locator",
+            "provider_tax_id",
             "number",
             "issue_date",
             "payment_date",
             "concept",
             "taxable_base",
             "taxes",
-            "total_amount",
             "currency",
             "document_pdf",
             "status",
@@ -153,6 +151,7 @@ class InvoiceAllocationForm(forms.ModelForm):
             "activity",
             "budget_line",
             "sub_budget_line",
+            "financier_contribution",
             "financier",
             "allocated_amount",
             "allocated_percentage",
