@@ -24,6 +24,7 @@ from .models import (
     ProgressStatus,
     Text,
 )
+from .templatetags.project_tags import money_es
 
 
 class ProjectModelTests(TestCase):
@@ -466,6 +467,34 @@ class ProjectViewTests(TestCase):
             "incomes": 1,
             "expenses": 1,
         })
+
+    def test_project_financiers_tab_uses_clear_financial_labels(self):
+        financier = Financier.objects.create(
+            name="Caixa",
+            financier_type=FinancierType.PUBLIC,
+            tax_id="A00000000",
+        )
+        ProjectFinancier.objects.create(
+            project=self.project,
+            financier=financier,
+            committed_amount=Decimal("30000.00"),
+            granted_amount=Decimal("28000.00"),
+            disbursed_amount=Decimal("25000.00"),
+        )
+
+        response = self.client.get(reverse("project-financiers"), {"obj_id": self.project.id})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Financiación comprometida")
+        self.assertContains(response, "Fondos desembolsados")
+        self.assertContains(response, "Disponible para partidas")
+        self.assertContains(response, "30.000,00 €")
+        self.assertContains(response, 'aria-label="Editar financiador Caixa"')
+        self.assertNotContains(response, ">Comprometido</span>\n            <span class=\"project-stat-value\">1</span>")
+
+    def test_money_es_formats_spanish_currency(self):
+        self.assertEqual(money_es(Decimal("50000.00")), "50.000,00 €")
+        self.assertEqual(money_es(Decimal("750.00")), "750,00 €")
 
     def test_project_form_hides_execution_date(self):
         response = self.client.get(reverse("project-form"), {"obj_id": self.project.id})

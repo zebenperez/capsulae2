@@ -482,9 +482,22 @@ def project_details(request):
 
 
 def get_project_financiers_context(project):
+    project_financiers = project.project_financiers.select_related("financier").order_by("financier__name")
+    committed_amount = decimal_sum(project_financiers, "committed_amount")
+    granted_amount = decimal_sum(project_financiers, "granted_amount")
+    disbursed_amount = decimal_sum(project_financiers, "disbursed_amount")
+    pending_execution = max((project.approved_budget or Decimal("0.00")) - project.executed_budget, Decimal("0.00"))
     return {
         "obj": project,
-        "project_financiers": project.project_financiers.select_related("financier").order_by("financier__name"),
+        "project_financiers": project_financiers,
+        "financier_summary": {
+            "approved_budget": project.approved_budget or Decimal("0.00"),
+            "committed_amount": committed_amount,
+            "granted_amount": granted_amount,
+            "disbursed_amount": disbursed_amount,
+            "pending_execution": pending_execution,
+            "financier_count": project_financiers.count(),
+        },
     }
 
 

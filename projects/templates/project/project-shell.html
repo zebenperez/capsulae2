@@ -24,11 +24,11 @@
         <div class="project-stat-grid">
             <div class="project-stat">
                 <span class="project-stat-label">{% trans "Presupuesto" %}</span>
-                <span class="project-stat-value">{{ obj.approved_budget|default:"0.00" }}</span>
+                <span class="project-stat-value">{{ obj.approved_budget|money_es }}</span>
             </div>
             <div class="project-stat">
-                <span class="project-stat-label">{% trans "Ejecutado" %}</span>
-                <span class="project-stat-value">{{ obj.executed_budget|default:"0.00" }}</span>
+                <span class="project-stat-label">{% trans "Gasto ejecutado" %}</span>
+                <span class="project-stat-value">{{ obj.executed_budget|money_es }}</span>
             </div>
             <div class="project-stat">
                 <span class="project-stat-label">{% trans "Actividades" %}</span>
