@@ -61,10 +61,12 @@ def vulnera_list_export(request, list_type):
                 info = True
             if "vulnerabilidad" in name and ("firmado" in name or "signed" in name):
                 signed = True
-        if info and signed and list_type == 2:
-            item_list.append(p)
-        elif info and list_type == 1:
-            item_list.append(p)
+        if info and signed:
+            if list_type == 2:
+                item_list.append(p)
+        elif info:
+            if list_type == 1:
+                item_list.append(p)
         elif list_type == 0:
             item_list.append(p)
 
