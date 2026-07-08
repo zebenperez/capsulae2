@@ -3,6 +3,7 @@ from decimal import Decimal
 
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from django.urls import reverse
 
@@ -17,11 +18,14 @@ from .models import (
     Indicator,
     Invoice,
     InvoiceAllocation,
+    InvoiceStatus,
+    InvoiceStatusChange,
     Objective,
     ObjectiveType,
     Project,
     ProjectFinancier,
     ProgressStatus,
+    Supplier,
     Text,
 )
 from .templatetags.project_tags import money_es
@@ -602,7 +606,7 @@ class ProjectInvoiceDashboardTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "REC01")
-        self.assertContains(response, "1 de febrero de 2026")
+        self.assertContains(response, "01/02/2026")
         self.assertNotContains(response, "February")
         self.assertNotContains(response, "OLD01")
 
@@ -633,6 +637,172 @@ class ProjectInvoiceDashboardTests(TestCase):
         self.assertContains(response, "invoice-imputation--partial")
         self.assertContains(response, "50%")
         self.assertContains(response, "Porcentaje imputado de la factura: 50%")
+
+    def test_supplier_crud_creates_searches_and_removes_supplier(self):
+        response = self.client.get(reverse("supplier-save"), {
+            "name": "Proveedor Salud",
+            "nif": "b12345678",
+            "address": "Calle Mayor 1",
+            "email": "proveedor@example.com",
+            "phone": "600111222",
+            "contact_person": "Ana Contacto",
+        })
+
+        self.assertEqual(response.status_code, 200)
+        supplier = Supplier.objects.get(nif="B12345678")
+        self.assertEqual(supplier.name, "Proveedor Salud")
+        self.assertContains(response, "Proveedor Salud")
+        self.assertContains(response, "B12345678")
+
+        response = self.client.get(reverse("supplier-search"), {"s-supplier": "Ana"})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Proveedor Salud")
+
+        response = self.client.get(reverse("supplier-form"), {"obj_id": supplier.id})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Editar proveedor")
+        self.assertContains(response, "Proveedor Salud")
+
+        response = self.client.get(reverse("supplier-remove"), {"obj_id": supplier.id})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(Supplier.objects.filter(pk=supplier.pk).exists())
+
+    def test_projects_dashboard_context_includes_suppliers(self):
+        supplier = Supplier.objects.create(
+            name="Proveedor Dashboard",
+            nif="B99999999",
+            address="Calle Dashboard 1",
+            email="dashboard@example.com",
+            phone="600999999",
+            contact_person="Contacto Dashboard",
+        )
+        from .views import get_projects_dashboard_context
+
+        context = get_projects_dashboard_context(self.user)
+        response = self.client.get(reverse("supplier-list"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(supplier, list(context["suppliers"]))
+        self.assertContains(response, "Proveedor Dashboard")
+
+    def test_invoice_list_uses_task_oriented_invoice_layout(self):
+        Invoice.objects.create(
+            locator="UX001",
+            provider_tax_id="B44444444",
+            number="F-UX",
+            issue_date=date(2026, 6, 1),
+            concept="Factura para revisar jerarquia visual",
+            taxable_base=Decimal("1500.00"),
+            taxes=Decimal("105.00"),
+            total_amount=Decimal("1605.00"),
+            status=InvoiceStatus.PAID,
+        )
+
+        response = self.client.get(reverse("invoice-list"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Proveedor")
+        self.assertNotContains(response, "NIF proveedor")
+        self.assertContains(response, "Proveedor no registrado")
+        self.assertContains(response, "NIF/CIF: B44444444")
+        self.assertContains(response, "Concepto")
+        self.assertContains(response, "Factura para revisar jerarquia visual")
+        self.assertContains(response, "01/06/2026")
+        self.assertContains(response, "pendiente")
+        self.assertContains(response, "Base: 1.500,00 €")
+        self.assertContains(response, "Impuestos: 105,00 €")
+        self.assertContains(response, "Total: 1.605,00 €")
+        self.assertContains(response, "Requiere imputación")
+
+    def test_invoice_list_warns_when_physical_document_is_missing(self):
+        invoice = Invoice.objects.create(
+            locator="DOC01",
+            provider_tax_id="B44444444",
+            number="F-DOC",
+            issue_date=date(2026, 6, 1),
+            concept="Factura sin documento fisico",
+            taxable_base=Decimal("200.00"),
+            taxes=Decimal("42.00"),
+            total_amount=Decimal("242.00"),
+        )
+
+        response = self.client.get(reverse("invoice-list"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Falta documento físico")
+        self.assertContains(response, reverse("invoice-physical-document-upload"))
+        self.assertContains(response, 'data-obj-id="{}"'.format(invoice.id))
+
+    def test_invoice_list_shows_physical_document_loaded(self):
+        invoice = Invoice.objects.create(
+            locator="DOC02",
+            provider_tax_id="B44444444",
+            number="F-DOC-LOADED",
+            issue_date=date(2026, 6, 1),
+            concept="Factura con documento fisico",
+            taxable_base=Decimal("200.00"),
+            taxes=Decimal("42.00"),
+            total_amount=Decimal("242.00"),
+        )
+        invoice.physical_document.save("documento-fisico.pdf", SimpleUploadedFile("documento-fisico.pdf", b"pdf"), save=True)
+
+        response = self.client.get(reverse("invoice-list"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Documento físico")
+        self.assertNotContains(response, "Falta documento físico")
+
+    def test_invoice_physical_document_upload_saves_file(self):
+        invoice = Invoice.objects.create(
+            locator="DOC03",
+            provider_tax_id="B44444444",
+            number="F-DOC-UPLOAD",
+            issue_date=date(2026, 6, 1),
+            concept="Factura para subir documento fisico",
+            taxable_base=Decimal("200.00"),
+            taxes=Decimal("42.00"),
+            total_amount=Decimal("242.00"),
+        )
+
+        response = self.client.post(reverse("invoice-physical-document-upload"), {
+            "obj_id": invoice.id,
+            "file": SimpleUploadedFile("documento-fisico.pdf", b"pdf", content_type="application/pdf"),
+        })
+
+        self.assertEqual(response.status_code, 200)
+        invoice.refresh_from_db()
+        self.assertTrue(invoice.physical_document.name.endswith(".pdf"))
+        self.assertContains(response, "Documento físico")
+        self.assertNotContains(response, "Falta documento físico")
+
+    def test_invoice_list_resolves_supplier_by_nif(self):
+        Supplier.objects.create(
+            name="Proveedor Registrado",
+            nif="B44444444",
+            address="Calle Mayor 1",
+            email="proveedor@example.com",
+            phone="600111222",
+            contact_person="Ana Contacto",
+        )
+        Invoice.objects.create(
+            locator="SUP01",
+            provider_tax_id="B44444444",
+            number="F-SUP",
+            issue_date=date(2026, 6, 1),
+            concept="Factura con proveedor registrado",
+            taxable_base=Decimal("200.00"),
+            taxes=Decimal("42.00"),
+            total_amount=Decimal("242.00"),
+        )
+
+        response = self.client.get(reverse("invoice-list"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Proveedor Registrado")
+        self.assertNotContains(response, "Proveedor no registrado")
 
     def test_recent_invoice_query_preloads_imputed_amount(self):
         invoice = Invoice.objects.create(
@@ -680,6 +850,149 @@ class ProjectInvoiceDashboardTests(TestCase):
         self.assertEqual(invoice.provider_tax_id, "B44444444")
         self.assertEqual(invoice.total_amount, Decimal("242.00"))
         self.assertContains(response, invoice.locator)
+
+    def test_invoice_form_shows_amounts_in_number_input_format(self):
+        invoice = Invoice.objects.create(
+            provider_tax_id="B44444444",
+            number="F-EDIT",
+            issue_date=date(2026, 6, 1),
+            concept="Factura editable",
+            taxable_base=Decimal("200.00"),
+            taxes=Decimal("42.00"),
+            total_amount=Decimal("242.00"),
+        )
+
+        response = self.client.get(reverse("invoice-form"), {"obj_id": invoice.id})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'name="taxable_base"\n                    value="200.00"', html=False)
+        self.assertContains(response, 'name="taxes"\n                    value="42.00"', html=False)
+        self.assertContains(response, 'name="total_amount"\n                    value="242.00"', html=False)
+
+    def test_invoice_form_shows_physical_document_field(self):
+        invoice = Invoice.objects.create(
+            provider_tax_id="B44444444",
+            number="F-DOC-FORM",
+            issue_date=date(2026, 6, 1),
+            concept="Factura editable con documento fisico",
+            taxable_base=Decimal("200.00"),
+            taxes=Decimal("42.00"),
+            total_amount=Decimal("242.00"),
+        )
+
+        response = self.client.get(reverse("invoice-form"), {"obj_id": invoice.id})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Documento físico")
+        self.assertContains(response, "Subir documento físico")
+        self.assertContains(response, reverse("invoice-physical-document-upload"))
+
+    def test_invoice_status_change_action_creates_trace(self):
+        invoice = Invoice.objects.create(
+            provider_tax_id="B44444444",
+            number="F-STATUS",
+            issue_date=date(2026, 6, 1),
+            concept="Factura con estado",
+            taxable_base=Decimal("200.00"),
+            taxes=Decimal("42.00"),
+            total_amount=Decimal("242.00"),
+            status=InvoiceStatus.DRAFT,
+        )
+
+        response = self.client.get(reverse("invoice-status-save"), {
+            "invoice_id": invoice.id,
+            "status": InvoiceStatus.PENDING,
+        })
+
+        self.assertEqual(response.status_code, 200)
+        invoice.refresh_from_db()
+        self.assertEqual(invoice.status, InvoiceStatus.PENDING)
+        change = InvoiceStatusChange.objects.get(invoice=invoice)
+        self.assertEqual(change.changed_by, self.user)
+        self.assertIsNotNone(change.changed_at)
+        self.assertEqual(change.original_status, InvoiceStatus.DRAFT)
+        self.assertEqual(change.final_status, InvoiceStatus.PENDING)
+        self.assertContains(response, "Pendiente")
+
+    def test_invoice_status_change_rejects_same_status(self):
+        invoice = Invoice.objects.create(
+            provider_tax_id="B44444444",
+            number="F-SAME",
+            issue_date=date(2026, 6, 1),
+            concept="Factura sin cambio",
+            taxable_base=Decimal("200.00"),
+            taxes=Decimal("42.00"),
+            total_amount=Decimal("242.00"),
+            status=InvoiceStatus.DRAFT,
+        )
+
+        response = self.client.get(reverse("invoice-status-save"), {
+            "invoice_id": invoice.id,
+            "status": InvoiceStatus.DRAFT,
+        })
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(InvoiceStatusChange.objects.filter(invoice=invoice).count(), 0)
+
+    def test_invoice_list_shows_traceability_action(self):
+        Invoice.objects.create(
+            provider_tax_id="B44444444",
+            number="F-TRACE-LIST",
+            issue_date=date(2026, 6, 1),
+            concept="Factura con accion de trazabilidad",
+            taxable_base=Decimal("200.00"),
+            taxes=Decimal("42.00"),
+            total_amount=Decimal("242.00"),
+        )
+
+        response = self.client.get(reverse("invoice-list"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Ver historial")
+        self.assertContains(response, reverse("invoice-traceability"))
+
+    def test_invoice_traceability_shows_status_changes(self):
+        invoice = Invoice.objects.create(
+            provider_tax_id="B44444444",
+            number="F-TRACE",
+            issue_date=date(2026, 6, 1),
+            concept="Factura con trazabilidad",
+            taxable_base=Decimal("200.00"),
+            taxes=Decimal("42.00"),
+            total_amount=Decimal("242.00"),
+            status=InvoiceStatus.PENDING,
+        )
+        InvoiceStatusChange.objects.create(
+            invoice=invoice,
+            changed_by=self.user,
+            original_status=InvoiceStatus.DRAFT,
+            final_status=InvoiceStatus.PENDING,
+        )
+
+        response = self.client.get(reverse("invoice-traceability"), {"invoice_id": invoice.id})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Trazabilidad de factura")
+        self.assertContains(response, "F-TRACE")
+        self.assertContains(response, "Borrador")
+        self.assertContains(response, "Pendiente")
+        self.assertContains(response, self.user.username)
+
+    def test_invoice_traceability_shows_empty_state(self):
+        invoice = Invoice.objects.create(
+            provider_tax_id="B44444444",
+            number="F-NO-TRACE",
+            issue_date=date(2026, 6, 1),
+            concept="Factura sin trazabilidad",
+            taxable_base=Decimal("200.00"),
+            taxes=Decimal("42.00"),
+            total_amount=Decimal("242.00"),
+        )
+
+        response = self.client.get(reverse("invoice-traceability"), {"invoice_id": invoice.id})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "No hay cambios de estado registrados para esta factura.")
 
     def test_invoice_allocation_wizard_saves_allocation_without_activity(self):
         invoice = Invoice.objects.create(

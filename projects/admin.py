@@ -14,10 +14,12 @@ from .models import (
     Invoice,
     InvoiceAllocation,
     InvoiceDocument,
+    InvoiceStatusChange,
     Objective,
     Project,
     ProjectFinancier,
     Result,
+    Supplier,
     Text,
 )
 
@@ -121,6 +123,12 @@ class FinancierAdmin(admin.ModelAdmin):
     search_fields = ("name", "tax_id", "contact_person", "email")
 
 
+@admin.register(Supplier)
+class SupplierAdmin(admin.ModelAdmin):
+    list_display = ("name", "nif", "contact_person", "email", "phone")
+    search_fields = ("name", "nif", "contact_person", "email", "phone")
+
+
 @admin.register(ProjectFinancier)
 class ProjectFinancierAdmin(admin.ModelAdmin):
     list_display = ("project", "financier", "committed_amount", "granted_amount", "disbursed_amount", "available_amount")
@@ -150,13 +158,32 @@ class InvoiceAllocationInline(admin.TabularInline):
     autocomplete_fields = ("project", "activity", "budget_line", "sub_budget_line", "financier_contribution", "financier")
 
 
+class InvoiceStatusChangeInline(admin.TabularInline):
+    model = InvoiceStatusChange
+    extra = 0
+    readonly_fields = ("changed_by", "changed_at", "original_status", "final_status")
+    can_delete = False
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+
 @admin.register(Invoice)
 class InvoiceAdmin(admin.ModelAdmin):
-    list_display = ("locator", "invoice_code", "number", "provider_tax_id", "issue_date", "total_amount", "allocated_amount", "status")
+    list_display = ("locator", "invoice_code", "number", "provider_tax_id", "issue_date", "total_amount", "allocated_amount", "status", "physical_document")
     list_filter = ("status", "currency", "issue_date", "payment_date")
     search_fields = ("locator", "invoice_code", "number", "provider_tax_id", "concept")
     readonly_fields = ("invoice_code", "allocated_amount", "pending_amount")
-    inlines = (InvoiceDocumentInline, InvoiceAllocationInline)
+    inlines = (InvoiceDocumentInline, InvoiceAllocationInline, InvoiceStatusChangeInline)
+
+
+@admin.register(InvoiceStatusChange)
+class InvoiceStatusChangeAdmin(admin.ModelAdmin):
+    list_display = ("invoice", "changed_by", "changed_at", "original_status", "final_status")
+    list_filter = ("original_status", "final_status", "changed_at")
+    search_fields = ("invoice__locator", "invoice__invoice_code", "invoice__number", "changed_by__username")
+    autocomplete_fields = ("invoice", "changed_by")
+    readonly_fields = ("invoice", "changed_by", "changed_at", "original_status", "final_status")
 
 
 @admin.register(InvoiceAllocation)

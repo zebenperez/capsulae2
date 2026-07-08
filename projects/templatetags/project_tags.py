@@ -45,3 +45,14 @@ def money_es(value, currency="€"):
         return value
     formatted = "{:,.2f}".format(amount).replace(",", "X").replace(".", ",").replace("X", ".")
     return "{} {}".format(formatted, currency or "€")
+
+
+@register.filter()
+def decimal_input(value):
+    if value in (None, ""):
+        return "0.00"
+    try:
+        amount = Decimal(str(value))
+    except (InvalidOperation, ValueError):
+        return value
+    return "{:.2f}".format(amount)

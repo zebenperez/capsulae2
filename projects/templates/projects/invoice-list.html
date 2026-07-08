@@ -4,51 +4,82 @@
     <div class="invoice-list-head">
         <span>{% trans "Factura" %}</span>
         <span>{% trans "Fechas" %}</span>
-        <span>{% trans "NIF proveedor" %}</span>
+        <span>{% trans "Proveedor" %}</span>
         <span>{% trans "Importes" %}</span>
+        <span>{% trans "Estado" %}</span>
         <span>{% trans "Imputación" %}</span>
         <span></span>
     </div>
     {% for invoice in invoices %}
         {% with imputation=invoice.imputation_summary %}
-        <div class="invoice-list-row" id="invoice-row-{{ invoice.id }}">
-            <div class="project-row-main">
-                <span class="project-row-title">{{ invoice.locator|default:"-----" }} · {{ invoice.invoice_code|default:"Pendiente" }}</span>
-                <span class="project-row-subtitle">{{ invoice.number }}</span>
+        <div class="invoice-list-row invoice-row" id="invoice-row-{{ invoice.id }}">
+            <div class="invoice-main">
+                <span class="invoice-main__number">
+                    {{ invoice.number|default:"Factura sin número" }}
+                    {% if not invoice.physical_document %}
+                        <label for="invoice-physical-document-{{ invoice.id }}" class="invoice-badge invoice-badge--warning invoice-document-warning" title="{% trans 'Subir documento físico' %}">
+                            <i class="fas fa-upload"></i> {% trans "Falta documento físico" %}
+                        </label>
+                        <input type="file" class="upload d-none" id="invoice-physical-document-{{ invoice.id }}" data-url="{% url "invoice-physical-document-upload" %}"
+                            data-target="invoice-list" data-obj-id="{{ invoice.id }}" data-field="physical_document" data-csrf-token="{{ csrf_token }}">
+                    {% else %}
+                        <span class="invoice-badge invoice-badge--document">
+                            <i class="fas fa-check"></i> {% trans "Documento físico" %}
+                        </span>
+                    {% endif %}
+                </span>
+                <span class="invoice-main__reference">{{ invoice.locator|default:"-----" }} · {{ invoice.invoice_code|default:"Pendiente" }}</span>
+                <span class="invoice-main__concept"><strong>{% trans "Concepto" %}:</strong> {{ invoice.concept|truncatechars:150|default:"---" }}</span>
             </div>
-            <div class="project-row-desc">
-                <strong>{% trans "Factura" %}:</strong> {{ invoice.issue_date|date_es|default:"---" }}<br>
-                <strong>{% trans "Pago" %}:</strong> {{ invoice.payment_date|date_es|default:"---" }}
+            <div class="invoice-dates">
+                <span><strong>{% trans "Factura" %}:</strong> {{ invoice.issue_date|date:"d/m/Y"|default:"---" }}</span>
+                <span><strong>{% trans "Pago" %}:</strong> {% if invoice.payment_date %}{{ invoice.payment_date|date:"d/m/Y" }}{% else %}{% trans "pendiente" %}{% endif %}</span>
             </div>
-            <div class="project-row-desc">
-                <strong>{% trans "NIF" %}:</strong><br>
-                {{ invoice.provider_tax_id|default:"---" }}
+            <div class="invoice-provider">
+                <span class="invoice-provider__name">{% if invoice.supplier %}{{ invoice.supplier.name }}{% else %}{% trans "Proveedor no registrado" %}{% endif %}</span>
+                <span class="invoice-provider__tax">{% trans "NIF/CIF" %}: {{ invoice.provider_tax_id|default:"---" }}</span>
             </div>
-            <div class="project-row-desc">
-                <strong>{% trans "Base" %}:</strong> {{ invoice.taxable_base|floatformat:2 }} €<br>
-                <strong>{% trans "Impuestos" %}:</strong> {{ invoice.taxes|floatformat:2 }} €<br>
-                <strong>{% trans "Total" %}:</strong> {{ invoice.total_amount|floatformat:2 }} €
+            <div class="invoice-amounts">
+                <span class="invoice-amounts__secondary">{% trans "Base" %}: {{ invoice.taxable_base|money_es }}</span>
+                <span class="invoice-amounts__secondary">{% trans "Impuestos" %}: {{ invoice.taxes|money_es }}</span>
+                <span class="invoice-amounts__total">{% trans "Total" %}: {{ invoice.total_amount|money_es }}</span>
             </div>
-            <div class="invoice-imputation invoice-imputation--{{ imputation.estado_imputacion }}">
-                <div class="invoice-imputation__bar" role="img" aria-label="{{ imputation.aria_label }}">
-                    <span class="invoice-imputation__fill" style="width: {{ imputation.barra_porcentaje_style }}%;"></span>
+            <div class="invoice-status">
+                <mark class="invoice-badge invoice-badge--status">{{ invoice.get_status_display }}</mark>
+            </div>
+            <div class="invoice-allocation invoice-imputation invoice-imputation--{{ imputation.estado_imputacion }}">
+                <div class="invoice-progress invoice-imputation__bar" role="img" aria-label="{{ imputation.aria_label }}">
+                    <span class="invoice-progress__fill invoice-imputation__fill" style="width: {{ imputation.barra_porcentaje_style }}%;"></span>
                 </div>
                 <div class="invoice-imputation__meta">
                     <span class="invoice-imputation__label">{{ imputation.porcentaje_display }}</span>
-                    <span class="invoice-imputation__badge">{{ imputation.estado_label }}</span>
+                    <span class="invoice-badge invoice-badge--allocation invoice-imputation__badge">{{ imputation.estado_label }}</span>
+                    {% if invoice.status == "paid" and imputation.estado_imputacion != "complete" and imputation.estado_imputacion != "over" %}
+                        <span class="invoice-badge invoice-badge--action">{% trans "Requiere imputación" %}</span>
+                    {% endif %}
                 </div>
             </div>
-            <div class="project-actions">
-                <a class="project-icon-btn ark" title="{% trans 'Imputar' %}" data-url="{% url "invoice-allocation-wizard" %}"
-                    data-target-modal="common-modal" data-invoice_id="{{ invoice.id }}">
-                    <i class="fas fa-random"></i>
-                </a>
-                <a class="project-icon-btn ark" title="{% trans 'Editar factura' %}" data-url="{% url "invoice-form" %}"
-                    data-target-modal="common-modal" data-obj_id="{{ invoice.id }}">
-                    <i class="fas fa-edit"></i>
-                </a>
-            </div>
-            <div class="invoice-list-concept">{{ invoice.concept|truncatechars:180|default:"---" }}</div>
+            <details class="invoice-actions project-actions" open>
+                <summary>{% trans "Acciones" %}</summary>
+                <div class="invoice-actions__items">
+                    <a class="project-icon-btn ark" title="{% trans 'Imputar factura' %}" aria-label="{% trans 'Imputar factura' %}"
+                        data-url="{% url "invoice-allocation-wizard" %}" data-target-modal="common-modal" data-invoice_id="{{ invoice.id }}">
+                        <i class="fas fa-random"></i>
+                    </a>
+                    <a class="project-icon-btn ark" title="{% trans 'Cambiar estado de factura' %}" aria-label="{% trans 'Cambiar estado de factura' %}"
+                        data-url="{% url "invoice-status-form" %}" data-target-modal="common-modal" data-invoice_id="{{ invoice.id }}">
+                        <i class="fas fa-exchange-alt"></i>
+                    </a>
+                    <a class="project-icon-btn ark" title="{% trans 'Ver historial' %}" aria-label="{% trans 'Ver historial' %}"
+                        data-url="{% url "invoice-traceability" %}" data-target-modal="common-modal" data-invoice_id="{{ invoice.id }}">
+                        <i class="fas fa-history"></i>
+                    </a>
+                    <a class="project-icon-btn ark" title="{% trans 'Editar factura' %}" aria-label="{% trans 'Editar factura' %}"
+                        data-url="{% url "invoice-form" %}" data-target-modal="common-modal" data-obj_id="{{ invoice.id }}">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                </div>
+            </details>
         </div>
         {% endwith %}
     {% empty %}

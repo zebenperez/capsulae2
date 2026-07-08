@@ -31,6 +31,10 @@
                 <button class="projects-area-tab" type="button" data-dashboard-tab="financiers" role="tab" aria-selected="false">
                     <i class="fas fa-hand-holding-usd"></i> {% trans 'Financiadores' %}
                 </button>
+                <button class="projects-area-tab" type="button" data-dashboard-tab="suppliers" data-load-url="{% url "supplier-list" %}"
+                    data-load-target="supplier-list" role="tab" aria-selected="false">
+                    <i class="fas fa-truck"></i> {% trans 'Proveedores' %}
+                </button>
                 <button class="projects-area-tab" type="button" data-dashboard-tab="invoices" data-load-url="{% url "invoice-list" %}"
                     data-load-target="invoice-list" role="tab" aria-selected="false">
                     <i class="fas fa-file-invoice"></i> {% trans 'Facturas' %}
@@ -268,6 +272,30 @@
                     </div>
                     <div id="financier-list">
                         {% include "projects/financier-list.html" with items=financiers %}
+                    </div>
+                </div>
+            </section>
+
+            <section class="projects-area-section" data-dashboard-section="suppliers">
+                <div class="dashboard-panel">
+                    <div class="dashboard-panel-header">
+                        <div>
+                            <h2>{% trans 'Proveedores' %}</h2>
+                            <p class="project-muted">{% trans 'Listado y búsqueda de proveedores asociados a facturas.' %}</p>
+                        </div>
+                        <button type="button" class="project-btn project-btn-primary ark" data-url="{% url "supplier-form" %}"
+                            data-target-modal="common-modal">
+                            <i class="fas fa-plus"></i> {% trans 'Nuevo proveedor' %}
+                        </button>
+                    </div>
+                    <div class="project-search dashboard-inline-search">
+                        <i class="fas fa-search"></i>
+                        <input type="text" class="autosearch form-control form-control-dark w-100" name="s-supplier" id="s-supplier"
+                            placeholder="{% trans 'Buscar por nombre, NIF, contacto, email o teléfono' %}" data-url="{% url "supplier-search" %}"
+                            data-target="supplier-list" data-related="s-supplier" />
+                    </div>
+                    <div id="supplier-list">
+                        {% include "projects/supplier-list.html" with items=suppliers %}
                     </div>
                 </div>
             </section>

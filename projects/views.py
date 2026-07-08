@@ -3,6 +3,7 @@ from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
+from django.db import transaction
 from django.db.models.deletion import ProtectedError
 from django.db.models import DecimalField, F, Q, Sum, Value
 from django.db.models.functions import Coalesce
@@ -25,12 +26,14 @@ from .models import (
     Invoice,
     InvoiceAllocation,
     InvoiceStatus,
+    InvoiceStatusChange,
     File,
     Folder,
     Project,
     ProjectFinancier,
     ProjectStatus,
     ProgressStatus,
+    Supplier,
     Text,
 )
 
@@ -69,6 +72,25 @@ def get_financier_context(search_value=""):
     return {"items": get_financiers(search_value)}
 
 
+def normalize_tax_id(value):
+    return (value or "").strip().upper()
+
+
+def get_suppliers(search_value=""):
+    full_query = Q()
+    if search_value != "":
+        full_query |= Q(name__icontains=search_value)
+        full_query |= Q(nif__icontains=search_value)
+        full_query |= Q(contact_person__icontains=search_value)
+        full_query |= Q(email__icontains=search_value)
+        full_query |= Q(phone__icontains=search_value)
+    return Supplier.objects.filter(full_query).order_by("name")
+
+
+def get_supplier_context(search_value=""):
+    return {"items": get_suppliers(search_value)}
+
+
 def get_recent_invoice_start_date():
     return timezone.localdate() - timedelta(days=365)
 
@@ -91,9 +113,21 @@ def get_recent_invoices(user):
     )
 
 
+def attach_invoice_suppliers(invoices):
+    invoice_items = list(invoices)
+    supplier_nifs = {normalize_tax_id(invoice.provider_tax_id) for invoice in invoice_items if normalize_tax_id(invoice.provider_tax_id)}
+    suppliers = {
+        normalize_tax_id(supplier.nif): supplier
+        for supplier in Supplier.objects.filter(nif__in=supplier_nifs)
+    }
+    for invoice in invoice_items:
+        invoice.supplier = suppliers.get(normalize_tax_id(invoice.provider_tax_id))
+    return invoice_items
+
+
 def get_invoice_context(user):
     return {
-        "invoices": get_recent_invoices(user),
+        "invoices": attach_invoice_suppliers(get_recent_invoices(user)),
         "invoice_start_date": get_recent_invoice_start_date(),
     }
 
@@ -245,6 +279,7 @@ def get_projects_dashboard_context(user):
     return {
         "items": projects_qs.order_by("name"),
         "financiers": get_financiers(),
+        "suppliers": get_suppliers(),
         "invoices": invoice_items,
         "invoice_start_date": get_recent_invoice_start_date(),
         "projects_total": projects_total,
@@ -329,6 +364,58 @@ def financier_remove(request):
 
 
 @group_required("admins","managers", "employee")
+def supplier_list(request):
+    return render(request, "projects/supplier-list.html", get_supplier_context())
+
+
+@group_required("admins","managers", "employee")
+def supplier_search(request):
+    search_value = get_param(request.GET, "s-supplier")
+    return render(request, "projects/supplier-list.html", get_supplier_context(search_value))
+
+
+@group_required("admins","managers", "employee")
+def supplier_form(request):
+    obj = get_or_none(Supplier, get_param(request.GET, "obj_id")) if get_param(request.GET, "obj_id") else None
+    return render(request, "projects/supplier-form.html", {"obj": obj})
+
+
+@group_required("admins","managers", "employee")
+def supplier_save(request):
+    try:
+        obj = get_or_none(Supplier, get_param(request.GET, "obj_id")) if get_param(request.GET, "obj_id") else Supplier()
+        if obj == None:
+            return HttpResponse("Proveedor no encontrado.", status=404)
+
+        obj.name = get_param(request.GET, "name").strip()
+        obj.nif = normalize_tax_id(get_param(request.GET, "nif"))
+        obj.address = get_param(request.GET, "address").strip()
+        obj.email = get_param(request.GET, "email").strip()
+        obj.phone = get_param(request.GET, "phone").strip()
+        obj.contact_person = get_param(request.GET, "contact_person").strip()
+        obj.full_clean()
+        obj.save()
+        return render(request, "projects/supplier-list.html", get_supplier_context())
+    except ValidationError as e:
+        if hasattr(e, "message_dict"):
+            messages = []
+            for field_errors in e.message_dict.values():
+                messages.extend(field_errors)
+            return HttpResponse(" ".join(messages), status=400)
+        return HttpResponse(" ".join(e.messages), status=400)
+    except Exception as e:
+        return HttpResponse(show_exc(e), status=400)
+
+
+@group_required("admins","managers", "employee")
+def supplier_remove(request):
+    obj = get_or_none(Supplier, get_param(request.GET, "obj_id")) if get_param(request.GET, "obj_id") else None
+    if obj != None:
+        obj.delete()
+    return render(request, "projects/supplier-list.html", get_supplier_context())
+
+
+@group_required("admins","managers", "employee")
 def invoice_list(request):
     return render(request, "projects/invoice-list.html", get_invoice_context(request.user))
 
@@ -338,6 +425,28 @@ def invoice_form(request):
     obj = get_or_none(Invoice, get_param(request.GET, "obj_id")) if get_param(request.GET, "obj_id") else None
     return render(request, "projects/invoice-form.html", {
         "obj": obj,
+    })
+
+
+@group_required("admins","managers", "employee")
+def invoice_status_form(request):
+    invoice = get_or_none(Invoice, get_param(request.GET, "invoice_id"))
+    if invoice == None:
+        return HttpResponse("Factura no encontrada.", status=404)
+    return render(request, "projects/invoice-status-form.html", {
+        "invoice": invoice,
+        "invoice_statuses": InvoiceStatus.choices,
+    })
+
+
+@group_required("admins","managers", "employee")
+def invoice_traceability(request):
+    invoice = get_or_none(Invoice, get_param(request.GET, "invoice_id"))
+    if invoice == None:
+        return HttpResponse("Factura no encontrada.", status=404)
+    return render(request, "projects/invoice-traceability.html", {
+        "invoice": invoice,
+        "status_changes": invoice.status_changes.select_related("changed_by"),
     })
 
 
@@ -361,6 +470,59 @@ def invoice_save(request):
         obj.total_amount = obj.taxable_base + obj.taxes
         obj.full_clean()
         obj.save()
+        return render(request, "projects/invoice-list.html", get_invoice_context(request.user))
+    except ValidationError as e:
+        if hasattr(e, "message_dict"):
+            messages = []
+            for field_errors in e.message_dict.values():
+                messages.extend(field_errors)
+            return HttpResponse(" ".join(messages), status=400)
+        return HttpResponse(" ".join(e.messages), status=400)
+    except Exception as e:
+        return HttpResponse(show_exc(e), status=400)
+
+
+@group_required("admins","managers", "employee")
+def invoice_physical_document_upload(request):
+    try:
+        invoice = get_or_none(Invoice, request.POST.get("obj_id"))
+        if invoice == None:
+            return HttpResponse("Factura no encontrada.", status=404)
+        uploaded_file = request.FILES.get("file")
+        if uploaded_file == None:
+            return HttpResponse("Debes seleccionar un documento físico.", status=400)
+
+        invoice.physical_document = uploaded_file
+        invoice.save(update_fields=["physical_document"])
+        return render(request, "projects/invoice-list.html", get_invoice_context(request.user))
+    except Exception as e:
+        return HttpResponse(show_exc(e), status=400)
+
+
+@group_required("admins","managers", "employee")
+def invoice_status_save(request):
+    try:
+        invoice_id = get_param(request.GET, "invoice_id")
+        new_status = get_param(request.GET, "status")
+        valid_statuses = dict(InvoiceStatus.choices)
+        if new_status not in valid_statuses:
+            return HttpResponse("Debes seleccionar un estado válido.", status=400)
+
+        with transaction.atomic():
+            invoice = Invoice.objects.select_for_update().filter(pk=invoice_id).first()
+            if invoice == None:
+                return HttpResponse("Factura no encontrada.", status=404)
+            original_status = invoice.status
+            if original_status == new_status:
+                return HttpResponse("Debes seleccionar un estado diferente al actual.", status=400)
+
+            Invoice.objects.filter(pk=invoice.pk).update(status=new_status)
+            InvoiceStatusChange.objects.create(
+                invoice=invoice,
+                changed_by=request.user if request.user.is_authenticated else None,
+                original_status=original_status,
+                final_status=new_status,
+            )
         return render(request, "projects/invoice-list.html", get_invoice_context(request.user))
     except ValidationError as e:
         if hasattr(e, "message_dict"):

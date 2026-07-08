@@ -523,6 +523,33 @@ class Financier(models.Model):
         indexes = [models.Index(fields=["name"]), models.Index(fields=["tax_id"])]
 
 
+class Supplier(models.Model):
+    name = models.CharField("Nombre", max_length=255, db_index=True)
+    nif = models.CharField("NIF", max_length=64, unique=True, db_index=True)
+    address = models.TextField("Dirección", blank=True)
+    email = models.EmailField("Email", blank=True)
+    phone = models.CharField("Teléfono", max_length=64, blank=True)
+    contact_person = models.CharField("Persona de contacto", max_length=255, blank=True)
+
+    def clean(self):
+        super().clean()
+        if self.nif:
+            self.nif = self.nif.strip().upper()
+
+    def save(self, *args, **kwargs):
+        if self.nif:
+            self.nif = self.nif.strip().upper()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = "Proveedor"
+        verbose_name_plural = "Proveedores"
+        indexes = [models.Index(fields=["name"]), models.Index(fields=["nif"])]
+
+
 class ProjectFinancier(models.Model):
     project = models.ForeignKey(Project, verbose_name="Proyecto", on_delete=models.CASCADE, related_name="project_financiers")
     financier = models.ForeignKey(
@@ -704,6 +731,7 @@ class Invoice(models.Model):
     total_amount = models.DecimalField("Importe total", max_digits=MONEY_MAX_DIGITS, decimal_places=MONEY_DECIMAL_PLACES)
     currency = models.CharField("Moneda", max_length=3, default="EUR")
     document_pdf = models.FileField("Documento PDF", upload_to="projects/invoices/", blank=True)
+    physical_document = models.FileField("Documento físico", upload_to="projects/invoices/physical/", blank=True)
     status = models.CharField("Estado", max_length=32, choices=InvoiceStatus.choices, default=InvoiceStatus.DRAFT, db_index=True)
     notes = models.TextField("Observaciones", blank=True)
 
@@ -830,6 +858,33 @@ class InvoiceDocument(models.Model):
     class Meta:
         verbose_name = "Documento anexo de factura"
         verbose_name_plural = "Documentos anexos de factura"
+
+
+class InvoiceStatusChange(models.Model):
+    invoice = models.ForeignKey(Invoice, verbose_name="Factura", on_delete=models.CASCADE, related_name="status_changes")
+    changed_by = models.ForeignKey(
+        User,
+        verbose_name="Usuario",
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name="invoice_status_changes",
+    )
+    changed_at = models.DateTimeField("Fecha y hora del cambio", auto_now_add=True, db_index=True)
+    original_status = models.CharField("Estado original", max_length=32, choices=InvoiceStatus.choices)
+    final_status = models.CharField("Estado final", max_length=32, choices=InvoiceStatus.choices)
+
+    def __str__(self):
+        return "{}: {} -> {}".format(self.invoice, self.original_status, self.final_status)
+
+    class Meta:
+        verbose_name = "Cambio de estado de factura"
+        verbose_name_plural = "Cambios de estado de facturas"
+        ordering = ("-changed_at", "-id")
+        indexes = [
+            models.Index(fields=["invoice", "changed_at"]),
+            models.Index(fields=["changed_by", "changed_at"]),
+        ]
 
 
 class InvoiceAllocation(models.Model):
