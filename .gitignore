@@ -131,8 +131,6 @@ dmypy.json
 collect_static
 media
 migrations
-!projects/migrations/
-!projects/migrations/*.py
 *.deprecated
 logs.txt
 *.sh
