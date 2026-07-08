@@ -1,0 +1,44 @@
+{% load i18n %}
+
+<div class="project-list-card supplier-list-card">
+    <div class="project-list-head supplier-list-head">
+        <div>{% trans 'Proveedor' %}</div>
+        <div>{% trans 'Contacto' %}</div>
+        <div>{% trans 'Dirección' %}</div>
+        <div></div>
+    </div>
+
+    {% for item in items %}
+        <div class="project-list-row supplier-list-row" id="supplier-row-{{item.id}}">
+            <div class="project-row-main">
+                <span class="project-row-title">{{ item.name|default:"Proveedor sin nombre" }}</span>
+                <span class="project-row-subtitle">{{ item.nif|default:"Sin NIF" }}</span>
+            </div>
+            <div class="project-row-desc">
+                {% if item.contact_person %}{{ item.contact_person }}{% endif %}
+                {% if item.email %}{% if item.contact_person %} · {% endif %}{{ item.email }}{% endif %}
+                {% if item.phone %} · {{ item.phone }}{% endif %}
+                {% if not item.contact_person and not item.email and not item.phone %}---{% endif %}
+            </div>
+            <div class="project-row-desc">
+                {{ item.address|truncatechars:90|default:"---" }}
+            </div>
+            <div class="project-actions">
+                <a class="project-icon-btn ark" data-url="{% url "supplier-form" %}" data-target-modal="common-modal"
+                    data-obj_id="{{item.id}}" title="{% trans 'Editar proveedor' %}" aria-label="{% trans 'Editar proveedor' %}">
+                    <i class="fas fa-pen"></i>
+                </a>
+                <a class="project-icon-btn danger ark" data-url="{% url "supplier-remove" %}" data-target="supplier-list"
+                    data-obj_id="{{item.id}}" title="{% trans 'Eliminar proveedor' %}" aria-label="{% trans 'Eliminar proveedor' %}"
+                    data-confirm="{% trans "¿Seguro que quieres eliminar este proveedor?" %}">
+                    <i class="fas fa-trash"></i>
+                </a>
+            </div>
+        </div>
+    {% empty %}
+        <div class="project-empty">
+            <i class="far fa-address-card"></i>
+            <div>{% trans "No hay proveedores que mostrar." %}</div>
+        </div>
+    {% endfor %}
+</div>

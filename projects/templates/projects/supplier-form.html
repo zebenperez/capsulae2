@@ -1,0 +1,48 @@
+{% load i18n %}
+
+<div class="project-modal">
+    <div class="project-modal-close">
+        <button type="button" class="project-icon-btn" data-bs-dismiss="modal" aria-label="{% trans 'Cerrar' %}">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+
+    <h2>{% if obj %}{% trans 'Editar proveedor' %}{% else %}{% trans 'Nuevo proveedor' %}{% endif %}</h2>
+
+    <form id="supplier-form">
+        <input type="hidden" name="obj_id" value="{{ obj.id|default:"" }}">
+        <div class="project-form-grid project-form-grid-two">
+            <div class="project-form-field">
+                <label for="supplier-name">{% trans 'Nombre' %}</label>
+                <input type="text" class="form-control" id="supplier-name" name="name" value="{{ obj.name|default:"" }}" required>
+            </div>
+            <div class="project-form-field">
+                <label for="supplier-nif">{% trans 'NIF' %}</label>
+                <input type="text" class="form-control" id="supplier-nif" name="nif" value="{{ obj.nif|default:"" }}" required>
+            </div>
+            <div class="project-form-field">
+                <label for="supplier-email">{% trans 'Email' %}</label>
+                <input type="email" class="form-control" id="supplier-email" name="email" value="{{ obj.email|default:"" }}">
+            </div>
+            <div class="project-form-field">
+                <label for="supplier-phone">{% trans 'Teléfono' %}</label>
+                <input type="text" class="form-control" id="supplier-phone" name="phone" value="{{ obj.phone|default:"" }}">
+            </div>
+            <div class="project-form-field">
+                <label for="supplier-contact-person">{% trans 'Persona de contacto' %}</label>
+                <input type="text" class="form-control" id="supplier-contact-person" name="contact_person" value="{{ obj.contact_person|default:"" }}">
+            </div>
+            <div class="project-form-field project-form-field-wide">
+                <label for="supplier-address">{% trans 'Dirección' %}</label>
+                <textarea class="form-control" id="supplier-address" name="address">{{ obj.address|default:"" }}</textarea>
+            </div>
+        </div>
+    </form>
+
+    <div class="project-modal-actions">
+        <button type="button" class="project-btn project-btn-primary ajax-form-get" data-form="supplier-form"
+            data-url="{% url "supplier-save" %}" data-target="supplier-list" data-dismiss-modal="common-modal">
+            {% trans "Guardar" %}
+        </button>
+    </div>
+</div>

@@ -1,0 +1,34 @@
+{% load i18n %}
+
+<div class="project-modal">
+    <div class="project-modal-close">
+        <button type="button" class="project-icon-btn" data-bs-dismiss="modal" aria-label="{% trans 'Cerrar' %}">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+
+    <h2>{% trans "Trazabilidad de factura" %}</h2>
+    <p class="project-muted">{{ invoice.locator|default:"-----" }} · {{ invoice.number }} · {% trans "Estado actual" %}: {{ invoice.get_status_display }}</p>
+
+    <div class="invoice-traceability-list">
+        {% for change in status_changes %}
+            <div class="invoice-traceability-row">
+                <div class="invoice-traceability-main">
+                    <span class="invoice-traceability-status">
+                        {{ change.get_original_status_display }} <i class="fas fa-arrow-right"></i> {{ change.get_final_status_display }}
+                    </span>
+                    <span class="project-muted">
+                        {% if change.changed_by %}
+                            {% firstof change.changed_by.get_full_name change.changed_by.username %}
+                        {% else %}
+                            {% trans "Usuario no disponible" %}
+                        {% endif %}
+                    </span>
+                </div>
+                <time datetime="{{ change.changed_at|date:"c" }}">{{ change.changed_at|date:"d/m/Y H:i" }}</time>
+            </div>
+        {% empty %}
+            <div class="project-empty">{% trans "No hay cambios de estado registrados para esta factura." %}</div>
+        {% endfor %}
+    </div>
+</div>

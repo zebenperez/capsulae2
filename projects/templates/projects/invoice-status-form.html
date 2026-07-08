@@ -1,0 +1,33 @@
+{% load i18n %}
+
+<div class="project-modal">
+    <div class="project-modal-close">
+        <button type="button" class="project-icon-btn" data-bs-dismiss="modal" aria-label="{% trans 'Cerrar' %}">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+
+    <h2>{% trans "Cambiar estado de factura" %}</h2>
+    <p class="project-muted">{{ invoice.locator|default:"-----" }} · {{ invoice.number }} · {% trans "Estado actual" %}: {{ invoice.get_status_display }}</p>
+
+    <form id="invoice-status-form">
+        <input type="hidden" name="invoice_id" value="{{ invoice.id }}">
+        <div class="project-form-grid project-form-grid-two">
+            <div class="project-form-field">
+                <label>{% trans "Nuevo estado" %}</label>
+                <select class="form-control" name="status" required>
+                    {% for value, label in invoice_statuses %}
+                        <option value="{{ value }}"{% if invoice.status == value %} selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+    </form>
+
+    <div class="project-modal-actions">
+        <button type="button" class="project-btn project-btn-primary ajax-form-get" data-form="invoice-status-form"
+            data-url="{% url "invoice-status-save" %}" data-target="invoice-list" data-dismiss-modal="common-modal">
+            {% trans "Cambiar estado" %}
+        </button>
+    </div>
+</div>
