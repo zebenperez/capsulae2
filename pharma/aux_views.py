@@ -116,9 +116,7 @@ def vulnera_list_export(request, list_type):
 
 
 @group_required("admins","managers")
-#def procedure_not_done(request, comp):
 def procedure_not_done(request):
-    #comp = get_or_none(Company, comp)
     comp = Company.get_by_user(request.user)
     full_query = Q(**{'done': False})
     full_query &= (Q(**{'patient__id_user__company': comp}) | Q(**{'patient__id_user__user_companies__in': [comp]}))
@@ -126,12 +124,43 @@ def procedure_not_done(request):
     return render(request, "patients/aux/procedure-not-done.html", {"item_list": p_list,})
 
 @group_required("admins","managers")
-#def vulnera_files(request, comp):
+def procedure_done(request):
+    comp = Company.get_by_user(request.user)
+    full_query = Q(**{'done': True})
+    full_query &= (Q(**{'patient__id_user__company': comp}) | Q(**{'patient__id_user__user_companies__in': [comp]}))
+    p_list = PatientProcedure.objects.filter(full_query)
+    return render(request, "patients/aux/procedure-done.html", {"item_list": p_list,})
+
+@group_required("admins","managers")
+def procedure_export(request):
+    comp = Company.get_by_user(request.user)
+    full_query = Q(**{'done': True})
+    full_query &= (Q(**{'patient__id_user__company': comp}) | Q(**{'patient__id_user__user_companies__in': [comp]}))
+    p_list = PatientProcedure.objects.filter(full_query)
+
+    response = HttpResponse( content_type='text/csv', headers={'Content-Disposition': 'attachment; filename="tramites.csv"'},)
+
+    writer = csv.writer(response)
+    writer.writerow([
+        'Paciente', 
+        'Tramite', 
+        'Fecha'
+    ])
+    for item in p_list:
+        try:
+            pname = item.patient.nombre
+            name = item.procedure.nombre
+        except:
+            pname = ""
+            name = ""
+        writer.writerow([pname, name, item.date])
+    return response
+
+@group_required("admins","managers")
 def vulnera_files(request):
     import zipfile, os
     from io import BytesIO
 
-    #comp = get_or_none(Company, comp)
     comp = Company.get_by_user(request.user)
     full_query = Q()
     full_query &= (Q(**{'id_user__company': comp}) | Q(**{'id_user__user_companies__in': [comp]}))
@@ -139,7 +168,6 @@ def vulnera_files(request):
 
     files = []
     for p in p_list:
-        #print(p.nombre)
         info = False
         signed = False
         for lopd in p.lopd.all().order_by("-id"):

@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% load i18n pharma_tags common_tags %}
+
+{% block central_content %}
+    <div class="row">
+        <div class="col-12 text-end"><a href="{% url "patients-aux-index" %}" class="btn">{% trans "Volver" %}</a></div>
+    </div>
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="row">
+                        <div class="col-10"><strong>Trámites terminados</strong></div>
+                        <div class="text-end col-2">
+                            <a href="{% url "patients-aux-procedure-export" %}" target="_blank" style="color:#333">
+                                <i class="fas fa-download"></i> Exportar</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-4"><strong>Paciente</strong></div>
+                        <div class="col-4"><strong>Trámite</strong></div>
+                        <div class="col-4"><strong>Fecha</strong></div>
+                    </div>
+                    <hr/>
+                    {% for item in item_list %}
+                        <div class="row">
+                            <div class="col-4">
+                                <a href="{%url "patient-view" item.patient.id%}" class="btn">{{item.patient.nombre}}</a></div>
+                            <div class="col-4">{{item.procedure.name}}</div>
+                            <div class="col-4">{{item.date|date:"d-m-Y"}}</div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock central_content %}
