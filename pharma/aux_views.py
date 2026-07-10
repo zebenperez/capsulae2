@@ -149,7 +149,7 @@ def procedure_export(request):
     for item in p_list:
         try:
             pname = item.patient.nombre
-            name = item.procedure.nombre
+            name = item.procedure.name
         except:
             pname = ""
             name = ""
