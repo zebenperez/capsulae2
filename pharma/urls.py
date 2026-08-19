@@ -161,11 +161,10 @@ urlpatterns = [
     path('patients/aux/index/', aux_views.index, name='patients-aux-index'),
     path('patients/aux/vulnera-list/', aux_views.vulnera_list, name='patients-aux-vulnera-list'),
     path('patients/aux/vulnera-list-export/<int:list_type>', aux_views.vulnera_list_export, name='patients-aux-vulnera-list-export'),
-    #path('patients/aux/vulnera-list/<int:comp>', aux_views.vulnera_list, name='patient-aux-vulnera-list'),
     path('patients/aux/vulnera-files/', aux_views.vulnera_files, name='patients-aux-vulnera-files'),
-    #path('patients/aux/vulnera-files/<int:comp>', aux_views.vulnera_files, name='patient-aux-vulnera-files'),
     path('patients/aux/procedure-not-done/', aux_views.procedure_not_done, name='patients-aux-procedure-not-done'),
-    #path('patients/aux/procedure-not-done/<int:comp>', aux_views.procedure_not_done, name='patient-aux-procedure-not-done'),
+    path('patients/aux/procedure-done/', aux_views.procedure_done, name='patients-aux-procedure-done'),
+    path('patients/aux/procedure-export/', aux_views.procedure_export, name='patients-aux-procedure-export'),
 
     #---------------------- AUTO -----------------------
     path('autosave_field/', auto_views.autosave_field, name='autosave_field'),
