@@ -1726,7 +1726,7 @@
     min-height: 120px;
 }
 
-.project-form-field .cke {
+.project-form-field .tiptap-editor {
     border: 1px solid #d5aadd;
     border-left: 4px solid var(--project-accent);
     border-radius: 6px;
@@ -1735,7 +1735,8 @@
 }
 
 .project-form-field .form-control:focus,
-.project-form-field textarea.active-editor:focus {
+.project-form-field textarea.active-editor:focus,
+.project-form-field .tiptap-editor.is-focused {
     border-color: var(--project-accent);
     border-left-color: var(--project-accent);
     box-shadow: 0 0 0 0.2rem rgba(200, 44, 149, 0.16);

@@ -1142,8 +1142,131 @@ select.input.invalid,
     font-size:0.8em;
 }
 
-#desc-editor {
-    min-height: 500px;
+.tiptap-source-textarea {
+    display: none !important;
+}
+
+.tiptap-editor {
+    background: #fff;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    overflow: hidden;
+    width: 100%;
+}
+
+.tiptap-editor.is-focused {
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.16);
+}
+
+.tiptap-editor__toolbar {
+    align-items: center;
+    background: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 6px;
+}
+
+.tiptap-editor__button-group {
+    align-items: center;
+    border-right: 1px solid #dee2e6;
+    display: flex;
+    gap: 2px;
+    padding-right: 4px;
+}
+
+.tiptap-editor__button-group:last-child {
+    border-right: 0;
+}
+
+.tiptap-editor__button {
+    align-items: center;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    color: #343a40;
+    display: inline-flex;
+    font-size: 0.86rem;
+    font-weight: 700;
+    height: 30px;
+    justify-content: center;
+    min-width: 30px;
+    padding: 0 8px;
+}
+
+.tiptap-editor__button:hover:not(:disabled) {
+    background: #e9ecef;
+    border-color: #ced4da;
+}
+
+.tiptap-editor__button:focus-visible {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.16rem rgba(13, 110, 253, 0.25);
+    outline: 0;
+}
+
+.tiptap-editor__button.is-active {
+    background: #e7f1ff;
+    border-color: #86b7fe;
+    color: #0b5ed7;
+}
+
+.tiptap-editor__button:disabled {
+    color: #adb5bd;
+    cursor: not-allowed;
+}
+
+.tiptap-editor__content {
+    max-height: 520px;
+    min-height: 180px;
+    overflow-y: auto;
+}
+
+.tiptap-editor .ProseMirror {
+    color: #212529;
+    min-height: 180px;
+    outline: 0;
+    padding: 10px 12px;
+}
+
+.tiptap-editor .ProseMirror h1,
+.tiptap-editor .ProseMirror h2,
+.tiptap-editor .ProseMirror h3,
+.tiptap-editor .ProseMirror p,
+.tiptap-editor .ProseMirror ul,
+.tiptap-editor .ProseMirror ol,
+.tiptap-editor .ProseMirror blockquote {
+    margin-bottom: 0.75rem;
+}
+
+.tiptap-editor .ProseMirror h1 {
+    font-size: 1.65rem;
+}
+
+.tiptap-editor .ProseMirror h2 {
+    font-size: 1.35rem;
+}
+
+.tiptap-editor .ProseMirror h3 {
+    font-size: 1.15rem;
+}
+
+.tiptap-editor .ProseMirror ul,
+.tiptap-editor .ProseMirror ol {
+    padding-left: 1.5rem;
+}
+
+.tiptap-editor .ProseMirror blockquote {
+    border-left: 3px solid #ced4da;
+    color: #495057;
+    padding-left: 0.9rem;
+}
+
+.tiptap-editor .ProseMirror a {
+    color: #0d6efd;
+    text-decoration: underline;
 }
 .row.justify-center.notification-popup {
     margin-left:0px !important;
@@ -1855,4 +1978,3 @@ TIMELINE
   -webkit-box-shadow: 0 1px 5px rgba(0,0,0,0.2);
   font-size: 13px;
 }
-

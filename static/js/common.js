@@ -468,33 +468,11 @@ function showAlert(body, close) {
     }
 }
 
-function loadCkeditor(callback) {
-    if (window.CKEDITOR) {
-        callback();
-        return;
-    }
-
-    var scriptId = "ckeditor-script";
-    var script = document.getElementById(scriptId);
-    if (!script) {
-        script = document.createElement("script");
-        script.id = scriptId;
-        script.src = "https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js";
-        document.head.appendChild(script);
-    }
-    script.addEventListener("load", callback, { once: true });
-}
-
 function activeEditor(obj) {
-    var id = obj.attr("id");
-    var ref = obj.data("ref");
-    loadCkeditor(function(){
-        if (!document.getElementById(id))
-            return;
-        if (CKEDITOR.instances[id])
-            CKEDITOR.instances[id].destroy(true);
-        CKEDITOR.replace(id).on('change', function(){$("#"+ref).val(this.getData()).change();});
-    });
+    var element = obj && obj.jquery ? obj[0] : obj;
+    if (!element || !window.CapsulaeTiptap)
+        return;
+    window.CapsulaeTiptap.initTextarea(element);
 }
 
 function arkKeyUp(obj){

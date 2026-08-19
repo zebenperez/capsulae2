@@ -21,7 +21,7 @@
             <textarea class="hide autosave" id="desc" name="desc" title="{{obj.desc}}" data-model-name="projects.text" 
                 data-obj-id="{{obj.id}}" data-url="{%url "autosave_field"%}" data-target="div-notification">{{obj.desc}}</textarea> 
                 <span id="desc__msg"></span>
-            <textarea id="desc-editor" class="active-editor" data-ref="desc" onload="activeEditor($(this))">{{obj.desc}}</textarea>
+            <textarea id="desc-editor" class="active-editor" data-tiptap-editor data-ref="desc">{{obj.desc}}</textarea>
     </div>
 </div>
 

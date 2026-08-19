@@ -122,7 +122,7 @@
             title="{{obj.desc}}" data-model-name="projects.project" data-obj-id="{{obj.id}}" data-url="{% url "autosave_field" %}"
             data-target="div-notification" disabled>{{obj.desc}}</textarea>
         <span id="desc__msg"></span>
-        <textarea id="desc-editor-{{obj.id}}" class="active-editor" data-ref="desc">{{obj.desc}}</textarea>
+        <textarea id="desc-editor-{{obj.id}}" class="active-editor" data-tiptap-editor data-ref="desc">{{obj.desc}}</textarea>
     </div>
     <div class="project-form-field project-form-field-half">
         <label>{% trans "Observaciones" %}</label>
@@ -130,7 +130,7 @@
             title="{{obj.notes}}" data-model-name="projects.project" data-obj-id="{{obj.id}}" data-url="{% url "autosave_field" %}"
             data-target="div-notification" disabled>{{obj.notes}}</textarea>
         <span id="notes__msg"></span>
-        <textarea id="notes-editor-{{obj.id}}" class="active-editor" data-ref="notes">{{obj.notes}}</textarea>
+        <textarea id="notes-editor-{{obj.id}}" class="active-editor" data-tiptap-editor data-ref="notes">{{obj.notes}}</textarea>
     </div>
 </div>
 <div class="project-modal-actions">
