@@ -71,6 +71,28 @@ function getAjaxErrorMessage(e) {
     return e && e.responseText ? e.responseText : "No se pudo completar la operación.";
 }
 
+function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie !== "") {
+        var cookies = document.cookie.split(";");
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + "=")) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function getCsrfToken() {
+    var meta = document.querySelector('meta[name="csrf-token"]');
+    if (meta && meta.content)
+        return meta.content;
+    return getCookie("csrftoken");
+}
+
 function refreshProjectTabCounts() {
     var tabs = $(".project-tabs[data-project-id]").first();
     if (!tabs.length)
@@ -245,7 +267,7 @@ function ajaxPostAutosave(url, datas, target)
         data : datas,
         dataType : 'html',
         cache : false,
-        beforeSend : function(){},
+        beforeSend : function(xhr){xhr.setRequestHeader("X-CSRFToken", getCsrfToken());},
         success : function(data){
             if (target)
                 $("#"+target).empty();
@@ -255,6 +277,54 @@ function ajaxPostAutosave(url, datas, target)
         complete : function(){$("body").css("cursor", "default");}
     }); 
 };
+
+function buildAutosaveDataFromField(obj) {
+    var ref_field = obj.data("ref-field") ? obj.data("ref-field") : "pk";
+    var datas = {
+        "model_name": obj.data("model-name"),
+        "obj_id": obj.data("obj-id"),
+        "field": obj.attr("name"),
+        "value": obj.val(),
+        "ref_field": ref_field
+    };
+    if (obj.data("lang"))
+        datas["lang"] = obj.data("lang");
+    return datas;
+}
+
+function ajaxPostSaveField(field, options) {
+    options = options || {};
+    var obj = $(field);
+    return $.ajax({
+        url : obj.data("url"),
+        type : "POST",
+        data : buildAutosaveDataFromField(obj),
+        dataType : "html",
+        cache : false,
+        beforeSend : function(xhr){xhr.setRequestHeader("X-CSRFToken", getCsrfToken());},
+        success : function(){
+            if (window.CapsulaeTiptap)
+                window.CapsulaeTiptap.markSaved(field);
+            if (!options.silent)
+                showInfo("Saved!");
+        }
+    });
+}
+
+function hideClosestModal(obj) {
+    var modal = obj.closest(".modal");
+    if (!modal.length)
+        return;
+
+    if (window.bootstrap && window.bootstrap.Modal) {
+        var instance = window.bootstrap.Modal.getInstance(modal[0]) || new window.bootstrap.Modal(modal[0]);
+        instance.hide();
+        return;
+    }
+
+    if (modal.modal)
+        modal.modal("hide");
+}
 
 
 function ajaxGetRemove(url, datas, target)
@@ -518,6 +588,51 @@ $(document).ready(()=>{
         var obj = $(this);
         autoSearch(obj);
         e.preventDefault();
+    });
+
+    $("body").on("tiptap:save", ".tiptap-save-field", function(e){
+        ajaxPostSaveField(this, {"silent": true}).fail(function(error){
+            showError(getAjaxErrorMessage(error));
+        });
+        e.preventDefault();
+    });
+
+    $("body").on("click", ".save-tiptap-fields", function(e){
+        var obj = $(this);
+        runWithOptionalConfirm(obj, function(){
+            var modal = obj.closest(".project-modal");
+            var root = modal.length ? modal[0] : document;
+            if (window.CapsulaeTiptap)
+                window.CapsulaeTiptap.syncAll(root, false);
+
+            var fields = modal.find(".tiptap-save-field");
+            var requests = [];
+            fields.each(function(){
+                requests.push(ajaxPostSaveField(this, {"silent": true}));
+            });
+
+            setWait();
+            $.when.apply($, requests).done(function(){
+                showInfo("Saved!");
+                hideClosestModal(obj);
+
+                var url = obj.data("url");
+                var target = obj.data("target") ? obj.data("target") : "";
+                var target_modal = obj.data("target-modal") ? obj.data("target-modal") : "";
+                var datas = {};
+                var args = obj.data();
+                for(var i in args)
+                    if (i != "url")
+                        datas[i] = args[i]
+                ajaxGet(url, datas, target, target_modal);
+            }).fail(function(error){
+                showError(getAjaxErrorMessage(error));
+            }).always(function(){
+                unsetWait();
+            });
+        });
+        e.preventDefault();
+        e.stopImmediatePropagation();
     });
 
     $("body").on("click", ".ark", function(e){

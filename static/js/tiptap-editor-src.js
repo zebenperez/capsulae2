@@ -89,6 +89,42 @@ function syncInstance(instance, triggerChange = false) {
   }
 }
 
+function getSyncedHtml(instance) {
+  syncInstance(instance, false);
+  return instance.target ? instance.target.value : instance.textarea.value;
+}
+
+function updateDirtyState(instance) {
+  instance.isDirty = getSyncedHtml(instance) !== instance.lastSavedHtml;
+}
+
+function emitSaveRequest(instance) {
+  updateDirtyState(instance);
+  if (!instance.isDirty || !instance.target) {
+    return;
+  }
+
+  instance.target.dispatchEvent(
+    new CustomEvent("tiptap:save", {
+      bubbles: true,
+      detail: {
+        html: instance.target.value,
+        source: instance.textarea,
+        target: instance.target,
+      },
+    }),
+  );
+}
+
+function maybeSaveOnBlur(instance) {
+  window.setTimeout(() => {
+    if (instance.wrapper.contains(document.activeElement)) {
+      return;
+    }
+    emitSaveRequest(instance);
+  }, 0);
+}
+
 function createButton(config, editor, instance) {
   const button = document.createElement("button");
   button.type = "button";
@@ -110,7 +146,7 @@ function createButton(config, editor, instance) {
     event.preventDefault();
     runCommand(config.command, editor);
     updateToolbar(instance);
-    syncInstance(instance, true);
+    updateDirtyState(instance);
   });
 
   return button;
@@ -303,6 +339,8 @@ function initTextarea(textarea) {
   const instance = {
     editor: null,
     editorElement,
+    isDirty: false,
+    lastSavedHtml: "",
     target,
     textarea,
     wrapper,
@@ -333,7 +371,7 @@ function initTextarea(textarea) {
     ],
     content: textarea.value || target.value || "",
     onUpdate: () => {
-      syncInstance(instance, true);
+      updateDirtyState(instance);
     },
     onSelectionUpdate: () => {
       updateToolbar(instance);
@@ -343,7 +381,7 @@ function initTextarea(textarea) {
     },
     onBlur: () => {
       wrapper.classList.remove("is-focused");
-      syncInstance(instance, true);
+      maybeSaveOnBlur(instance);
     },
   });
 
@@ -353,6 +391,7 @@ function initTextarea(textarea) {
   textarea.insertAdjacentElement("afterend", wrapper);
   instances.set(textarea, instance);
   syncInstance(instance, false);
+  instance.lastSavedHtml = getSyncedHtml(instance);
   updateToolbar(instance);
 
   return instance;
@@ -377,12 +416,36 @@ function destroyTextarea(textarea) {
   if (!instance) {
     return;
   }
-
   instance.editor.destroy();
   instance.wrapper.remove();
   textarea.classList.remove("tiptap-source-textarea");
   textarea.removeAttribute("aria-hidden");
   instances.delete(textarea);
+}
+
+function findInstanceForField(field) {
+  let found = instances.get(field) || null;
+  if (found) {
+    return found;
+  }
+
+  instances.forEach((instance) => {
+    if (instance.target === field || instance.textarea === field) {
+      found = instance;
+    }
+  });
+
+  return found;
+}
+
+function markSaved(field) {
+  const instance = findInstanceForField(field);
+  if (!instance) {
+    return;
+  }
+
+  instance.lastSavedHtml = getSyncedHtml(instance);
+  instance.isDirty = false;
 }
 
 function destroyRemovedEditors(node) {
@@ -449,5 +512,6 @@ window.CapsulaeTiptap = {
   destroyTextarea,
   initAll,
   initTextarea,
+  markSaved,
   syncAll,
 };

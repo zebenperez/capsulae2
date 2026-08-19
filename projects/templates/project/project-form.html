@@ -118,23 +118,23 @@
 
     <div class="project-form-field project-form-field-half">
         <label>{% trans "Descripción" %}</label>
-        <textarea class="hide autosave" id="desc" name="desc"
+        <textarea class="hide tiptap-save-field" id="desc" name="desc"
             title="{{obj.desc}}" data-model-name="projects.project" data-obj-id="{{obj.id}}" data-url="{% url "autosave_field" %}"
-            data-target="div-notification" disabled>{{obj.desc}}</textarea>
+            data-target="div-notification">{{obj.desc}}</textarea>
         <span id="desc__msg"></span>
         <textarea id="desc-editor-{{obj.id}}" class="active-editor" data-tiptap-editor data-ref="desc">{{obj.desc}}</textarea>
     </div>
     <div class="project-form-field project-form-field-half">
         <label>{% trans "Observaciones" %}</label>
-        <textarea class="hide autosave" id="notes" name="notes"
+        <textarea class="hide tiptap-save-field" id="notes" name="notes"
             title="{{obj.notes}}" data-model-name="projects.project" data-obj-id="{{obj.id}}" data-url="{% url "autosave_field" %}"
-            data-target="div-notification" disabled>{{obj.notes}}</textarea>
+            data-target="div-notification">{{obj.notes}}</textarea>
         <span id="notes__msg"></span>
         <textarea id="notes-editor-{{obj.id}}" class="active-editor" data-tiptap-editor data-ref="notes">{{obj.notes}}</textarea>
     </div>
 </div>
 <div class="project-modal-actions">
-    <button type="button" class="project-btn project-btn-primary ark save" data-bs-dismiss="modal" data-url="{% url "project-shell" %}"
+    <button type="button" class="project-btn project-btn-primary save save-tiptap-fields" data-url="{% url "project-shell" %}"
         data-target="project-shell" data-obj_id="{{obj.id}}">{% trans "Guardar" %}</button>
 </div>
 </div>

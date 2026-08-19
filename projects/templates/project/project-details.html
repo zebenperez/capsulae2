@@ -63,11 +63,15 @@
         </div>
         <div class="project-field wide">
             <label>{% trans "Descripción" %}</label>
-            <div class="view">{{ obj.desc|safe|default:"---" }}</div>
+            <div class="view project-rich-text">
+                {% if obj.desc %}{{ obj.desc|safe }}{% else %}---{% endif %}
+            </div>
         </div>
         <div class="project-field wide">
             <label>{% trans "Observaciones" %}</label>
-            <div class="view">{{ obj.notes|linebreaksbr|default:"---" }}</div>
+            <div class="view project-rich-text">
+                {% if obj.notes %}{{ obj.notes|safe }}{% else %}---{% endif %}
+            </div>
         </div>
     </div>
 </div>

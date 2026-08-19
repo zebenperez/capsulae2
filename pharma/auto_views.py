@@ -10,20 +10,21 @@ from capsulae2.commons import get_or_none_str, set_obj_field, create_obj_str, sh
 #@login_required
 def autosave_field(request):
     try:
-        app = request.GET["model_name"].split(".")[0]
-        model = request.GET["model_name"].split(".")[1]
-        obj_id = request.GET["obj_id"]
+        params = request.POST if request.method == "POST" else request.GET
+        app = params["model_name"].split(".")[0]
+        model = params["model_name"].split(".")[1]
+        obj_id = params["obj_id"]
 
-        field = request.GET["field"]
+        field = params["field"]
 
         try:
-            reffield = request.GET["ref_field"]
+            reffield = params["ref_field"]
         except:
             reffield = "pk"
         try:
-            value = request.GET["value"]
+            value = params["value"]
         except:
-            value = request.GET.getlist("value[]")
+            value = params.getlist("value[]")
 
         obj = get_or_none_str(app, model, obj_id, field=reffield)
         if obj != None:
@@ -82,5 +83,4 @@ def autoremove_obj(request):
     except Exception as e:
         #logger.error("[autoremove_obj] %s" % e)
         return render(request, 'simple-error.html', {'msg': str(e)})
-
 

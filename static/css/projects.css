@@ -1360,6 +1360,54 @@
     overflow-wrap: anywhere;
 }
 
+.project-rich-text p,
+.project-rich-text ul,
+.project-rich-text ol,
+.project-rich-text blockquote {
+    margin-bottom: 0.75rem;
+}
+
+.project-rich-text h1,
+.project-rich-text h2,
+.project-rich-text h3 {
+    color: var(--project-text);
+    font-weight: 800;
+    line-height: 1.25;
+    margin: 0 0 0.75rem;
+}
+
+.project-rich-text h1 {
+    font-size: 1.45rem;
+}
+
+.project-rich-text h2 {
+    font-size: 1.25rem;
+}
+
+.project-rich-text h3 {
+    font-size: 1.08rem;
+}
+
+.project-rich-text ul,
+.project-rich-text ol {
+    padding-left: 1.35rem;
+}
+
+.project-rich-text blockquote {
+    border-left: 3px solid var(--project-border);
+    color: var(--project-muted);
+    padding-left: 0.9rem;
+}
+
+.project-rich-text a {
+    color: var(--project-primary);
+    text-decoration: underline;
+}
+
+.project-rich-text > :last-child {
+    margin-bottom: 0;
+}
+
 .project-table {
     border: 1px solid var(--project-border);
     border-radius: 8px;
