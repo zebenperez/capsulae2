@@ -1,34 +1,84 @@
-{% load i18n %}
+{% load i18n project_tags %}
 
-<div class="project-modal">
-    <div class="project-modal-close">
-        <button type="button" class="project-icon-btn" data-bs-dismiss="modal" aria-label="{% trans 'Cerrar' %}">
-            <i class="fas fa-times"></i>
-        </button>
-    </div>
-
-    <h2>{% trans "Trazabilidad de factura" %}</h2>
-    <p class="project-muted">{{ invoice.locator|default:"-----" }} · {{ invoice.number }} · {% trans "Estado actual" %}: {{ invoice.get_status_display }}</p>
-
-    <div class="invoice-traceability-list">
-        {% for change in status_changes %}
-            <div class="invoice-traceability-row">
-                <div class="invoice-traceability-main">
-                    <span class="invoice-traceability-status">
-                        {{ change.get_original_status_display }} <i class="fas fa-arrow-right"></i> {{ change.get_final_status_display }}
-                    </span>
-                    <span class="project-muted">
-                        {% if change.changed_by %}
-                            {% firstof change.changed_by.get_full_name change.changed_by.username %}
-                        {% else %}
-                            {% trans "Usuario no disponible" %}
-                        {% endif %}
-                    </span>
-                </div>
-                <time datetime="{{ change.changed_at|date:"c" }}">{{ change.changed_at|date:"d/m/Y H:i" }}</time>
+<div class="project-modal invoice-traceability-modal">
+    <header class="invoice-traceability-header">
+        <div class="invoice-traceability-title">
+            <h2>{% trans "TRAZABILIDAD DE FACTURA" %}</h2>
+            <p>{{ invoice.locator|default:"-----" }} · {{ invoice.number }} · {% trans "Estado actual" %}: {{ invoice.get_status_display }}</p>
+        </div>
+        <div class="invoice-traceability-kpis" aria-label="{% trans 'Resumen de factura' %}">
+            <div class="invoice-traceability-kpi">
+                <span class="invoice-traceability-kpi-icon" aria-hidden="true"><i class="fas fa-coins"></i></span>
+                <span>{% trans "Imputado" %}</span>
+                <strong>{{ invoice.allocated_amount|money_es }}</strong>
             </div>
-        {% empty %}
-            <div class="project-empty">{% trans "No hay cambios de estado registrados para esta factura." %}</div>
-        {% endfor %}
-    </div>
+            <div class="invoice-traceability-kpi invoice-traceability-kpi-pending">
+                <span class="invoice-traceability-kpi-icon" aria-hidden="true"><i class="fas fa-euro-sign"></i></span>
+                <span>{% trans "Pendiente" %}</span>
+                <strong>{{ invoice.pending_amount|money_es }}</strong>
+            </div>
+        </div>
+        <button type="button" class="invoice-traceability-close" data-bs-dismiss="modal" aria-label="{% trans 'Cerrar' %}">
+            <i class="fas fa-times" aria-hidden="true"></i>
+        </button>
+    </header>
+
+    <main class="invoice-traceability-body">
+        <section class="invoice-traceability-section">
+            <div class="invoice-traceability-section-header">
+                <span class="invoice-traceability-section-icon" aria-hidden="true"><i class="fas fa-history"></i></span>
+                <div>
+                    <h3>{% trans "CAMBIOS DE ESTADO" %}</h3>
+                    <p>{% trans "Historial de cambios registrados para esta factura." %}</p>
+                </div>
+            </div>
+            <div class="invoice-traceability-list">
+                {% for change in status_changes %}
+                    <div class="invoice-traceability-row">
+                        <div class="invoice-traceability-main">
+                            <span class="invoice-traceability-status">
+                                {{ change.get_original_status_display }} <i class="fas fa-arrow-right" aria-hidden="true"></i> {{ change.get_final_status_display }}
+                            </span>
+                            <span class="project-muted">
+                                {% if change.changed_by %}
+                                    {% firstof change.changed_by.get_full_name change.changed_by.username %}
+                                {% else %}
+                                    {% trans "Usuario no disponible" %}
+                                {% endif %}
+                            </span>
+                        </div>
+                        <time datetime="{{ change.changed_at|date:"c" }}">{{ change.changed_at|date:"d/m/Y H:i" }}</time>
+                    </div>
+                {% empty %}
+                    <div class="project-empty">{% trans "No hay cambios de estado registrados para esta factura." %}</div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <section class="invoice-traceability-section">
+            <div class="invoice-traceability-section-header">
+                <span class="invoice-traceability-section-icon" aria-hidden="true"><i class="fas fa-sitemap"></i></span>
+                <div>
+                    <h3>{% trans "PARTIDAS IMPUTADAS" %}</h3>
+                    <p>{% trans "Detalle de las partidas a las que se ha imputado esta factura." %}</p>
+                </div>
+            </div>
+            <div class="invoice-allocation-trace-list">
+                <div class="invoice-allocation-trace-head">
+                    <span>{% trans "Proyecto" %}</span>
+                    <span>{% trans "Partida" %}</span>
+                    <span>{% trans "Cantidad imputada" %}</span>
+                </div>
+                {% for allocation in allocations %}
+                    <div class="invoice-allocation-trace-row">
+                        <span>{{ allocation.project.code|default:"" }} {{ allocation.project.name|default:"Proyecto sin nombre" }}</span>
+                        <span>{{ allocation.budget_line.full_code }} · {{ allocation.budget_line.name|default:"Sin nombre" }}</span>
+                        <strong>{{ allocation.allocated_amount|money_es }}</strong>
+                    </div>
+                {% empty %}
+                    <div class="project-empty">{% trans "No hay imputaciones registradas para esta factura." %}</div>
+                {% endfor %}
+            </div>
+        </section>
+    </main>
 </div>

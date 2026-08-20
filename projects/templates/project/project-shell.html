@@ -1,5 +1,23 @@
 {% load i18n project_tags %}
 
+<div class="projects-area-tabs project-global-tabs" role="navigation" aria-label="{% trans 'Navegación general de proyectos' %}">
+    <a class="projects-area-tab" href="{% url "projects" %}?section=dashboard">
+        <i class="fas fa-home"></i> {% trans 'Dashboard' %}
+    </a>
+    <a class="projects-area-tab active" href="{% url "projects" %}?section=projects" aria-current="page">
+        <i class="fas fa-briefcase"></i> {% trans 'Proyectos' %}
+    </a>
+    <a class="projects-area-tab" href="{% url "projects" %}?section=financiers">
+        <i class="fas fa-hand-holding-usd"></i> {% trans 'Financiadores' %}
+    </a>
+    <a class="projects-area-tab" href="{% url "projects" %}?section=suppliers">
+        <i class="fas fa-truck"></i> {% trans 'Proveedores' %}
+    </a>
+    <a class="projects-area-tab" href="{% url "projects" %}?section=invoices">
+        <i class="fas fa-file-invoice"></i> {% trans 'Facturas' %}
+    </a>
+</div>
+
 <div class="project-hero">
     <div class="project-title">
         <div class="project-kicker">

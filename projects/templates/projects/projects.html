@@ -2,25 +2,9 @@
 {% load i18n static project_tags %}
 
 {% block central_content %}
-    <link rel="stylesheet" href="{% static 'css/projects.css' %}?v=20260820-wide">
+    <link rel="stylesheet" href="{% static 'css/projects.css' %}?v=20260820-invoice-allocation">
     <div class="projects-ui">
         <div class="projects-shell">
-            <div class="projects-dashboard-hero">
-                <div class="projects-title">
-                    <span class="project-kicker">{% trans 'Dashboard' %}</span>
-                    <h1>{% trans 'Gestión de proyectos' %}</h1>
-                    <p>{% trans 'Resumen operativo, técnico y financiero de los proyectos asignados.' %}</p>
-                </div>
-                <div class="projects-dashboard-actions">
-                    <button class="project-btn project-btn-ghost" type="button">
-                        <i class="far fa-calendar-alt"></i> {% trans 'Periodo actual' %}
-                    </button>
-                    <a class="project-btn project-btn-primary" href="{% url "project-new" %}">
-                        <i class="fas fa-plus"></i> {% trans "Nuevo proyecto"%}
-                    </a>
-                </div>
-            </div>
-
             <div class="projects-area-tabs" role="tablist" aria-label="{% trans 'Áreas de proyectos' %}">
                 <button class="projects-area-tab active" type="button" data-dashboard-tab="dashboard" role="tab" aria-selected="true">
                     <i class="fas fa-home"></i> {% trans 'Dashboard' %}
@@ -39,6 +23,22 @@
                     data-load-target="invoice-list" role="tab" aria-selected="false">
                     <i class="fas fa-file-invoice"></i> {% trans 'Facturas' %}
                 </button>
+            </div>
+
+            <div class="projects-dashboard-hero">
+                <div class="projects-title">
+                    <span class="project-kicker">{% trans 'Dashboard' %}</span>
+                    <h1>{% trans 'Gestión de proyectos' %}</h1>
+                    <p>{% trans 'Resumen operativo, técnico y financiero de los proyectos asignados.' %}</p>
+                </div>
+                <div class="projects-dashboard-actions">
+                    <button class="project-btn project-btn-ghost" type="button">
+                        <i class="far fa-calendar-alt"></i> {% trans 'Periodo actual' %}
+                    </button>
+                    <a class="project-btn project-btn-primary" href="{% url "project-new" %}">
+                        <i class="fas fa-plus"></i> {% trans "Nuevo proyecto"%}
+                    </a>
+                </div>
             </div>
 
             <section class="projects-area-section active" data-dashboard-section="dashboard">
@@ -323,16 +323,29 @@
     </div>
     <script>
         $(document).ready(function() {
-            $(".projects-area-tab").on("click", function() {
-                var sectionName = $(this).data("dashboard-tab");
+            function activateProjectsSection(tab) {
+                var sectionName = tab.data("dashboard-tab");
+                if (!sectionName)
+                    return;
                 $(".projects-area-tab").removeClass("active").attr("aria-selected", "false");
-                $(this).addClass("active").attr("aria-selected", "true");
+                tab.addClass("active").attr("aria-selected", "true");
                 $(".projects-area-section").removeClass("active");
                 $('.projects-area-section[data-dashboard-section="' + sectionName + '"]').addClass("active");
-                if ($(this).data("load-url") && $(this).data("load-target")) {
-                    ajaxGet($(this).data("load-url"), {}, $(this).data("load-target"), "");
+                if (tab.data("load-url") && tab.data("load-target")) {
+                    ajaxGet(tab.data("load-url"), {}, tab.data("load-target"), "");
                 }
+            }
+
+            $(".projects-area-tab").on("click", function() {
+                activateProjectsSection($(this));
             });
+
+            var initialSection = new URLSearchParams(window.location.search).get("section");
+            if (initialSection) {
+                var initialTab = $('.projects-area-tab[data-dashboard-tab="' + initialSection + '"]');
+                if (initialTab.length)
+                    activateProjectsSection(initialTab);
+            }
         });
     </script>
     {% include "common-modal.html" %}

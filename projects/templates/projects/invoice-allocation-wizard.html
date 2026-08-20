@@ -1,113 +1,290 @@
 {% load i18n %}
 
 <div class="project-modal invoice-allocation-wizard">
-    <div class="project-modal-close">
-        <button type="button" class="project-icon-btn" data-bs-dismiss="modal" aria-label="{% trans 'Cerrar' %}">
-            <i class="fas fa-times"></i>
+    <header class="invoice-wizard-header">
+        <div class="invoice-wizard-title">
+            <h2>{% trans "IMPUTAR FACTURA" %}</h2>
+            <p>{% trans "Factura" %} {{ invoice.locator }} · {{ invoice.number }}</p>
+        </div>
+        <div class="invoice-wizard-kpis" aria-label="{% trans 'Resumen de imputación de factura' %}">
+            <div class="invoice-wizard-kpi invoice-wizard-kpi-allocated">
+                <span class="invoice-wizard-kpi-icon" aria-hidden="true"><i class="fas fa-coins"></i></span>
+                <span>{% trans "Imputado" %}</span>
+                <strong>{{ allocated_amount_display }} €</strong>
+            </div>
+            <div class="invoice-wizard-kpi invoice-wizard-kpi-pending">
+                <span class="invoice-wizard-kpi-icon" aria-hidden="true"><i class="fas fa-euro-sign"></i></span>
+                <span>{% trans "Pendiente" %}</span>
+                <strong>{{ remaining_amount_display }} €</strong>
+            </div>
+        </div>
+        <button type="button" class="invoice-wizard-close" data-bs-dismiss="modal" aria-label="{% trans 'Cerrar' %}">
+            <i class="fas fa-times" aria-hidden="true"></i>
         </button>
-    </div>
+    </header>
 
-    <h2>{% trans "Imputar factura" %}</h2>
-    <p class="project-muted">
-        {{ invoice.locator }} · {{ invoice.number }} · {% trans "Imputado" %}: {{ allocated_amount_display }} € · {% trans "Pendiente" %}: {{ remaining_amount_display }} €
-    </p>
+    <form id="invoice-allocation-form" class="invoice-wizard-form" data-invoice-id="{{ invoice.id }}">
+        <nav class="invoice-wizard-steps" aria-label="{% trans 'Pasos de imputación' %}">
+            <span class="active" data-step-indicator="1" aria-current="step">
+                <strong><span class="invoice-step-number">1</span><i class="fas fa-check" aria-hidden="true"></i></strong>
+                <em>{% trans "Proyecto" %}</em>
+            </span>
+            <span data-step-indicator="2">
+                <strong><span class="invoice-step-number">2</span><i class="fas fa-check" aria-hidden="true"></i></strong>
+                <em>{% trans "Partida" %}</em>
+            </span>
+            <span data-step-indicator="3">
+                <strong><span class="invoice-step-number">3</span><i class="fas fa-check" aria-hidden="true"></i></strong>
+                <em>{% trans "Imputación" %}</em>
+            </span>
+        </nav>
 
-    <form id="invoice-allocation-form">
-        <input type="hidden" name="invoice_id" value="{{ invoice.id }}">
-        <div class="invoice-wizard-steps">
-            <span class="active" data-step-indicator="1">1</span>
-            <span data-step-indicator="2">2</span>
-            <span data-step-indicator="3">3</span>
-        </div>
+        <main class="invoice-wizard-body">
+            <div class="invoice-wizard-error" role="alert" hidden></div>
 
-        <div class="invoice-wizard-step active" data-step="1">
-            <div class="project-form-field project-form-field-wide">
-                <label>{% trans "Proyecto" %}</label>
-                <select class="form-control" name="project" required>
-                    <option value="">---</option>
-                    {% for project in projects %}
-                        <option value="{{ project.id }}">{{ project.code|default:"" }} {{ project.name|default:"Proyecto sin nombre" }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-        </div>
-
-        <div class="invoice-wizard-step" data-step="2">
-            <div class="project-form-field project-form-field-wide">
-                <label>{% trans "Partida / Subpartida" %}</label>
-                <select class="form-control" name="budget_line" required>
-                    <option value="">---</option>
-                    {% for budget_line in budget_lines %}
-                        <option value="{{ budget_line.id }}"
-                            data-project="{{ budget_line.project_id }}"
-                            data-available="{{ budget_line.invoice_allocation_available }}">
-                            {{ budget_line.project.code|default:budget_line.project.name }} · {{ budget_line.full_code }} · {{ budget_line.name|default:"Sin nombre" }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="project-form-field project-form-field-wide">
-                <label>
-                    {% trans "Importe a imputar" %}
-                    <span class="invoice-allocation-max-label">· {% trans "Máximo disponible" %}: 0,00 €</span>
-                </label>
-                <div class="invoice-allocation-mode">
-                    <label>
-                        <input type="radio" name="allocation_mode" value="amount" checked>
-                        {% trans "Cantidad" %}
-                    </label>
-                    <label>
-                        <input type="radio" name="allocation_mode" value="percentage">
-                        {% trans "Porcentaje" %}
-                    </label>
+            <section class="invoice-wizard-step active" data-step="1">
+                <div class="invoice-wizard-card">
+                    <div class="invoice-wizard-card-header">
+                        <span class="invoice-wizard-card-icon" aria-hidden="true"><i class="far fa-folder-open"></i></span>
+                        <div>
+                            <h3>{% trans "PROYECTO" %}</h3>
+                            <p>{% trans "Selecciona el proyecto al que se imputará esta factura." %}</p>
+                        </div>
+                    </div>
+                    <div class="invoice-wizard-field">
+                        <label for="invoice-allocation-project">{% trans "Proyecto" %}</label>
+                        <input type="hidden" id="invoice-allocation-project" name="project" required>
+                        <div class="invoice-project-selected" data-project-selected-label>{% trans "Selecciona un proyecto" %}</div>
+                        <div class="invoice-project-list" data-project-picker aria-label="{% trans 'Proyectos disponibles' %}">
+                            {% for project in projects %}
+                                <button type="button" class="invoice-project-option" data-value="{{ project.id }}"
+                                    data-label="{{ project.code|default:"" }} {{ project.name|default:"Proyecto sin nombre" }}">
+                                    <i class="far fa-folder" aria-hidden="true"></i>
+                                    <span>
+                                        <strong>{{ project.name|default:"Proyecto sin nombre" }}</strong>
+                                        {% if project.code %}<small>{{ project.code }}</small>{% endif %}
+                                    </span>
+                                </button>
+                            {% endfor %}
+                        </div>
+                    </div>
                 </div>
-                <input type="number" step="0.01" min="0.01" class="form-control" name="allocated_amount"
-                    value="{{ remaining_amount }}" max="{{ remaining_amount }}" required>
-                <input type="number" step="0.01" min="0.01" class="form-control invoice-allocation-percentage-input"
-                    name="allocated_percentage" value="100.00" max="100" required>
-            </div>
-        </div>
+            </section>
 
-        <div class="invoice-wizard-step" data-step="3">
-            <div class="project-form-field project-form-field-wide">
-                <label>{% trans "Actividad" %}</label>
-                <select class="form-control" name="activity">
-                    <option value="">{% trans "--- Sin actividad ---" %}</option>
-                    {% for activity in activities %}
-                        <option value="{{ activity.id }}" data-project="{{ activity.project_id }}">
-                            {{ activity.code|default:"" }} {{ activity.name|default:"Actividad sin nombre" }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
-        </div>
+            <section class="invoice-wizard-step" data-step="2">
+                <div class="invoice-wizard-context invoice-wizard-context-single" data-context="project" hidden>
+                    <span class="invoice-wizard-context-icon" aria-hidden="true"><i class="far fa-folder"></i></span>
+                    <span>{% trans "Proyecto seleccionado" %}: <strong data-project-context-name></strong></span>
+                </div>
+                <div class="invoice-wizard-card">
+                    <div class="invoice-wizard-card-header">
+                        <span class="invoice-wizard-card-icon" aria-hidden="true"><i class="fas fa-sitemap"></i></span>
+                        <div>
+                            <h3>{% trans "PARTIDA PRESUPUESTARIA" %}</h3>
+                            <p>{% trans "Selecciona la partida o subpartida a la que se imputará la factura." %}</p>
+                        </div>
+                    </div>
+                    <div class="invoice-wizard-field">
+                        <label for="invoice-allocation-budget-line">{% trans "Partida / Subpartida" %}</label>
+                        <input type="hidden" id="invoice-allocation-budget-line" name="budget_line" required>
+                        <div class="invoice-budget-line-selected" data-budget-line-selected-label>{% trans "Selecciona una partida / subpartida" %}</div>
+                        <div class="invoice-budget-line-list" data-budget-line-picker aria-label="{% trans 'Partidas disponibles' %}">
+                            {% for budget_line in budget_lines %}
+                                {% if budget_line.parent_id %}
+                                    {% ifchanged budget_line.parent_id %}
+                                        <div class="invoice-budget-line-parent" data-project="{{ budget_line.project_id }}" data-parent="{{ budget_line.parent_id }}">
+                                            <i class="fas fa-chevron-right" aria-hidden="true"></i>
+                                            <span>{{ budget_line.parent.full_code }} · {{ budget_line.parent.name|default:"Sin nombre" }}</span>
+                                        </div>
+                                    {% endifchanged %}
+                                    <button type="button" class="invoice-budget-line-option invoice-budget-line-option-child"
+                                        data-project="{{ budget_line.project_id }}"
+                                        data-parent="{{ budget_line.parent_id }}"
+                                        data-value="{{ budget_line.id }}"
+                                        data-available="{{ budget_line.invoice_allocation_available|stringformat:'f' }}"
+                                        data-label="{{ budget_line.full_code }} · {{ budget_line.name|default:"Sin nombre" }}">
+                                        <i class="fas fa-level-up-alt" aria-hidden="true"></i>
+                                        <span>{{ budget_line.full_code }} · {{ budget_line.name|default:"Sin nombre" }}</span>
+                                    </button>
+                                {% else %}
+                                    <button type="button" class="invoice-budget-line-option"
+                                        data-project="{{ budget_line.project_id }}"
+                                        data-value="{{ budget_line.id }}"
+                                        data-available="{{ budget_line.invoice_allocation_available|stringformat:'f' }}"
+                                        data-label="{{ budget_line.full_code }} · {{ budget_line.name|default:"Sin nombre" }}">
+                                        <i class="fas fa-chevron-right" aria-hidden="true"></i>
+                                        <span>{{ budget_line.full_code }} · {{ budget_line.name|default:"Sin nombre" }}</span>
+                                    </button>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="invoice-wizard-step" data-step="3">
+                <div class="invoice-wizard-context invoice-wizard-context-grid" data-context="allocation" hidden>
+                    <span class="invoice-wizard-context-item">
+                        <span class="invoice-wizard-context-icon" aria-hidden="true"><i class="far fa-folder"></i></span>
+                        <span>{% trans "Proyecto seleccionado" %}: <strong data-allocation-project-name></strong></span>
+                    </span>
+                    <span class="invoice-wizard-context-item">
+                        <span class="invoice-wizard-context-icon" aria-hidden="true"><i class="fas fa-sitemap"></i></span>
+                        <span>{% trans "Partida seleccionada" %}: <strong data-allocation-budget-line-name></strong></span>
+                    </span>
+                </div>
+                <div class="invoice-wizard-card">
+                    <div class="invoice-wizard-card-header">
+                        <span class="invoice-wizard-card-icon" aria-hidden="true"><i class="fas fa-calculator"></i></span>
+                        <div>
+                            <h3>{% trans "IMPORTE A IMPUTAR" %}</h3>
+                            <p>{% trans "Indica cuánto de la factura debe imputarse a esta partida." %}</p>
+                        </div>
+                    </div>
+                    <div class="invoice-wizard-allocation-grid">
+                        <div class="invoice-wizard-pending-panel">
+                            <div class="invoice-wizard-pending-box">
+                                <span class="invoice-wizard-pending-icon" aria-hidden="true"><i class="far fa-clock"></i></span>
+                                <span>{% trans "Pendiente de imputar" %}</span>
+                                <strong>{{ remaining_amount_display }} €</strong>
+                            </div>
+                            <p>{% trans "Este es el importe máximo que puedes imputar en esta operación." %}</p>
+                            <span class="invoice-allocation-max-label">{% trans "Máximo disponible" %}: 0,00 €</span>
+                        </div>
+                        <div class="invoice-wizard-input-panel">
+                            <div class="invoice-allocation-mode" role="group" aria-label="{% trans 'Modo de imputación' %}">
+                                <label>
+                                    <input type="radio" name="allocation_mode" value="amount" checked>
+                                    {% trans "Cantidad" %}
+                                </label>
+                                <label>
+                                    <input type="radio" name="allocation_mode" value="percentage">
+                                    {% trans "Porcentaje" %}
+                                </label>
+                            </div>
+                            <div class="invoice-wizard-field invoice-wizard-money-field">
+                                <label for="invoice-allocation-amount">{% trans "Importe a imputar" %}</label>
+                                <div class="invoice-wizard-money-input">
+                                    <input type="number" step="0.01" min="0.01" class="form-control" id="invoice-allocation-amount"
+                                        name="allocated_amount" value="{{ remaining_amount|stringformat:'f' }}" max="{{ remaining_amount|stringformat:'f' }}" required>
+                                    <span aria-hidden="true">€</span>
+                                </div>
+                                <input type="number" step="0.01" min="0.01" class="form-control invoice-allocation-percentage-input"
+                                    name="allocated_percentage" value="100.00" max="100" required aria-label="{% trans 'Porcentaje a imputar' %}">
+                                <small>{% trans "El importe no puede superar el pendiente disponible." %}</small>
+                            </div>
+                            <div class="invoice-wizard-field">
+                                <label for="invoice-allocation-activity">{% trans "Actividad" %}</label>
+                                <select class="form-control" id="invoice-allocation-activity" name="activity">
+                                    <option value="">{% trans "--- Sin actividad ---" %}</option>
+                                    {% for activity in activities %}
+                                        <option value="{{ activity.id }}" data-project="{{ activity.project_id }}">
+                                            {{ activity.code|default:"" }} {{ activity.name|default:"Actividad sin nombre" }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="invoice-wizard-summary">
+                                <strong>{% trans "Resumen de la imputación" %}</strong>
+                                <span>{% trans "Tras esta imputación quedará pendiente" %} <b data-allocation-remaining>{{ remaining_amount_display }} €</b></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
     </form>
 
-    <div class="project-modal-actions invoice-wizard-actions">
-        <button type="button" class="project-btn project-btn-ghost invoice-wizard-prev">{% trans "Anterior" %}</button>
-        <button type="button" class="project-btn project-btn-primary invoice-wizard-next">{% trans "Siguiente" %}</button>
-        <button type="button" class="project-btn project-btn-primary ajax-form-get invoice-wizard-save" data-form="invoice-allocation-form"
-            data-url="{% url "invoice-allocation-save" %}" data-target="invoice-list" data-dismiss-modal="common-modal">
-            {% trans "Guardar" %}
-        </button>
-    </div>
+    <footer class="project-modal-actions invoice-wizard-actions">
+        <span class="invoice-wizard-progress">{% trans "Paso" %} <strong data-current-step>1</strong> {% trans "de" %} 3</span>
+        <div class="invoice-wizard-action-buttons">
+            <button type="button" class="project-btn project-btn-ghost invoice-wizard-prev">
+                <i class="fas fa-arrow-left" aria-hidden="true"></i> {% trans "Anterior" %}
+            </button>
+            <button type="button" class="project-btn project-btn-ghost" data-bs-dismiss="modal">{% trans "Cancelar" %}</button>
+            <button type="button" class="project-btn project-btn-primary invoice-wizard-next">
+                {% trans "Siguiente" %} <i class="fas fa-arrow-right" aria-hidden="true"></i>
+            </button>
+            <button type="button" class="project-btn project-btn-primary ajax-form-get invoice-wizard-save" data-form="invoice-allocation-form"
+                data-url="{% url "invoice-allocation-save" %}" data-target="invoice-list" data-dismiss-modal="common-modal"
+                data-loading-text="{% trans 'Imputando…' %}">
+                <i class="fas fa-check" aria-hidden="true"></i> {% trans "Confirmar imputación" %}
+            </button>
+        </div>
+    </footer>
 </div>
 
 <script>
     (function(){
         var currentStep = 1;
         var maxStep = 3;
-        var remainingAmount = parseFloat("{{ remaining_amount|default:"0" }}");
-        var invoiceTotal = parseFloat("{{ invoice.total_amount|default:"0" }}");
+        var remainingAmount = parseFloat("{{ remaining_amount|stringformat:'f'|default:'0' }}");
+        var invoiceTotal = parseFloat("{{ invoice.total_amount|stringformat:'f'|default:'0' }}");
         var currentMaxAmount = 0;
 
         function formatMoney(value) {
             return value.toLocaleString("es-ES", {minimumFractionDigits: 2, maximumFractionDigits: 2});
         }
 
+        function selectedText(name) {
+            if (name === "project") {
+                return $.trim($('[name="project"]').data("label") || "");
+            }
+            if (name === "budget_line") {
+                return $.trim($('[name="budget_line"]').data("label") || "");
+            }
+            var selected = $('[name="' + name + '"] option:selected');
+            return $.trim(selected.text() || "");
+        }
+
+        function currentAllocationAmount() {
+            var mode = $('[name="allocation_mode"]:checked').val();
+            if (mode === "percentage") {
+                var percentage = parseFloat($('[name="allocated_percentage"]').val() || "0");
+                return invoiceTotal * percentage / 100;
+            }
+            return parseFloat($('[name="allocated_amount"]').val() || "0");
+        }
+
+        function updateAllocationSummary() {
+            var pendingAfter = Math.max(remainingAmount - currentAllocationAmount(), 0);
+            $("[data-allocation-remaining]").text(formatMoney(pendingAfter) + " €");
+        }
+
+        function updateContext() {
+            var projectText = selectedText("project");
+            var budgetLineText = selectedText("budget_line");
+            var projectContext = $('[data-context="project"]');
+            var allocationContext = $('[data-context="allocation"]');
+            if ($('[name="project"]').val()) {
+                $("[data-project-context-name], [data-allocation-project-name]").text(projectText);
+                projectContext.removeAttr("hidden");
+            } else {
+                $("[data-project-context-name], [data-allocation-project-name]").text("");
+                projectContext.attr("hidden", true);
+            }
+            if ($('[name="project"]').val() && $('[name="budget_line"]').val()) {
+                $("[data-allocation-budget-line-name]").text(budgetLineText);
+                allocationContext.removeAttr("hidden");
+            } else {
+                $("[data-allocation-budget-line-name]").text("");
+                allocationContext.attr("hidden", true);
+            }
+        }
+
+        function updateProjectPicker() {
+            var projectId = $('[name="project"]').val();
+            $(".invoice-project-option").each(function(){
+                var option = $(this);
+                option.toggleClass("selected", String(option.data("value")) === String(projectId));
+            });
+            $("[data-project-selected-label]").text($('[name="project"]').data("label") || "{% trans 'Selecciona un proyecto' %}");
+        }
+
         function updateMaxLabel() {
             var maxPercentage = invoiceTotal > 0 ? (currentMaxAmount * 100 / invoiceTotal) : 0;
-            $(".invoice-allocation-max-label").text("· {% trans "Máximo disponible" %}: " + formatMoney(currentMaxAmount) + " € (" + maxPercentage.toFixed(2) + "%)");
+            $(".invoice-allocation-max-label").text("{% trans "Máximo disponible" %}: " + formatMoney(currentMaxAmount) + " € (" + maxPercentage.toFixed(2) + "%)");
+            updateAllocationSummary();
         }
 
         function syncAllocationMode() {
@@ -118,14 +295,16 @@
             amountField.attr("max", currentMaxAmount.toFixed(2));
             percentageField.attr("max", maxPercentage.toFixed(2));
             if (mode === "percentage") {
-                amountField.hide().prop("required", false);
+                amountField.closest(".invoice-wizard-money-input").hide();
+                amountField.prop("required", false);
                 percentageField.show().prop("required", true);
                 if (parseFloat(percentageField.val() || "0") > maxPercentage) {
                     percentageField.val(maxPercentage.toFixed(2));
                 }
             } else {
                 percentageField.hide().prop("required", false);
-                amountField.show().prop("required", true);
+                amountField.closest(".invoice-wizard-money-input").show();
+                amountField.prop("required", true);
                 if (parseFloat(amountField.val() || "0") > currentMaxAmount) {
                     amountField.val(currentMaxAmount.toFixed(2));
                 }
@@ -135,13 +314,22 @@
 
         function showStep(step) {
             currentStep = Math.max(1, Math.min(maxStep, step));
+            $(".invoice-allocation-wizard").attr("data-active-step", currentStep);
             $(".invoice-wizard-step").removeClass("active");
             $('.invoice-wizard-step[data-step="' + currentStep + '"]').addClass("active");
-            $("[data-step-indicator]").removeClass("active");
-            $('[data-step-indicator="' + currentStep + '"]').addClass("active");
+            $("[data-step-indicator]").removeClass("active completed").removeAttr("aria-current");
+            $("[data-step-indicator]").each(function(){
+                var indicatorStep = parseInt($(this).data("step-indicator"), 10);
+                if (indicatorStep < currentStep)
+                    $(this).addClass("completed");
+            });
+            $('[data-step-indicator="' + currentStep + '"]').addClass("active").attr("aria-current", "step");
             $(".invoice-wizard-prev").toggle(currentStep > 1);
             $(".invoice-wizard-next").toggle(currentStep < maxStep);
             $(".invoice-wizard-save").toggle(currentStep === maxStep);
+            $(".invoice-wizard-progress [data-current-step]").text(currentStep);
+            updateContext();
+            updateProjectPicker();
         }
 
         function filterOptions(selectName, predicate) {
@@ -155,19 +343,43 @@
             }
         }
 
+        function updateBudgetLinePicker() {
+            var projectId = $('[name="project"]').val();
+            var selectedBudgetLine = $('[name="budget_line"]').val();
+            var parentVisibility = {};
+
+            $(".invoice-budget-line-option").each(function(){
+                var option = $(this);
+                var belongsToProject = String(option.data("project")) === String(projectId);
+                option.toggle(belongsToProject);
+                option.toggleClass("selected", belongsToProject && String(option.data("value")) === String(selectedBudgetLine));
+                if (belongsToProject && option.data("parent")) {
+                    parentVisibility[String(option.data("parent"))] = true;
+                }
+            });
+
+            $(".invoice-budget-line-parent").each(function(){
+                var parent = $(this);
+                var belongsToProject = String(parent.data("project")) === String(projectId);
+                var hasVisibleChild = parentVisibility[String(parent.data("parent"))] === true;
+                parent.toggle(belongsToProject && hasVisibleChild);
+            });
+
+            $("[data-budget-line-picker]").toggle(Boolean(projectId));
+            $("[data-budget-line-selected-label]").text($('[name="budget_line"]').data("label") || "{% trans 'Selecciona una partida / subpartida' %}");
+        }
+
         function filterDependentFields() {
             var projectId = $('[name="project"]').val();
-            filterOptions("budget_line", function(option){
-                return String(option.data("project")) === String(projectId);
-            });
             filterOptions("activity", function(option){
                 return String(option.data("project")) === String(projectId);
             });
+            updateContext();
+            updateBudgetLinePicker();
         }
 
         function updateAmountFromBudgetLine() {
-            var selected = $('[name="budget_line"] option:selected');
-            var available = parseFloat(selected.data("available") || "0");
+            var available = parseFloat($('[name="budget_line"]').data("available") || "0");
             var amount = Math.min(remainingAmount, available);
             currentMaxAmount = amount;
             if (amount > 0) {
@@ -176,10 +388,22 @@
                 $('[name="allocated_amount"]').val("");
             }
             syncAllocationMode();
+            updateContext();
+            updateBudgetLinePicker();
         }
 
         $(".invoice-wizard-next").on("click", function(){
             var invalidField = null;
+            if (currentStep === 1 && !$('[name="project"]').val()) {
+                $(".invoice-wizard-error").removeAttr("hidden").text("{% trans 'Selecciona un proyecto antes de continuar.' %}");
+                $(".invoice-project-option:first").focus();
+                return;
+            }
+            if (currentStep === 2 && !$('[name="budget_line"]').val()) {
+                $(".invoice-wizard-error").removeAttr("hidden").text("{% trans 'Selecciona una partida antes de continuar.' %}");
+                $(".invoice-budget-line-option:visible:first").focus();
+                return;
+            }
             $('.invoice-wizard-step[data-step="' + currentStep + '"]').find("select[required], input[required]").filter(":visible").each(function(){
                 if (!$(this).val() && invalidField === null) {
                     invalidField = $(this);
@@ -187,22 +411,37 @@
             });
             if (invalidField !== null) {
                 invalidField.addClass("invalid").focus();
+                $(".invoice-wizard-error").removeAttr("hidden").text("{% trans 'Completa el campo obligatorio antes de continuar.' %}");
                 return;
             }
+            $(".invoice-wizard-error").attr("hidden", true).text("");
             $('.invoice-wizard-step[data-step="' + currentStep + '"]').find(".invalid").removeClass("invalid");
             showStep(currentStep + 1);
         });
         $(".invoice-wizard-prev").on("click", function(){ showStep(currentStep - 1); });
         $('[name="project"]').on("change", function(){
-            $('[name="budget_line"], [name="activity"]').val("");
+            $('[name="budget_line"]').val("").removeData("label").removeData("available");
+            $('[name="activity"]').val("");
             filterDependentFields();
             updateAmountFromBudgetLine();
+            updateProjectPicker();
         });
         $('[name="budget_line"]').on("change", function(){
             filterDependentFields();
             updateAmountFromBudgetLine();
         });
+        $(".invoice-budget-line-option").on("click", function(){
+            $('[name="budget_line"]')
+                .val($(this).data("value"))
+                .data("label", $.trim($(this).data("label") || $(this).text()))
+                .data("available", $(this).data("available"))
+                .trigger("change");
+        });
+        $(".invoice-project-option").on("click", function(){
+            $('[name="project"]').val($(this).data("value")).data("label", $.trim($(this).data("label") || $(this).text())).trigger("change");
+        });
         $('[name="allocation_mode"]').on("change", syncAllocationMode);
+        $('[name="allocated_amount"], [name="allocated_percentage"]').on("input change", updateAllocationSummary);
         filterDependentFields();
         syncAllocationMode();
         showStep(1);

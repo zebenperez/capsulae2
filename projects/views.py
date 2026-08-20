@@ -445,6 +445,7 @@ def invoice_traceability(request):
     return render(request, "projects/invoice-traceability.html", {
         "invoice": invoice,
         "status_changes": invoice.status_changes.select_related("changed_by"),
+        "allocations": invoice.allocations.select_related("project", "budget_line"),
     })
 
 
@@ -535,7 +536,8 @@ def invoice_status_save(request):
 
 @group_required("admins","managers", "employee")
 def invoice_allocation_wizard(request):
-    invoice = get_or_none(Invoice, get_param(request.GET, "invoice_id"))
+    invoice_id = get_param(request.GET, "invoice_id") or get_param(request.GET, "invoiceId")
+    invoice = get_or_none(Invoice, invoice_id)
     if invoice == None:
         return HttpResponse("Factura no encontrada.", status=404)
     return render(request, "projects/invoice-allocation-wizard.html", get_invoice_allocation_wizard_context(request.user, invoice))
@@ -545,6 +547,7 @@ def invoice_allocation_wizard(request):
 def invoice_allocation_save(request):
     try:
         invoice = get_or_none(Invoice, get_param(request.GET, "invoice_id"))
+
         if invoice == None:
             return HttpResponse("Factura no encontrada.", status=404)
         if invoice.pending_amount <= 0:

@@ -695,6 +695,41 @@ $(document).ready(()=>{
         e.stopImmediatePropagation();
     });
 
+    $("body").on("click", ".invoice-allocation-open", function(e){
+        var obj = $(this);
+        if (obj.data("loading")) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            return;
+        }
+        obj.data("loading", true);
+        setWait();
+        $.ajax({
+            url: obj.data("url"),
+            type: "GET",
+            data: {invoice_id: obj.data("invoice-id")},
+            cache: false,
+            dataType: "html",
+            success: function(data){
+                if ($(data).filter(".invoice-allocation-wizard").length == 0 && $(data).find(".invoice-allocation-wizard").length == 0) {
+                    showError("No se pudo cargar el formulario de imputación.");
+                    return;
+                }
+                $("#common-modal-body").html(data);
+                $("#common-modal").modal("show");
+            },
+            error: function(error){
+                showError(getAjaxErrorMessage(error));
+            },
+            complete: function(){
+                obj.removeData("loading");
+                unsetWait();
+            }
+        });
+        e.preventDefault();
+        e.stopImmediatePropagation();
+    });
+
     $("body").on("click", ".ajax-form-get", function(e){
         var obj = $(this);
         if (obj.data("loading")) {
@@ -704,15 +739,19 @@ $(document).ready(()=>{
         }
         var form = $("#" + obj.data("form"));
         var datas = {};
-        var modal = obj.closest(".project-financier-allocation-modal");
-        var modalError = modal.find(".project-contribution-error");
+        var modal = obj.closest(".project-modal");
+        var modalError = modal.find(".project-contribution-error, .invoice-wizard-error").first();
         if (modalError.length)
             modalError.attr("hidden", true).text("");
         form.find("input, select, textarea").each(function(){
             var field = $(this);
+            if ((field.attr("type") == "radio" || field.attr("type") == "checkbox") && !field.prop("checked"))
+                return;
             if (field.attr("name"))
                 datas[field.attr("name")] = field.val();
         });
+        if (form.data("invoice-id") && !datas.invoice_id)
+            datas.invoice_id = form.data("invoice-id");
         var originalHtml = obj.html();
         obj.data("loading", true);
         obj.prop("disabled", true);

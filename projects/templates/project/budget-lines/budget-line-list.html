@@ -107,8 +107,10 @@
                         <div class="project-actions project-budget-actions">
                             <button type="button" class="project-btn project-btn-ghost project-budget-action-main ark"
                                 data-url="{% url "project-sub-budget-line-form" %}" data-target-modal="common-modal"
-                                data-budget_line_id="{{item.id}}">
-                                <i class="fas fa-plus"></i> {% trans "Subpartida" %}
+                                data-budget_line_id="{{item.id}}"
+                                title="{% trans 'Añadir subpartida' %}"
+                                aria-label="{% trans 'Añadir subpartida a' %} {{ item.code|default:'---' }} - {{ item.name|default:'Sin nombre' }}">
+                                <i class="fas fa-plus"></i> <span class="project-budget-action-label">{% trans "Subpartida" %}</span>
                             </button>
                             <button type="button" class="project-icon-btn ark" title="{% trans 'Editar partida' %}"
                                 aria-label="{% trans 'Editar partida' %} {{ item.code|default:'---' }} - {{ item.name|default:'Sin nombre' }}"
@@ -182,14 +184,17 @@
                                     <button type="button" class="project-btn project-btn-ghost project-budget-action-main ark"
                                         data-url="{% url "project-financier-contribution-form" %}" data-target-modal="common-modal"
                                         data-budget_line_id="{{row.item.id}}"
+                                        title="{% trans 'Gestionar financiación' %}"
                                         aria-label="{% trans 'Gestionar financiación de' %} {{ row.item.full_code|default:'---' }} - {{ row.item.name|default:'Sin nombre' }}">
-                                        {% trans "Gestionar financiación" %}
+                                        <i class="fas fa-hand-holding-usd"></i> <span class="project-budget-action-label">{% trans "Gestionar financiación" %}</span>
                                     </button>
                                 {% elif row.can_add_child %}
                                     <button type="button" class="project-btn project-btn-ghost project-budget-action-main ark"
                                         data-url="{% url "project-sub-budget-line-form" %}" data-target-modal="common-modal"
-                                        data-parent_id="{{row.item.id}}">
-                                        <i class="fas fa-plus"></i> {% trans "Subpartida" %}
+                                        data-parent_id="{{row.item.id}}"
+                                        title="{% trans 'Añadir subpartida' %}"
+                                        aria-label="{% trans 'Añadir subpartida a' %} {{ row.item.full_code|default:'---' }} - {{ row.item.name|default:'Sin nombre' }}">
+                                        <i class="fas fa-plus"></i> <span class="project-budget-action-label">{% trans "Subpartida" %}</span>
                                     </button>
                                 {% endif %}
                                 <button type="button" class="project-icon-btn ark" title="{% trans 'Editar subpartida' %}"
