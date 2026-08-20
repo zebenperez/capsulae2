@@ -1,92 +1,177 @@
-{% load i18n %}
+{% load i18n project_tags %}
 
-<div class="project-modal">
-    <div class="project-modal-close">
-        <button type="button" class="project-icon-btn" data-bs-dismiss="modal" title="{% trans "Close" %}">
+<div class="project-modal project-financier-allocation-modal">
+    <header class="project-contribution-header">
+        <div>
+            <h2>{% trans "APORTACIÓN DE FINANCIADOR A PARTIDA" %}</h2>
+            <p>{{ budget_line.full_code }} · {{ budget_line.name|default:"Sin nombre" }}</p>
+        </div>
+        <button type="button" class="project-contribution-close" data-bs-dismiss="modal" title="{% trans "Cerrar" %}" aria-label="{% trans "Cerrar" %}">
             <i class="fas fa-times"></i>
         </button>
-    </div>
+    </header>
 
-    <h2>{% trans "Aportación por subpartida" %}</h2>
-    <p class="project-muted">{{ budget_line.full_code }} - {{ budget_line.name|default:"Sin nombre" }}</p>
-
-    <div id="financier-contribution-form" class="project-form-grid project-form-grid-two">
-        <input type="hidden" name="budget_line_id" value="{{budget_line.id}}">
-        <input type="hidden" name="obj_id" value="{% if obj %}{{obj.id}}{% endif %}">
-
-        <div class="project-form-field project-form-field-wide">
-            <label>{% trans "Financiador" %}</label>
-            <select class="form-control project-financier-selector" name="financier">
-                <option value="">{% trans "--- Selecciona financiador del proyecto ---" %}</option>
-                {% for project_financier in project_financiers %}
-                    <option value="{{project_financier.id}}" {% if obj and obj.financier_id == project_financier.financier_id %}selected{% endif %}>
-                        {{ project_financier.financier.name }} · {% trans "Disponible" %}: {{ project_financier.available_amount }}
-                    </option>
-                {% endfor %}
-                <option value="__new__">{% trans "Agregar nuevo financiador" %}</option>
-            </select>
-        </div>
-
-        <div class="project-form-field project-new-financier-field">
-            <label>{% trans "Nuevo financiador" %}</label>
-            <input type="text" class="form-control" name="new_financier_name">
-        </div>
-        <div class="project-form-field project-new-financier-field">
-            <label>{% trans "Tipo" %}</label>
-            <select class="form-control" name="new_financier_type">
-                {% for value, label in financier_types %}
-                    <option value="{{value}}">{{label}}</option>
-                {% endfor %}
-            </select>
-        </div>
-        <div class="project-form-field project-new-financier-field">
-            <label>{% trans "CIF/NIF" %}</label>
-            <input type="text" class="form-control" name="new_financier_tax_id">
-        </div>
-        <div class="project-form-field project-new-financier-field">
-            <label>{% trans "Email" %}</label>
-            <input type="email" class="form-control" name="new_financier_email">
-        </div>
-
-        <div class="project-form-field">
-            <label>{% trans "Cantidad aportada" %}</label>
-            <input type="number" step="0.01" min="0" class="form-control" name="amount" value="{% if obj %}{{obj.amount}}{% else %}0.00{% endif %}">
-        </div>
-        <div class="project-form-field">
-            <label>{% trans "Presupuesto subpartida" %}</label>
-            <input type="text" class="form-control" value="{{budget_line.effective_budget}}" disabled>
-        </div>
-        <div class="project-form-field project-form-field-wide">
-            <label>{% trans "Observaciones" %}</label>
-            <textarea class="form-control" name="notes">{% if obj %}{{obj.notes}}{% endif %}</textarea>
-        </div>
-    </div>
-
-    {% if budget_line.sub_financier_contributions.all %}
-        <div class="project-contribution-list">
-            <h3>{% trans "Aportaciones registradas" %}</h3>
-            {% for contribution in budget_line.sub_financier_contributions.all %}
-                <div class="project-contribution-row">
-                    <span>{{ contribution.financier.name }}</span>
-                    <strong>{{ contribution.amount }}</strong>
-                    <a class="project-icon-btn ark" title="{% trans 'Editar aportación' %}" data-url="{% url "project-financier-contribution-form" %}"
-                        data-target-modal="common-modal" data-obj_id="{{contribution.id}}">
-                        <i class="fas fa-edit"></i>
-                    </a>
-                    <a class="project-icon-btn danger ark" title="{% trans 'Eliminar aportación' %}" data-url="{% url "project-financier-contribution-remove" %}"
-                        data-target="div-container" data-obj_id="{{contribution.id}}"
-                        data-confirm="{% trans "¿Seguro que quieres eliminar esta aportación?" %}">
-                        <i class="fas fa-trash"></i>
-                    </a>
+    <main class="project-contribution-body">
+    <section class="project-contribution-section project-contribution-summary" aria-labelledby="contribution-summary-title">
+        <h3 id="contribution-summary-title">{% trans "RESUMEN FINANCIERO" %}</h3>
+        <div class="project-contribution-kpis">
+            <div class="project-contribution-kpi project-contribution-kpi-budget">
+                <span class="project-contribution-kpi-icon" aria-hidden="true"><i class="fas fa-wallet"></i></span>
+                <span class="project-contribution-kpi-label">{% trans "Presupuesto" %}</span>
+                <strong>{{ budget_amount|money_es }}</strong>
+            </div>
+            <div class="project-contribution-kpi project-contribution-kpi-contributed">
+                <span class="project-contribution-kpi-icon" aria-hidden="true"><i class="fas fa-coins"></i></span>
+                <span class="project-contribution-kpi-label">{% trans "Aportado" %}</span>
+                <strong>{{ contributed_amount|money_es }}</strong>
+            </div>
+            <div class="project-contribution-kpi project-contribution-kpi-pending">
+                <span class="project-contribution-kpi-icon" aria-hidden="true"><i class="fas fa-chart-pie"></i></span>
+                <span class="project-contribution-kpi-label">{% trans "Pendiente" %}</span>
+                <strong>{{ pending_amount|money_es }}</strong>
+            </div>
+            <div class="project-contribution-progress">
+                <strong>{{ financing_percentage_display }} % {% trans "financiado" %}</strong>
+                <div class="project-contribution-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ financing_bar_percentage_css }}">
+                    <span style="--project-progress: {{ financing_bar_percentage_css }}%;"></span>
                 </div>
-            {% endfor %}
+                <small>{{ contributed_amount|money_es }} {% trans "de" %} {{ budget_amount|money_es }}</small>
+            </div>
         </div>
-    {% endif %}
+    </section>
 
-    <div class="project-modal-actions">
-        <button type="button" class="project-btn project-btn-primary ajax-form-get" data-form="financier-contribution-form"
-            data-url="{% url "project-financier-contribution-save" %}" data-target="div-container" data-dismiss-modal="common-modal">
-            <i class="fas fa-check"></i> {% trans "Guardar" %}
-        </button>
+    <section class="project-contribution-section" aria-labelledby="contributions-list-title">
+        <h3 id="contributions-list-title">{% trans "APORTACIONES REGISTRADAS" %} · {{ contributions_count }}</h3>
+        <div class="project-contribution-table-wrap">
+            <div class="project-contribution-table">
+                <div class="project-contribution-table-head">
+                    <div>{% trans "Financiador" %}</div>
+                    <div>{% trans "Importe" %}</div>
+                    <div>{% trans "Observaciones" %}</div>
+                    <div>{% trans "Acciones" %}</div>
+                </div>
+                {% for contribution in contributions %}
+                    <div class="project-contribution-table-row{% if obj and obj.id == contribution.id %} is-editing{% endif %}" data-contribution-id="{{ contribution.id }}">
+                        <div>{{ contribution.financier.name|default:"Sin financiador" }}</div>
+                        <div class="project-money-cell">{{ contribution.amount|money_es }}</div>
+                        <div class="project-contribution-notes">{{ contribution.notes|default:"—" }}</div>
+                        <div class="project-contribution-actions">
+                            <a class="project-icon-btn ark" title="{% trans 'Editar aportación' %}"
+                                aria-label="{% trans 'Editar aportación de' %} {{ contribution.financier.name|default:'Sin financiador' }}"
+                                data-url="{% url "project-financier-contribution-form" %}"
+                                data-target-modal="common-modal" data-obj_id="{{contribution.id}}">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a class="project-icon-btn danger ark" title="{% trans 'Eliminar aportación' %}"
+                                aria-label="{% trans 'Eliminar aportación de' %} {{ contribution.financier.name|default:'Sin financiador' }}"
+                                data-url="{% url "project-financier-contribution-remove" %}"
+                                data-target-modal="common-modal" data-obj_id="{{contribution.id}}" data-return_modal="1"
+                                data-refresh-url="{% url "project-budget-lines" %}?obj_id={{ project.id }}" data-refresh-target="div-container"
+                                data-confirm="{% trans "¿Seguro que quieres eliminar esta aportación?" %}">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="project-empty project-contribution-empty">{% trans "No hay aportaciones registradas para esta partida." %}</div>
+                {% endfor %}
+                <div class="project-contribution-total-row">
+                    <div>{% trans "Total aportado" %}</div>
+                    <div class="project-money-cell">{{ contributed_amount|money_es }}</div>
+                    <div></div>
+                    <div></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="project-contribution-section project-contribution-editor" aria-labelledby="contribution-editor-title">
+        <h3 id="contribution-editor-title">
+            {% if obj %}
+                {% trans "EDITAR APORTACIÓN" %}
+            {% else %}
+                {% trans "NUEVA APORTACIÓN" %}
+            {% endif %}
+        </h3>
+        <div class="project-contribution-error" role="alert" hidden></div>
+        <div id="financier-contribution-form" class="project-form-grid project-contribution-form-grid">
+            <input type="hidden" name="budget_line_id" value="{{budget_line.id}}">
+            <input type="hidden" name="obj_id" value="{% if obj %}{{obj.id}}{% endif %}">
+            <input type="hidden" name="return_modal" value="1">
+
+            <div class="project-form-field">
+                <label for="contribution-financier-{{ budget_line.id }}">{% trans "Financiador" %}</label>
+                <select class="form-control project-financier-selector" id="contribution-financier-{{ budget_line.id }}" name="financier">
+                    <option value="">{% trans "--- Selecciona financiador del proyecto ---" %}</option>
+                    {% for project_financier in project_financiers %}
+                        <option value="{{project_financier.id}}" {% if obj and obj.financier_id == project_financier.financier_id %}selected{% endif %}>
+                            {{ project_financier.financier.name }} · {% trans "Disponible" %}: {{ project_financier.form_available_amount|money_es }}
+                        </option>
+                    {% endfor %}
+                    <option value="__new__">{% trans "Agregar nuevo financiador" %}</option>
+                </select>
+            </div>
+
+            <div class="project-form-field project-contribution-amount-field">
+                <label for="contribution-amount-{{ budget_line.id }}">{% trans "Cantidad aportada" %}</label>
+                <div class="project-money-input">
+                    <input type="number" step="0.01" min="0" class="form-control" id="contribution-amount-{{ budget_line.id }}"
+                        name="amount" value="{% if obj %}{{obj.amount|decimal_input}}{% else %}0.00{% endif %}">
+                    <span aria-hidden="true">€</span>
+                </div>
+                <p class="project-field-help">{% trans "Disponible por aportar" %}: <strong>{{ form_available_amount|money_es }}</strong></p>
+            </div>
+
+            <div class="project-form-field project-contribution-notes-field">
+                <label for="contribution-notes-{{ budget_line.id }}">{% trans "Observaciones" %}</label>
+                <textarea class="form-control" id="contribution-notes-{{ budget_line.id }}" name="notes"
+                    placeholder="{% trans 'Especifica cualquier observación (opcional)' %}">{% if obj %}{{obj.notes}}{% endif %}</textarea>
+            </div>
+
+            <div class="project-form-field project-new-financier-field">
+                <label for="new-financier-name-{{ budget_line.id }}">{% trans "Nuevo financiador" %}</label>
+                <input type="text" class="form-control" id="new-financier-name-{{ budget_line.id }}" name="new_financier_name">
+            </div>
+            <div class="project-form-field project-new-financier-field">
+                <label for="new-financier-type-{{ budget_line.id }}">{% trans "Tipo" %}</label>
+                <select class="form-control" id="new-financier-type-{{ budget_line.id }}" name="new_financier_type">
+                    {% for value, label in financier_types %}
+                        <option value="{{value}}">{{label}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="project-form-field project-new-financier-field">
+                <label for="new-financier-tax-id-{{ budget_line.id }}">{% trans "CIF/NIF" %}</label>
+                <input type="text" class="form-control" id="new-financier-tax-id-{{ budget_line.id }}" name="new_financier_tax_id">
+            </div>
+            <div class="project-form-field project-new-financier-field">
+                <label for="new-financier-email-{{ budget_line.id }}">{% trans "Email" %}</label>
+                <input type="email" class="form-control" id="new-financier-email-{{ budget_line.id }}" name="new_financier_email">
+            </div>
+        </div>
+    </section>
+    </main>
+
+    <div class="project-modal-actions project-contribution-actions-footer">
+        {% if obj %}
+            <button type="button" class="project-btn project-btn-ghost ark" data-url="{% url "project-financier-contribution-form" %}"
+                data-target-modal="common-modal" data-budget_line_id="{{ budget_line.id }}">
+                {% trans "Cancelar edición" %}
+            </button>
+            <button type="button" class="project-btn project-btn-primary ajax-form-get" data-form="financier-contribution-form"
+                data-url="{% url "project-financier-contribution-save" %}" data-target-modal="common-modal"
+                data-refresh-url="{% url "project-budget-lines" %}?obj_id={{ project.id }}" data-refresh-target="div-container"
+                data-loading-text="{% trans 'Guardando…' %}">
+                <i class="fas fa-check"></i> {% trans "Guardar cambios" %}
+            </button>
+        {% else %}
+            <button type="button" class="project-btn project-btn-ghost" data-bs-dismiss="modal">{% trans "Cancelar" %}</button>
+            <button type="button" class="project-btn project-btn-primary ajax-form-get" data-form="financier-contribution-form"
+                data-url="{% url "project-financier-contribution-save" %}" data-target-modal="common-modal"
+                data-refresh-url="{% url "project-budget-lines" %}?obj_id={{ project.id }}" data-refresh-target="div-container"
+                data-loading-text="{% trans 'Guardando…' %}">
+                <i class="fas fa-plus-circle"></i> {% trans "Añadir aportación" %}
+            </button>
+        {% endif %}
     </div>
 </div>

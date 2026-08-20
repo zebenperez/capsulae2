@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models.deletion import ProtectedError
-from django.db.models import DecimalField, F, Q, Sum, Value
+from django.db.models import Count, DecimalField, F, Q, Sum, Value
 from django.db.models.functions import Coalesce
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, reverse
@@ -137,14 +137,13 @@ def get_invoice_allocation_wizard_context(user, invoice):
     project_ids = list(projects_qs.values_list("id", flat=True))
     budget_lines = (
         BudgetLine.objects.filter(project_id__in=project_ids)
+        .annotate(child_count=Count("child_lines"))
+        .filter(child_count=0)
         .select_related("project", "parent")
         .order_by("project__name", "code", "name")
     )
-    contributions = (
-        FinancierContribution.objects.filter(project_id__in=project_ids)
-        .select_related("project", "financier", "budget_line", "sub_budget_line")
-        .order_by("project__name", "financier__name", "budget_line__code", "sub_budget_line__code")
-    )
+    for budget_line in budget_lines:
+        budget_line.invoice_allocation_available = max(budget_line.available_balance, Decimal("0.00"))
     activities = Activity.objects.filter(project_id__in=project_ids).select_related("project").order_by("project__name", "name")
     remaining_amount = invoice.pending_amount if invoice else Decimal("0.00")
     allocated_amount = invoice.allocated_amount if invoice else Decimal("0.00")
@@ -152,7 +151,6 @@ def get_invoice_allocation_wizard_context(user, invoice):
         "invoice": invoice,
         "projects": projects_qs,
         "budget_lines": budget_lines,
-        "contributions": contributions,
         "activities": activities,
         "allocated_amount": allocated_amount,
         "allocated_amount_display": format_decimal(allocated_amount),
@@ -557,21 +555,18 @@ def invoice_allocation_save(request):
         if project == None or project.id not in allowed_project_ids:
             return HttpResponse("Debes seleccionar un proyecto válido.", status=400)
 
-        contribution = get_or_none(FinancierContribution, get_param(request.GET, "financier_contribution"))
-        if contribution == None or contribution.project_id != project.id:
-            return HttpResponse("Debes seleccionar una aportación válida para el proyecto.", status=400)
-
         selected_budget_line = get_or_none(BudgetLine, get_param(request.GET, "budget_line"))
-        contribution_target = contribution.sub_budget_line or contribution.budget_line
-        if selected_budget_line == None or contribution_target == None or selected_budget_line.id != contribution_target.id:
-            return HttpResponse("La aportación no pertenece a la partida seleccionada.", status=400)
+        if selected_budget_line == None or selected_budget_line.project_id != project.id:
+            return HttpResponse("Debes seleccionar una partida válida para el proyecto.", status=400)
+        if selected_budget_line.child_lines.exists():
+            return HttpResponse("Solo pueden imputarse facturas a partidas sin subpartidas.", status=400)
 
         activity = get_or_none(Activity, get_param(request.GET, "activity")) if get_param(request.GET, "activity") else None
         if activity != None and activity.project_id != project.id:
             return HttpResponse("La actividad debe pertenecer al proyecto seleccionado.", status=400)
 
         allocation_mode = get_param(request.GET, "allocation_mode", "amount")
-        max_available = min(invoice.pending_amount, contribution.available_amount)
+        max_available = min(invoice.pending_amount, max(selected_budget_line.available_balance, Decimal("0.00")))
         if allocation_mode == "percentage":
             allocated_percentage = parse_decimal(get_param(request.GET, "allocated_percentage"))
             if allocated_percentage <= 0:
@@ -585,16 +580,13 @@ def invoice_allocation_save(request):
         if allocated_amount <= 0:
             return HttpResponse("El importe a imputar debe ser mayor que cero.", status=400)
         if allocated_amount > max_available:
-            return HttpResponse("No se puede imputar más que el máximo disponible para esta factura y aportación.", status=400)
+            return HttpResponse("No se puede imputar más que el máximo disponible para esta factura y partida.", status=400)
 
         allocation = InvoiceAllocation(
             invoice=invoice,
             project=project,
             activity=activity,
-            budget_line=contribution.budget_line or contribution_target.root_line,
-            sub_budget_line=contribution.sub_budget_line,
-            financier_contribution=contribution,
-            financier=contribution.financier,
+            budget_line=selected_budget_line,
             allocated_amount=allocated_amount,
         )
         allocation.full_clean()
@@ -742,12 +734,10 @@ def project_financier_remove(request):
         project = obj.project
         if project.financier_contributions.filter(financier=obj.financier).exists():
             return HttpResponse("No se puede eliminar porque este financiador ya tiene aportaciones en partidas.", status=400)
-        if project.invoice_allocations.filter(financier=obj.financier).exists():
-            return HttpResponse("No se puede eliminar porque este financiador ya tiene facturas imputadas.", status=400)
         obj.delete()
         return render(request, "project/financiers/financier-list.html", get_project_financiers_context(project))
     except ProtectedError:
-        return HttpResponse("No se puede eliminar porque hay aportaciones o facturas vinculadas.", status=400)
+        return HttpResponse("No se puede eliminar porque hay aportaciones vinculadas.", status=400)
     except Exception as e:
         return HttpResponse(show_exc(e), status=400)
 
@@ -770,7 +760,7 @@ def project_budget_autosave(request):
         }
         allowed_fields = {
             "projects.project": {"approved_budget"},
-            "projects.budgetline": {"approved_budget", "modified_budget"},
+            "projects.budgetline": {"approved_budget"},
         }
         model = model_map.get(model_name)
         if model == None or field not in allowed_fields.get(model_name, set()):
@@ -821,39 +811,196 @@ def get_budget_lines_context(project):
     children_by_parent = {}
     for sub_line in sub_lines:
         children_by_parent.setdefault(sub_line.parent_id, []).append(sub_line)
+    allocation_totals = {
+        row["budget_line_id"]: row["amount"] or Decimal("0.00")
+        for row in project.invoice_allocations.values("budget_line_id").annotate(amount=Sum("allocated_amount"))
+    }
+    contribution_totals = {}
+    for row in project.financier_contributions.values("budget_line_id", "financier_id").annotate(amount=Sum("amount")):
+        budget_line_id = row["budget_line_id"]
+        financier_id = row["financier_id"]
+        amount = row["amount"] or Decimal("0.00")
+        contribution_totals.setdefault(budget_line_id, {})[financier_id] = amount
+
+    def percentage_of(numerator, denominator):
+        numerator = numerator or Decimal("0.00")
+        denominator = denominator or Decimal("0.00")
+        if denominator == 0:
+            return Decimal("0.00")
+        return (numerator * Decimal("100")) / denominator
+
+    def css_percentage(value):
+        value = value or Decimal("0.00")
+        return "{:.2f}".format(max(Decimal("0.00"), min(value, Decimal("100.00"))))
+
+    def funding_state(amount, percentage):
+        if (amount or Decimal("0.00")) <= 0:
+            return "none"
+        if (percentage or Decimal("0.00")) >= Decimal("100.00"):
+            return "complete"
+        return "partial"
+
+    def assigned_budget_display_for(budget_line):
+        children = children_by_parent.get(budget_line.id, [])
+        if children:
+            return sum((child.approved_budget for child in children), Decimal("0.00"))
+        return budget_line.approved_budget
+
+    def executed_amount_for(budget_line):
+        children = children_by_parent.get(budget_line.id, [])
+        child_total = sum((executed_amount_for(child) for child in children), Decimal("0.00"))
+        return allocation_totals.get(budget_line.id, Decimal("0.00")) + child_total
+
+    def financed_amounts_by_financier_for(budget_line):
+        children = children_by_parent.get(budget_line.id, [])
+        if not children:
+            return dict(contribution_totals.get(budget_line.id, {}))
+
+        totals = {}
+        for child in children:
+            for financier_id, amount in financed_amounts_by_financier_for(child).items():
+                totals[financier_id] = totals.get(financier_id, Decimal("0.00")) + amount
+        return totals
+
+    def display_available_balance_for(budget_line):
+        children = children_by_parent.get(budget_line.id, [])
+        if not children:
+            return budget_line.approved_budget - allocation_totals.get(budget_line.id, Decimal("0.00"))
+
+        return sum(
+            (display_available_balance_for(child) for child in children),
+            Decimal("0.00"),
+        )
+
+    def prepare_budget_line_row(budget_line):
+        child_count = len(children_by_parent.get(budget_line.id, []))
+        budget_line.child_line_count = child_count
+        budget_line.can_assign_financing = child_count == 0
+        budget_line.has_child_lines = child_count > 0
+        budget_line.available_balance_label = "Saldo disponible" if budget_line.can_assign_financing else "Disponible acumulado"
+        budget_line.display_assigned_budget = assigned_budget_display_for(budget_line)
+        budget_line.display_executed_amount = executed_amount_for(budget_line)
+        budget_line.display_available_balance = display_available_balance_for(budget_line)
+        budget_line.financed_amounts_by_financier = financed_amounts_by_financier_for(budget_line)
+        budget_line.financed_amount = sum(
+            budget_line.financed_amounts_by_financier.values(),
+            Decimal("0.00"),
+        )
+        budget_line.funding_percentage = percentage_of(budget_line.financed_amount, budget_line.display_assigned_budget)
+        budget_line.funding_percentage_display = format_percentage(budget_line.funding_percentage)
+        budget_line.funding_bar_percentage_css = css_percentage(budget_line.funding_percentage)
+        budget_line.funding_state = funding_state(budget_line.financed_amount, budget_line.funding_percentage)
 
     def append_tree_rows(rows, sub_line, level):
+        prepare_budget_line_row(sub_line)
         rows.append({
             "item": sub_line,
             "level": level,
             "can_add_child": level < BudgetLine.MAX_DEPTH,
+            "has_child_lines": sub_line.has_child_lines,
         })
         for child in children_by_parent.get(sub_line.id, []):
             append_tree_rows(rows, child, level + 1)
 
     for budget_line in budget_lines:
+        prepare_budget_line_row(budget_line)
         rows = []
         for sub_line in children_by_parent.get(budget_line.id, []):
             append_tree_rows(rows, sub_line, 1)
         budget_line.tree_sub_lines = rows
 
+    funding_states = set()
+    for budget_line in budget_lines:
+        funding_states.add(budget_line.funding_state)
+        for row in budget_line.tree_sub_lines:
+            funding_states.add(row["item"].funding_state)
+
+    approved_budget = project.approved_budget or Decimal("0.00")
     approved_in_budget_lines = decimal_sum(project.budget_lines.filter(parent__isnull=True), "approved_budget")
-    assigned_to_sub_lines = decimal_sum(project.budget_lines.filter(parent__isnull=False), "approved_budget")
-    pending_assignment = max((project.approved_budget or Decimal("0.00")) - approved_in_budget_lines, Decimal("0.00"))
+    leaf_line_ids = [
+        budget_line.id
+        for budget_line in list(budget_lines) + sub_lines
+        if not children_by_parent.get(budget_line.id)
+    ]
+    assigned_to_leaf_lines = decimal_sum(project.budget_lines.filter(id__in=leaf_line_ids), "approved_budget")
+    executed_amount = sum(allocation_totals.values(), Decimal("0.00"))
+    available_amount = sum((budget_line.display_available_balance for budget_line in budget_lines), Decimal("0.00"))
+    pending_assignment = max(approved_budget - approved_in_budget_lines, Decimal("0.00"))
+    assigned_percentage = percentage_of(assigned_to_leaf_lines, approved_budget)
+    executed_percentage = percentage_of(executed_amount, approved_budget)
+    available_percentage = percentage_of(available_amount, approved_budget)
+    pending_percentage = percentage_of(pending_assignment, approved_budget)
 
     return {
         'obj': project,
         'budget_lines': budget_lines,
         'budget_line_summary': {
-            'approved_budget': project.approved_budget or Decimal("0.00"),
+            'approved_budget': approved_budget,
             'approved_in_budget_lines': approved_in_budget_lines,
-            'assigned_to_sub_lines': assigned_to_sub_lines,
-            'executed_amount': project.executed_budget,
+            'assigned_to_leaf_lines': assigned_to_leaf_lines,
+            'executed_amount': executed_amount,
+            'available_amount': available_amount,
             'pending_assignment': pending_assignment,
+            'assigned_percentage': assigned_percentage,
+            'assigned_percentage_display': format_percentage(assigned_percentage),
+            'assigned_percentage_css': css_percentage(assigned_percentage),
+            'executed_percentage_display': format_percentage(executed_percentage),
+            'available_percentage_display': format_percentage(available_percentage),
+            'pending_percentage_display': format_percentage(pending_percentage),
+            'show_funding_legend': {"complete", "partial", "none"}.issubset(funding_states),
             'budget_line_count': len(budget_lines),
             'sub_budget_line_count': len(sub_lines),
         },
     }
+
+
+def format_percentage(value):
+    value = value or Decimal("0.00")
+    value = value.quantize(Decimal("0.1"), rounding=ROUND_HALF_UP)
+    return str(value).replace(".", ",")
+
+
+def get_financier_contribution_context(budget_line, obj=None):
+    contributions = list(
+        budget_line.financier_contributions
+        .select_related("financier")
+        .order_by("financier__name", "id")
+    )
+    project_financiers = list(budget_line.project.project_financiers.select_related("financier").order_by("financier__name"))
+    for project_financier in project_financiers:
+        project_financier.form_available_amount = project_financier.available_amount
+        if obj and obj.financier_id == project_financier.financier_id:
+            project_financier.form_available_amount += obj.amount
+    budget_amount = budget_line.effective_budget or Decimal("0.00")
+    contributed_amount = sum((contribution.amount for contribution in contributions), Decimal("0.00"))
+    pending_amount = budget_amount - contributed_amount
+    if budget_amount:
+        financing_percentage = (contributed_amount * Decimal("100")) / budget_amount
+    else:
+        financing_percentage = Decimal("0.00")
+    financing_bar_percentage = max(Decimal("0.00"), min(financing_percentage, Decimal("100.00")))
+    form_available_amount = max(
+        budget_amount - contributed_amount + (obj.amount if obj else Decimal("0.00")),
+        Decimal("0.00"),
+    )
+    return {
+        "obj": obj,
+        "budget_line": budget_line,
+        "project": budget_line.project,
+        "project_financiers": project_financiers,
+        "financier_types": FinancierType.choices,
+        "contributions": contributions,
+        "contributions_count": len(contributions),
+        "budget_amount": budget_amount,
+        "contributed_amount": contributed_amount,
+        "pending_amount": pending_amount,
+        "financing_percentage": financing_percentage,
+        "financing_percentage_display": format_percentage(financing_percentage),
+        "financing_bar_percentage": financing_bar_percentage,
+        "financing_bar_percentage_css": "{:.2f}".format(financing_bar_percentage),
+        "form_available_amount": form_available_amount,
+    }
+
 
 @group_required("admins","managers", "employee")
 def project_budget_lines(request):
@@ -867,16 +1014,12 @@ def project_financier_contribution_form(request):
         budget_line = get_or_none(BudgetLine, get_param(request.GET, "budget_line_id"))
         obj = get_or_none(FinancierContribution, get_param(request.GET, "obj_id")) if "obj_id" in request.GET else None
         if budget_line == None and obj != None:
-            budget_line = obj.sub_budget_line or obj.budget_line
+            budget_line = obj.budget_line
         if budget_line == None:
-            return render(request, 'error_exception.html', {'exc':'Subpartida no encontrada!'})
-        return render(request, "project/budget-lines/financier-contribution-form.html", {
-            "obj": obj,
-            "budget_line": budget_line,
-            "project": budget_line.project,
-            "project_financiers": budget_line.project.project_financiers.select_related("financier").order_by("financier__name"),
-            "financier_types": FinancierType.choices,
-        })
+            return render(request, 'error_exception.html', {'exc':'Partida presupuestaria no encontrada!'})
+        if budget_line.child_lines.exists():
+            return render(request, 'error_exception.html', {'exc':'Solo puede asignarse financiación a partidas sin subpartidas.'})
+        return render(request, "project/budget-lines/financier-contribution-form.html", get_financier_contribution_context(budget_line, obj))
     except Exception as e:
         return render(request, 'error_exception.html', {'exc':show_exc(e)})
 
@@ -887,9 +1030,11 @@ def project_financier_contribution_save(request):
         budget_line = get_or_none(BudgetLine, get_param(request.GET, "budget_line_id"))
         obj = get_or_none(FinancierContribution, get_param(request.GET, "obj_id")) if get_param(request.GET, "obj_id") else None
         if budget_line == None and obj != None:
-            budget_line = obj.sub_budget_line or obj.budget_line
+            budget_line = obj.budget_line
         if budget_line == None:
-            return HttpResponse("Subpartida no encontrada.", status=404)
+            return HttpResponse("Partida presupuestaria no encontrada.", status=404)
+        if budget_line.child_lines.exists():
+            return HttpResponse("Solo puede asignarse financiación a partidas sin subpartidas.", status=400)
 
         project = budget_line.project
         financier_id = get_param(request.GET, "financier")
@@ -924,14 +1069,15 @@ def project_financier_contribution_save(request):
             obj = FinancierContribution(project=project, financier=financier)
         else:
             obj.financier = financier
-        obj.budget_line = budget_line.root_line
-        obj.sub_budget_line = budget_line
+        obj.budget_line = budget_line
         obj.amount = amount
         if budget_line.effective_budget:
             obj.percentage = (amount * Decimal("100")) / budget_line.effective_budget
         obj.notes = get_param(request.GET, "notes")
         obj.full_clean()
         obj.save()
+        if get_param(request.GET, "return_modal") == "1":
+            return render(request, "project/budget-lines/financier-contribution-form.html", get_financier_contribution_context(budget_line))
         return render(request, "project/budget-lines/budget-line-list.html", get_budget_lines_context(project))
     except Exception as e:
         if hasattr(e, "message_dict"):
@@ -949,7 +1095,10 @@ def project_financier_contribution_remove(request):
         if obj == None:
             return HttpResponse("Aportación no encontrada.", status=404)
         project = obj.project
+        budget_line = obj.budget_line
         obj.delete()
+        if get_param(request.GET, "return_modal") == "1":
+            return render(request, "project/budget-lines/financier-contribution-form.html", get_financier_contribution_context(budget_line))
         return render(request, "project/budget-lines/budget-line-list.html", get_budget_lines_context(project))
     except ProtectedError:
         return HttpResponse("No se puede eliminar esta aportación porque está vinculada a facturas.", status=400)
@@ -1095,6 +1244,55 @@ def get_next_sub_budget_line_code(parent):
     return code
 
 
+def move_parent_financing_and_allocations_to_child(parent, child):
+    contributions = list(parent.financier_contributions.all())
+    allocations = list(parent.invoice_allocations.all())
+    if not contributions and not allocations:
+        return
+    total_amount = sum((contribution.amount for contribution in contributions), Decimal("0.00"))
+    total_allocated = sum((allocation.allocated_amount for allocation in allocations), Decimal("0.00"))
+    inherited_budget = max(total_amount, total_allocated)
+    if inherited_budget > 0 and not child.effective_budget:
+        child.approved_budget = inherited_budget
+        child.save(update_fields=["approved_budget"])
+    budget_limit = child.effective_budget
+    for contribution in contributions:
+        contribution.budget_line = child
+        if budget_limit:
+            contribution.percentage = (contribution.amount * Decimal("100")) / budget_limit
+        contribution.save(update_fields=["budget_line", "percentage"])
+    for allocation in allocations:
+        allocation.budget_line = child
+        allocation.save(update_fields=["budget_line"])
+
+
+def get_or_create_root_budget_line_draft(project):
+    draft = (
+        project.budget_lines
+        .filter(
+            parent__isnull=True,
+            name="",
+            description="",
+            approved_budget=Decimal("0.00"),
+        )
+        .annotate(
+            child_count=Count("child_lines"),
+            contribution_count=Count("financier_contributions"),
+            allocation_count=Count("invoice_allocations"),
+        )
+        .filter(child_count=0, contribution_count=0, allocation_count=0)
+        .order_by("-id")
+        .first()
+    )
+    if draft:
+        return draft
+
+    return BudgetLine.objects.create(
+        project=project,
+        code=get_next_budget_line_code(project),
+    )
+
+
 @group_required("admins","managers", "employee")
 def project_budget_line_form(request):
     try:
@@ -1102,10 +1300,7 @@ def project_budget_line_form(request):
         if project == None:
             return render(request, 'error_exception.html', {'exc':'Proyecto no encontrado!'})
 
-        obj = get_or_none(BudgetLine, request.GET["obj_id"]) if "obj_id" in request.GET else BudgetLine.objects.create(
-            project=project,
-            code=get_next_budget_line_code(project),
-        )
+        obj = get_or_none(BudgetLine, request.GET["obj_id"]) if "obj_id" in request.GET else get_or_create_root_budget_line_draft(project)
         return render(request, "project/budget-lines/budget-line-form.html", {'obj': obj})
     except Exception as e:
         return render(request, 'error_exception.html', {'exc':show_exc(e)})
@@ -1137,11 +1332,13 @@ def project_sub_budget_line_form(request):
                 return render(request, 'error_exception.html', {'exc':'Partida presupuestaria padre no encontrada!'})
             if parent.level >= BudgetLine.MAX_DEPTH:
                 return render(request, 'error_exception.html', {'exc':'El límite máximo de anidamiento de subpartidas es 4.'})
-            obj = BudgetLine.objects.create(
-                project=parent.project,
-                parent=parent,
-                code=get_next_sub_budget_line_code(parent),
-            )
+            with transaction.atomic():
+                obj = BudgetLine.objects.create(
+                    project=parent.project,
+                    parent=parent,
+                    code=get_next_sub_budget_line_code(parent),
+                )
+                move_parent_financing_and_allocations_to_child(parent, obj)
         return render(request, "project/budget-lines/sub-budget-line-form.html", {'obj': obj})
     except Exception as e:
         return render(request, 'error_exception.html', {'exc':show_exc(e)})

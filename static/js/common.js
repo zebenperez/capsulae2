@@ -120,10 +120,28 @@ function refreshProjectTabCounts() {
     });
 }
 
-function ajaxGet(url, datas, target, modal_target)
+function refreshHtmlTarget(url, target)
+{
+    if (!url || !target)
+        return;
+
+    $.ajax({
+        url: url,
+        type: "GET",
+        cache: false,
+        dataType: "html",
+        success: function(data){
+            if (data != "")
+                $("#" + target).html(data);
+            refreshProjectTabCounts();
+        }
+    });
+}
+
+function ajaxGet(url, datas, target, modal_target, refresh_url, refresh_target)
 {
     setWait();
-    $.ajax({
+    return $.ajax({
         url : url,
         type : 'GET',
         data : datas,
@@ -143,6 +161,7 @@ function ajaxGet(url, datas, target, modal_target)
                 if (target != "")
                     $('#'+target).html(data);
             refreshProjectTabCounts();
+            refreshHtmlTarget(refresh_url, refresh_target);
         },
         error : function(e){showError(getAjaxErrorMessage(e));},
         complete : function(){unsetWait();}
@@ -637,6 +656,12 @@ $(document).ready(()=>{
 
     $("body").on("click", ".ark", function(e){
         var obj = $(this);
+        if (obj.data("loading")) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            return;
+        }
+        obj.data("loading", true);
         runWithOptionalConfirm(obj, function(){
             url = obj.data("url");
             var target = "";
@@ -651,7 +676,11 @@ $(document).ready(()=>{
             for(var i in args)
                 if (i != "url")
                     datas[i] = args[i]
-            ajaxGet(url, datas, target, target_modal);
+            var request = ajaxGet(url, datas, target, target_modal, obj.data("refresh-url"), obj.data("refresh-target"));
+            if (request && request.always)
+                request.always(function(){ obj.removeData("loading"); });
+            else
+                obj.removeData("loading");
             if (obj.data("show"))
                 $("#" + obj.data("show")).show();
             if (obj.data("hide"))
@@ -660,19 +689,34 @@ $(document).ready(()=>{
             e.preventDefault();
             e.stopImmediatePropagation();
         });
+        if (obj.data("confirm"))
+            obj.removeData("loading");
         e.preventDefault();
         e.stopImmediatePropagation();
     });
 
     $("body").on("click", ".ajax-form-get", function(e){
         var obj = $(this);
+        if (obj.data("loading")) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            return;
+        }
         var form = $("#" + obj.data("form"));
         var datas = {};
+        var modal = obj.closest(".project-financier-allocation-modal");
+        var modalError = modal.find(".project-contribution-error");
+        if (modalError.length)
+            modalError.attr("hidden", true).text("");
         form.find("input, select, textarea").each(function(){
             var field = $(this);
             if (field.attr("name"))
                 datas[field.attr("name")] = field.val();
         });
+        var originalHtml = obj.html();
+        obj.data("loading", true);
+        obj.prop("disabled", true);
+        obj.html(obj.data("loading-text") || "Guardando...");
         setWait();
         $.ajax({
             url: obj.data("url"),
@@ -683,12 +727,29 @@ $(document).ready(()=>{
             success: function(data){
                 if (obj.data("target"))
                     $("#" + obj.data("target")).html(data);
+                if (obj.data("target-modal") && data != "")
+                {
+                    $("#" + obj.data("target-modal") + "-body").html(data);
+                    $("#" + obj.data("target-modal")).modal("show");
+                }
                 if (obj.data("dismiss-modal"))
                     $("#" + obj.data("dismiss-modal")).modal("hide");
                 refreshProjectTabCounts();
+                refreshHtmlTarget(obj.data("refresh-url"), obj.data("refresh-target"));
             },
-            error: function(e){showError(getAjaxErrorMessage(e));},
-            complete: function(){unsetWait();}
+            error: function(e){
+                var message = getAjaxErrorMessage(e);
+                if (modalError.length)
+                    modalError.removeAttr("hidden").text(message);
+                else
+                    showError(message);
+            },
+            complete: function(){
+                obj.removeData("loading");
+                obj.prop("disabled", false);
+                obj.html(originalHtml);
+                unsetWait();
+            }
         });
         e.preventDefault();
         e.stopImmediatePropagation();
@@ -700,6 +761,61 @@ $(document).ready(()=>{
             modal.addClass("show-new-financier");
         else
             modal.removeClass("show-new-financier");
+    });
+
+    function setBudgetChildrenVisibility(parentId, visible) {
+        $(".project-budget-items [data-parent-id='" + parentId + "']").each(function(){
+            var row = $(this);
+            var rowId = row.data("budget-row-id");
+            if (visible) {
+                row.removeClass("is-budget-hidden");
+                if (row.find(".project-budget-collapse").first().attr("aria-expanded") == "true")
+                    setBudgetChildrenVisibility(rowId, true);
+            }
+            else {
+                row.addClass("is-budget-hidden");
+                setBudgetChildrenVisibility(rowId, false);
+            }
+        });
+    }
+
+    function closeBudgetMenus() {
+        $(".project-budget-menu.is-open").removeClass("is-open")
+            .find(".project-budget-menu-toggle").attr("aria-expanded", "false");
+    }
+
+    $("body").on("click", ".project-budget-collapse", function(e){
+        var obj = $(this);
+        var expanded = obj.attr("aria-expanded") == "true";
+        obj.attr("aria-expanded", expanded ? "false" : "true");
+        setBudgetChildrenVisibility(obj.data("budget-collapse"), !expanded);
+        e.preventDefault();
+        e.stopPropagation();
+    });
+
+    $("body").on("click", ".project-budget-menu-toggle", function(e){
+        var menu = $(this).closest(".project-budget-menu");
+        var shouldOpen = !menu.hasClass("is-open");
+        closeBudgetMenus();
+        if (shouldOpen) {
+            menu.addClass("is-open");
+            $(this).attr("aria-expanded", "true");
+        }
+        e.preventDefault();
+        e.stopPropagation();
+    });
+
+    $("body").on("click", ".project-budget-menu-panel", function(e){
+        e.stopPropagation();
+    });
+
+    $("body").on("click", function(){
+        closeBudgetMenus();
+    });
+
+    $(document).on("keydown", function(e){
+        if (e.key == "Escape")
+            closeBudgetMenus();
     });
 
     $("body").on("click", ".confirm-link", function(e){

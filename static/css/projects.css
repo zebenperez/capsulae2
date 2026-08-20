@@ -23,15 +23,19 @@
 
 .projects-ui {
     background: var(--project-bg);
+    box-sizing: border-box;
     color: var(--project-text);
     margin: -1px -12px 0 -12px;
     min-height: calc(100vh - 120px);
-    padding: 24px;
+    padding: clamp(16px, 1.6vw, 32px);
+    width: calc(100% + 24px);
 }
 
 .projects-shell {
-    margin: 0 auto;
-    max-width: 1320px;
+    margin: 0;
+    max-width: none;
+    min-width: 0;
+    width: 100%;
 }
 
 .projects-topbar,
@@ -753,7 +757,7 @@
 .dashboard-kpis {
     display: grid;
     gap: 12px;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
     margin-bottom: 14px;
 }
 
@@ -1327,7 +1331,7 @@
 .project-detail-grid {
     display: grid;
     gap: 12px;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 }
 
 .project-field {
@@ -1476,8 +1480,8 @@
 
 .project-table.budget-lines .project-table-head,
 .project-table.budget-lines .project-table-row {
-    grid-template-columns: minmax(280px, 1.5fr) repeat(4, minmax(132px, 0.68fr)) minmax(176px, auto);
-    min-width: 1080px;
+    grid-template-columns: minmax(260px, 1.45fr) repeat(5, minmax(124px, 0.66fr)) minmax(176px, auto);
+    min-width: 1210px;
 }
 
 .project-table.budget-lines {
@@ -1487,7 +1491,7 @@
 .project-budget-line-summary {
     display: grid;
     gap: 10px;
-    grid-template-columns: repeat(3, minmax(140px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
     margin-bottom: 14px;
 }
 
@@ -1533,7 +1537,7 @@
     white-space: nowrap;
 }
 
-.project-table.budget-lines .project-table-head > div:nth-child(n+2):nth-child(-n+5) {
+.project-table.budget-lines .project-table-head > div:nth-child(n+2):nth-child(-n+6) {
     text-align: right;
 }
 
@@ -1570,6 +1574,434 @@
     font-size: 0.78rem;
     font-weight: 700;
     margin-top: 6px;
+}
+
+.project-budget-items {
+    display: grid;
+    gap: 14px;
+    padding: 18px;
+}
+
+.project-budget-items-header {
+    align-items: center;
+    display: flex;
+    gap: 14px;
+    justify-content: space-between;
+}
+
+.project-budget-title-row {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.project-budget-title-row h2 {
+    color: #1f1930;
+    font-size: 1.28rem;
+    font-weight: 800;
+    letter-spacing: 0;
+    line-height: 1.2;
+    margin: 0;
+}
+
+.project-count-pill {
+    background: var(--project-primary-soft);
+    border: 1px solid rgba(132, 71, 156, 0.18);
+    border-radius: 999px;
+    color: var(--project-primary-dark);
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 5px 10px;
+}
+
+.project-budget-items .project-budget-kpis {
+    gap: 12px;
+    grid-template-columns: repeat(5, minmax(160px, 1fr));
+    margin-bottom: 0;
+}
+
+.project-budget-items .project-budget-kpi {
+    align-items: center;
+    background: #fff;
+    border: 1px solid rgba(132, 71, 156, 0.14);
+    border-radius: 8px;
+    display: grid;
+    gap: 2px 12px;
+    grid-template-columns: 46px minmax(0, 1fr);
+    min-width: 0;
+    padding: 15px 16px;
+}
+
+.project-budget-items .project-budget-kpi-icon {
+    align-items: center;
+    background: var(--project-primary-soft);
+    border-radius: 50%;
+    color: var(--project-primary);
+    display: inline-flex;
+    grid-row: span 3;
+    height: 42px;
+    justify-content: center;
+    width: 42px;
+}
+
+.project-budget-items .project-budget-kpi-available .project-budget-kpi-icon {
+    background: rgba(34, 107, 115, 0.1);
+    color: #226b73;
+}
+
+.project-budget-items .project-stat-label {
+    letter-spacing: 0.02em;
+    margin-bottom: 0;
+}
+
+.project-budget-items .project-stat-value,
+.project-budget-items .project-money-cell,
+.project-budget-items .project-funding-cell {
+    font-variant-numeric: tabular-nums;
+}
+
+.project-budget-items .project-stat-value {
+    font-size: 1.16rem;
+}
+
+.project-budget-kpi-foot {
+    color: var(--project-muted);
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+.project-budget-assignment {
+    align-items: center;
+    background: #fff;
+    border: 1px solid rgba(132, 71, 156, 0.14);
+    border-radius: 8px;
+    display: grid;
+    gap: 14px;
+    grid-template-columns: minmax(260px, auto) minmax(180px, 1fr) auto;
+    padding: 13px 16px;
+}
+
+.project-budget-assignment-text {
+    color: var(--project-primary-dark);
+    font-size: 0.86rem;
+    font-weight: 600;
+}
+
+.project-budget-assignment-bar {
+    background: #e7e2eb;
+    border-radius: 999px;
+    height: 8px;
+    overflow: hidden;
+}
+
+.project-budget-assignment-bar span {
+    background: linear-gradient(90deg, var(--project-primary), #aa6ed5, var(--project-accent));
+    border-radius: inherit;
+    display: block;
+    height: 100%;
+    width: var(--project-progress);
+}
+
+.project-budget-assignment-percent {
+    color: var(--project-primary-dark);
+    font-size: 0.88rem;
+}
+
+.project-budget-table-wrap {
+    overflow-x: auto;
+}
+
+.project-budget-items .project-table.budget-lines {
+    border: 1px solid rgba(132, 71, 156, 0.16);
+    border-radius: 8px;
+    min-width: 1180px;
+    overflow: visible;
+}
+
+.project-budget-items .project-table.budget-lines .project-table-head,
+.project-budget-items .project-table.budget-lines .project-table-row {
+    grid-template-columns: minmax(300px, 1.55fr) minmax(122px, 0.7fr) minmax(122px, 0.7fr) minmax(168px, 0.95fr) minmax(122px, 0.7fr) minmax(122px, 0.7fr) minmax(220px, auto);
+    min-width: 1180px;
+}
+
+.project-budget-items .project-table.budget-lines .project-table-head {
+    background: rgba(132, 71, 156, 0.045);
+    color: #58455f;
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+}
+
+.project-budget-items .project-table.budget-lines .project-table-head > div:nth-child(n+2):nth-child(-n+6) {
+    text-align: right;
+}
+
+.project-budget-items .project-table-row.budget-line-row {
+    background: #fff;
+    font-weight: 700;
+}
+
+.project-budget-items .project-table-row.budget-line-row:hover {
+    background: rgba(132, 71, 156, 0.035);
+}
+
+.project-budget-items .project-table-row.sub-budget-line-row {
+    background: #fffaf0;
+    border-left: 4px solid var(--project-warm);
+    font-weight: 600;
+    padding-left: 14px;
+}
+
+.project-budget-items .project-table-row.sub-budget-line-row:hover {
+    background: #fff5df;
+}
+
+.project-budget-items .project-table-row.is-budget-hidden {
+    display: none;
+}
+
+.project-budget-line-main {
+    align-items: flex-start;
+    display: grid;
+    gap: 8px;
+    grid-template-columns: 22px minmax(0, 1fr);
+}
+
+.project-budget-collapse {
+    align-items: center;
+    background: transparent;
+    border: 0;
+    color: #2f2438;
+    cursor: pointer;
+    display: inline-flex;
+    height: 22px;
+    justify-content: center;
+    padding: 0;
+    width: 22px;
+}
+
+.project-budget-collapse:hover,
+.project-budget-collapse:focus {
+    color: var(--project-primary);
+    outline: 0;
+}
+
+.project-budget-collapse[aria-expanded="false"] i {
+    transform: rotate(-90deg);
+}
+
+.project-budget-collapse i {
+    transition: transform 140ms ease;
+}
+
+.project-budget-collapse-spacer {
+    display: inline-block;
+    width: 22px;
+}
+
+.project-budget-items .project-subline-prefix {
+    align-items: center;
+    color: var(--project-warm);
+    display: inline-flex;
+    font-weight: 800;
+    height: 22px;
+    justify-content: center;
+    margin: 0;
+    width: 22px;
+}
+
+.project-budget-items .project-subline-count {
+    color: var(--project-primary);
+    font-size: 0.74rem;
+    font-weight: 700;
+    margin-top: 4px;
+}
+
+.project-budget-items .project-table-row.sub-budget-line-level-2 {
+    padding-left: 32px;
+}
+
+.project-budget-items .project-table-row.sub-budget-line-level-3 {
+    padding-left: 50px;
+}
+
+.project-budget-items .project-table-row.sub-budget-line-level-4 {
+    padding-left: 68px;
+}
+
+.project-funding-cell {
+    display: grid;
+    gap: 3px;
+    justify-items: end;
+    min-width: 0;
+    text-align: right;
+}
+
+.project-funding-cell strong {
+    color: #171321;
+    font-size: 0.92rem;
+    line-height: 1.1;
+}
+
+.project-funding-cell span {
+    color: var(--project-muted);
+    font-size: 0.72rem;
+    font-weight: 600;
+}
+
+.project-funding-bar {
+    background: #dddfe4;
+    border-radius: 999px;
+    height: 5px;
+    overflow: hidden;
+    width: min(100%, 132px);
+}
+
+.project-funding-bar span {
+    background: #d5d8de;
+    border-radius: inherit;
+    display: block;
+    height: 100%;
+    width: var(--project-progress);
+}
+
+.project-funding-partial .project-funding-bar span {
+    background: linear-gradient(90deg, var(--project-primary), var(--project-accent));
+}
+
+.project-funding-complete .project-funding-bar span {
+    background: #21b56f;
+}
+
+.project-funding-none strong {
+    color: #2f2a35;
+}
+
+.project-available-cell {
+    color: #123f47;
+    font-weight: 800;
+}
+
+.project-budget-items .project-table.budget-lines .project-actions {
+    align-items: center;
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    min-width: 220px;
+    overflow: visible;
+    position: relative;
+    white-space: nowrap;
+}
+
+.project-budget-action-main {
+    color: var(--project-primary-dark) !important;
+    font-size: 0.78rem;
+    font-weight: 800;
+    min-height: 34px;
+    padding: 7px 11px;
+}
+
+.project-budget-menu {
+    position: relative;
+}
+
+.project-budget-menu-panel {
+    background: #fff;
+    border: 1px solid rgba(132, 71, 156, 0.18);
+    border-radius: 8px;
+    box-shadow: 0 12px 26px rgba(46, 39, 52, 0.14);
+    display: none;
+    min-width: 190px;
+    padding: 6px;
+    position: absolute;
+    right: 0;
+    top: calc(100% + 6px);
+    z-index: 20;
+}
+
+.project-budget-menu.is-open .project-budget-menu-panel {
+    display: grid;
+    gap: 2px;
+}
+
+.project-budget-menu-item {
+    align-items: center;
+    background: transparent;
+    border: 0;
+    border-radius: 6px;
+    color: var(--project-text);
+    cursor: pointer;
+    display: flex;
+    font-size: 0.84rem;
+    font-weight: 700;
+    gap: 8px;
+    padding: 8px 10px;
+    text-align: left;
+    width: 100%;
+}
+
+.project-budget-menu-item:hover,
+.project-budget-menu-item:focus {
+    background: var(--project-primary-soft);
+    color: var(--project-primary-dark);
+    outline: 0;
+}
+
+.project-budget-menu-item.danger {
+    color: var(--project-danger);
+}
+
+.project-budget-table-foot {
+    align-items: center;
+    border-top: 1px solid rgba(132, 71, 156, 0.12);
+    display: flex;
+    gap: 14px;
+    justify-content: space-between;
+    min-width: 1180px;
+    padding: 14px 26px;
+}
+
+.project-budget-legend {
+    align-items: center;
+    color: var(--project-text);
+    display: flex;
+    flex-wrap: wrap;
+    font-size: 0.78rem;
+    gap: 12px;
+}
+
+.project-funding-dot {
+    border-radius: 3px;
+    display: inline-block;
+    height: 8px;
+    margin-right: 4px;
+    width: 8px;
+}
+
+.project-funding-dot.complete {
+    background: #21b56f;
+}
+
+.project-funding-dot.partial {
+    background: var(--project-primary);
+}
+
+.project-funding-dot.none {
+    background: #c9ccd3;
+}
+
+.project-budget-currency-note {
+    color: var(--project-muted);
+    font-size: 0.76rem;
+    font-weight: 600;
+}
+
+.project-budget-empty {
+    align-items: center;
+    display: flex;
+    gap: 14px;
+    justify-content: space-between;
 }
 
 .project-money-kicker {
@@ -1795,58 +2227,447 @@
     color: #9d8ea5;
 }
 
+#common-modal:has(.project-financier-allocation-modal) .modal-dialog {
+    max-width: min(1380px, calc(100vw - 60px));
+}
+
+#common-modal:has(.project-financier-allocation-modal) .modal-content {
+    background: #fffefd;
+    border: 1px solid rgba(132, 71, 156, 0.16);
+    border-radius: 10px;
+    box-shadow: 0 18px 44px rgba(46, 39, 52, 0.14);
+    max-height: calc(100vh - 40px);
+    overflow: hidden;
+    padding: 0 !important;
+}
+
 .project-new-financier-field {
     display: none;
 }
 
-.project-modal:has(.project-financier-selector option[value="__new__"]:checked) .project-new-financier-field {
-    display: block;
-}
-
+.project-modal:has(.project-financier-selector option[value="__new__"]:checked) .project-new-financier-field,
 .project-modal.show-new-financier .project-new-financier-field {
     display: block;
-}
-
-.project-contribution-list {
-    border-top: 1px solid var(--project-border);
-    display: grid;
-    gap: 8px;
-    margin-top: 18px;
-    padding-top: 14px;
-}
-
-.project-contribution-list h3 {
-    color: var(--project-primary-dark);
-    font-size: 0.92rem;
-    font-weight: 800;
-    margin: 0;
-    text-transform: uppercase;
-}
-
-.project-contribution-row {
-    align-items: center;
-    background: rgba(255, 255, 255, 0.66);
-    border: 1px solid var(--project-border);
-    border-radius: 8px;
-    display: grid;
-    gap: 8px;
-    grid-template-columns: minmax(0, 1fr) auto auto auto;
-    padding: 9px;
-}
-
-.project-contribution-row span {
-    font-weight: 700;
-    overflow-wrap: anywhere;
-}
-
-.project-contribution-row strong {
-    white-space: nowrap;
 }
 
 .project-modal-actions {
     display: flex;
     justify-content: flex-end;
     margin-top: 18px;
+}
+
+.project-financier-allocation-modal {
+    --allocation-teal: #226b73;
+    --allocation-teal-soft: rgba(34, 107, 115, 0.1);
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    max-height: calc(100vh - 40px);
+    min-height: 0;
+    overflow: hidden;
+}
+
+.project-financier-allocation-modal .project-contribution-header {
+    align-items: flex-start;
+    border-bottom: 1px solid rgba(132, 71, 156, 0.12);
+    display: flex;
+    gap: 18px;
+    justify-content: space-between;
+    padding: 28px 32px 16px;
+}
+
+.project-financier-allocation-modal .project-contribution-header h2 {
+    color: var(--project-primary-dark);
+    font-size: 1.75rem;
+    font-weight: 700;
+    line-height: 1.15;
+    margin: 0;
+}
+
+.project-financier-allocation-modal .project-contribution-header p {
+    color: #667085;
+    font-size: 1.04rem;
+    font-weight: 500;
+    margin: 6px 0 0;
+}
+
+.project-financier-allocation-modal .project-contribution-close {
+    align-items: center;
+    background: #fff;
+    border: 1px solid rgba(132, 71, 156, 0.22);
+    border-radius: 8px;
+    color: var(--project-primary-dark);
+    cursor: pointer;
+    display: inline-flex;
+    flex: 0 0 auto;
+    height: 36px;
+    justify-content: center;
+    transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease;
+    width: 36px;
+}
+
+.project-financier-allocation-modal .project-contribution-close:hover,
+.project-financier-allocation-modal .project-contribution-close:focus {
+    background: var(--project-primary-soft);
+    border-color: var(--project-primary);
+    outline: 0;
+}
+
+.project-financier-allocation-modal .project-contribution-body {
+    display: grid;
+    gap: 16px;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 16px 32px;
+}
+
+.project-financier-allocation-modal .project-contribution-section {
+    background: #fff;
+    border: 1px solid rgba(132, 71, 156, 0.16);
+    border-radius: 10px;
+    box-shadow: 0 8px 20px rgba(46, 39, 52, 0.035);
+    padding: 18px 20px;
+}
+
+.project-financier-allocation-modal .project-contribution-section h3 {
+    color: var(--project-primary-dark);
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.045em;
+    margin: 0 0 14px;
+}
+
+.project-financier-allocation-modal .project-contribution-kpis {
+    align-items: center;
+    display: grid;
+    gap: 16px;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(260px, 1.25fr);
+}
+
+.project-financier-allocation-modal .project-contribution-kpi {
+    align-items: center;
+    border-right: 1px solid rgba(132, 71, 156, 0.13);
+    display: grid;
+    gap: 2px 14px;
+    grid-template-columns: 52px minmax(0, 1fr);
+    min-width: 0;
+    padding-right: 16px;
+}
+
+.project-financier-allocation-modal .project-contribution-kpi-icon {
+    align-items: center;
+    background: var(--project-primary-soft);
+    border-radius: 10px;
+    color: var(--project-primary-dark);
+    display: inline-flex;
+    font-size: 1.15rem;
+    grid-row: span 2;
+    height: 52px;
+    justify-content: center;
+    width: 52px;
+}
+
+.project-financier-allocation-modal .project-contribution-kpi-contributed .project-contribution-kpi-icon {
+    background: var(--allocation-teal-soft);
+    color: var(--allocation-teal);
+}
+
+.project-financier-allocation-modal .project-contribution-kpi-pending .project-contribution-kpi-icon {
+    background: var(--project-accent-soft);
+    color: var(--project-accent);
+}
+
+.project-financier-allocation-modal .project-contribution-kpi-label {
+    color: #48505d;
+    font-size: 0.94rem;
+    font-weight: 500;
+}
+
+.project-financier-allocation-modal .project-contribution-kpi strong {
+    color: #1c1722;
+    font-size: 1.38rem;
+    font-weight: 700;
+    line-height: 1.1;
+}
+
+.project-financier-allocation-modal .project-contribution-progress {
+    display: grid;
+    gap: 7px;
+    min-width: 0;
+}
+
+.project-financier-allocation-modal .project-contribution-progress strong {
+    color: var(--project-primary-dark);
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.project-financier-allocation-modal .project-contribution-progress small {
+    color: #667085;
+    font-size: 0.82rem;
+}
+
+.project-financier-allocation-modal .project-contribution-progress-track {
+    background: #ebe7ef;
+    border-radius: 999px;
+    height: 10px;
+    overflow: hidden;
+}
+
+.project-financier-allocation-modal .project-contribution-progress-track span {
+    background: linear-gradient(90deg, var(--project-primary), var(--project-accent));
+    border-radius: inherit;
+    display: block;
+    height: 100%;
+    transition: width 160ms ease;
+    width: var(--project-progress);
+}
+
+.project-financier-allocation-modal .project-contribution-table-wrap {
+    max-height: 260px;
+    overflow: auto;
+}
+
+.project-financier-allocation-modal .project-contribution-table {
+    border: 1px solid rgba(132, 71, 156, 0.14);
+    border-radius: 8px;
+    min-width: 720px;
+    overflow: hidden;
+}
+
+.project-financier-allocation-modal .project-contribution-table-head,
+.project-financier-allocation-modal .project-contribution-table-row,
+.project-financier-allocation-modal .project-contribution-total-row {
+    align-items: center;
+    display: grid;
+    gap: 14px;
+    grid-template-columns: minmax(190px, 1.15fr) minmax(130px, 0.68fr) minmax(220px, 1.35fr) 120px;
+    padding: 12px 14px;
+}
+
+.project-financier-allocation-modal .project-contribution-table-head {
+    background: rgba(132, 71, 156, 0.055);
+    color: var(--project-primary-dark);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.035em;
+    position: sticky;
+    text-transform: uppercase;
+    top: 0;
+    z-index: 1;
+}
+
+.project-financier-allocation-modal .project-contribution-table-row {
+    background: #fff;
+    border-top: 1px solid rgba(132, 71, 156, 0.1);
+}
+
+.project-financier-allocation-modal .project-contribution-table-row.is-editing {
+    background: rgba(132, 71, 156, 0.045);
+    box-shadow: inset 3px 0 0 var(--project-primary);
+}
+
+.project-financier-allocation-modal .project-contribution-table-row > div:first-child {
+    color: #27212e;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.project-financier-allocation-modal .project-money-cell {
+    text-align: right;
+}
+
+.project-financier-allocation-modal .project-contribution-notes {
+    color: #667085;
+    overflow-wrap: anywhere;
+}
+
+.project-financier-allocation-modal .project-contribution-actions,
+.project-financier-allocation-modal .project-contribution-actions-footer {
+    align-items: center;
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+.project-financier-allocation-modal .project-contribution-actions .project-icon-btn {
+    margin-left: 0;
+}
+
+.project-financier-allocation-modal .project-contribution-actions .project-icon-btn:not(.danger) {
+    color: var(--project-primary-dark) !important;
+}
+
+.project-financier-allocation-modal .project-contribution-actions .project-icon-btn.danger {
+    color: var(--project-danger) !important;
+}
+
+.project-financier-allocation-modal .project-contribution-total-row {
+    background: rgba(132, 71, 156, 0.06);
+    border-top: 1px solid rgba(132, 71, 156, 0.14);
+    color: var(--project-primary-dark);
+    font-weight: 700;
+}
+
+.project-financier-allocation-modal .project-contribution-empty {
+    border-top: 1px solid rgba(132, 71, 156, 0.1);
+    color: #667085;
+    margin: 0;
+    padding: 18px;
+}
+
+.project-financier-allocation-modal .project-contribution-form-grid {
+    align-items: start;
+    display: grid;
+    gap: 16px;
+    grid-template-columns: minmax(240px, 1.1fr) minmax(220px, 0.9fr) minmax(300px, 1.4fr);
+}
+
+.project-financier-allocation-modal .project-contribution-error {
+    background: rgba(198, 40, 40, 0.08);
+    border: 1px solid rgba(198, 40, 40, 0.22);
+    border-radius: 8px;
+    color: var(--project-danger);
+    font-size: 0.88rem;
+    font-weight: 600;
+    margin: 0 0 12px;
+    padding: 10px 12px;
+}
+
+.project-financier-allocation-modal .project-contribution-error[hidden] {
+    display: none;
+}
+
+.project-financier-allocation-modal .project-form-field {
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    padding: 0;
+}
+
+.project-financier-allocation-modal .project-form-field label {
+    color: var(--project-primary-dark);
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.045em;
+}
+
+.project-financier-allocation-modal .project-form-field .form-control {
+    background: #fff;
+    border: 1px solid rgba(132, 71, 156, 0.24);
+    border-radius: 8px;
+    min-height: 43px;
+    padding: 10px 12px;
+}
+
+.project-financier-allocation-modal .project-form-field .form-control:focus {
+    border-color: var(--project-primary);
+    box-shadow: 0 0 0 0.16rem rgba(132, 71, 156, 0.13);
+}
+
+.project-financier-allocation-modal .project-contribution-notes-field textarea.form-control {
+    min-height: 76px;
+    resize: vertical;
+}
+
+.project-financier-allocation-modal .project-money-input {
+    display: flex;
+}
+
+.project-financier-allocation-modal .project-money-input .form-control {
+    border-bottom-right-radius: 0;
+    border-top-right-radius: 0;
+}
+
+.project-financier-allocation-modal .project-money-input span {
+    align-items: center;
+    background: var(--project-primary-soft);
+    border: 1px solid rgba(132, 71, 156, 0.24);
+    border-left: 0;
+    border-radius: 0 8px 8px 0;
+    color: var(--project-primary-dark);
+    display: inline-flex;
+    font-weight: 800;
+    justify-content: center;
+    min-height: 43px;
+    min-width: 42px;
+}
+
+.project-financier-allocation-modal .project-field-help {
+    color: #667085;
+    font-size: 0.82rem;
+    margin: 7px 0 0;
+}
+
+.project-financier-allocation-modal .project-field-help strong {
+    color: var(--allocation-teal);
+    font-weight: 700;
+}
+
+.project-financier-allocation-modal .project-new-financier-field {
+    display: none;
+}
+
+.project-financier-allocation-modal:has(.project-financier-selector option[value="__new__"]:checked) .project-new-financier-field,
+.project-financier-allocation-modal.show-new-financier .project-new-financier-field {
+    display: block;
+}
+
+.project-financier-allocation-modal .project-contribution-actions-footer {
+    border-top: 1px solid rgba(132, 71, 156, 0.12);
+    margin-top: 0;
+    padding: 14px 32px 22px;
+}
+
+.project-financier-allocation-modal .project-contribution-actions-footer .project-btn {
+    min-height: 40px;
+    transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease, opacity 150ms ease;
+}
+
+.project-financier-allocation-modal .project-contribution-actions-footer .project-btn-primary i {
+    color: rgba(255, 255, 255, 0.92);
+}
+
+.project-financier-allocation-modal .project-contribution-actions-footer .project-btn[disabled] {
+    opacity: 0.74;
+}
+
+@media (min-width: 1500px) {
+    .dashboard-main-grid {
+        grid-template-columns: minmax(380px, 1.25fr) repeat(3, minmax(280px, 1fr));
+    }
+
+    .projects-area-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 1099px) {
+    #common-modal:has(.project-financier-allocation-modal) .modal-dialog {
+        max-width: min(960px, calc(100vw - 32px));
+    }
+
+    .project-financier-allocation-modal .project-contribution-kpis {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .project-financier-allocation-modal .project-contribution-kpi {
+        border-right: 0;
+        border-bottom: 1px solid rgba(132, 71, 156, 0.13);
+        padding: 0 0 12px;
+    }
+
+    .project-financier-allocation-modal .project-contribution-kpi:nth-child(3) {
+        border-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    .project-financier-allocation-modal .project-contribution-form-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .project-financier-allocation-modal .project-contribution-notes-field {
+        grid-column: 1 / -1;
+    }
 }
 
 @media (max-width: 992px) {
@@ -2028,6 +2849,62 @@
         grid-column: 1 / -1;
     }
 
+    #common-modal:has(.project-financier-allocation-modal) .modal-dialog {
+        max-width: calc(100vw - 16px);
+        margin: 8px auto;
+    }
+
+    #common-modal:has(.project-financier-allocation-modal) .modal-content,
+    .project-financier-allocation-modal {
+        max-height: calc(100vh - 16px);
+    }
+
+    .project-financier-allocation-modal .project-contribution-header {
+        padding: 20px 18px 14px;
+    }
+
+    .project-financier-allocation-modal .project-contribution-header h2 {
+        font-size: 1.35rem;
+    }
+
+    .project-financier-allocation-modal .project-contribution-header p {
+        font-size: 0.94rem;
+    }
+
+    .project-financier-allocation-modal .project-contribution-body {
+        gap: 12px;
+        padding: 12px 18px;
+    }
+
+    .project-financier-allocation-modal .project-contribution-section {
+        padding: 15px;
+    }
+
+    .project-financier-allocation-modal .project-contribution-kpis,
+    .project-financier-allocation-modal .project-contribution-form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .project-financier-allocation-modal .project-contribution-kpi:nth-child(3) {
+        border-bottom: 1px solid rgba(132, 71, 156, 0.13);
+        padding-bottom: 12px;
+    }
+
+    .project-financier-allocation-modal .project-contribution-notes-field,
+    .project-financier-allocation-modal .project-new-financier-field {
+        grid-column: 1 / -1;
+    }
+
+    .project-financier-allocation-modal .project-contribution-actions-footer {
+        align-items: stretch;
+        flex-direction: column-reverse;
+        padding: 12px 18px 18px;
+    }
+
+    .project-financier-allocation-modal .project-contribution-actions-footer .project-btn {
+        width: 100%;
+    }
+
     .dashboard-alerts > div,
     .dashboard-alerts > div:nth-child(2) {
         border-top: 1px solid var(--project-border);
@@ -2057,5 +2934,68 @@
     .project-money-cell,
     .project-not-applicable {
         text-align: left;
+    }
+}
+
+@media (max-width: 1180px) {
+    .project-budget-items .project-budget-kpis {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .project-budget-assignment {
+        grid-template-columns: 1fr;
+    }
+
+    .project-budget-assignment-percent {
+        justify-self: end;
+    }
+}
+
+@media (max-width: 992px) {
+    .project-budget-items .project-table.budget-lines .project-table-head {
+        display: grid;
+    }
+
+    .project-budget-items .project-money-cell {
+        text-align: right;
+    }
+
+    .project-budget-items .project-table.budget-lines .project-table-row {
+        align-items: center;
+        grid-template-columns: minmax(300px, 1.55fr) minmax(122px, 0.7fr) minmax(122px, 0.7fr) minmax(168px, 0.95fr) minmax(122px, 0.7fr) minmax(122px, 0.7fr) minmax(220px, auto);
+    }
+
+    .project-budget-items .project-table.budget-lines .project-actions {
+        justify-content: flex-end;
+    }
+}
+
+@media (max-width: 760px) {
+    .project-budget-items {
+        padding: 14px;
+    }
+
+    .project-budget-items-header,
+    .project-budget-empty {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .project-budget-items-header .project-btn,
+    .project-budget-empty .project-btn {
+        width: 100%;
+    }
+
+    .project-budget-items .project-budget-kpis {
+        grid-template-columns: 1fr;
+    }
+
+    .project-budget-title-row h2 {
+        font-size: 1.08rem;
+    }
+
+    .project-budget-table-foot {
+        align-items: flex-start;
+        flex-direction: column;
     }
 }

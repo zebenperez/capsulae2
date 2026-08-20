@@ -18,7 +18,6 @@
             <span class="active" data-step-indicator="1">1</span>
             <span data-step-indicator="2">2</span>
             <span data-step-indicator="3">3</span>
-            <span data-step-indicator="4">4</span>
         </div>
 
         <div class="invoice-wizard-step active" data-step="1">
@@ -39,25 +38,10 @@
                 <select class="form-control" name="budget_line" required>
                     <option value="">---</option>
                     {% for budget_line in budget_lines %}
-                        <option value="{{ budget_line.id }}" data-project="{{ budget_line.project_id }}">
+                        <option value="{{ budget_line.id }}"
+                            data-project="{{ budget_line.project_id }}"
+                            data-available="{{ budget_line.invoice_allocation_available }}">
                             {{ budget_line.project.code|default:budget_line.project.name }} · {{ budget_line.full_code }} · {{ budget_line.name|default:"Sin nombre" }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
-        </div>
-
-        <div class="invoice-wizard-step" data-step="3">
-            <div class="project-form-field project-form-field-wide">
-                <label>{% trans "Aportación de financiador" %}</label>
-                <select class="form-control" name="financier_contribution" required>
-                    <option value="">---</option>
-                    {% for contribution in contributions %}
-                        <option value="{{ contribution.id }}"
-                            data-project="{{ contribution.project_id }}"
-                            data-budget-line="{% if contribution.sub_budget_line_id %}{{ contribution.sub_budget_line_id }}{% else %}{{ contribution.budget_line_id }}{% endif %}"
-                            data-available="{{ contribution.available_amount }}">
-                            {{ contribution.financier.name }} · {{ contribution.amount }} € · {% trans "Disponible" %}: {{ contribution.available_amount }} €
                         </option>
                     {% endfor %}
                 </select>
@@ -65,7 +49,7 @@
             <div class="project-form-field project-form-field-wide">
                 <label>
                     {% trans "Importe a imputar" %}
-                    <span class="invoice-allocation-max-label">· {% trans "Máximo disponible" %}: {{ remaining_amount_display }} €</span>
+                    <span class="invoice-allocation-max-label">· {% trans "Máximo disponible" %}: 0,00 €</span>
                 </label>
                 <div class="invoice-allocation-mode">
                     <label>
@@ -84,7 +68,7 @@
             </div>
         </div>
 
-        <div class="invoice-wizard-step" data-step="4">
+        <div class="invoice-wizard-step" data-step="3">
             <div class="project-form-field project-form-field-wide">
                 <label>{% trans "Actividad" %}</label>
                 <select class="form-control" name="activity">
@@ -112,10 +96,10 @@
 <script>
     (function(){
         var currentStep = 1;
-        var maxStep = 4;
+        var maxStep = 3;
         var remainingAmount = parseFloat("{{ remaining_amount|default:"0" }}");
         var invoiceTotal = parseFloat("{{ invoice.total_amount|default:"0" }}");
-        var currentMaxAmount = remainingAmount;
+        var currentMaxAmount = 0;
 
         function formatMoney(value) {
             return value.toLocaleString("es-ES", {minimumFractionDigits: 2, maximumFractionDigits: 2});
@@ -173,49 +157,51 @@
 
         function filterDependentFields() {
             var projectId = $('[name="project"]').val();
-            var budgetLineId = $('[name="budget_line"]').val();
             filterOptions("budget_line", function(option){
                 return String(option.data("project")) === String(projectId);
-            });
-            filterOptions("financier_contribution", function(option){
-                return String(option.data("project")) === String(projectId) &&
-                    String(option.data("budget-line")) === String(budgetLineId);
             });
             filterOptions("activity", function(option){
                 return String(option.data("project")) === String(projectId);
             });
         }
 
-        function updateAmountFromContribution() {
-            var selected = $('[name="financier_contribution"] option:selected');
+        function updateAmountFromBudgetLine() {
+            var selected = $('[name="budget_line"] option:selected');
             var available = parseFloat(selected.data("available") || "0");
             var amount = Math.min(remainingAmount, available);
             currentMaxAmount = amount;
             if (amount > 0) {
                 $('[name="allocated_amount"]').val(amount.toFixed(2));
+            } else {
+                $('[name="allocated_amount"]').val("");
             }
             syncAllocationMode();
         }
 
         $(".invoice-wizard-next").on("click", function(){
-            var field = $('.invoice-wizard-step[data-step="' + currentStep + '"]').find("select[required], input[required]").first();
-            if (field.length && !field.val()) {
-                field.addClass("invalid").focus();
+            var invalidField = null;
+            $('.invoice-wizard-step[data-step="' + currentStep + '"]').find("select[required], input[required]").filter(":visible").each(function(){
+                if (!$(this).val() && invalidField === null) {
+                    invalidField = $(this);
+                }
+            });
+            if (invalidField !== null) {
+                invalidField.addClass("invalid").focus();
                 return;
             }
-            field.removeClass("invalid");
+            $('.invoice-wizard-step[data-step="' + currentStep + '"]').find(".invalid").removeClass("invalid");
             showStep(currentStep + 1);
         });
         $(".invoice-wizard-prev").on("click", function(){ showStep(currentStep - 1); });
         $('[name="project"]').on("change", function(){
-            $('[name="budget_line"], [name="financier_contribution"], [name="activity"]').val("");
+            $('[name="budget_line"], [name="activity"]').val("");
             filterDependentFields();
+            updateAmountFromBudgetLine();
         });
         $('[name="budget_line"]').on("change", function(){
-            $('[name="financier_contribution"]').val("");
             filterDependentFields();
+            updateAmountFromBudgetLine();
         });
-        $('[name="financier_contribution"]').on("change", updateAmountFromContribution);
         $('[name="allocation_mode"]').on("change", syncAllocationMode);
         filterDependentFields();
         syncAllocationMode();

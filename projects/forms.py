@@ -88,13 +88,13 @@ class ResultForm(forms.ModelForm):
 class BudgetLineForm(forms.ModelForm):
     class Meta:
         model = BudgetLine
-        fields = ("project", "code", "name", "description", "approved_budget", "modified_budget")
+        fields = ("project", "code", "name", "description", "approved_budget")
 
 
 class ChildBudgetLineForm(forms.ModelForm):
     class Meta:
         model = BudgetLine
-        fields = ("project", "parent", "code", "name", "description", "approved_budget", "modified_budget")
+        fields = ("project", "parent", "code", "name", "description", "approved_budget")
 
 
 class FinancierForm(forms.ModelForm):
@@ -120,7 +120,7 @@ class ProjectFinancierForm(forms.ModelForm):
 class FinancierContributionForm(forms.ModelForm):
     class Meta:
         model = FinancierContribution
-        fields = ("project", "financier", "budget_line", "sub_budget_line", "amount", "percentage", "notes")
+        fields = ("project", "financier", "budget_line", "amount", "percentage", "notes")
 
 
 class InvoiceForm(forms.ModelForm):
@@ -150,9 +150,6 @@ class InvoiceAllocationForm(forms.ModelForm):
             "project",
             "activity",
             "budget_line",
-            "sub_budget_line",
-            "financier_contribution",
-            "financier",
             "allocated_amount",
             "allocated_percentage",
             "allocation_date",

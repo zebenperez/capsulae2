@@ -1,12 +1,10 @@
 {% load i18n project_tags %}
 
-<div class="project-panel">
-    <div class="project-section-header">
-        <div>
-            <h2>{% trans "Partidas presupuestarias" %}</h2>
-            <p class="project-muted">
-                {{ obj.budget_lines_count }} {% trans "partidas" %}
-            </p>
+<div class="project-panel project-budget-items">
+    <div class="project-budget-items-header">
+        <div class="project-budget-title-row">
+            <h2>{% trans "PARTIDAS PRESUPUESTARIAS" %}</h2>
+            <span class="project-count-pill">{{ budget_line_summary.budget_line_count }} {% trans "partidas" %}</span>
         </div>
         <button type="button" class="project-btn project-btn-primary ark" data-url="{% url "project-budget-line-form" %}"
             data-target-modal="common-modal" data-project_id="{{obj.id}}">
@@ -14,123 +12,233 @@
         </button>
     </div>
 
-    <div class="project-budget-line-summary">
-        <div class="project-stat">
-            <span class="project-stat-label">{% trans "Presupuesto del proyecto" %}</span>
+    <div class="project-budget-line-summary project-budget-kpis">
+        <div class="project-budget-kpi">
+            <span class="project-budget-kpi-icon" aria-hidden="true"><i class="fas fa-receipt"></i></span>
+            <span class="project-stat-label">{% trans "Aprobado" %}</span>
             <span class="project-stat-value">{{ budget_line_summary.approved_budget|money_es }}</span>
         </div>
-        <div class="project-stat">
-            <span class="project-stat-label">{% trans "Aprobado en partidas" %}</span>
-            <span class="project-stat-value">{{ budget_line_summary.approved_in_budget_lines|money_es }}</span>
+        <div class="project-budget-kpi">
+            <span class="project-budget-kpi-icon" aria-hidden="true"><i class="fas fa-circle-notch"></i></span>
+            <span class="project-stat-label">{% trans "Asignado" %}</span>
+            <span class="project-stat-value">{{ budget_line_summary.assigned_to_leaf_lines|money_es }}</span>
+            <span class="project-budget-kpi-foot">{{ budget_line_summary.assigned_percentage_display }}% {% trans "del aprobado" %}</span>
         </div>
-        <div class="project-stat">
-            <span class="project-stat-label">{% trans "Asignado a subpartidas" %}</span>
-            <span class="project-stat-value">{{ budget_line_summary.assigned_to_sub_lines|money_es }}</span>
-        </div>
-        <div class="project-stat">
-            <span class="project-stat-label">{% trans "Gasto ejecutado" %}</span>
+        <div class="project-budget-kpi">
+            <span class="project-budget-kpi-icon" aria-hidden="true"><i class="fas fa-cash-register"></i></span>
+            <span class="project-stat-label">{% trans "Ejecutado" %}</span>
             <span class="project-stat-value">{{ budget_line_summary.executed_amount|money_es }}</span>
+            <span class="project-budget-kpi-foot">{{ budget_line_summary.executed_percentage_display }}% {% trans "del aprobado" %}</span>
         </div>
-        <div class="project-stat">
+        <div class="project-budget-kpi project-budget-kpi-available">
+            <span class="project-budget-kpi-icon" aria-hidden="true"><i class="fas fa-wallet"></i></span>
+            <span class="project-stat-label">{% trans "Disponible" %}</span>
+            <span class="project-stat-value">{{ budget_line_summary.available_amount|money_es }}</span>
+            <span class="project-budget-kpi-foot">{{ budget_line_summary.available_percentage_display }}% {% trans "del aprobado" %}</span>
+        </div>
+        <div class="project-budget-kpi">
+            <span class="project-budget-kpi-icon" aria-hidden="true"><i class="fas fa-edit"></i></span>
             <span class="project-stat-label">{% trans "Pendiente de asignar" %}</span>
             <span class="project-stat-value">{{ budget_line_summary.pending_assignment|money_es }}</span>
-        </div>
-        <div class="project-stat">
-            <span class="project-stat-label">{% trans "Partidas / Subpartidas" %}</span>
-            <span class="project-stat-value">{{ budget_line_summary.budget_line_count }} / {{ budget_line_summary.sub_budget_line_count }}</span>
+            <span class="project-budget-kpi-foot">{{ budget_line_summary.pending_percentage_display }}% {% trans "del aprobado" %}</span>
         </div>
     </div>
 
-    <div class="project-table budget-lines">
-        <div class="project-table-head">
-            <div>{% trans "Partida" %}</div>
-            <div title="{% trans 'Importe inicialmente aprobado para esta partida.' %}">{% trans "Presupuesto aprobado" %}</div>
-            <div title="{% trans 'Presupuesto modificado registrado para la partida; en subpartidas se muestra el importe asignado.' %}">{% trans "Presupuesto modificado / asignado" %}</div>
-            <div title="{% trans 'Importe ya gastado o imputado a esta partida.' %}">{% trans "Gasto ejecutado" %}</div>
-            <div title="{% trans 'En partidas padre representa el importe pendiente de distribuir; en subpartidas representa el importe pendiente de ejecutar.' %}">{% trans "Saldo disponible" %}</div>
-            <div>{% trans "Acciones" %}</div>
+    <div class="project-budget-assignment">
+        <div class="project-budget-assignment-text">
+            <strong>{{ budget_line_summary.assigned_to_leaf_lines|money_es }}</strong>
+            {% trans "asignados de" %}
+            <strong>{{ budget_line_summary.approved_budget|money_es }}</strong>
+            {% trans "aprobados" %}
         </div>
-        {% for item in budget_lines %}
-            <div class="project-table-row budget-line-row" id="row_{{item.id}}">
-                <div class="project-table-main">
-                    <span class="project-table-title">{{ item.code|default:"---" }} - {{ item.name|default:"Sin nombre" }}</span>
-                    {% if item.description %}
-                        <div class="project-table-desc">{{ item.description }}</div>
-                    {% endif %}
-                    <div class="project-subline-count">
-                        {{ item.child_lines.all.count }} {% trans "subpartidas" %}
+        <div class="project-budget-assignment-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ budget_line_summary.assigned_percentage_css }}">
+            <span style="--project-progress: {{ budget_line_summary.assigned_percentage_css }}%;"></span>
+        </div>
+        <strong class="project-budget-assignment-percent">{{ budget_line_summary.assigned_percentage_display }}%</strong>
+    </div>
+
+    {% if budget_lines %}
+        <div class="project-budget-table-wrap">
+            <div class="project-table budget-lines project-budget-table">
+                <div class="project-table-head">
+                    <div>{% trans "Partida" %}</div>
+                    <div>{% trans "Aprobado" %}</div>
+                    <div>{% trans "Asignado" %}</div>
+                    <div title="{% trans 'Importe aportado por financiadores respecto al presupuesto asignado de la partida o subpartida.' %}">
+                        {% trans "Financiado" %} <i class="fas fa-info-circle" aria-hidden="true"></i>
                     </div>
+                    <div>{% trans "Ejecutado" %}</div>
+                    <div>{% trans "Disponible" %}</div>
+                    <div>{% trans "Acciones" %}</div>
                 </div>
-                <div class="project-table-title project-money-cell">{{ item.approved_budget|money_es }}</div>
-                <div class="project-table-title project-money-cell">{{ item.modified_budget|money_es }}</div>
-                <div class="project-table-title project-money-cell">{{ item.executed_amount|money_es }}</div>
-                <div class="project-table-title project-money-cell">
-                    <span class="project-money-kicker">{% trans "Pendiente de asignar" %}</span>
-                    {{ item.available_balance|money_es }}
-                </div>
-                <div class="project-actions">
-                    <a class="project-icon-btn ark" title="{% trans 'Añadir subpartida' %}" data-url="{% url "project-sub-budget-line-form" %}"
-                        aria-label="{% trans 'Añadir subpartida a' %} {{ item.code|default:'---' }} - {{ item.name|default:'Sin nombre' }}"
-                        data-target-modal="common-modal" data-budget_line_id="{{item.id}}">
-                        <i class="fas fa-plus"></i>
-                    </a>
-                    <a class="project-icon-btn ark" title="{% trans 'Editar partida' %}" data-url="{% url "project-budget-line-form" %}"
-                        aria-label="{% trans 'Editar partida' %} {{ item.code|default:'---' }} - {{ item.name|default:'Sin nombre' }}"
-                        data-target-modal="common-modal" data-obj_id="{{item.id}}" data-project_id="{{obj.id}}">
-                        <i class="fas fa-edit"></i>
-                    </a>
-                    <a class="project-icon-btn danger ark" data-url="{% url "project-budget-line-remove" %}" data-obj_id="{{item.id}}"
-                        data-target="div-container" title="{% trans 'Eliminar partida' %}"
-                        aria-label="{% trans 'Eliminar partida' %} {{ item.code|default:'---' }} - {{ item.name|default:'Sin nombre' }}"
-                        data-confirm="{% trans "¿Seguro que quieres eliminar esta partida? Si tiene subpartidas, también se eliminarán." %}">
-                        <i class="fas fa-trash"></i>
-                    </a>
+                {% for item in budget_lines %}
+                    <div class="project-table-row budget-line-row" id="row_{{item.id}}" data-budget-row-id="{{item.id}}">
+                        <div class="project-table-main project-budget-line-main">
+                            {% if item.has_child_lines %}
+                                <button type="button" class="project-budget-collapse" aria-expanded="true"
+                                    aria-label="{% trans 'Contraer subpartidas de' %} {{ item.code|default:'---' }} - {{ item.name|default:'Sin nombre' }}"
+                                    data-budget-collapse="{{item.id}}">
+                                    <i class="fas fa-chevron-down" aria-hidden="true"></i>
+                                </button>
+                            {% else %}
+                                <span class="project-budget-collapse-spacer" aria-hidden="true"></span>
+                            {% endif %}
+                            <div>
+                                <span class="project-table-title">{{ item.code|default:"---" }} · {{ item.name|default:"Sin nombre" }}</span>
+                                {% if item.description %}
+                                    <div class="project-table-desc">{{ item.description }}</div>
+                                {% endif %}
+                                <div class="project-subline-count">
+                                    {{ item.child_line_count }} {% trans "subpartidas" %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="project-table-title project-money-cell">{{ item.approved_budget|money_es }}</div>
+                        <div class="project-table-title project-money-cell">{{ item.display_assigned_budget|money_es }}</div>
+                        <div class="project-funding-cell project-funding-{{ item.funding_state }}">
+                            <strong>{{ item.financed_amount|money_es }}</strong>
+                            <span>{{ item.funding_percentage_display }}% {% trans "financiado" %}</span>
+                            <div class="project-funding-bar" aria-hidden="true">
+                                <span style="--project-progress: {{ item.funding_bar_percentage_css }}%;"></span>
+                            </div>
+                        </div>
+                        <div class="project-table-title project-money-cell">{{ item.display_executed_amount|money_es }}</div>
+                        <div class="project-table-title project-money-cell project-available-cell">{{ item.display_available_balance|money_es }}</div>
+                        <div class="project-actions project-budget-actions">
+                            <button type="button" class="project-btn project-btn-ghost project-budget-action-main ark"
+                                data-url="{% url "project-sub-budget-line-form" %}" data-target-modal="common-modal"
+                                data-budget_line_id="{{item.id}}">
+                                <i class="fas fa-plus"></i> {% trans "Subpartida" %}
+                            </button>
+                            <button type="button" class="project-icon-btn ark" title="{% trans 'Editar partida' %}"
+                                aria-label="{% trans 'Editar partida' %} {{ item.code|default:'---' }} - {{ item.name|default:'Sin nombre' }}"
+                                data-url="{% url "project-budget-line-form" %}" data-target-modal="common-modal"
+                                data-obj_id="{{item.id}}" data-project_id="{{obj.id}}">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <div class="project-budget-menu">
+                                <button type="button" class="project-icon-btn project-budget-menu-toggle" title="{% trans 'Más acciones' %}"
+                                    aria-label="{% trans 'Más acciones para' %} {{ item.code|default:'---' }} - {{ item.name|default:'Sin nombre' }}"
+                                    aria-expanded="false">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                                <div class="project-budget-menu-panel" role="menu">
+                                    {% if item.can_assign_financing %}
+                                        <button type="button" class="project-budget-menu-item ark" role="menuitem"
+                                            data-url="{% url "project-financier-contribution-form" %}"
+                                            data-target-modal="common-modal" data-budget_line_id="{{item.id}}"
+                                            aria-label="{% trans 'Gestionar financiación de' %} {{ item.code|default:'---' }} - {{ item.name|default:'Sin nombre' }}">
+                                            <i class="fas fa-hand-holding-usd"></i> {% trans "Gestionar financiación" %}
+                                        </button>
+                                    {% endif %}
+                                    <button type="button" class="project-budget-menu-item danger ark" role="menuitem"
+                                        data-url="{% url "project-budget-line-remove" %}" data-obj_id="{{item.id}}"
+                                        data-target="div-container"
+                                        data-confirm="{% trans "¿Seguro que quieres eliminar esta partida? Si tiene subpartidas, también se eliminarán." %}">
+                                        <i class="fas fa-trash"></i> {% trans "Eliminar" %}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% for row in item.tree_sub_lines %}
+                        <div class="project-table-row sub-budget-line-row sub-budget-line-level-{{row.level}}" id="row_sub_{{row.item.id}}"
+                            data-budget-row-id="{{row.item.id}}" data-parent-id="{{row.item.parent_id}}">
+                            <div class="project-table-main project-budget-line-main">
+                                {% if row.has_child_lines %}
+                                    <button type="button" class="project-budget-collapse" aria-expanded="true"
+                                        aria-label="{% trans 'Contraer subpartidas de' %} {{ row.item.full_code|default:'---' }} - {{ row.item.name|default:'Sin nombre' }}"
+                                        data-budget-collapse="{{row.item.id}}">
+                                        <i class="fas fa-chevron-down" aria-hidden="true"></i>
+                                    </button>
+                                {% else %}
+                                    <span class="project-subline-prefix" aria-hidden="true">&#8627;</span>
+                                {% endif %}
+                                <div>
+                                    <span class="project-table-title">{{ row.item.full_code|default:"---" }} · {{ row.item.name|default:"Sin nombre" }}</span>
+                                    {% if row.item.description %}
+                                        <div class="project-table-desc">{{ row.item.description }}</div>
+                                    {% endif %}
+                                    {% if row.has_child_lines %}
+                                        <div class="project-subline-count">
+                                            {{ row.item.child_line_count }} {% trans "subpartidas" %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="project-table-title project-money-cell">{{ row.item.approved_budget|money_es }}</div>
+                            <div class="project-table-title project-money-cell">{{ row.item.display_assigned_budget|money_es }}</div>
+                            <div class="project-funding-cell project-funding-{{ row.item.funding_state }}">
+                                <strong>{{ row.item.financed_amount|money_es }}</strong>
+                                <span>{{ row.item.funding_percentage_display }}% {% trans "financiado" %}</span>
+                                <div class="project-funding-bar" aria-hidden="true">
+                                    <span style="--project-progress: {{ row.item.funding_bar_percentage_css }}%;"></span>
+                                </div>
+                            </div>
+                            <div class="project-table-title project-money-cell">{{ row.item.display_executed_amount|money_es }}</div>
+                            <div class="project-table-title project-money-cell project-available-cell">{{ row.item.display_available_balance|money_es }}</div>
+                            <div class="project-actions project-budget-actions">
+                                {% if row.item.can_assign_financing %}
+                                    <button type="button" class="project-btn project-btn-ghost project-budget-action-main ark"
+                                        data-url="{% url "project-financier-contribution-form" %}" data-target-modal="common-modal"
+                                        data-budget_line_id="{{row.item.id}}"
+                                        aria-label="{% trans 'Gestionar financiación de' %} {{ row.item.full_code|default:'---' }} - {{ row.item.name|default:'Sin nombre' }}">
+                                        {% trans "Gestionar financiación" %}
+                                    </button>
+                                {% elif row.can_add_child %}
+                                    <button type="button" class="project-btn project-btn-ghost project-budget-action-main ark"
+                                        data-url="{% url "project-sub-budget-line-form" %}" data-target-modal="common-modal"
+                                        data-parent_id="{{row.item.id}}">
+                                        <i class="fas fa-plus"></i> {% trans "Subpartida" %}
+                                    </button>
+                                {% endif %}
+                                <button type="button" class="project-icon-btn ark" title="{% trans 'Editar subpartida' %}"
+                                    aria-label="{% trans 'Editar subpartida' %} {{ row.item.full_code|default:'---' }} - {{ row.item.name|default:'Sin nombre' }}"
+                                    data-url="{% url "project-sub-budget-line-form" %}" data-target-modal="common-modal"
+                                    data-obj_id="{{row.item.id}}">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <div class="project-budget-menu">
+                                    <button type="button" class="project-icon-btn project-budget-menu-toggle" title="{% trans 'Más acciones' %}"
+                                        aria-label="{% trans 'Más acciones para' %} {{ row.item.full_code|default:'---' }} - {{ row.item.name|default:'Sin nombre' }}"
+                                        aria-expanded="false">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <div class="project-budget-menu-panel" role="menu">
+                                        <button type="button" class="project-budget-menu-item danger ark" role="menuitem"
+                                            data-url="{% url "project-sub-budget-line-remove" %}" data-obj_id="{{row.item.id}}"
+                                            data-target="div-container"
+                                            data-confirm="{% trans "¿Seguro que quieres eliminar esta subpartida?" %}">
+                                            <i class="fas fa-trash"></i> {% trans "Eliminar" %}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+                <div class="project-budget-table-foot">
+                    {% if budget_line_summary.show_funding_legend %}
+                        <div class="project-budget-legend">
+                            <strong>{% trans "Leyenda de financiación:" %}</strong>
+                            <span><i class="project-funding-dot complete"></i> {% trans "Completa" %}</span>
+                            <span><i class="project-funding-dot partial"></i> {% trans "Parcial" %}</span>
+                            <span><i class="project-funding-dot none"></i> {% trans "Sin financiación" %}</span>
+                        </div>
+                    {% else %}
+                        <span></span>
+                    {% endif %}
+                    <span class="project-budget-currency-note">{% trans "Los importes están expresados en euros (€)" %}</span>
                 </div>
             </div>
-            {% for row in item.tree_sub_lines %}
-                <div class="project-table-row sub-budget-line-row sub-budget-line-level-{{row.level}}" id="row_sub_{{row.item.id}}">
-                    <div class="project-table-main">
-                        <span class="project-table-title"><span class="project-subline-prefix" aria-hidden="true">&#8627;</span>{{ row.item.full_code|default:"---" }} - {{ row.item.name|default:"Sin nombre" }}</span>
-                        {% if row.item.description %}
-                            <div class="project-table-desc">{{ row.item.description }}</div>
-                        {% endif %}
-                    </div>
-                    <div class="project-table-title project-not-applicable" title="{% trans 'Las subpartidas no tienen presupuesto aprobado directo; dependen de la partida principal.' %}">{% trans "No aplica" %}</div>
-                    <div class="project-table-title project-money-cell">{{ row.item.assigned_budget|money_es }}</div>
-                    <div class="project-table-title project-money-cell">{{ row.item.executed_amount|money_es }}</div>
-                    <div class="project-table-title project-money-cell">
-                        <span class="project-money-kicker">{% trans "Saldo disponible" %}</span>
-                        {{ row.item.available_balance|money_es }}
-                    </div>
-                    <div class="project-actions">
-                        {% if row.can_add_child %}
-                            <a class="project-icon-btn ark" title="{% trans 'Añadir subpartida' %}" data-url="{% url "project-sub-budget-line-form" %}"
-                                aria-label="{% trans 'Añadir subpartida a' %} {{ row.item.full_code|default:'---' }} - {{ row.item.name|default:'Sin nombre' }}"
-                                data-target-modal="common-modal" data-parent_id="{{row.item.id}}">
-                                <i class="fas fa-plus"></i>
-                            </a>
-                        {% endif %}
-                        <a class="project-icon-btn ark" title="{% trans 'Editar subpartida' %}" data-url="{% url "project-sub-budget-line-form" %}"
-                            aria-label="{% trans 'Editar subpartida' %} {{ row.item.full_code|default:'---' }} - {{ row.item.name|default:'Sin nombre' }}"
-                            data-target-modal="common-modal" data-obj_id="{{row.item.id}}">
-                            <i class="fas fa-edit"></i>
-                        </a>
-                        <a class="project-icon-btn ark" title="{% trans 'Asignar financiación' %}" data-url="{% url "project-financier-contribution-form" %}"
-                            aria-label="{% trans 'Asignar financiación a' %} {{ row.item.full_code|default:'---' }} - {{ row.item.name|default:'Sin nombre' }}"
-                            data-target-modal="common-modal" data-budget_line_id="{{row.item.id}}">
-                            <i class="fas fa-hand-holding-usd"></i>
-                        </a>
-                        <a class="project-icon-btn danger ark" data-url="{% url "project-sub-budget-line-remove" %}" data-obj_id="{{row.item.id}}"
-                            data-target="div-container" title="{% trans 'Eliminar subpartida' %}"
-                            aria-label="{% trans 'Eliminar subpartida' %} {{ row.item.full_code|default:'---' }} - {{ row.item.name|default:'Sin nombre' }}"
-                            data-confirm="{% trans "¿Seguro que quieres eliminar esta subpartida?" %}">
-                            <i class="fas fa-trash"></i>
-                        </a>
-                    </div>
-                </div>
-            {% endfor %}
-        {% empty %}
-            <div class="project-empty">{% trans "No hay partidas presupuestarias." %}</div>
-        {% endfor %}
-    </div>
+        </div>
+    {% else %}
+        <div class="project-empty project-budget-empty">
+            <strong>{% trans "No hay partidas presupuestarias todavía." %}</strong>
+            <button type="button" class="project-btn project-btn-primary ark" data-url="{% url "project-budget-line-form" %}"
+                data-target-modal="common-modal" data-project_id="{{obj.id}}">
+                <i class="fas fa-plus"></i> {% trans "Nueva partida" %}
+            </button>
+        </div>
+    {% endif %}
 </div>

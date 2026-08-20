@@ -88,8 +88,7 @@ class ProjectModelTests(TestCase):
         self.contribution = FinancierContribution.objects.create(
             project=self.project,
             financier=self.financier,
-            budget_line=self.budget_line,
-            sub_budget_line=self.sub_budget_line,
+            budget_line=self.sub_budget_line,
             amount=Decimal("3000.00"),
             percentage=Decimal("100.00"),
         )
@@ -127,9 +126,7 @@ class ProjectModelTests(TestCase):
             invoice=self.invoice,
             project=self.project,
             activity=self.activity,
-            budget_line=self.budget_line,
-            sub_budget_line=self.sub_budget_line,
-            financier=self.financier,
+            budget_line=self.sub_budget_line,
             allocated_amount=Decimal("1000.00"),
         )
         self.assertEqual(self.invoice.allocated_amount, Decimal("1000.00"))
@@ -143,18 +140,14 @@ class ProjectModelTests(TestCase):
             invoice=self.invoice,
             project=self.project,
             activity=self.activity,
-            budget_line=self.budget_line,
-            sub_budget_line=self.sub_budget_line,
-            financier=self.financier,
+            budget_line=self.sub_budget_line,
             allocated_amount=Decimal("1000.00"),
         )
         allocation = InvoiceAllocation(
             invoice=self.invoice,
             project=self.project,
             activity=self.activity,
-            budget_line=self.budget_line,
-            sub_budget_line=self.sub_budget_line,
-            financier=self.financier,
+            budget_line=self.sub_budget_line,
             allocated_amount=Decimal("500.00"),
         )
         with self.assertRaises(ValidationError):
@@ -165,10 +158,7 @@ class ProjectModelTests(TestCase):
             invoice=self.invoice,
             project=self.project,
             activity=None,
-            budget_line=self.budget_line,
-            sub_budget_line=self.sub_budget_line,
-            financier_contribution=self.contribution,
-            financier=self.financier,
+            budget_line=self.sub_budget_line,
             allocated_amount=Decimal("100.00"),
         )
 
@@ -245,10 +235,7 @@ class ProjectModelTests(TestCase):
             invoice=self.invoice,
             project=self.project,
             activity=self.activity,
-            budget_line=self.budget_line,
-            sub_budget_line=self.sub_budget_line,
-            financier_contribution=self.contribution,
-            financier=self.financier,
+            budget_line=self.sub_budget_line,
             allocated_amount=Decimal("605.00"),
         )
 
@@ -263,10 +250,7 @@ class ProjectModelTests(TestCase):
             invoice=self.invoice,
             project=self.project,
             activity=self.activity,
-            budget_line=self.budget_line,
-            sub_budget_line=self.sub_budget_line,
-            financier_contribution=self.contribution,
-            financier=self.financier,
+            budget_line=self.sub_budget_line,
             allocated_amount=Decimal("1210.00"),
         )
 
@@ -291,20 +275,14 @@ class ProjectModelTests(TestCase):
             invoice=over_invoice,
             project=self.project,
             activity=self.activity,
-            budget_line=self.budget_line,
-            sub_budget_line=self.sub_budget_line,
-            financier_contribution=self.contribution,
-            financier=self.financier,
+            budget_line=self.sub_budget_line,
             allocated_amount=Decimal("70.00"),
         )
         InvoiceAllocation.objects.create(
             invoice=over_invoice,
             project=self.project,
             activity=self.activity,
-            budget_line=self.budget_line,
-            sub_budget_line=self.sub_budget_line,
-            financier_contribution=self.contribution,
-            financier=self.financier,
+            budget_line=self.sub_budget_line,
             allocated_amount=Decimal("55.00"),
         )
 
@@ -401,15 +379,12 @@ class ProjectModelTests(TestCase):
         with self.assertRaises(ValidationError):
             level_5.full_clean()
 
-    def test_invoice_allocation_requires_project_financier(self):
-        other_financier = Financier.objects.create(name="No vinculado")
+    def test_invoice_allocation_requires_leaf_budget_line(self):
         allocation = InvoiceAllocation(
             invoice=self.invoice,
             project=self.project,
             activity=self.activity,
             budget_line=self.budget_line,
-            sub_budget_line=self.sub_budget_line,
-            financier=other_financier,
             allocated_amount=Decimal("100.00"),
         )
         with self.assertRaises(ValidationError):
@@ -507,28 +482,274 @@ class ProjectViewTests(TestCase):
             name="Contratación de personal",
             approved_budget=Decimal("30000.00"),
         )
-        BudgetLine.objects.create(
+        sub_line = BudgetLine.objects.create(
             project=self.project,
             parent=budget_line,
             code="S001",
             name="Técnico de campo",
             approved_budget=Decimal("3000.00"),
         )
+        BudgetLine.objects.create(
+            project=self.project,
+            code="P002",
+            name="Viajes",
+            approved_budget=Decimal("5000.00"),
+        )
+        financier = Financier.objects.create(name="Financiador listado")
+        ProjectFinancier.objects.create(
+            project=self.project,
+            financier=financier,
+            committed_amount=Decimal("2500.00"),
+            granted_amount=Decimal("2500.00"),
+        )
+        FinancierContribution.objects.create(
+            project=self.project,
+            financier=financier,
+            budget_line=sub_line,
+            amount=Decimal("2500.00"),
+            percentage=Decimal("83.33"),
+        )
+        invoice = Invoice.objects.create(
+            provider_tax_id="B12345678",
+            number="F-LIST-001",
+            issue_date=date(2026, 7, 10),
+            concept="Servicios imputados",
+            taxable_base=Decimal("750.00"),
+            taxes=Decimal("0.00"),
+            total_amount=Decimal("750.00"),
+        )
+        InvoiceAllocation.objects.create(
+            invoice=invoice,
+            project=self.project,
+            budget_line=sub_line,
+            allocated_amount=Decimal("750.00"),
+        )
 
         response = self.client.get(reverse("project-budget-lines"), {"obj_id": self.project.id})
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Partidas presupuestarias")
-        self.assertContains(response, "Aprobado en partidas")
-        self.assertContains(response, "Presupuesto modificado / asignado")
-        self.assertContains(response, "Saldo disponible")
-        self.assertContains(response, "Partidas / Subpartidas")
-        self.assertContains(response, "No aplica")
+        self.assertContains(response, "project-budget-items")
+        self.assertContains(response, "PARTIDAS PRESUPUESTARIAS")
+        self.assertContains(response, "2 partidas")
+        self.assertContains(response, "Aprobado")
+        self.assertContains(response, "Asignado")
+        self.assertContains(response, "Ejecutado")
+        self.assertContains(response, "Disponible")
+        self.assertContains(response, "Pendiente de asignar")
+        self.assertNotContains(response, "Asignado a subpartidas")
+        self.assertContains(response, "Financiado")
+        self.assertContains(response, "asignados de")
+        self.assertContains(response, "project-budget-assignment-bar")
+        self.assertContains(response, "project-funding-partial")
+        self.assertContains(response, "project-funding-none")
+        self.assertContains(response, "Gestionar financiación")
+        self.assertContains(response, "project-budget-menu-toggle")
+        self.assertContains(response, "aria-expanded=\"true\"")
         self.assertContains(response, "30.000,00 €")
         self.assertContains(response, "3.000,00 €")
+        self.assertContains(response, "5.000,00 €")
+        self.assertContains(response, "2.250,00 €", count=2)
+        self.assertContains(response, "2.500,00 €", count=2)
         self.assertContains(response, 'aria-label="Editar partida P001 - Contratación de personal"')
-        self.assertContains(response, 'aria-label="Asignar financiación a P001.S001 - Técnico de campo"')
+        self.assertContains(response, 'aria-label="Gestionar financiación de P001.S001 - Técnico de campo"')
+        self.assertContains(response, 'aria-label="Gestionar financiación de P002 - Viajes"')
+        self.assertNotContains(response, 'aria-label="Gestionar financiación de P001 - Contratación de personal"')
         self.assertContains(response, "¿Seguro que quieres eliminar esta partida?")
+
+    def test_budget_line_financed_amounts_sum_leaf_financiers_and_child_lines(self):
+        from .views import get_budget_lines_context
+
+        parent = BudgetLine.objects.create(
+            project=self.project,
+            code="P100",
+            name="Partida padre",
+            approved_budget=Decimal("5000.00"),
+        )
+        child = BudgetLine.objects.create(
+            project=self.project,
+            parent=parent,
+            code="S100",
+            name="Partida hoja",
+            approved_budget=Decimal("5000.00"),
+        )
+        financier_a = Financier.objects.create(name="Financiador A")
+        financier_b = Financier.objects.create(name="Financiador B")
+        ProjectFinancier.objects.create(
+            project=self.project,
+            financier=financier_a,
+            committed_amount=Decimal("5000.00"),
+            granted_amount=Decimal("5000.00"),
+        )
+        ProjectFinancier.objects.create(
+            project=self.project,
+            financier=financier_b,
+            committed_amount=Decimal("5000.00"),
+            granted_amount=Decimal("5000.00"),
+        )
+        FinancierContribution.objects.create(
+            project=self.project,
+            financier=financier_a,
+            budget_line=parent,
+            amount=Decimal("900.00"),
+            percentage=Decimal("18.00"),
+        )
+        FinancierContribution.objects.create(
+            project=self.project,
+            financier=financier_a,
+            budget_line=child,
+            amount=Decimal("100.00"),
+            percentage=Decimal("2.00"),
+        )
+        FinancierContribution.objects.create(
+            project=self.project,
+            financier=financier_a,
+            budget_line=child,
+            amount=Decimal("150.00"),
+            percentage=Decimal("3.00"),
+        )
+        FinancierContribution.objects.create(
+            project=self.project,
+            financier=financier_b,
+            budget_line=child,
+            amount=Decimal("200.00"),
+            percentage=Decimal("4.00"),
+        )
+
+        context = get_budget_lines_context(self.project)
+        parent_row = next(item for item in context["budget_lines"] if item.id == parent.id)
+        child_row = parent_row.tree_sub_lines[0]["item"]
+
+        self.assertEqual(child_row.financed_amounts_by_financier[financier_a.id], Decimal("250.00"))
+        self.assertEqual(child_row.financed_amounts_by_financier[financier_b.id], Decimal("200.00"))
+        self.assertEqual(child_row.financed_amount, Decimal("450.00"))
+        self.assertEqual(parent_row.financed_amounts_by_financier[financier_a.id], Decimal("250.00"))
+        self.assertEqual(parent_row.financed_amounts_by_financier[financier_b.id], Decimal("200.00"))
+        self.assertEqual(parent_row.financed_amount, Decimal("450.00"))
+
+    def test_financier_contribution_modal_shows_financial_summary_and_registered_contributions(self):
+        budget_line = BudgetLine.objects.create(
+            project=self.project,
+            code="P001",
+            name="Técnico de Laboratorio",
+            approved_budget=Decimal("15000.00"),
+        )
+        financier_1 = Financier.objects.create(name="Gobierno de Canarias")
+        financier_2 = Financier.objects.create(name="Cabildo de Tenerife")
+        financier_3 = Financier.objects.create(name="Fondos propios")
+        for financier in [financier_1, financier_2, financier_3]:
+            ProjectFinancier.objects.create(
+                project=self.project,
+                financier=financier,
+                committed_amount=Decimal("15000.00"),
+                granted_amount=Decimal("15000.00"),
+            )
+        FinancierContribution.objects.create(
+            project=self.project,
+            financier=financier_1,
+            budget_line=budget_line,
+            amount=Decimal("5000.00"),
+            percentage=Decimal("33.33"),
+            notes="Financiación inicial",
+        )
+        FinancierContribution.objects.create(
+            project=self.project,
+            financier=financier_2,
+            budget_line=budget_line,
+            amount=Decimal("2500.00"),
+            percentage=Decimal("16.67"),
+        )
+        FinancierContribution.objects.create(
+            project=self.project,
+            financier=financier_3,
+            budget_line=budget_line,
+            amount=Decimal("1000.00"),
+            percentage=Decimal("6.67"),
+            notes="Complemento",
+        )
+
+        response = self.client.get(reverse("project-financier-contribution-form"), {"budget_line_id": budget_line.id})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "project-financier-allocation-modal")
+        self.assertContains(response, "APORTACIÓN DE FINANCIADOR A PARTIDA")
+        self.assertContains(response, "P001 · Técnico de Laboratorio")
+        self.assertContains(response, "aria-label=\"Cerrar\"")
+        self.assertContains(response, "RESUMEN FINANCIERO")
+        self.assertContains(response, "15.000,00 €")
+        self.assertContains(response, "8.500,00 €", count=2)
+        self.assertContains(response, "6.500,00 €", count=2)
+        self.assertContains(response, "56,7 % financiado")
+        self.assertContains(response, "role=\"progressbar\"")
+        self.assertContains(response, "APORTACIONES REGISTRADAS")
+        self.assertContains(response, "Gobierno de Canarias")
+        self.assertContains(response, "Financiación inicial")
+        self.assertContains(response, "Cabildo de Tenerife")
+        self.assertContains(response, "—")
+        self.assertContains(response, "Fondos propios")
+        self.assertContains(response, "Total aportado")
+        self.assertContains(response, "NUEVA APORTACIÓN")
+        self.assertContains(response, "Añadir aportación")
+        self.assertContains(response, "Disponible por aportar")
+        self.assertContains(response, "project-contribution-error")
+        self.assertNotContains(response, "Presupuesto partida / subpartida")
+
+    def test_new_sub_budget_line_receives_parent_financing_and_invoice_allocations(self):
+        budget_line = BudgetLine.objects.create(
+            project=self.project,
+            code="P010",
+            name="Partida con financiación",
+            approved_budget=Decimal("10000.00"),
+        )
+        financier = Financier.objects.create(name="Financiador padre")
+        ProjectFinancier.objects.create(
+            project=self.project,
+            financier=financier,
+            committed_amount=Decimal("4000.00"),
+            granted_amount=Decimal("4000.00"),
+        )
+        contribution = FinancierContribution.objects.create(
+            project=self.project,
+            financier=financier,
+            budget_line=budget_line,
+            amount=Decimal("4000.00"),
+            percentage=Decimal("40.00"),
+        )
+        invoice = Invoice.objects.create(
+            provider_tax_id="B87654321",
+            number="F-HEREDA-001",
+            issue_date=date(2026, 7, 12),
+            concept="Factura imputada al padre",
+            taxable_base=Decimal("1000.00"),
+            taxes=Decimal("0.00"),
+            total_amount=Decimal("1000.00"),
+        )
+        allocation = InvoiceAllocation.objects.create(
+            invoice=invoice,
+            project=self.project,
+            budget_line=budget_line,
+            allocated_amount=Decimal("1000.00"),
+        )
+
+        response = self.client.get(reverse("project-sub-budget-line-form"), {"budget_line_id": budget_line.id})
+
+        self.assertEqual(response.status_code, 200)
+        child = budget_line.child_lines.get()
+        contribution.refresh_from_db()
+        allocation.refresh_from_db()
+        self.assertEqual(contribution.budget_line, child)
+        self.assertEqual(allocation.budget_line, child)
+        self.assertEqual(child.approved_budget, Decimal("4000.00"))
+        self.assertEqual(contribution.percentage, Decimal("100.00"))
+
+    def test_new_budget_line_form_reuses_empty_draft(self):
+        first_response = self.client.get(reverse("project-budget-line-form"), {"project_id": self.project.id})
+        second_response = self.client.get(reverse("project-budget-line-form"), {"project_id": self.project.id})
+
+        self.assertEqual(first_response.status_code, 200)
+        self.assertEqual(second_response.status_code, 200)
+        budget_lines = BudgetLine.objects.filter(project=self.project, parent__isnull=True)
+        self.assertEqual(budget_lines.count(), 1)
+        self.assertContains(second_response, 'data-obj-id="{}"'.format(budget_lines.get().id))
 
     def test_project_form_hides_execution_date(self):
         response = self.client.get(reverse("project-form"), {"obj_id": self.project.id})
@@ -626,8 +847,6 @@ class ProjectInvoiceDashboardTests(TestCase):
             project=self.project,
             activity=self.activity,
             budget_line=self.budget_line,
-            financier_contribution=self.contribution,
-            financier=self.financier,
             allocated_amount=Decimal("121.00"),
         )
 
@@ -820,8 +1039,6 @@ class ProjectInvoiceDashboardTests(TestCase):
             project=self.project,
             activity=self.activity,
             budget_line=self.budget_line,
-            financier_contribution=self.contribution,
-            financier=self.financier,
             allocated_amount=Decimal("121.00"),
         )
         from .views import get_recent_invoices
@@ -1009,7 +1226,6 @@ class ProjectInvoiceDashboardTests(TestCase):
             "invoice_id": invoice.id,
             "project": self.project.id,
             "budget_line": self.budget_line.id,
-            "financier_contribution": self.contribution.id,
             "allocated_amount": "200.00",
             "activity": "",
         })
@@ -1018,9 +1234,6 @@ class ProjectInvoiceDashboardTests(TestCase):
         allocation = InvoiceAllocation.objects.get(invoice=invoice)
         self.assertEqual(allocation.project, self.project)
         self.assertEqual(allocation.budget_line, self.budget_line)
-        self.assertIsNone(allocation.sub_budget_line)
-        self.assertEqual(allocation.financier_contribution, self.contribution)
-        self.assertEqual(allocation.financier, self.financier)
         self.assertIsNone(allocation.activity)
         self.assertEqual(allocation.allocated_amount, Decimal("200.00"))
 
@@ -1039,7 +1252,6 @@ class ProjectInvoiceDashboardTests(TestCase):
             "invoice_id": invoice.id,
             "project": self.project.id,
             "budget_line": self.budget_line.id,
-            "financier_contribution": self.contribution.id,
             "allocation_mode": "percentage",
             "allocated_percentage": "50.00",
             "activity": self.activity.id,
@@ -1049,6 +1261,76 @@ class ProjectInvoiceDashboardTests(TestCase):
         allocation = InvoiceAllocation.objects.get(invoice=invoice)
         self.assertEqual(allocation.activity, self.activity)
         self.assertEqual(allocation.allocated_amount, Decimal("121.00"))
+
+    def test_invoice_allocation_wizard_lists_only_leaf_budget_lines(self):
+        parent = BudgetLine.objects.create(
+            project=self.project,
+            code="2",
+            name="Partida padre no seleccionable",
+            approved_budget=Decimal("500.00"),
+        )
+        child = BudgetLine.objects.create(
+            project=self.project,
+            parent=parent,
+            code="2.1",
+            name="Partida hija seleccionable",
+            approved_budget=Decimal("500.00"),
+        )
+        invoice = Invoice.objects.create(
+            provider_tax_id="B88888888",
+            number="F-LEAF",
+            issue_date=date(2026, 6, 5),
+            concept="Factura hoja",
+            taxable_base=Decimal("100.00"),
+            taxes=Decimal("21.00"),
+            total_amount=Decimal("121.00"),
+        )
+
+        response = self.client.get(reverse("invoice-allocation-wizard"), {"invoice_id": invoice.id})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Partida hija seleccionable")
+        self.assertContains(response, 'value="{}"'.format(child.id))
+        self.assertNotContains(response, 'value="{}"'.format(parent.id))
+
+    def test_invoice_allocation_wizard_rejects_amount_over_budget_line_available(self):
+        previous_invoice = Invoice.objects.create(
+            provider_tax_id="B99999999",
+            number="F-PREV",
+            issue_date=date(2026, 6, 6),
+            concept="Factura previa",
+            taxable_base=Decimal("900.00"),
+            taxes=Decimal("0.00"),
+            total_amount=Decimal("900.00"),
+        )
+        InvoiceAllocation.objects.create(
+            invoice=previous_invoice,
+            project=self.project,
+            activity=self.activity,
+            budget_line=self.budget_line,
+            allocated_amount=Decimal("900.00"),
+        )
+        invoice = Invoice.objects.create(
+            provider_tax_id="B10101010",
+            number="F-OVER-LINE",
+            issue_date=date(2026, 6, 7),
+            concept="Factura supera partida",
+            taxable_base=Decimal("500.00"),
+            taxes=Decimal("0.00"),
+            total_amount=Decimal("500.00"),
+        )
+
+        response = self.client.get(reverse("invoice-allocation-save"), {
+            "invoice_id": invoice.id,
+            "project": self.project.id,
+            "budget_line": self.budget_line.id,
+            "allocation_mode": "amount",
+            "allocated_amount": "150.00",
+            "activity": "",
+        })
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(InvoiceAllocation.objects.filter(invoice=invoice).count(), 0)
 
     def test_invoice_allocation_wizard_rejects_amount_over_pending_invoice_total(self):
         invoice = Invoice.objects.create(
@@ -1065,8 +1347,6 @@ class ProjectInvoiceDashboardTests(TestCase):
             project=self.project,
             activity=self.activity,
             budget_line=self.budget_line,
-            financier_contribution=self.contribution,
-            financier=self.financier,
             allocated_amount=Decimal("300.00"),
         )
 
@@ -1074,7 +1354,6 @@ class ProjectInvoiceDashboardTests(TestCase):
             "invoice_id": invoice.id,
             "project": self.project.id,
             "budget_line": self.budget_line.id,
-            "financier_contribution": self.contribution.id,
             "allocation_mode": "amount",
             "allocated_amount": "100.00",
             "activity": "",
