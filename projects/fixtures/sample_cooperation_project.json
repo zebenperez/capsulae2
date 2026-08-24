@@ -105,8 +105,7 @@
       "code": "1",
       "name": "Personal",
       "description": "Costes de personal técnico y facilitadores.",
-      "approved_budget": "60000.00",
-      "modified_budget": "0.00"
+      "approved_budget": "60000.00"
     }
   },
   {
@@ -117,8 +116,7 @@
       "code": "2",
       "name": "Actividades",
       "description": "Materiales, logística y servicios de actividades.",
-      "approved_budget": "60000.00",
-      "modified_budget": "0.00"
+      "approved_budget": "60000.00"
     }
   },
   {
@@ -231,7 +229,6 @@
       "project": 1,
       "financier": 1,
       "budget_line": 2,
-      "sub_budget_line": 2,
       "amount": "15000.00",
       "percentage": "75.00",
       "notes": "Financiación principal para materiales."
@@ -244,7 +241,6 @@
       "project": 1,
       "financier": 2,
       "budget_line": 2,
-      "sub_budget_line": 2,
       "amount": "5000.00",
       "percentage": "25.00",
       "notes": "Cofinanciación de materiales."
@@ -276,8 +272,6 @@
       "project": 1,
       "activity": 1,
       "budget_line": 2,
-      "sub_budget_line": 2,
-      "financier": 1,
       "allocated_amount": "3025.00",
       "allocated_percentage": "100.00",
       "allocation_date": "2026-04-01",

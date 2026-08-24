@@ -5,6 +5,7 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="description" content="">
+        <meta name="csrf-token" content="{{ csrf_token }}">
         <title>Fundec</title>
 	    <link rel="icon" type="image/x-icon" href="/static/imgs/favicon.ico">
 
@@ -29,14 +30,12 @@
         <!-- SweetAlert2 -->
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-        <!-- CKeditor -->
-        <script id="ckeditor-script" src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
-
         <!-- Shidix -->
         <link rel="stylesheet" href="{% static 'css/styles.css' %}" >
         <link rel="stylesheet" href="{% static 'css/new-style.css' %}" >
         <link rel="stylesheet" href="{% static 'css/dashboard.css' %}" >
         <link rel="stylesheet" href="{% static 'css/login.css' %}" >
+        <script src="{% static "js/tiptap-editor.bundle.js" %}"></script>
         <script src="{% static "js/common.js" %}"></script>
         <script src="{% static "js/utils.js" %}"></script>
 

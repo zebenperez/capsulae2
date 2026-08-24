@@ -71,6 +71,28 @@ function getAjaxErrorMessage(e) {
     return e && e.responseText ? e.responseText : "No se pudo completar la operación.";
 }
 
+function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie !== "") {
+        var cookies = document.cookie.split(";");
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + "=")) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function getCsrfToken() {
+    var meta = document.querySelector('meta[name="csrf-token"]');
+    if (meta && meta.content)
+        return meta.content;
+    return getCookie("csrftoken");
+}
+
 function refreshProjectTabCounts() {
     var tabs = $(".project-tabs[data-project-id]").first();
     if (!tabs.length)
@@ -98,10 +120,28 @@ function refreshProjectTabCounts() {
     });
 }
 
-function ajaxGet(url, datas, target, modal_target)
+function refreshHtmlTarget(url, target)
+{
+    if (!url || !target)
+        return;
+
+    $.ajax({
+        url: url,
+        type: "GET",
+        cache: false,
+        dataType: "html",
+        success: function(data){
+            if (data != "")
+                $("#" + target).html(data);
+            refreshProjectTabCounts();
+        }
+    });
+}
+
+function ajaxGet(url, datas, target, modal_target, refresh_url, refresh_target)
 {
     setWait();
-    $.ajax({
+    return $.ajax({
         url : url,
         type : 'GET',
         data : datas,
@@ -121,6 +161,7 @@ function ajaxGet(url, datas, target, modal_target)
                 if (target != "")
                     $('#'+target).html(data);
             refreshProjectTabCounts();
+            refreshHtmlTarget(refresh_url, refresh_target);
         },
         error : function(e){showError(getAjaxErrorMessage(e));},
         complete : function(){unsetWait();}
@@ -245,7 +286,7 @@ function ajaxPostAutosave(url, datas, target)
         data : datas,
         dataType : 'html',
         cache : false,
-        beforeSend : function(){},
+        beforeSend : function(xhr){xhr.setRequestHeader("X-CSRFToken", getCsrfToken());},
         success : function(data){
             if (target)
                 $("#"+target).empty();
@@ -255,6 +296,54 @@ function ajaxPostAutosave(url, datas, target)
         complete : function(){$("body").css("cursor", "default");}
     }); 
 };
+
+function buildAutosaveDataFromField(obj) {
+    var ref_field = obj.data("ref-field") ? obj.data("ref-field") : "pk";
+    var datas = {
+        "model_name": obj.data("model-name"),
+        "obj_id": obj.data("obj-id"),
+        "field": obj.attr("name"),
+        "value": obj.val(),
+        "ref_field": ref_field
+    };
+    if (obj.data("lang"))
+        datas["lang"] = obj.data("lang");
+    return datas;
+}
+
+function ajaxPostSaveField(field, options) {
+    options = options || {};
+    var obj = $(field);
+    return $.ajax({
+        url : obj.data("url"),
+        type : "POST",
+        data : buildAutosaveDataFromField(obj),
+        dataType : "html",
+        cache : false,
+        beforeSend : function(xhr){xhr.setRequestHeader("X-CSRFToken", getCsrfToken());},
+        success : function(){
+            if (window.CapsulaeTiptap)
+                window.CapsulaeTiptap.markSaved(field);
+            if (!options.silent)
+                showInfo("Saved!");
+        }
+    });
+}
+
+function hideClosestModal(obj) {
+    var modal = obj.closest(".modal");
+    if (!modal.length)
+        return;
+
+    if (window.bootstrap && window.bootstrap.Modal) {
+        var instance = window.bootstrap.Modal.getInstance(modal[0]) || new window.bootstrap.Modal(modal[0]);
+        instance.hide();
+        return;
+    }
+
+    if (modal.modal)
+        modal.modal("hide");
+}
 
 
 function ajaxGetRemove(url, datas, target)
@@ -468,33 +557,11 @@ function showAlert(body, close) {
     }
 }
 
-function loadCkeditor(callback) {
-    if (window.CKEDITOR) {
-        callback();
-        return;
-    }
-
-    var scriptId = "ckeditor-script";
-    var script = document.getElementById(scriptId);
-    if (!script) {
-        script = document.createElement("script");
-        script.id = scriptId;
-        script.src = "https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js";
-        document.head.appendChild(script);
-    }
-    script.addEventListener("load", callback, { once: true });
-}
-
 function activeEditor(obj) {
-    var id = obj.attr("id");
-    var ref = obj.data("ref");
-    loadCkeditor(function(){
-        if (!document.getElementById(id))
-            return;
-        if (CKEDITOR.instances[id])
-            CKEDITOR.instances[id].destroy(true);
-        CKEDITOR.replace(id).on('change', function(){$("#"+ref).val(this.getData()).change();});
-    });
+    var element = obj && obj.jquery ? obj[0] : obj;
+    if (!element || !window.CapsulaeTiptap)
+        return;
+    window.CapsulaeTiptap.initTextarea(element);
 }
 
 function arkKeyUp(obj){
@@ -542,8 +609,59 @@ $(document).ready(()=>{
         e.preventDefault();
     });
 
+    $("body").on("tiptap:save", ".tiptap-save-field", function(e){
+        ajaxPostSaveField(this, {"silent": true}).fail(function(error){
+            showError(getAjaxErrorMessage(error));
+        });
+        e.preventDefault();
+    });
+
+    $("body").on("click", ".save-tiptap-fields", function(e){
+        var obj = $(this);
+        runWithOptionalConfirm(obj, function(){
+            var modal = obj.closest(".project-modal");
+            var root = modal.length ? modal[0] : document;
+            if (window.CapsulaeTiptap)
+                window.CapsulaeTiptap.syncAll(root, false);
+
+            var fields = modal.find(".tiptap-save-field");
+            var requests = [];
+            fields.each(function(){
+                requests.push(ajaxPostSaveField(this, {"silent": true}));
+            });
+
+            setWait();
+            $.when.apply($, requests).done(function(){
+                showInfo("Saved!");
+                hideClosestModal(obj);
+
+                var url = obj.data("url");
+                var target = obj.data("target") ? obj.data("target") : "";
+                var target_modal = obj.data("target-modal") ? obj.data("target-modal") : "";
+                var datas = {};
+                var args = obj.data();
+                for(var i in args)
+                    if (i != "url")
+                        datas[i] = args[i]
+                ajaxGet(url, datas, target, target_modal);
+            }).fail(function(error){
+                showError(getAjaxErrorMessage(error));
+            }).always(function(){
+                unsetWait();
+            });
+        });
+        e.preventDefault();
+        e.stopImmediatePropagation();
+    });
+
     $("body").on("click", ".ark", function(e){
         var obj = $(this);
+        if (obj.data("loading")) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            return;
+        }
+        obj.data("loading", true);
         runWithOptionalConfirm(obj, function(){
             url = obj.data("url");
             var target = "";
@@ -558,7 +676,11 @@ $(document).ready(()=>{
             for(var i in args)
                 if (i != "url")
                     datas[i] = args[i]
-            ajaxGet(url, datas, target, target_modal);
+            var request = ajaxGet(url, datas, target, target_modal, obj.data("refresh-url"), obj.data("refresh-target"));
+            if (request && request.always)
+                request.always(function(){ obj.removeData("loading"); });
+            else
+                obj.removeData("loading");
             if (obj.data("show"))
                 $("#" + obj.data("show")).show();
             if (obj.data("hide"))
@@ -567,19 +689,73 @@ $(document).ready(()=>{
             e.preventDefault();
             e.stopImmediatePropagation();
         });
+        if (obj.data("confirm"))
+            obj.removeData("loading");
+        e.preventDefault();
+        e.stopImmediatePropagation();
+    });
+
+    $("body").on("click", ".invoice-allocation-open", function(e){
+        var obj = $(this);
+        if (obj.data("loading")) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            return;
+        }
+        obj.data("loading", true);
+        setWait();
+        $.ajax({
+            url: obj.data("url"),
+            type: "GET",
+            data: {invoice_id: obj.data("invoice-id")},
+            cache: false,
+            dataType: "html",
+            success: function(data){
+                if ($(data).filter(".invoice-allocation-wizard").length == 0 && $(data).find(".invoice-allocation-wizard").length == 0) {
+                    showError("No se pudo cargar el formulario de imputación.");
+                    return;
+                }
+                $("#common-modal-body").html(data);
+                $("#common-modal").modal("show");
+            },
+            error: function(error){
+                showError(getAjaxErrorMessage(error));
+            },
+            complete: function(){
+                obj.removeData("loading");
+                unsetWait();
+            }
+        });
         e.preventDefault();
         e.stopImmediatePropagation();
     });
 
     $("body").on("click", ".ajax-form-get", function(e){
         var obj = $(this);
+        if (obj.data("loading")) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            return;
+        }
         var form = $("#" + obj.data("form"));
         var datas = {};
+        var modal = obj.closest(".project-modal");
+        var modalError = modal.find(".project-contribution-error, .invoice-wizard-error").first();
+        if (modalError.length)
+            modalError.attr("hidden", true).text("");
         form.find("input, select, textarea").each(function(){
             var field = $(this);
+            if ((field.attr("type") == "radio" || field.attr("type") == "checkbox") && !field.prop("checked"))
+                return;
             if (field.attr("name"))
                 datas[field.attr("name")] = field.val();
         });
+        if (form.data("invoice-id") && !datas.invoice_id)
+            datas.invoice_id = form.data("invoice-id");
+        var originalHtml = obj.html();
+        obj.data("loading", true);
+        obj.prop("disabled", true);
+        obj.html(obj.data("loading-text") || "Guardando...");
         setWait();
         $.ajax({
             url: obj.data("url"),
@@ -590,12 +766,29 @@ $(document).ready(()=>{
             success: function(data){
                 if (obj.data("target"))
                     $("#" + obj.data("target")).html(data);
+                if (obj.data("target-modal") && data != "")
+                {
+                    $("#" + obj.data("target-modal") + "-body").html(data);
+                    $("#" + obj.data("target-modal")).modal("show");
+                }
                 if (obj.data("dismiss-modal"))
                     $("#" + obj.data("dismiss-modal")).modal("hide");
                 refreshProjectTabCounts();
+                refreshHtmlTarget(obj.data("refresh-url"), obj.data("refresh-target"));
             },
-            error: function(e){showError(getAjaxErrorMessage(e));},
-            complete: function(){unsetWait();}
+            error: function(e){
+                var message = getAjaxErrorMessage(e);
+                if (modalError.length)
+                    modalError.removeAttr("hidden").text(message);
+                else
+                    showError(message);
+            },
+            complete: function(){
+                obj.removeData("loading");
+                obj.prop("disabled", false);
+                obj.html(originalHtml);
+                unsetWait();
+            }
         });
         e.preventDefault();
         e.stopImmediatePropagation();
@@ -607,6 +800,61 @@ $(document).ready(()=>{
             modal.addClass("show-new-financier");
         else
             modal.removeClass("show-new-financier");
+    });
+
+    function setBudgetChildrenVisibility(parentId, visible) {
+        $(".project-budget-items [data-parent-id='" + parentId + "']").each(function(){
+            var row = $(this);
+            var rowId = row.data("budget-row-id");
+            if (visible) {
+                row.removeClass("is-budget-hidden");
+                if (row.find(".project-budget-collapse").first().attr("aria-expanded") == "true")
+                    setBudgetChildrenVisibility(rowId, true);
+            }
+            else {
+                row.addClass("is-budget-hidden");
+                setBudgetChildrenVisibility(rowId, false);
+            }
+        });
+    }
+
+    function closeBudgetMenus() {
+        $(".project-budget-menu.is-open").removeClass("is-open")
+            .find(".project-budget-menu-toggle").attr("aria-expanded", "false");
+    }
+
+    $("body").on("click", ".project-budget-collapse", function(e){
+        var obj = $(this);
+        var expanded = obj.attr("aria-expanded") == "true";
+        obj.attr("aria-expanded", expanded ? "false" : "true");
+        setBudgetChildrenVisibility(obj.data("budget-collapse"), !expanded);
+        e.preventDefault();
+        e.stopPropagation();
+    });
+
+    $("body").on("click", ".project-budget-menu-toggle", function(e){
+        var menu = $(this).closest(".project-budget-menu");
+        var shouldOpen = !menu.hasClass("is-open");
+        closeBudgetMenus();
+        if (shouldOpen) {
+            menu.addClass("is-open");
+            $(this).attr("aria-expanded", "true");
+        }
+        e.preventDefault();
+        e.stopPropagation();
+    });
+
+    $("body").on("click", ".project-budget-menu-panel", function(e){
+        e.stopPropagation();
+    });
+
+    $("body").on("click", function(){
+        closeBudgetMenus();
+    });
+
+    $(document).on("keydown", function(e){
+        if (e.key == "Escape")
+            closeBudgetMenus();
     });
 
     $("body").on("click", ".confirm-link", function(e){

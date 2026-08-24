@@ -366,12 +366,6 @@ class BudgetLine(models.Model):
         decimal_places=MONEY_DECIMAL_PLACES,
         default=Decimal("0.00"),
     )
-    modified_budget = models.DecimalField(
-        "Presupuesto modificado",
-        max_digits=MONEY_MAX_DIGITS,
-        decimal_places=MONEY_DECIMAL_PLACES,
-        default=Decimal("0.00"),
-    )
 
     @property
     def is_root(self):
@@ -403,7 +397,7 @@ class BudgetLine(models.Model):
 
     @property
     def effective_budget(self):
-        return self.modified_budget if self.modified_budget else self.approved_budget
+        return self.approved_budget
 
     @property
     def assigned_budget(self):
@@ -415,7 +409,7 @@ class BudgetLine(models.Model):
 
     @property
     def direct_executed_amount(self):
-        return money_sum(self.sub_invoice_allocations.all(), "allocated_amount")
+        return money_sum(self.invoice_allocations.all(), "allocated_amount")
 
     def descendants(self):
         items = []
@@ -427,7 +421,7 @@ class BudgetLine(models.Model):
     @property
     def executed_amount(self):
         descendant_total = money_sum(
-            InvoiceAllocation.objects.filter(sub_budget_line__in=self.descendants()),
+            InvoiceAllocation.objects.filter(budget_line__in=self.descendants()),
             "allocated_amount",
         )
         return self.direct_executed_amount + descendant_total
@@ -439,6 +433,12 @@ class BudgetLine(models.Model):
     @property
     def available_balance(self):
         return self.effective_budget - self.direct_executed_amount - self.child_assigned_budget
+
+    @property
+    def assigned_budget_display(self):
+        if self.has_children():
+            return self.child_assigned_budget
+        return self.approved_budget
 
     def __str__(self):
         return "%s - %s" % (self.full_code, self.name)
@@ -489,7 +489,6 @@ class BudgetLine(models.Model):
             child_budget_total = money_sum(self.child_lines.all(), "approved_budget")
             if child_budget_total > self.effective_budget:
                 errors["approved_budget"] = "El presupuesto de la partida no puede ser inferior a la suma de sus subpartidas de primer nivel."
-                errors["modified_budget"] = "El presupuesto de la partida no puede ser inferior a la suma de sus subpartidas de primer nivel."
         if errors:
             raise ValidationError(errors)
 
@@ -500,7 +499,6 @@ class BudgetLine(models.Model):
         indexes = [models.Index(fields=["project", "code"]), models.Index(fields=["parent", "code"])]
         constraints = [
             models.CheckConstraint(check=Q(approved_budget__gte=0), name="budget_line_approved_gte_0"),
-            models.CheckConstraint(check=Q(modified_budget__gte=0), name="budget_line_modified_gte_0"),
         ]
 
 
@@ -612,19 +610,9 @@ class FinancierContribution(models.Model):
     )
     budget_line = models.ForeignKey(
         BudgetLine,
-        verbose_name="Partida",
+        verbose_name="Partida / Subpartida",
         on_delete=models.PROTECT,
-        blank=True,
-        null=True,
         related_name="financier_contributions",
-    )
-    sub_budget_line = models.ForeignKey(
-        BudgetLine,
-        verbose_name="Subpartida",
-        on_delete=models.PROTECT,
-        blank=True,
-        null=True,
-        related_name="sub_financier_contributions",
     )
     amount = models.DecimalField("Importe", max_digits=MONEY_MAX_DIGITS, decimal_places=MONEY_DECIMAL_PLACES)
     percentage = models.DecimalField(
@@ -638,8 +626,6 @@ class FinancierContribution(models.Model):
 
     @property
     def allocated_to_invoices(self):
-        if self.pk:
-            return money_sum(self.invoice_allocations.all(), "allocated_amount")
         return Decimal("0.00")
 
     @property
@@ -649,15 +635,8 @@ class FinancierContribution(models.Model):
     def clean(self):
         super().clean()
         errors = {}
-        if not self.budget_line and not self.sub_budget_line:
-            errors["budget_line"] = "Debe indicarse al menos una partida o subpartida."
         if self.budget_line and self.budget_line.project_id != self.project_id:
-            errors["budget_line"] = "La partida debe pertenecer al proyecto."
-        if self.sub_budget_line:
-            if self.sub_budget_line.project_id != self.project_id:
-                errors["sub_budget_line"] = "La subpartida debe pertenecer al proyecto."
-            if self.budget_line and self.sub_budget_line.root_line.id != self.budget_line_id:
-                errors["sub_budget_line"] = "La subpartida debe pertenecer a la partida indicada."
+            errors["budget_line"] = "La partida o subpartida debe pertenecer al proyecto."
         relation = ProjectFinancier.objects.filter(project=self.project, financier=self.financier).first()
         if not relation:
             errors["financier"] = "El financiador debe estar vinculado al proyecto."
@@ -667,13 +646,12 @@ class FinancierContribution(models.Model):
                 existing_amount = FinancierContribution.objects.get(pk=self.pk).amount
             if self.amount > relation.available_amount + existing_amount:
                 errors["amount"] = "El financiador no puede aportar más de su importe comprometido."
-        budget_limit = self.sub_budget_line.effective_budget if self.sub_budget_line else self.budget_line.effective_budget if self.budget_line else None
+        budget_limit = self.budget_line.effective_budget if self.budget_line else None
+        if self.budget_line and self.budget_line.child_lines.exists():
+            errors["budget_line"] = "Solo puede asignarse financiación a partidas sin subpartidas."
         if budget_limit is not None and self.amount:
             contribution_filter = self.project.financier_contributions.exclude(pk=self.pk)
-            if self.sub_budget_line:
-                current_budget_total = money_sum(contribution_filter.filter(sub_budget_line=self.sub_budget_line), "amount")
-            else:
-                current_budget_total = money_sum(contribution_filter.filter(budget_line=self.budget_line, sub_budget_line__isnull=True), "amount")
+            current_budget_total = money_sum(contribution_filter.filter(budget_line=self.budget_line), "amount")
             if current_budget_total + self.amount > budget_limit:
                 errors["amount"] = "La aportación no puede superar el presupuesto aprobado."
         if errors:
@@ -688,17 +666,12 @@ class FinancierContribution(models.Model):
         indexes = [
             models.Index(fields=["project", "financier"]),
             models.Index(fields=["budget_line"]),
-            models.Index(fields=["sub_budget_line"]),
         ]
         constraints = [
             models.CheckConstraint(check=Q(amount__gte=0), name="financier_contribution_amount_gte_0"),
             models.CheckConstraint(
                 check=Q(percentage__gte=0) & Q(percentage__lte=100),
                 name="financier_contribution_pct_between_0_100",
-            ),
-            models.CheckConstraint(
-                check=Q(budget_line__isnull=False) | Q(sub_budget_line__isnull=False),
-                name="financier_contribution_has_budget_target",
             ),
         ]
 
@@ -900,29 +873,7 @@ class InvoiceAllocation(models.Model):
     )
     budget_line = models.ForeignKey(
         BudgetLine,
-        verbose_name="Partida",
-        on_delete=models.PROTECT,
-        related_name="invoice_allocations",
-    )
-    sub_budget_line = models.ForeignKey(
-        BudgetLine,
-        verbose_name="Subpartida",
-        on_delete=models.PROTECT,
-        blank=True,
-        null=True,
-        related_name="sub_invoice_allocations",
-    )
-    financier_contribution = models.ForeignKey(
-        FinancierContribution,
-        verbose_name="Aportación de financiador",
-        on_delete=models.PROTECT,
-        blank=True,
-        null=True,
-        related_name="invoice_allocations",
-    )
-    financier = models.ForeignKey(
-        Financier,
-        verbose_name="Financiador",
+        verbose_name="Partida / Subpartida",
         on_delete=models.PROTECT,
         related_name="invoice_allocations",
     )
@@ -943,48 +894,17 @@ class InvoiceAllocation(models.Model):
         if self.activity and self.project and self.activity.project_id != self.project_id:
             errors["activity"] = "La actividad debe pertenecer al proyecto."
         if self.budget_line and self.budget_line.project_id != self.project_id:
-            errors["budget_line"] = "La partida debe pertenecer al proyecto."
-        if self.sub_budget_line:
-            if self.sub_budget_line.project_id != self.project_id:
-                errors["sub_budget_line"] = "La subpartida debe pertenecer al proyecto."
-            if self.budget_line and self.sub_budget_line.root_line.id != self.budget_line_id:
-                errors["sub_budget_line"] = "La partida debe ser la partida padre de la subpartida."
-        if self.financier and self.project:
-            if not ProjectFinancier.objects.filter(project=self.project, financier=self.financier).exists():
-                errors["financier"] = "El financiador debe pertenecer al proyecto."
-        if self.financier_contribution:
-            contribution_target = self.financier_contribution.sub_budget_line or self.financier_contribution.budget_line
-            if self.financier_contribution.project_id != self.project_id:
-                errors["financier_contribution"] = "La aportación debe pertenecer al proyecto."
-            if self.financier_contribution.financier_id != self.financier_id:
-                errors["financier_contribution"] = "La aportación debe pertenecer al financiador indicado."
-            if contribution_target and contribution_target.id != (self.sub_budget_line_id or self.budget_line_id):
-                errors["financier_contribution"] = "La aportación debe pertenecer a la partida seleccionada."
+            errors["budget_line"] = "La partida o subpartida debe pertenecer al proyecto."
+        if self.budget_line and self.budget_line.child_lines.exists():
+            errors["budget_line"] = "Solo pueden imputarse facturas a partidas sin subpartidas."
         if self.invoice_id and self.allocated_amount:
             current_total = money_sum(self.invoice.allocations.exclude(pk=self.pk), "allocated_amount")
             if current_total + self.allocated_amount > self.invoice.total_amount:
                 errors["allocated_amount"] = "La suma de imputaciones no puede superar el importe total de la factura."
-        if self.sub_budget_line_id and self.allocated_amount:
-            current_sub_total = money_sum(self.sub_budget_line.sub_invoice_allocations.exclude(pk=self.pk), "allocated_amount")
-            if current_sub_total + self.allocated_amount + self.sub_budget_line.child_assigned_budget > self.sub_budget_line.effective_budget:
-                errors["allocated_amount"] = "No puede imputarse más dinero del disponible en la subpartida."
-        elif self.budget_line_id and self.allocated_amount:
-            current_budget_total = money_sum(
-                self.budget_line.invoice_allocations.filter(sub_budget_line__isnull=True).exclude(pk=self.pk),
-                "allocated_amount",
-            )
+        if self.budget_line_id and self.allocated_amount:
+            current_budget_total = money_sum(self.budget_line.invoice_allocations.exclude(pk=self.pk), "allocated_amount")
             if current_budget_total + self.allocated_amount + self.budget_line.child_assigned_budget > self.budget_line.effective_budget:
-                errors["allocated_amount"] = "No puede imputarse más dinero del disponible en la partida."
-        if self.financier_id and self.project_id and self.allocated_amount:
-            contribution_filter = self.project.financier_contributions.filter(financier=self.financier)
-            allocation_filter = self.project.invoice_allocations.filter(financier=self.financier)
-            if self.financier_contribution_id:
-                contribution_filter = contribution_filter.filter(pk=self.financier_contribution_id)
-                allocation_filter = allocation_filter.filter(financier_contribution_id=self.financier_contribution_id)
-            financed = money_sum(contribution_filter, "amount")
-            allocated = money_sum(allocation_filter.exclude(pk=self.pk), "allocated_amount")
-            if allocated + self.allocated_amount > financed:
-                errors["financier"] = "No puede imputarse más dinero del financiado por el financiador."
+                errors["allocated_amount"] = "No puede imputarse más dinero del disponible en la partida o subpartida."
         if errors:
             raise ValidationError(errors)
 
@@ -1001,9 +921,7 @@ class InvoiceAllocation(models.Model):
         verbose_name_plural = "Imputaciones de facturas"
         indexes = [
             models.Index(fields=["project", "activity"]),
-            models.Index(fields=["budget_line", "sub_budget_line"]),
-            models.Index(fields=["financier"]),
-            models.Index(fields=["financier_contribution"]),
+            models.Index(fields=["budget_line"]),
         ]
         constraints = [
             models.CheckConstraint(check=Q(allocated_amount__gte=0), name="invoice_allocation_amount_gte_0"),

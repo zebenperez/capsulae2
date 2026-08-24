@@ -1,0 +1,14 @@
+{
+  "private": true,
+  "scripts": {
+    "build:tiptap": "esbuild static/js/tiptap-editor-src.js --bundle --format=iife --global-name=CapsulaeTiptapBundle --outfile=static/js/tiptap-editor.bundle.js"
+  },
+  "dependencies": {
+    "@tiptap/core": "^3.0.0",
+    "@tiptap/pm": "^3.0.0",
+    "@tiptap/starter-kit": "^3.0.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2"
+  }
+}

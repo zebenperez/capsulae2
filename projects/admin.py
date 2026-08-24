@@ -33,7 +33,7 @@ class ObjectiveInline(admin.TabularInline):
 class BudgetLineInline(admin.TabularInline):
     model = BudgetLine
     extra = 0
-    fields = ("parent", "code", "name", "approved_budget", "modified_budget")
+    fields = ("parent", "code", "name", "approved_budget")
 
 
 class ProjectFinancierInline(admin.TabularInline):
@@ -109,7 +109,7 @@ class ResultAdmin(admin.ModelAdmin):
 
 @admin.register(BudgetLine)
 class BudgetLineAdmin(admin.ModelAdmin):
-    list_display = ("full_code", "name", "project", "parent", "approved_budget", "modified_budget", "executed_amount", "available_balance")
+    list_display = ("full_code", "name", "project", "parent", "approved_budget", "executed_amount", "available_balance")
     list_filter = ("project",)
     search_fields = ("code", "name", "description", "project__name", "project__code", "parent__name")
     autocomplete_fields = ("project", "parent")
@@ -140,10 +140,10 @@ class ProjectFinancierAdmin(admin.ModelAdmin):
 
 @admin.register(FinancierContribution)
 class FinancierContributionAdmin(admin.ModelAdmin):
-    list_display = ("project", "financier", "budget_line", "sub_budget_line", "amount", "percentage", "available_amount")
+    list_display = ("project", "financier", "budget_line", "amount", "percentage", "available_amount")
     list_filter = ("project", "financier")
-    search_fields = ("project__name", "financier__name", "budget_line__name", "sub_budget_line__name")
-    autocomplete_fields = ("project", "financier", "budget_line", "sub_budget_line")
+    search_fields = ("project__name", "financier__name", "budget_line__name")
+    autocomplete_fields = ("project", "financier", "budget_line")
     readonly_fields = ("allocated_to_invoices", "available_amount")
 
 
@@ -155,7 +155,7 @@ class InvoiceDocumentInline(admin.TabularInline):
 class InvoiceAllocationInline(admin.TabularInline):
     model = InvoiceAllocation
     extra = 0
-    autocomplete_fields = ("project", "activity", "budget_line", "sub_budget_line", "financier_contribution", "financier")
+    autocomplete_fields = ("project", "activity", "budget_line")
 
 
 class InvoiceStatusChangeInline(admin.TabularInline):
@@ -188,10 +188,10 @@ class InvoiceStatusChangeAdmin(admin.ModelAdmin):
 
 @admin.register(InvoiceAllocation)
 class InvoiceAllocationAdmin(admin.ModelAdmin):
-    list_display = ("invoice", "project", "activity", "sub_budget_line", "financier_contribution", "financier", "allocated_amount", "allocated_percentage")
-    list_filter = ("project", "financier", "allocation_date")
-    search_fields = ("invoice__number", "invoice__provider_tax_id", "activity__name", "sub_budget_line__name", "financier__name")
-    autocomplete_fields = ("invoice", "project", "activity", "budget_line", "sub_budget_line", "financier_contribution", "financier")
+    list_display = ("invoice", "project", "activity", "budget_line", "allocated_amount", "allocated_percentage")
+    list_filter = ("project", "allocation_date")
+    search_fields = ("invoice__number", "invoice__provider_tax_id", "activity__name", "budget_line__name")
+    autocomplete_fields = ("invoice", "project", "activity", "budget_line")
 
 
 admin.site.register(InvoiceDocument)

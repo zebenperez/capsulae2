@@ -62,8 +62,8 @@
             <details class="invoice-actions project-actions" open>
                 <summary>{% trans "Acciones" %}</summary>
                 <div class="invoice-actions__items">
-                    <a class="project-icon-btn ark" title="{% trans 'Imputar factura' %}" aria-label="{% trans 'Imputar factura' %}"
-                        data-url="{% url "invoice-allocation-wizard" %}" data-target-modal="common-modal" data-invoice_id="{{ invoice.id }}">
+                    <a class="project-icon-btn invoice-allocation-open" title="{% trans 'Imputar factura' %}" aria-label="{% trans 'Imputar factura' %}"
+                        data-url="{% url "invoice-allocation-wizard" %}" data-invoice-id="{{ invoice.id }}">
                         <i class="fas fa-random"></i>
                     </a>
                     <a class="project-icon-btn ark" title="{% trans 'Cambiar estado de factura' %}" aria-label="{% trans 'Cambiar estado de factura' %}"
