@@ -73,10 +73,10 @@
                     <div class="col-11">
                         <div class="row">
                             <div class="col-2"> {% trans 'Historial' %} </div>
-                            <div class="col-6"> {% trans 'Nombre' %} </div>
-                            <div class="col-2"> {% trans 'CIP' %} </div>
-                            <div class="col-1"> {% trans 'Edad' %} </div>
-                            <div class="col-1"> {% trans 'LOPD' %} </div>
+                            <div class="col-6 patient-sort" data-sort="name">{% trans 'Nombre' %} <i class="fas fa-sort"></i></div>
+                            <div class="col-2 patient-sort" data-sort="cip">{% trans 'CIP' %} <i class="fas fa-sort"></i></div>
+                            <div class="col-1 patient-sort" data-sort="age">{% trans 'Edad' %} <i class="fas fa-sort"></i></div>
+                            <div class="col-1 patient-sort" data-sort="lopd">{% trans 'LOPD' %} <i class="fas fa-sort"></i></div>
                         </div>
                     </div>
                 </div>
@@ -88,6 +88,43 @@
         </div>
     </div>
     <a class="hide ark" id="load-patient-list" data-url="{% url "patient-list" %}" data-target="patient-list"></a>
-    <script>$(document).ready(function() {$("#load-patient-list").click()})</script>
+    <script>
+        $(document).ready(function() {
+            $("#load-patient-list").click();
+
+            $(document).on("click", ".patient-sort", function() {
+                var header = $(this);
+                var direction = header.data("direction") === "asc" ? "desc" : "asc";
+                var searchValue = $("#s-name").val();
+                var url = searchValue ? $("#form-search").attr("action") : $("#load-patient-list").data("url");
+                var data = {sort: header.data("sort"), direction: direction};
+                if (searchValue) data["s-name"] = searchValue;
+
+                $(".patient-sort").data("direction", "").find("i").attr("class", "fas fa-sort");
+                header.data("direction", direction).find("i").attr("class", "fas fa-sort-" + (direction === "asc" ? "up" : "down"));
+                sortVisiblePatients(header.data("sort"), direction);
+                ajaxGet(url, data, "patient-list", "");
+            });
+
+            function sortVisiblePatients(sortBy, direction) {
+                var rows = $("#patient-list > .row-item").get();
+                rows.sort(function(first, second) {
+                    var firstValue = $(first).data(sortBy);
+                    var secondValue = $(second).data(sortBy);
+                    if (sortBy === "age" || sortBy === "lopd") {
+                        firstValue = firstValue === "" ? -1 : Number(firstValue);
+                        secondValue = secondValue === "" ? -1 : Number(secondValue);
+                    } else {
+                        firstValue = String(firstValue || "").toLocaleLowerCase();
+                        secondValue = String(secondValue || "").toLocaleLowerCase();
+                    }
+                    if (firstValue === secondValue) return 0;
+                    var result = firstValue > secondValue ? 1 : -1;
+                    return direction === "asc" ? result : -result;
+                });
+                $.each(rows, function(_, row) { $("#patient-list").append(row); });
+            }
+        });
+    </script>
     {% include "common-modal.html" %}
 {% endblock central_content %}

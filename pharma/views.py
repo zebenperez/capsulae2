@@ -150,7 +150,29 @@ def get_shared_patient(search_list, user_id):
     #return list(PatientShared.objects.filter(name_query).filter(user__id=user_id).values_list('patient', flat=True))
     return [item.patient for item in PatientShared.objects.filter(query).filter(user__id=user_id)]
 
-def get_patients(user, search_value="", start=0, end=50, lopd_signed=True):
+def sort_patients(items, sort_by="", sort_direction="asc"):
+    """Sort the patient list only by fields exposed as sortable in the UI."""
+    sortable_fields = {"name", "cip", "age", "lopd"}
+    if sort_by not in sortable_fields:
+        return items
+
+    reverse = sort_direction == "desc"
+    if sort_by == "name":
+        key = lambda patient: patient.full_name.casefold()
+    elif sort_by == "cip":
+        key = lambda patient: (patient.cip or "").casefold()
+    elif sort_by == "age":
+        key = lambda patient: patient.age
+    else:
+        key = lambda patient: patient.lopd_signed
+
+    # Keep patients without a value at the end in either direction.
+    patients_with_value = [patient for patient in items if key(patient) != ""]
+    patients_without_value = [patient for patient in items if key(patient) == ""]
+    return sorted(patients_with_value, key=key, reverse=reverse) + patients_without_value
+
+
+def get_patients(user, search_value="", start=0, end=50, lopd_signed=True, sort_by="", sort_direction="asc"):
     #filters_to_search = ["n_historial__icontains", "nombre__icontains", "apellido__icontains", "cip__icontains"]
     filters_to_search = ["n_historial__icontains", "cip__icontains"]
 
@@ -192,14 +214,21 @@ def get_patients(user, search_value="", start=0, end=50, lopd_signed=True):
         limit = datetime.today() - timedelta(days=lopd_limit)
         date_list = list(Pacientes.objects.filter(full_query).exclude(id__in=lopd_patient_ids).filter(created_at__gte=limit))
 
-        return (date_list + lopd_list + shared_list)[start:end]
+        return sort_patients(date_list + lopd_list + shared_list, sort_by, sort_direction)[start:end]
     else:
-        return list(Pacientes.objects.filter(full_query).exclude(id__in=lopd_patient_ids)[start:end])
+        items = list(Pacientes.objects.filter(full_query).exclude(id__in=lopd_patient_ids))
+        return sort_patients(items, sort_by, sort_direction)[start:end]
 
-def get_patient_context(user, search_value="", start=0, end=50, lopd_signed=True):
+def get_patient_context(user, search_value="", start=0, end=50, lopd_signed=True, sort_by="", sort_direction="asc"):
+    context = {'sort_by': sort_by, 'sort_direction': sort_direction}
     if (search_value == ""):
-        return {'items': get_patients(user, search_value, start, end), 'start': (start+end), 'end': (end+end), 'lopd_signed': lopd_signed}
-    return {'items': get_patients(user, search_value, start, end, lopd_signed),}
+        context.update({
+            'items': get_patients(user, search_value, start, end, lopd_signed, sort_by, sort_direction),
+            'start': (start+end), 'end': (end+end), 'lopd_signed': lopd_signed,
+        })
+    else:
+        context['items'] = get_patients(user, search_value, start, end, lopd_signed, sort_by, sort_direction)
+    return context
 
 @group_required("admins","managers", "employee")
 def patients(request):
@@ -210,7 +239,9 @@ def patients(request):
 def patient_list(request):
     start = int(request.GET["start"]) if "start" in request.GET else 0
     end = int(request.GET["end"]) if "end" in request.GET else 10
-    return render(request, "patients/patient-list.html", get_patient_context(request.user, "", start, end))
+    sort_by = get_param(request.GET, "sort")
+    sort_direction = get_param(request.GET, "direction")
+    return render(request, "patients/patient-list.html", get_patient_context(request.user, "", start, end, True, sort_by, sort_direction))
 
 @group_required("admins", "managers")
 def patient_list_nolopd(request):
@@ -222,11 +253,13 @@ def patient_list_nolopd(request):
 def patient_search(request):
     import base64
     search_value = get_param(request.GET, "s-name")
-    list_users = get_patient_context(request.user, search_value)
+    sort_by = get_param(request.GET, "sort")
+    sort_direction = get_param(request.GET, "direction")
+    list_users = get_patient_context(request.user, search_value, sort_by=sort_by, sort_direction=sort_direction)
     if list_users["items"] != []:
         return render(request, "patients/patient-list.html", list_users)
     else:
-        list_users = get_patient_context(request.user, search_value, lopd_signed=False)
+        list_users = get_patient_context(request.user, search_value, lopd_signed=False, sort_by=sort_by, sort_direction=sort_direction)
         #print(list_users)
         if (len(list_users["items"]) == 1):
             url_abs = request.build_absolute_uri(reverse('patient-lopd-generate-document2', kwargs={'patient_id': list_users["items"][0].id}))
@@ -1193,6 +1226,5 @@ def patient_api_get_patients(request):
     except Exception as e:
         print(show_exc(e))
         return JsonResponse({"error": "An error occurred"}, status=500)
-
 
 
