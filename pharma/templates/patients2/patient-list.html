@@ -6,9 +6,24 @@
             <div class="col-11">
                 <div class="row">
                     <div class="col-2"> {% trans 'Historial' %} </div>
-                    <div class="col-6"> {% trans 'Nombre' %} </div>
-                    <div class="col-2"> {% trans 'CIP' %} </div>
-                    <div class="col-1"> {% trans 'Edad' %} </div>
+                    <div class="col-6">
+                        <a class="text-reset text-decoration-none" href="?sort=name&direction={% if sort == 'name' and sort_direction == 'asc' %}desc{% else %}asc{% endif %}">
+                            {% trans 'Nombre' %}
+                            <i class="fas {% if sort == 'name' %}{% if sort_direction == 'asc' %}fa-sort-up{% else %}fa-sort-down{% endif %}{% else %}fa-sort{% endif %}"></i>
+                        </a>
+                    </div>
+                    <div class="col-2">
+                        <a class="text-reset text-decoration-none" href="?sort=cip&direction={% if sort == 'cip' and sort_direction == 'asc' %}desc{% else %}asc{% endif %}">
+                            {% trans 'CIP' %}
+                            <i class="fas {% if sort == 'cip' %}{% if sort_direction == 'asc' %}fa-sort-up{% else %}fa-sort-down{% endif %}{% else %}fa-sort{% endif %}"></i>
+                        </a>
+                    </div>
+                    <div class="col-1">
+                        <a class="text-reset text-decoration-none" href="?sort=age&direction={% if sort == 'age' and sort_direction == 'asc' %}desc{% else %}asc{% endif %}">
+                            {% trans 'Edad' %}
+                            <i class="fas {% if sort == 'age' %}{% if sort_direction == 'asc' %}fa-sort-up{% else %}fa-sort-down{% endif %}{% else %}fa-sort{% endif %}"></i>
+                        </a>
+                    </div>
                     <div class="col-1"> {% trans 'LOPD' %} </div>
                 </div>
             </div>
@@ -41,4 +56,3 @@
     </div>
 {% endfor %}
 {% include "foot_paginator.html" with items=items page_url=page_url columns=12 %}
-

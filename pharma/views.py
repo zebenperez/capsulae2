@@ -3,6 +3,7 @@ from django.core.files.base import ContentFile
 from django.core.paginator import Paginator
 #from django.contrib.auth import logout
 from django.db.models import Q
+from django.db.models.functions import Lower
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, reverse
 from django.template.loader import render_to_string
@@ -88,8 +89,22 @@ def get_patients2(request):
         full_query &= Q(**{'cip__icontains': cip})
     if lopd != "":
         full_query &= Q(**{'lopd__isnull': False}) if lopd == "1" else Q(**{'lopd__isnull': True})
-    print(full_query)
     items = Pacientes.objects.filter(full_query)
+    sort = request.session.get("patients2_sort", "")
+    direction = request.session.get("patients2_sort_direction", "asc")
+
+    # Age is derived from the birth date, so its database ordering is inverted:
+    # a more recent date of birth means a lower age.
+    orderings = {
+        "name": [Lower("nombre"), Lower("apellido"), "id"],
+        "cip": [Lower("cip"), "id"],
+        "age": ["-fecha_nacimiento", "id"],
+    }
+    if sort in orderings:
+        ordering = orderings[sort]
+        if direction == "desc":
+            ordering = [field.desc() if hasattr(field, "desc") else "-" + field.lstrip("-") for field in ordering]
+        items = items.order_by(*ordering)
 
     return items, items.count()
 
@@ -108,6 +123,13 @@ def patients2_page_rows(request, page=1, rows=10):
 @group_required("admins","managers", "employee")
 def patients2(request):
     init_session(request)
+    sort = request.GET.get("sort")
+    direction = request.GET.get("direction")
+    if sort in {"name", "cip", "age"} and direction in {"asc", "desc"}:
+        request.session["patients2_sort"] = sort
+        request.session["patients2_sort_direction"] = direction
+        request.session["b_page"] = 1
+
     items, total_count = get_patients2(request)
     paginator = Paginator(items, get_int(request.session["b_rows"]))
     page_obj = paginator.get_page(request.session["b_page"])
@@ -116,6 +138,8 @@ def patients2(request):
         'items': page_obj, 
         'rows': request.session["b_rows"], 
         'page_url': 'patients2-page-rows', 
+        'sort': request.session.get("patients2_sort", ""),
+        'sort_direction': request.session.get("patients2_sort_direction", "asc"),
     }
     return render(request, "patients2/patients.html", context)
 
@@ -1226,5 +1250,4 @@ def patient_api_get_patients(request):
     except Exception as e:
         print(show_exc(e))
         return JsonResponse({"error": "An error occurred"}, status=500)
-
 

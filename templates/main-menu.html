@@ -19,6 +19,14 @@
             </li><hr/>
             {%endcomment%}
         {% endif %}
+        {% if user|have_menu:"PAC2"%}
+            <li class="nav-item">
+                <a class="nav-link " href="{%url "patients2"%}">
+                    <i class="fa fa-user"></i> {%if user|is_pharma%}{%trans 'Pacientes'%} {%else%} {%trans 'Usuarios'%} {%endif%} 2
+                </a>
+            </li><hr/>
+        {% endif %}
+
         {% if user|have_menu:"MED"%}
             <li class="nav-item"><a class="nav-link " href="{%url "medication"%}">
                 <i class="fa fa-vial"></i> {%trans "Medicamentos"%} </a></li><hr/>
