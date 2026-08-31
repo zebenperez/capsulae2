@@ -4,7 +4,7 @@
 
 {% block central_content %}
 	<div class="form-body mt-5 p-2">
-		<div class="text-center"><img src="{%static "imgs/regulariza.png"%}" class="form-img" alt="cabecera"/></div>
+		<div class="text-center"><img src="{%static "imgs/registro.png"%}" width="70%" class="form-img" alt="cabecera"/></div>
 
 		<div class="form-container">
 
@@ -17,7 +17,7 @@
                 <p class="text-danger">* Indica que la pregunta es obligatoria</p>
             </div>
 
-		    <form method="POST" action="{% url "forms-regulariza-save" %}" enctype="multipart/form-data">
+		    <form method="POST" action="{% url "forms-register-save" %}" enctype="multipart/form-data">
 	            {%csrf_token%}
 	            <input type="hidden" name="comp" value="{{comp}}" />
 

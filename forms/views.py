@@ -29,7 +29,8 @@ def register(request, org):
     return render(request, "forms/register.html", {'comp': org, 'countries': countries, 'etnias': etnias})
 
 def register_save(request):
-    comp = get_or_none(Company, get_param(request.POST, "comp"))
+    #comp = get_or_none(Company, get_param(request.POST, "comp"), "uuid")
+    comp = Company.objects.filter(uuid=get_param(request.POST, "comp")).first()
     if request.POST and comp != None:
         name = get_param(request.POST, "name")
         sex = get_param(request.POST, "sex")
@@ -88,10 +89,10 @@ def register_save(request):
                 print(f"Email error: {e}")
                 #pass
 
-            return render(request, "forms/register-save.html", {'comp': comp.id,})
+            return render(request, "forms/register-save.html", {'comp': comp.uuid,})
         else:
-            return render(request, "forms/register-save.html", {'err': "Este usuario ya ha sido dado de alta!.",'comp': comp.id})
-    return render(request, "forms/regulariza-save.html", {'err': "Se ha producido un error, disculpe las molestias!.",'comp':comp.id})
+            return render(request, "forms/register-save.html", {'err': "Este usuario ya ha sido dado de alta!.",'comp': comp.uuid})
+    return render(request, "forms/register-save.html", {'err':"Se ha producido un error, disculpe las molestias!.",'comp':comp.uuid})
 
 def regulariza(request, org):
     etnias = Etnia.objects.all()

@@ -4,7 +4,7 @@
 
 {% block central_content %}
     <div class="text-center p-4" style="background: #fdf1e3; border:1px solid red;">
-        <img src="{%static "imgs/regulariza.png"%}" alt="cabecera"/>
+        <img src="{%static "imgs/registro.png"%}" alt="cabecera"/>
         <h1>DATOS IDENTIFICATIVOS</h1>
         <p>Estos datos son necesarios para poder añadirle a la lista de próximas citas, gracias por la colaboración.</p>
         <hr/>
@@ -18,7 +18,7 @@
             {% else %}
                 <div class="alert alert-warning">{{err}}</div>
             {% endif %}
-            <a class="btn btn-success" href="{%url "forms-regulariza" comp %}">Volver</a>
+            <a class="btn btn-success" href="{%url "forms-register" comp %}">Volver</a>
         </div>
     </div>
 {% endblock central_content %}
