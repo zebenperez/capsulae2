@@ -991,7 +991,7 @@ def get_lopd_template(template, patient):
     date = f"{now.day:02d} de {MESES[now.month]} de {now.year}"
 
     temp = template.temp.replace("__PATIENT_HIST__", patient.n_historial)
-    temp = temp.replace("__PATIENT_QR__", patient.qr.url)
+    temp = temp.replace("__PATIENT_QR__", patient.qr.url if patient.qr else "")
     temp = temp.replace("__PATIENT_NAME__", patient.nombre)
     temp = temp.replace("__PATIENT_SURNAME__", patient.apellido)
     temp = temp.replace("__PATIENT_NIF__", patient.nif)
@@ -1250,4 +1250,3 @@ def patient_api_get_patients(request):
     except Exception as e:
         print(show_exc(e))
         return JsonResponse({"error": "An error occurred"}, status=500)
-
