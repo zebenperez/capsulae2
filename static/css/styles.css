@@ -114,6 +114,9 @@ body.loading .overlay{
 	margin-left:0;
 	margin-right:0;
 }
+.patient-sort {
+	cursor: pointer;
+}
 #patient-list {
 /*
 	overflow-y: scroll;

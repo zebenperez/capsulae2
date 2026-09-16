@@ -23,6 +23,77 @@ def get_vulnera_subject():
 def get_vulnera_body(name, host):
     return get_config_value("email_vulnera_body").replace("__NAME__", name).replace("__URL__", f'https://{host}/pwa/')
 
+def register(request, org):
+    etnias = Etnia.objects.all()
+    countries = Paises.objects.all()
+    return render(request, "forms/register.html", {'comp': org, 'countries': countries, 'etnias': etnias})
+
+def register_save(request):
+    #comp = get_or_none(Company, get_param(request.POST, "comp"), "uuid")
+    comp = Company.objects.filter(uuid=get_param(request.POST, "comp")).first()
+    if request.POST and comp != None:
+        name = get_param(request.POST, "name")
+        sex = get_param(request.POST, "sex")
+        passport = get_param(request.POST, "passport")
+        born_date = get_param(request.POST, "born_date")
+        nationality = get_param(request.POST, "nationality")
+        locality = get_param(request.POST, "locality")
+        address = get_param(request.POST, "address")
+        province = get_param(request.POST, "province")
+        cp = get_param(request.POST, "cp")
+        phone = get_param(request.POST, "phone")
+        email = get_param(request.POST, "email")
+        languaje = get_param(request.POST, "languaje")
+        etnia = get_or_none(Etnia, get_param(request.POST, "etnia"))
+        country = get_or_none(Paises, get_param(request.POST, "country"))
+        privacy = get_param(request.POST, "privacy")
+        tos = get_param(request.POST, "tos")
+        obs = get_param(request.POST, "obs")
+        doc = request.FILES["doc"] if "doc" in request.FILES else None
+        #print(f"{name} {sex} {passport} {tos} {privacy}")
+        #print(doc)
+        p = Pacientes.objects.filter(nif=passport).first()
+        if p == None:
+            p = Pacientes(nif=passport, id_user=comp.manager)
+            p.nombre = name
+            if sex != "":
+                p.sexo = "H" if sex == "hombre" else "M"
+            p.fecha_nacimiento = born_date
+            p.locality = locality
+            p.domicilio = address
+            p.province = province
+            p.cod_postal = cp
+            p.telefono1 = phone
+            p.email = email
+            p.observaciones = obs
+            p.save()
+
+            po = PatientOrigin(patient = p)
+            po.nationality = nationality
+            po.etnia = etnia
+            po.country = country
+            po.save()
+
+            doc_name = ""
+            if doc is not None:
+                procedure = Procedure.objects.filter(code="00").first()
+                patpro = PatientProcedure.objects.create(procedure=procedure, obs="Nuevo registro", patient=p)
+                if patpro != None:
+                    patprodoc = PatientProcedureDoc.objects.create(procedure=patpro, doc=doc)
+                doc_name = doc.name
+
+            try:
+                #send_import_doc_email(request.META['HTTP_HOST'], [p.email], p.full_name, doc_name)
+                send_common_email([p.email], get_register_subject(), get_register_body(p.full_name, request.META['HTTP_HOST']))
+            except Exception as e:
+                print(f"Email error: {e}")
+                #pass
+
+            return render(request, "forms/register-save.html", {'comp': comp.uuid,})
+        else:
+            return render(request, "forms/register-save.html", {'err': "Este usuario ya ha sido dado de alta!.",'comp': comp.uuid})
+    return render(request, "forms/register-save.html", {'err':"Se ha producido un error, disculpe las molestias!.",'comp':comp.uuid})
+
 def regulariza(request, org):
     etnias = Etnia.objects.all()
     countries = Paises.objects.all()
