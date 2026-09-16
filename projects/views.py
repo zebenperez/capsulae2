@@ -1,5 +1,6 @@
 from datetime import timedelta
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
+import logging
 
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
@@ -13,6 +14,7 @@ from django.utils import timezone
 
 from capsulae2.decorators import group_required
 from capsulae2.commons import get_or_none, get_param, show_exc, validate_captcha
+from .forms import InvoiceImportForm
 from .models import (
     Activity,
     ActivityUser,
@@ -36,8 +38,18 @@ from .models import (
     Supplier,
     Text,
 )
+from .services.invoice_ai import InvoiceExtractionError, extract_invoice_data
+from .services.invoice_import import (
+    DuplicateInvoiceError,
+    InvoiceAmountValidationError,
+    InvoiceImportError,
+    import_invoice,
+)
 
 import csv
+
+
+logger = logging.getLogger(__name__)
 
 
 '''
@@ -427,6 +439,50 @@ def invoice_form(request):
 
 
 @group_required("admins","managers", "employee")
+def invoice_import(request):
+    if request.method == "GET":
+        return render(request, "projects/invoice-import-form.html", {
+            "form": InvoiceImportForm(),
+        })
+
+    form = InvoiceImportForm(request.POST, request.FILES)
+    if not form.is_valid():
+        return render(request, "projects/invoice-import-form.html", {
+            "form": form,
+        }, status=400)
+
+    pdf_file = form.cleaned_data["invoice_pdf"]
+    try:
+        extracted_data = extract_invoice_data(pdf_file)
+        import_result = import_invoice(extracted_data, pdf_file)
+        response = render(request, "projects/invoice-list.html", get_invoice_context(request.user))
+        response["X-Capsulae-Message"] = "Factura importada correctamente."
+        response["X-Capsulae-Invoice-Id"] = str(import_result.invoice.id)
+        return response
+    except InvoiceAmountValidationError as exc:
+        return render(request, "projects/invoice-import-error.html", {
+            "validation": exc.validation,
+            "form_url": reverse("invoice-import"),
+        }, status=400)
+    except DuplicateInvoiceError as exc:
+        return render(request, "projects/invoice-import-duplicate.html", {
+            "invoice": exc.invoice,
+        }, status=409)
+    except (InvoiceExtractionError, InvoiceImportError) as exc:
+        logger.warning("Invoice import rejected: %s", exc)
+        form.add_error("invoice_pdf", str(exc))
+        return render(request, "projects/invoice-import-form.html", {
+            "form": form,
+        }, status=400)
+    except Exception:
+        logger.exception("Unexpected invoice import error")
+        form.add_error("invoice_pdf", "No se ha podido analizar la factura. Puedes intentarlo de nuevo o introducirla manualmente.")
+        return render(request, "projects/invoice-import-form.html", {
+            "form": form,
+        }, status=400)
+
+
+@group_required("admins","managers", "employee")
 def invoice_status_form(request):
     invoice = get_or_none(Invoice, get_param(request.GET, "invoice_id"))
     if invoice == None:
@@ -462,7 +518,10 @@ def invoice_save(request):
         obj.payment_date = get_param(request.GET, "payment_date") or None
         obj.concept = get_param(request.GET, "concept").strip()
         obj.taxable_base = parse_decimal(get_param(request.GET, "taxable_base"))
-        obj.taxes = parse_decimal(get_param(request.GET, "taxes"))
+        obj.iva_amount = parse_decimal(get_param(request.GET, "iva_amount"))
+        obj.igic_amount = parse_decimal(get_param(request.GET, "igic_amount"))
+        obj.irpf_amount = parse_decimal(get_param(request.GET, "irpf_amount"))
+        obj.taxes = obj.calculated_taxes
         obj.currency = "EUR"
         if not obj.pk:
             obj.status = InvoiceStatus.DRAFT
@@ -1113,7 +1172,6 @@ def project_drive(request):
     project = get_or_none(Project, get_param(request.GET, "obj_id"))
     folder_list = project.folders.filter(parent__isnull=True)
     file_list = project.files.filter(folder__isnull=True)
-    print(file_list)
     return render(request, "project/drive/drive.html", {'obj': project, 'folder_list': folder_list, 'file_list': file_list})
 
 '''
@@ -1466,8 +1524,6 @@ def project_file_list(request):
         obj_id = request.GET["obj_id"]
         obj = get_or_none(File, obj_id)
         file_list = obj.folder.files.all() if obj.folder != None else obj.project.files.filter(folder__isnull=True)
-        for f in file_list:
-            print(f.name)
         return render(request, "project/drive/file-list.html", {"obj": obj.project, 'folder': obj.folder, 'file_list': file_list})
     except Exception as e:
         return render(request, 'error_exception.html', {'exc':show_exc(e)})
@@ -1491,7 +1547,7 @@ def project_file_add(request):
         file_list = folder.files.all() if folder != None else obj.files.filter(folder__isnull=True)
         return render(request, "project/drive/file-list.html", {"obj": obj, 'folder': folder, 'file_list': file_list})
     except Exception as e:
-        print(e)
+        logger.exception("Project file upload failed")
         return (render(request, "error_exception.html", {'exc':show_exc(e)}))
 
 @group_required("admins","managers", "employee")
@@ -1530,3 +1586,20 @@ def project_file_get(request, obj_id):
         return response 
     except Exception as e:
         return (render(request, "error_exception.html", {'exc':show_exc(e)}))
+
+
+def test_api(request):
+    try:
+        import os
+        import openai
+        openai.api_key = os.getenv('OPENAI_API_KEY', 'your_openai_api_key_here')
+        if "your_openai_api_key_here" in openai.api_key:
+            return JsonResponse({"message": "Test API failed", "error": "OpenAI API key is not set properly"})
+        # response = openai.Completion.create(
+        #     model="text-davinci-003",
+        #     prompt="Say hello",
+        #     max_tokens=5
+        # )
+        return JsonResponse({"message": "Test API successful"})
+    except Exception as e:
+        return JsonResponse({"message": "Test API failed", "error": str(e)})

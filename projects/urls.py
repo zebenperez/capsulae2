@@ -19,6 +19,7 @@ urlpatterns = [
     path('projects/suppliers/remove/', views.supplier_remove, name='supplier-remove'),
     path('projects/invoices/', views.invoice_list, name='invoice-list'),
     path('projects/invoices/form/', views.invoice_form, name='invoice-form'),
+    path('projects/invoices/import/', views.invoice_import, name='invoice-import'),
     path('projects/invoices/save/', views.invoice_save, name='invoice-save'),
     path('projects/invoices/physical-document-upload/', views.invoice_physical_document_upload, name='invoice-physical-document-upload'),
     path('projects/invoices/status-form/', views.invoice_status_form, name='invoice-status-form'),
@@ -74,4 +75,6 @@ urlpatterns = [
     path('projects/drive/file-form', views.project_file_form, name='project-file-form'),
     path('projects/drive/file-remove', views.project_file_remove, name='project-file-remove'),
     path('projects/drive/file-get/<int:obj_id>/', views.project_file_get, name='project-file-get'),
+
+    path('projects/test-api/', views.test_api, name='test-api'),
 ]

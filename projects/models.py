@@ -701,6 +701,24 @@ class Invoice(models.Model):
         decimal_places=MONEY_DECIMAL_PLACES,
         default=Decimal("0.00"),
     )
+    iva_amount = models.DecimalField(
+        "IVA",
+        max_digits=MONEY_MAX_DIGITS,
+        decimal_places=MONEY_DECIMAL_PLACES,
+        default=Decimal("0.00"),
+    )
+    igic_amount = models.DecimalField(
+        "IGIC",
+        max_digits=MONEY_MAX_DIGITS,
+        decimal_places=MONEY_DECIMAL_PLACES,
+        default=Decimal("0.00"),
+    )
+    irpf_amount = models.DecimalField(
+        "IRPF",
+        max_digits=MONEY_MAX_DIGITS,
+        decimal_places=MONEY_DECIMAL_PLACES,
+        default=Decimal("0.00"),
+    )
     total_amount = models.DecimalField("Importe total", max_digits=MONEY_MAX_DIGITS, decimal_places=MONEY_DECIMAL_PLACES)
     currency = models.CharField("Moneda", max_length=3, default="EUR")
     document_pdf = models.FileField("Documento PDF", upload_to="projects/invoices/", blank=True)
@@ -718,6 +736,29 @@ class Invoice(models.Model):
     @property
     def pending_amount(self):
         return self.total_amount - self.allocated_amount
+
+    @property
+    def has_tax_breakdown(self):
+        return any([
+            self.iva_amount not in (None, Decimal("0.00")),
+            self.igic_amount not in (None, Decimal("0.00")),
+            self.irpf_amount not in (None, Decimal("0.00")),
+        ])
+
+    @property
+    def calculated_taxes(self):
+        iva_amount = self.iva_amount or Decimal("0.00")
+        igic_amount = self.igic_amount or Decimal("0.00")
+        irpf_amount = self.irpf_amount or Decimal("0.00")
+        if self.has_tax_breakdown:
+            return iva_amount + igic_amount - irpf_amount
+        return self.taxes or Decimal("0.00")
+
+    @property
+    def display_iva_amount(self):
+        if not self.has_tax_breakdown and self.taxes:
+            return self.taxes
+        return self.iva_amount or Decimal("0.00")
 
     @property
     def imputation_summary(self):
@@ -783,7 +824,10 @@ class Invoice(models.Model):
             self.locator = self.locator.strip().upper()
         if self.provider_tax_id:
             self.provider_tax_id = self.provider_tax_id.strip().upper()
+        if not self.has_tax_breakdown and self.taxes:
+            self.iva_amount = self.taxes
         if self.taxable_base is not None and self.taxes is not None:
+            self.taxes = self.calculated_taxes
             self.total_amount = self.taxable_base + self.taxes
 
     def save(self, *args, **kwargs):
@@ -793,7 +837,10 @@ class Invoice(models.Model):
             self.locator = self.generate_unique_locator()
         if self.provider_tax_id:
             self.provider_tax_id = self.provider_tax_id.strip().upper()
+        if not self.has_tax_breakdown and self.taxes:
+            self.iva_amount = self.taxes
         if self.taxable_base is not None and self.taxes is not None:
+            self.taxes = self.calculated_taxes
             self.total_amount = self.taxable_base + self.taxes
         super().save(*args, **kwargs)
         invoice_code = self.build_invoice_code()
@@ -814,7 +861,9 @@ class Invoice(models.Model):
         ]
         constraints = [
             models.CheckConstraint(check=Q(taxable_base__gte=0), name="invoice_taxable_base_gte_0"),
-            models.CheckConstraint(check=Q(taxes__gte=0), name="invoice_taxes_gte_0"),
+            models.CheckConstraint(check=Q(iva_amount__gte=0), name="invoice_iva_amount_gte_0"),
+            models.CheckConstraint(check=Q(igic_amount__gte=0), name="invoice_igic_amount_gte_0"),
+            models.CheckConstraint(check=Q(irpf_amount__gte=0), name="invoice_irpf_amount_gte_0"),
             models.CheckConstraint(check=Q(total_amount__gte=0), name="invoice_total_amount_gte_0"),
         ]
 

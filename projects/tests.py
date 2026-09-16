@@ -1,5 +1,6 @@
 from datetime import date
 from decimal import Decimal
+from unittest.mock import patch
 
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
@@ -28,6 +29,8 @@ from .models import (
     Supplier,
     Text,
 )
+from .services.invoice_ai import InvoiceExtractionError, InvoiceExtractionResult
+from .services.invoice_import import validate_invoice_amounts
 from .templatetags.project_tags import money_es
 
 
@@ -172,13 +175,16 @@ class ProjectModelTests(TestCase):
             issue_date=date(2026, 5, 2),
             concept="Servicios",
             taxable_base=Decimal("10.50"),
-            taxes=Decimal("2.10"),
+            iva_amount=Decimal("2.10"),
+            igic_amount=Decimal("0.00"),
+            irpf_amount=Decimal("1.00"),
             total_amount=Decimal("0.00"),
         )
 
         self.assertEqual(invoice.locator, "AB12C")
         self.assertEqual(invoice.invoice_code, "2026-{}".format(invoice.id))
-        self.assertEqual(invoice.total_amount, Decimal("12.60"))
+        self.assertEqual(invoice.taxes, Decimal("1.10"))
+        self.assertEqual(invoice.total_amount, Decimal("11.60"))
 
     def test_invoice_locator_is_generated_on_create(self):
         first = Invoice.objects.create(
@@ -932,7 +938,9 @@ class ProjectInvoiceDashboardTests(TestCase):
         self.assertContains(response, "01/06/2026")
         self.assertContains(response, "pendiente")
         self.assertContains(response, "Base: 1.500,00 €")
-        self.assertContains(response, "Impuestos: 105,00 €")
+        self.assertContains(response, "IVA: 105,00 €")
+        self.assertContains(response, "IGIC: 0,00 €")
+        self.assertContains(response, "IRPF: 0,00 €")
         self.assertContains(response, "Total: 1.605,00 €")
         self.assertContains(response, "Requiere imputación")
 
@@ -1057,7 +1065,9 @@ class ProjectInvoiceDashboardTests(TestCase):
             "payment_date": "2026-06-10",
             "concept": "Factura nueva",
             "taxable_base": "200.00",
-            "taxes": "42.00",
+            "iva_amount": "42.00",
+            "igic_amount": "7.00",
+            "irpf_amount": "15.00",
         })
 
         self.assertEqual(response.status_code, 200)
@@ -1065,7 +1075,11 @@ class ProjectInvoiceDashboardTests(TestCase):
         self.assertRegex(invoice.locator, r"^[A-Z0-9]{5}$")
         self.assertEqual(invoice.invoice_code, "2026-{}".format(invoice.id))
         self.assertEqual(invoice.provider_tax_id, "B44444444")
-        self.assertEqual(invoice.total_amount, Decimal("242.00"))
+        self.assertEqual(invoice.iva_amount, Decimal("42.00"))
+        self.assertEqual(invoice.igic_amount, Decimal("7.00"))
+        self.assertEqual(invoice.irpf_amount, Decimal("15.00"))
+        self.assertEqual(invoice.taxes, Decimal("34.00"))
+        self.assertEqual(invoice.total_amount, Decimal("234.00"))
         self.assertContains(response, invoice.locator)
 
     def test_invoice_form_shows_amounts_in_number_input_format(self):
@@ -1083,7 +1097,9 @@ class ProjectInvoiceDashboardTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'name="taxable_base"\n                    value="200.00"', html=False)
-        self.assertContains(response, 'name="taxes"\n                    value="42.00"', html=False)
+        self.assertContains(response, 'name="iva_amount"\n                    value="42.00"', html=False)
+        self.assertContains(response, 'name="igic_amount"\n                    value="0.00"', html=False)
+        self.assertContains(response, 'name="irpf_amount"\n                    value="0.00"', html=False)
         self.assertContains(response, 'name="total_amount"\n                    value="242.00"', html=False)
 
     def test_invoice_form_shows_physical_document_field(self):
@@ -1370,3 +1386,136 @@ class ProjectInvoiceDashboardTests(TestCase):
 
         self.assertEqual(response.status_code, 400)
         self.assertEqual(InvoiceAllocation.objects.filter(invoice=invoice).count(), 1)
+
+    def _pdf_upload(self, name="factura.pdf"):
+        return SimpleUploadedFile(name, b"%PDF-1.4\n% factura de prueba\n", content_type="application/pdf")
+
+    def _extraction(self, **overrides):
+        data = {
+            "numero_factura": "F-IMP",
+            "fecha_factura": "2026-06-08",
+            "fecha_pago": None,
+            "nif_proveedor": "B12345678",
+            "base": Decimal("100.00"),
+            "iva": Decimal("21.00"),
+            "igic": Decimal("0.00"),
+            "irpf": Decimal("0.00"),
+            "total": Decimal("121.00"),
+            "concepto": "Servicios importados",
+        }
+        data.update(overrides)
+        return InvoiceExtractionResult(**data)
+
+    def test_invoice_import_rejects_invalid_pdf(self):
+        response = self.client.post(reverse("invoice-import"), {
+            "invoice_pdf": SimpleUploadedFile("factura.txt", b"texto", content_type="text/plain"),
+        })
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(Invoice.objects.filter(number="F-IMP").count(), 0)
+        self.assertContains(response, "El archivo debe tener extensión PDF", status_code=400)
+
+    def test_validate_invoice_amounts_accepts_iva_invoice(self):
+        validation = validate_invoice_amounts(self._extraction())
+
+        self.assertTrue(validation["valid"])
+        self.assertEqual(validation["expected_total"], Decimal("121.00"))
+        self.assertEqual(validation["declared_total"], Decimal("121.00"))
+
+    def test_validate_invoice_amounts_accepts_irpf_invoice(self):
+        validation = validate_invoice_amounts(self._extraction(irpf=Decimal("15.00"), total=Decimal("106.00")))
+
+        self.assertTrue(validation["valid"])
+        self.assertEqual(validation["expected_total"], Decimal("106.00"))
+
+    def test_validate_invoice_amounts_accepts_igic_invoice(self):
+        validation = validate_invoice_amounts(self._extraction(iva=Decimal("0.00"), igic=Decimal("7.00"), total=Decimal("107.00")))
+
+        self.assertTrue(validation["valid"])
+        self.assertEqual(validation["expected_total"], Decimal("107.00"))
+
+    def test_validate_invoice_amounts_allows_rounding_tolerance(self):
+        validation = validate_invoice_amounts(self._extraction(total=Decimal("121.01")))
+
+        self.assertTrue(validation["valid"])
+        self.assertEqual(validation["difference"], Decimal("-0.01"))
+
+    @patch("projects.views.extract_invoice_data")
+    def test_invoice_import_creates_invoice_and_physical_document(self, extract_invoice_data):
+        Supplier.objects.create(name="Proveedor Importado", nif="B12345678")
+        extract_invoice_data.return_value = self._extraction()
+
+        response = self.client.post(reverse("invoice-import"), {
+            "invoice_pdf": self._pdf_upload(),
+        })
+
+        self.assertEqual(response.status_code, 200)
+        invoice = Invoice.objects.get(number="F-IMP")
+        self.assertEqual(invoice.provider_tax_id, "B12345678")
+        self.assertEqual(invoice.taxable_base, Decimal("100.00"))
+        self.assertEqual(invoice.iva_amount, Decimal("21.00"))
+        self.assertEqual(invoice.igic_amount, Decimal("0.00"))
+        self.assertEqual(invoice.irpf_amount, Decimal("0.00"))
+        self.assertEqual(invoice.total_amount, Decimal("121.00"))
+        self.assertTrue(invoice.physical_document.name.endswith(".pdf"))
+        self.assertContains(response, "Proveedor Importado")
+        self.assertNotContains(response, "Falta documento físico")
+
+    @patch("projects.views.extract_invoice_data")
+    def test_invoice_import_preserves_unregistered_supplier_behavior(self, extract_invoice_data):
+        extract_invoice_data.return_value = self._extraction(nif_proveedor="B87654321", numero_factura="F-UNREGISTERED")
+
+        response = self.client.post(reverse("invoice-import"), {
+            "invoice_pdf": self._pdf_upload(),
+        })
+
+        self.assertEqual(response.status_code, 200)
+        invoice = Invoice.objects.get(number="F-UNREGISTERED")
+        self.assertEqual(invoice.provider_tax_id, "B87654321")
+        self.assertContains(response, "Proveedor no registrado")
+
+    @patch("projects.views.extract_invoice_data")
+    def test_invoice_import_rejects_incongruent_amounts(self, extract_invoice_data):
+        extract_invoice_data.return_value = self._extraction(total=Decimal("150.00"))
+
+        response = self.client.post(reverse("invoice-import"), {
+            "invoice_pdf": self._pdf_upload(),
+        })
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(Invoice.objects.filter(number="F-IMP").count(), 0)
+        self.assertContains(response, "No se ha podido importar la factura porque los importes extraídos no son congruentes.", status_code=400)
+        self.assertContains(response, "Total calculado", status_code=400)
+
+    @patch("projects.views.extract_invoice_data")
+    def test_invoice_import_rejects_duplicate_invoice(self, extract_invoice_data):
+        Invoice.objects.create(
+            provider_tax_id="B12345678",
+            number="F-IMP",
+            issue_date=date(2026, 6, 8),
+            concept="Factura existente",
+            taxable_base=Decimal("100.00"),
+            taxes=Decimal("21.00"),
+            total_amount=Decimal("121.00"),
+        )
+        extract_invoice_data.return_value = self._extraction()
+
+        response = self.client.post(reverse("invoice-import"), {
+            "invoice_pdf": self._pdf_upload(),
+        })
+
+        self.assertEqual(response.status_code, 409)
+        self.assertEqual(Invoice.objects.filter(number="F-IMP", provider_tax_id="B12345678").count(), 1)
+        self.assertContains(response, "Parece que esta factura ya está registrada.", status_code=409)
+
+    @patch("projects.views.extract_invoice_data")
+    def test_invoice_import_handles_openai_error(self, extract_invoice_data):
+        extract_invoice_data.side_effect = InvoiceExtractionError("No se ha podido analizar la factura.")
+
+        response = self.client.post(reverse("invoice-import"), {
+            "invoice_pdf": self._pdf_upload(),
+        })
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(Invoice.objects.filter(number="F-IMP").count(), 0)
+        self.assertContains(response, "No se ha podido analizar la factura.", status_code=400)

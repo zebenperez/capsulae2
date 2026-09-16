@@ -1,0 +1,30 @@
+{% load i18n project_tags %}
+
+<div class="project-modal invoice-import-modal invoice-import-result">
+    <div class="project-modal-close">
+        <button type="button" class="project-icon-btn" data-bs-dismiss="modal" aria-label="{% trans 'Cerrar' %}">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+
+    <h2>{% trans "Importar factura" %}</h2>
+    <div class="invoice-import-alert invoice-import-alert-warning" role="alert">
+        <strong>{% trans "Parece que esta factura ya está registrada." %}</strong>
+    </div>
+
+    <div class="invoice-import-duplicate-summary">
+        <span>{{ invoice.locator|default:"-----" }} · {{ invoice.invoice_code|default:"Pendiente" }}</span>
+        <strong>{{ invoice.number }}</strong>
+        <span>{{ invoice.provider_tax_id }} · {{ invoice.total_amount|money_es }}</span>
+    </div>
+
+    <div class="project-modal-actions invoice-import-actions">
+        <button type="button" class="project-btn project-btn-ghost" data-bs-dismiss="modal">
+            {% trans "Volver" %}
+        </button>
+        <button type="button" class="project-btn project-btn-primary ark" data-url="{% url "invoice-form" %}"
+            data-target-modal="common-modal" data-obj_id="{{ invoice.id }}">
+            <i class="fas fa-edit"></i> {% trans "Ver factura" %}
+        </button>
+    </div>
+</div>

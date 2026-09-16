@@ -1,0 +1,53 @@
+{% load i18n project_tags %}
+
+<div class="project-modal invoice-import-modal invoice-import-result">
+    <div class="project-modal-close">
+        <button type="button" class="project-icon-btn" data-bs-dismiss="modal" aria-label="{% trans 'Cerrar' %}">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+
+    <h2>{% trans "Importar factura" %}</h2>
+    <div class="invoice-import-alert invoice-import-alert-danger" role="alert">
+        <strong>{% trans "No se ha podido importar la factura porque los importes extraídos no son congruentes." %}</strong>
+    </div>
+
+    <dl class="invoice-import-amount-check">
+        <div>
+            <dt>{% trans "Base" %}</dt>
+            <dd>{% if validation.base != None %}{{ validation.base|money_es }}{% else %}---{% endif %}</dd>
+        </div>
+        <div>
+            <dt>{% trans "IVA" %}</dt>
+            <dd>{% if validation.iva != None %}{{ validation.iva|money_es }}{% else %}---{% endif %}</dd>
+        </div>
+        <div>
+            <dt>{% trans "IGIC" %}</dt>
+            <dd>{% if validation.igic != None %}{{ validation.igic|money_es }}{% else %}---{% endif %}</dd>
+        </div>
+        <div>
+            <dt>{% trans "IRPF" %}</dt>
+            <dd>{% if validation.irpf != None %}{{ validation.irpf|money_es }}{% else %}---{% endif %}</dd>
+        </div>
+        <div>
+            <dt>{% trans "Total calculado" %}</dt>
+            <dd>{% if validation.expected_total != None %}{{ validation.expected_total|money_es }}{% else %}---{% endif %}</dd>
+        </div>
+        <div>
+            <dt>{% trans "Total factura" %}</dt>
+            <dd>{% if validation.declared_total != None %}{{ validation.declared_total|money_es }}{% else %}---{% endif %}</dd>
+        </div>
+        <div>
+            <dt>{% trans "Diferencia" %}</dt>
+            <dd>{% if validation.difference != None %}{{ validation.difference|money_es }}{% else %}---{% endif %}</dd>
+        </div>
+    </dl>
+
+    <p class="project-muted">{{ validation.message }}</p>
+
+    <div class="project-modal-actions invoice-import-actions">
+        <button type="button" class="project-btn project-btn-ghost ark" data-url="{{ form_url }}" data-target-modal="common-modal">
+            {% trans "Volver" %}
+        </button>
+    </div>
+</div>

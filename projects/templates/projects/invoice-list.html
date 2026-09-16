@@ -41,7 +41,9 @@
             </div>
             <div class="invoice-amounts">
                 <span class="invoice-amounts__secondary">{% trans "Base" %}: {{ invoice.taxable_base|money_es }}</span>
-                <span class="invoice-amounts__secondary">{% trans "Impuestos" %}: {{ invoice.taxes|money_es }}</span>
+                <span class="invoice-amounts__secondary">{% trans "IVA" %}: {{ invoice.display_iva_amount|money_es }}</span>
+                <span class="invoice-amounts__secondary">{% trans "IGIC" %}: {{ invoice.igic_amount|money_es }}</span>
+                <span class="invoice-amounts__secondary">{% trans "IRPF" %}: {% if invoice.irpf_amount %}-{{ invoice.irpf_amount|money_es }}{% else %}{{ invoice.irpf_amount|money_es }}{% endif %}</span>
                 <span class="invoice-amounts__total">{% trans "Total" %}: {{ invoice.total_amount|money_es }}</span>
             </div>
             <div class="invoice-status">

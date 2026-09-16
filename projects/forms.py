@@ -1,4 +1,7 @@
+import os
+
 from django import forms
+from django.conf import settings
 
 from .models import (
     Activity,
@@ -127,7 +130,6 @@ class InvoiceForm(forms.ModelForm):
     class Meta:
         model = Invoice
         fields = (
-            "locator",
             "provider_tax_id",
             "number",
             "issue_date",
@@ -135,11 +137,37 @@ class InvoiceForm(forms.ModelForm):
             "concept",
             "taxable_base",
             "taxes",
+            "iva_amount",
+            "igic_amount",
+            "irpf_amount",
             "currency",
             "document_pdf",
             "status",
             "notes",
         )
+
+
+class InvoiceImportForm(forms.Form):
+    invoice_pdf = forms.FileField(label="Factura PDF")
+
+    def clean_invoice_pdf(self):
+        uploaded_file = self.cleaned_data["invoice_pdf"]
+        max_size = int(getattr(settings, "INVOICE_IMPORT_MAX_PDF_SIZE", os.getenv("INVOICE_IMPORT_MAX_PDF_SIZE", 10 * 1024 * 1024)))
+        filename = uploaded_file.name or ""
+        extension = os.path.splitext(filename)[1].lower()
+        if extension != ".pdf":
+            raise forms.ValidationError("El archivo debe tener extensión PDF.")
+        if uploaded_file.content_type != "application/pdf":
+            raise forms.ValidationError("El archivo debe tener tipo MIME application/pdf.")
+        if uploaded_file.size > max_size:
+            raise forms.ValidationError("El archivo supera el tamaño máximo permitido.")
+
+        uploaded_file.seek(0)
+        signature = uploaded_file.read(5)
+        uploaded_file.seek(0)
+        if signature != b"%PDF-":
+            raise forms.ValidationError("El archivo no parece ser un PDF válido.")
+        return uploaded_file
 
 
 class InvoiceAllocationForm(forms.ModelForm):

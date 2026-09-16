@@ -309,10 +309,16 @@
                                 {% blocktrans with start_date=invoice_start_date|date_es %}Facturas registradas desde {{ start_date }}.{% endblocktrans %}
                             </p>
                         </div>
-                        <button type="button" class="project-btn project-btn-primary ark" data-url="{% url "invoice-form" %}"
-                            data-target-modal="common-modal">
-                            <i class="fas fa-plus"></i> {% trans 'Nueva factura' %}
-                        </button>
+                        <div class="invoice-header-actions">
+                            <button type="button" class="project-btn project-btn-ghost ark" data-url="{% url "invoice-import" %}"
+                                data-target-modal="common-modal">
+                                <i class="fas fa-download"></i> {% trans 'Importar factura' %}
+                            </button>
+                            <button type="button" class="project-btn project-btn-primary ark" data-url="{% url "invoice-form" %}"
+                                data-target-modal="common-modal">
+                                <i class="fas fa-plus"></i> {% trans 'Nueva factura' %}
+                            </button>
+                        </div>
                     </div>
                     <div id="invoice-list">
                         {% include "projects/invoice-list.html" with invoices=invoices invoice_start_date=invoice_start_date %}

@@ -794,6 +794,61 @@ $(document).ready(()=>{
         e.stopImmediatePropagation();
     });
 
+    $("body").on("click", ".ajax-form-file", function(e){
+        var obj = $(this);
+        if (obj.data("loading")) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            return;
+        }
+        var form = $("#" + obj.data("form"));
+        var data = new FormData(form[0]);
+        if (!data.get("csrfmiddlewaretoken"))
+            data.append("csrfmiddlewaretoken", getCsrfToken());
+
+        var originalHtml = obj.html();
+        obj.data("loading", true);
+        obj.prop("disabled", true);
+        obj.html('<i class="fas fa-spinner fa-spin"></i> ' + (obj.data("loading-text") || "Procesando..."));
+        setWait();
+
+        $.ajax({
+            url: obj.data("url"),
+            type: "POST",
+            data: data,
+            cache: false,
+            contentType: false,
+            processData: false,
+            dataType: "html",
+            success: function(data, textStatus, xhr){
+                if (obj.data("target"))
+                    $("#" + obj.data("target")).html(data);
+                if (obj.data("dismiss-modal"))
+                    $("#" + obj.data("dismiss-modal")).modal("hide");
+                showInfo(xhr.getResponseHeader("X-Capsulae-Message") || obj.data("success-message") || "Completado.");
+                refreshProjectTabCounts();
+            },
+            error: function(e){
+                var html = e && e.responseText ? e.responseText : "";
+                if (html.indexOf("project-modal") >= 0) {
+                    $("#common-modal-body").html(html);
+                    $("#common-modal").modal("show");
+                }
+                else {
+                    showError(getAjaxErrorMessage(e));
+                }
+            },
+            complete: function(){
+                obj.removeData("loading");
+                obj.prop("disabled", false);
+                obj.html(originalHtml);
+                unsetWait();
+            }
+        });
+        e.preventDefault();
+        e.stopImmediatePropagation();
+    });
+
     $("body").on("change", ".project-financier-selector", function(){
         var modal = $(this).closest(".project-modal");
         if ($(this).val() == "__new__")

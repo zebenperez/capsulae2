@@ -170,7 +170,7 @@ class InvoiceStatusChangeInline(admin.TabularInline):
 
 @admin.register(Invoice)
 class InvoiceAdmin(admin.ModelAdmin):
-    list_display = ("locator", "invoice_code", "number", "provider_tax_id", "issue_date", "total_amount", "allocated_amount", "status", "physical_document")
+    list_display = ("locator", "invoice_code", "number", "provider_tax_id", "issue_date", "total_amount", "iva_amount", "igic_amount", "irpf_amount", "allocated_amount", "status", "physical_document")
     list_filter = ("status", "currency", "issue_date", "payment_date")
     search_fields = ("locator", "invoice_code", "number", "provider_tax_id", "concept")
     readonly_fields = ("invoice_code", "allocated_amount", "pending_amount")

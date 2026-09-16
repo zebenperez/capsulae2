@@ -1,0 +1,110 @@
+{% load i18n %}
+
+<div class="project-modal invoice-import-modal">
+    <div class="project-modal-close">
+        <button type="button" class="project-icon-btn" data-bs-dismiss="modal" aria-label="{% trans 'Cerrar' %}">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+
+    <h2>{% trans "Importar factura" %}</h2>
+    <p class="project-muted">
+        {% trans "Selecciona una factura en PDF. El sistema analizará el documento y extraerá automáticamente sus datos." %}
+    </p>
+
+    <form id="invoice-import-form" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="project-form-grid">
+            <div class="project-form-field project-form-field-wide invoice-import-dropzone">
+                <label for="invoice-import-pdf">{% trans "Factura PDF" %}</label>
+                <input type="file" class="form-control" id="invoice-import-pdf" name="invoice_pdf" accept="application/pdf,.pdf" required>
+                <small>{% trans "Solo se aceptan archivos PDF." %}</small>
+                {% if form.invoice_pdf.errors %}
+                    <div class="invoice-import-error-message" role="alert">
+                        {% for error in form.invoice_pdf.errors %}{{ error }}{% if not forloop.last %}<br>{% endif %}{% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </form>
+
+    <div class="project-modal-actions invoice-import-actions">
+        <button type="button" class="project-btn project-btn-ghost" data-bs-dismiss="modal">
+            {% trans "Cancelar" %}
+        </button>
+        <button type="button" class="project-btn project-btn-primary ajax-form-file invoice-import-submit" data-form="invoice-import-form"
+            data-url="{% url "invoice-import" %}" data-target="invoice-list" data-dismiss-modal="common-modal"
+            data-loading-text="{% trans 'Analizando factura…' %}" data-success-message="{% trans 'Factura importada correctamente.' %}">
+            <i class="fas fa-search"></i> {% trans "Analizar factura" %}
+        </button>
+    </div>
+</div>
+
+<script>
+    (function(){
+        $(".invoice-import-submit").off("click.invoiceImport").on("click.invoiceImport", function(e){
+            var obj = $(this);
+            var form = $("#" + obj.data("form"));
+            if (!form.length)
+                return;
+            if (form[0].checkValidity && !form[0].checkValidity()) {
+                form[0].reportValidity();
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                return;
+            }
+            if (obj.data("loading")) {
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                return;
+            }
+
+            var data = new FormData(form[0]);
+            if (!data.get("csrfmiddlewaretoken"))
+                data.append("csrfmiddlewaretoken", getCsrfToken());
+
+            var originalHtml = obj.html();
+            obj.data("loading", true);
+            obj.prop("disabled", true);
+            obj.html('<i class="fas fa-spinner fa-spin"></i> ' + (obj.data("loading-text") || "Procesando..."));
+            setWait();
+
+            $.ajax({
+                url: obj.data("url"),
+                type: "POST",
+                data: data,
+                cache: false,
+                contentType: false,
+                processData: false,
+                dataType: "html",
+                success: function(data, textStatus, xhr){
+                    if (obj.data("target"))
+                        $("#" + obj.data("target")).html(data);
+                    if (obj.data("dismiss-modal"))
+                        $("#" + obj.data("dismiss-modal")).modal("hide");
+                    showInfo(xhr.getResponseHeader("X-Capsulae-Message") || obj.data("success-message") || "Completado.");
+                    refreshProjectTabCounts();
+                },
+                error: function(error){
+                    var html = error && error.responseText ? error.responseText : "";
+                    if (html.indexOf("project-modal") >= 0) {
+                        $("#common-modal-body").html(html);
+                        $("#common-modal").modal("show");
+                    }
+                    else {
+                        showError(getAjaxErrorMessage(error));
+                    }
+                },
+                complete: function(){
+                    obj.removeData("loading");
+                    obj.prop("disabled", false);
+                    obj.html(originalHtml);
+                    unsetWait();
+                }
+            });
+
+            e.preventDefault();
+            e.stopImmediatePropagation();
+        });
+    })();
+</script>
