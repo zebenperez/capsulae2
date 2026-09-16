@@ -80,6 +80,13 @@
                         data-url="{% url "invoice-form" %}" data-target-modal="common-modal" data-obj_id="{{ invoice.id }}">
                         <i class="fas fa-edit"></i>
                     </a>
+                    {% if invoice.allocation_count == 0 %}
+                        <a class="project-icon-btn danger ark" title="{% trans 'Eliminar factura' %}" aria-label="{% trans 'Eliminar factura' %}"
+                            data-url="{% url "invoice-remove" %}" data-target="invoice-list" data-obj_id="{{ invoice.id }}"
+                            data-confirm="{% trans "¿Seguro que quieres eliminar esta factura? También se eliminará su documento físico asociado." %}">
+                            <i class="fas fa-trash"></i>
+                        </a>
+                    {% endif %}
                 </div>
             </details>
         </div>

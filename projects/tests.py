@@ -1005,6 +1005,93 @@ class ProjectInvoiceDashboardTests(TestCase):
         self.assertContains(response, "Documento físico")
         self.assertNotContains(response, "Falta documento físico")
 
+    def test_invoice_list_shows_remove_action_only_without_allocations(self):
+        removable_invoice = Invoice.objects.create(
+            locator="DEL01",
+            provider_tax_id="B44444444",
+            number="F-DELETE",
+            issue_date=date(2026, 6, 1),
+            concept="Factura eliminable",
+            taxable_base=Decimal("200.00"),
+            taxes=Decimal("42.00"),
+            total_amount=Decimal("242.00"),
+        )
+        allocated_invoice = Invoice.objects.create(
+            locator="DEL02",
+            provider_tax_id="B44444444",
+            number="F-NO-DELETE",
+            issue_date=date(2026, 6, 2),
+            concept="Factura no eliminable",
+            taxable_base=Decimal("200.00"),
+            taxes=Decimal("42.00"),
+            total_amount=Decimal("242.00"),
+        )
+        InvoiceAllocation.objects.create(
+            invoice=allocated_invoice,
+            project=self.project,
+            activity=self.activity,
+            budget_line=self.budget_line,
+            allocated_amount=Decimal("100.00"),
+        )
+
+        response = self.client.get(reverse("invoice-list"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, reverse("invoice-remove"))
+        self.assertContains(response, 'data-obj_id="{}"'.format(removable_invoice.id))
+        self.assertNotContains(response, 'data-obj_id="{}"'.format(allocated_invoice.id))
+
+    def test_invoice_remove_deletes_invoice_and_physical_document(self):
+        invoice = Invoice.objects.create(
+            locator="DEL03",
+            provider_tax_id="B44444444",
+            number="F-DELETE-DOC",
+            issue_date=date(2026, 6, 1),
+            concept="Factura eliminable con documento",
+            taxable_base=Decimal("200.00"),
+            taxes=Decimal("42.00"),
+            total_amount=Decimal("242.00"),
+        )
+        invoice.physical_document.save("documento-fisico-delete.pdf", SimpleUploadedFile("documento-fisico-delete.pdf", b"pdf"), save=True)
+        storage = invoice.physical_document.storage
+        document_name = invoice.physical_document.name
+        self.assertTrue(storage.exists(document_name))
+
+        response = self.client.get(reverse("invoice-remove"), {"obj_id": invoice.id})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(Invoice.objects.filter(pk=invoice.pk).exists())
+        self.assertFalse(storage.exists(document_name))
+
+    def test_invoice_remove_rejects_invoice_with_allocations(self):
+        invoice = Invoice.objects.create(
+            locator="DEL04",
+            provider_tax_id="B44444444",
+            number="F-DELETE-ALLOCATED",
+            issue_date=date(2026, 6, 1),
+            concept="Factura con imputacion",
+            taxable_base=Decimal("200.00"),
+            taxes=Decimal("42.00"),
+            total_amount=Decimal("242.00"),
+        )
+        invoice.physical_document.save("documento-fisico-allocated.pdf", SimpleUploadedFile("documento-fisico-allocated.pdf", b"pdf"), save=True)
+        document_name = invoice.physical_document.name
+        storage = invoice.physical_document.storage
+        InvoiceAllocation.objects.create(
+            invoice=invoice,
+            project=self.project,
+            activity=self.activity,
+            budget_line=self.budget_line,
+            allocated_amount=Decimal("100.00"),
+        )
+
+        response = self.client.get(reverse("invoice-remove"), {"obj_id": invoice.id})
+
+        self.assertEqual(response.status_code, 400)
+        self.assertTrue(Invoice.objects.filter(pk=invoice.pk).exists())
+        self.assertTrue(storage.exists(document_name))
+        self.assertContains(response, "No se puede eliminar una factura con imputaciones.", status_code=400)
+
     def test_invoice_list_resolves_supplier_by_nif(self):
         Supplier.objects.create(
             name="Proveedor Registrado",

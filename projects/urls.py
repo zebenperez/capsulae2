@@ -21,6 +21,7 @@ urlpatterns = [
     path('projects/invoices/form/', views.invoice_form, name='invoice-form'),
     path('projects/invoices/import/', views.invoice_import, name='invoice-import'),
     path('projects/invoices/save/', views.invoice_save, name='invoice-save'),
+    path('projects/invoices/remove/', views.invoice_remove, name='invoice-remove'),
     path('projects/invoices/physical-document-upload/', views.invoice_physical_document_upload, name='invoice-physical-document-upload'),
     path('projects/invoices/status-form/', views.invoice_status_form, name='invoice-status-form'),
     path('projects/invoices/status-save/', views.invoice_status_save, name='invoice-status-save'),

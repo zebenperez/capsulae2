@@ -119,7 +119,8 @@ def get_recent_invoices(user):
                 Sum("allocations__allocated_amount"),
                 Value(Decimal("0.00")),
                 output_field=DecimalField(max_digits=14, decimal_places=2),
-            )
+            ),
+            allocation_count=Count("allocations", distinct=True),
         )
         .order_by("-issue_date", "-id")
     )
@@ -537,6 +538,24 @@ def invoice_save(request):
             return HttpResponse(" ".join(messages), status=400)
         return HttpResponse(" ".join(e.messages), status=400)
     except Exception as e:
+        return HttpResponse(show_exc(e), status=400)
+
+
+@group_required("admins","managers", "employee")
+def invoice_remove(request):
+    try:
+        obj = get_or_none(Invoice, get_param(request.GET, "obj_id")) if get_param(request.GET, "obj_id") else None
+        if obj == None:
+            return HttpResponse("Factura no encontrada.", status=404)
+        if obj.allocations.exists():
+            return HttpResponse("No se puede eliminar una factura con imputaciones.", status=400)
+
+        if obj.physical_document:
+            obj.physical_document.delete(save=False)
+        obj.delete()
+        return render(request, "projects/invoice-list.html", get_invoice_context(request.user))
+    except Exception as e:
+        logger.exception("Invoice removal failed")
         return HttpResponse(show_exc(e), status=400)
 
 
