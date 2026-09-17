@@ -1738,7 +1738,41 @@ class ProjectInvoiceDashboardTests(TestCase):
         self.assertContains(response, '<option value="{}" selected>'.format(supplier.pk), html=False)
         pending_import.refresh_from_db()
         self.assertEqual(pending_import.status, PendingInvoiceImportStatus.PENDING_REVIEW)
-        self.assertEqual(pending_import.extracted_data["numero_factura"], "F-REANALIZADA")
+        self.assertEqual(pending_import.get_extracted_data()["numero_factura"], "F-REANALIZADA")
+
+    def test_pending_invoice_import_serializes_supported_json_values(self):
+        pending_import = PendingInvoiceImport.objects.create(
+            owner=self.user,
+            temporary_document=self._pdf_upload("serialized-values.pdf"),
+            original_name="serialized-values.pdf",
+            detected_mime="application/pdf",
+            file_size=32,
+            expires_at=timezone.now() + timedelta(hours=1),
+        )
+        values = [
+            None,
+            True,
+            False,
+            "texto",
+            ["uno", 2, None, False],
+            {"numero_factura": "F-JSON", "validado": True, "items": [1, 2]},
+        ]
+
+        for value in values:
+            pending_import.set_extracted_data(value)
+            pending_import.save(update_fields=["extracted_data"])
+            pending_import.refresh_from_db()
+            self.assertEqual(pending_import.get_extracted_data(), value)
+
+    def test_pending_invoice_import_empty_extracted_data_returns_empty_dict(self):
+        pending_import = PendingInvoiceImport(extracted_data="")
+
+        self.assertEqual(pending_import.get_extracted_data(), {})
+
+    def test_pending_invoice_import_invalid_extracted_data_returns_empty_dict(self):
+        pending_import = PendingInvoiceImport(extracted_data="{contenido no valido")
+
+        self.assertEqual(pending_import.get_extracted_data(), {})
 
     @patch("projects.views.extract_invoice_data")
     def test_failed_reanalysis_restores_pending_review_state(self, extract_invoice_data):

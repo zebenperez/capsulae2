@@ -255,7 +255,7 @@ def create_pending_import(owner, invoice_document):
 
 
 def mark_pending_import_ready(pending_import, extracted_data):
-    pending_import.extracted_data = serialize_extracted_data(extracted_data)
+    pending_import.set_extracted_data(serialize_extracted_data(extracted_data))
     pending_import.status = PendingInvoiceImportStatus.PENDING_REVIEW
     pending_import.error_code = ""
     pending_import.save(update_fields=["extracted_data", "status", "error_code"])

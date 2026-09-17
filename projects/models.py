@@ -3,6 +3,7 @@ import random
 import string
 import uuid
 from decimal import Decimal
+import json
 
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
@@ -896,7 +897,7 @@ class PendingInvoiceImport(models.Model):
     original_name = models.CharField(max_length=255)
     detected_mime = models.CharField(max_length=64)
     file_size = models.PositiveBigIntegerField(default=0)
-    extracted_data = models.JSONField(default=dict, blank=True)
+    extracted_data = models.TextField(default="", blank=True)
     status = models.CharField(
         max_length=32,
         choices=PendingInvoiceImportStatus.choices,
@@ -917,6 +918,17 @@ class PendingInvoiceImport(models.Model):
 
     def __str__(self):
         return "{} ({})".format(self.token, self.status)
+
+    def set_extracted_data(self, value):
+        self.extracted_data = json.dumps(value, ensure_ascii=False)
+
+    def get_extracted_data(self):
+        if not self.extracted_data:
+            return {}
+        try:
+            return json.loads(self.extracted_data)
+        except (TypeError, ValueError, json.JSONDecodeError):
+            return {}
 
     class Meta:
         verbose_name = "Importación pendiente de factura"
