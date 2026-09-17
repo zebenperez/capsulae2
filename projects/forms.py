@@ -1,7 +1,45 @@
-import os
+import calendar
+from decimal import Decimal
+from django.utils import timezone
 
 from django import forms
-from django.conf import settings
+from django.core.exceptions import ValidationError
+
+from projects.services.invoice_documents import (
+    INVOICE_DOCUMENT_ACCEPT,
+    INVOICE_DOCUMENT_HELP_TEXT,
+    validate_invoice_document,
+)
+from projects.services.invoice_import import get_amount_tolerance
+from projects.services.supplier_matching import normalize_tax_id
+
+
+class InvoiceFilterForm(forms.Form):
+    invoice_q = forms.CharField(label="Buscar", required=False)
+    invoice_from = forms.DateField(label="Desde", required=False, widget=forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d"))
+    invoice_to = forms.DateField(label="Hasta", required=False, widget=forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d"))
+    invoice_status = forms.ChoiceField(label="Estado", required=False)
+    invoice_min = forms.DecimalField(label="Importe mínimo", required=False, min_value=0, max_digits=14, decimal_places=2)
+
+    def __init__(self, params=None):
+        from .models import InvoiceStatus
+        today = timezone.localdate()
+        start_year, start_month = divmod(today.year * 12 + today.month - 1 - 6, 12)
+        start_date = today.replace(year=start_year, month=start_month + 1, day=1)
+        values = {"invoice_from": start_date.isoformat(), "invoice_to": today.replace(day=calendar.monthrange(today.year, today.month)[1]).isoformat(), "invoice_min": "0"}
+        if params is not None:
+            values.update({key: params.get(key) for key in self.base_fields if key in params})
+        super().__init__(data=values)
+        self.fields["invoice_status"].choices = [("", "Todos")] + list(InvoiceStatus.choices)
+        for field in self.fields.values():
+            field.widget.attrs["class"] = "form-control"
+        self.fields["invoice_q"].widget.attrs["placeholder"] = "Factura, localizador, código o proveedor"
+
+    def clean(self):
+        data = super().clean()
+        if data.get("invoice_from") and data.get("invoice_to") and data["invoice_from"] > data["invoice_to"]:
+            raise forms.ValidationError("La fecha inicial no puede ser posterior a la fecha final.")
+        return data
 
 from .models import (
     Activity,
@@ -15,6 +53,7 @@ from .models import (
     Project,
     ProjectFinancier,
     Result,
+    Supplier,
 )
 
 
@@ -130,44 +169,100 @@ class InvoiceForm(forms.ModelForm):
     class Meta:
         model = Invoice
         fields = (
+            "supplier",
             "provider_tax_id",
             "number",
             "issue_date",
             "payment_date",
             "concept",
             "taxable_base",
-            "taxes",
             "iva_amount",
             "igic_amount",
             "irpf_amount",
-            "currency",
-            "document_pdf",
-            "status",
-            "notes",
+            "total_amount",
         )
+        widgets = {
+            "issue_date": forms.DateInput(attrs={"type": "date", "class": "form-control"}, format="%Y-%m-%d"),
+            "payment_date": forms.DateInput(attrs={"type": "date", "class": "form-control"}, format="%Y-%m-%d"),
+            "concept": forms.Textarea(attrs={"class": "form-control"}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop("user", None)
+        super().__init__(*args, **kwargs)
+        self.fields["supplier"].queryset = Supplier.objects.only("id", "name", "nif").order_by("name", "id")
+        self.fields["supplier"].required = False
+        self.fields["supplier"].empty_label = "Seleccionar proveedor manualmente"
+        for name, field in self.fields.items():
+            field.widget.attrs.setdefault("class", "form-control")
+            if name in ("taxable_base", "iva_amount", "igic_amount", "irpf_amount", "total_amount"):
+                field.widget.attrs.update({"step": "0.01", "min": "0"})
+            if name in ("taxable_base", "iva_amount", "igic_amount", "irpf_amount"):
+                field.widget.attrs["class"] += " invoice-amount"
+            if name == "total_amount":
+                field.widget.attrs["class"] += " invoice-total"
+
+    def clean(self):
+        cleaned_data = super().clean()
+        amount_fields = ("taxable_base", "iva_amount", "igic_amount", "irpf_amount", "total_amount")
+        if any(cleaned_data.get(field) is None for field in amount_fields):
+            return cleaned_data
+
+        expected_total = (
+            cleaned_data["taxable_base"]
+            + cleaned_data["iva_amount"]
+            + cleaned_data["igic_amount"]
+            - cleaned_data["irpf_amount"]
+        ).quantize(Decimal("0.01"))
+        declared_total = cleaned_data["total_amount"].quantize(Decimal("0.01"))
+        if abs(expected_total - declared_total) > get_amount_tolerance():
+            message = "El total no coincide con la base, los impuestos y la retención. Revisa los importes."
+            self.add_error("total_amount", message)
+            self.add_error("taxable_base", "Revisa este importe.")
+            self.add_error("iva_amount", "Revisa este importe.")
+            self.add_error("igic_amount", "Revisa este importe.")
+            self.add_error("irpf_amount", "Revisa este importe.")
+
+        provider_tax_id = normalize_tax_id(cleaned_data.get("provider_tax_id"))
+        cleaned_data["provider_tax_id"] = provider_tax_id
+        supplier = cleaned_data.get("supplier")
+        if supplier is not None:
+            provider_tax_id = supplier.nif
+            cleaned_data["provider_tax_id"] = supplier.nif
+        number = (cleaned_data.get("number") or "").strip()
+        duplicate = Invoice.objects.filter(provider_tax_id__iexact=provider_tax_id, number=number)
+        if self.instance.pk:
+            duplicate = duplicate.exclude(pk=self.instance.pk)
+        if provider_tax_id and number and duplicate.exists():
+            self.add_error("number", "Ya existe una factura de este proveedor con el mismo número.")
+        return cleaned_data
+
+    def save(self, commit=True):
+        invoice = super().save(commit=False)
+        invoice.provider_tax_id = normalize_tax_id(invoice.provider_tax_id)
+        invoice.taxes = invoice.iva_amount + invoice.igic_amount - invoice.irpf_amount
+        if commit:
+            invoice.save()
+            self.save_m2m()
+        return invoice
 
 
 class InvoiceImportForm(forms.Form):
-    invoice_pdf = forms.FileField(label="Factura PDF")
+    invoice_document = forms.FileField(
+        label="Factura o ticket",
+        help_text=INVOICE_DOCUMENT_HELP_TEXT,
+        allow_empty_file=True,
+        widget=forms.ClearableFileInput(attrs={
+            "accept": INVOICE_DOCUMENT_ACCEPT,
+        }),
+    )
 
-    def clean_invoice_pdf(self):
-        uploaded_file = self.cleaned_data["invoice_pdf"]
-        max_size = int(getattr(settings, "INVOICE_IMPORT_MAX_PDF_SIZE", os.getenv("INVOICE_IMPORT_MAX_PDF_SIZE", 10 * 1024 * 1024)))
-        filename = uploaded_file.name or ""
-        extension = os.path.splitext(filename)[1].lower()
-        if extension != ".pdf":
-            raise forms.ValidationError("El archivo debe tener extensión PDF.")
-        if uploaded_file.content_type != "application/pdf":
-            raise forms.ValidationError("El archivo debe tener tipo MIME application/pdf.")
-        if uploaded_file.size > max_size:
-            raise forms.ValidationError("El archivo supera el tamaño máximo permitido.")
-
-        uploaded_file.seek(0)
-        signature = uploaded_file.read(5)
-        uploaded_file.seek(0)
-        if signature != b"%PDF-":
-            raise forms.ValidationError("El archivo no parece ser un PDF válido.")
-        return uploaded_file
+    def clean_invoice_document(self):
+        uploaded_file = self.cleaned_data["invoice_document"]
+        try:
+            return validate_invoice_document(uploaded_file)
+        except ValidationError as exc:
+            raise forms.ValidationError(exc.messages)
 
 
 class InvoiceAllocationForm(forms.ModelForm):

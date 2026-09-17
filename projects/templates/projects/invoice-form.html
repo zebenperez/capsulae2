@@ -9,8 +9,44 @@
 
     <h2>{% if obj %}{% trans "Editar factura" %}{% else %}{% trans "Nueva factura" %}{% endif %}</h2>
 
-    <form id="invoice-form">
+    {% if automatic_review %}
+        <div class="invoice-import-alert invoice-import-alert-warning" role="status">
+            {% trans "Hemos completado el formulario con la información identificada en el documento. Revisa los datos antes de guardar la factura." %}
+        </div>
+        <div class="invoice-supplier-match" id="invoice-supplier-match" role="{% if supplier_match.unique_exact %}status{% else %}alert{% endif %}" aria-live="polite">
+            {% if not supplier_match.normalized_tax_id %}
+                <p>{% trans "No fue posible identificar el NIF/CIF del proveedor. Puedes seleccionarlo manualmente." %}</p>
+            {% elif supplier_match.unique_exact %}
+                <p>{% blocktrans with name=supplier_match.unique_exact.name nif=supplier_match.unique_exact.nif %}Se ha identificado el proveedor {{ name }}, con NIF/CIF {{ nif }}. Revisa que sea correcto antes de guardar.{% endblocktrans %}</p>
+            {% elif supplier_match.exact_matches %}
+                <p>{% trans "Hay varios proveedores registrados con este NIF/CIF. Selecciona el proveedor correcto." %}</p>
+                <div class="invoice-supplier-suggestions">
+                    {% for candidate in supplier_match.exact_matches %}
+                        <div><span><strong>{{ candidate.name }}</strong><small>{{ candidate.nif }}</small></span><button type="button" class="project-btn project-btn-ghost invoice-supplier-select" data-supplier-id="{{ candidate.id }}" data-supplier-nif="{{ candidate.nif }}">{% trans "Seleccionar proveedor" %}</button></div>
+                    {% endfor %}
+                </div>
+            {% elif supplier_match.suggestions %}
+                <p>{% blocktrans with nif=supplier_match.original_tax_id %}No se encontró ningún proveedor con el NIF/CIF exacto “{{ nif }}”. Hemos encontrado los siguientes proveedores similares:{% endblocktrans %}</p>
+                <div class="invoice-supplier-suggestions">
+                    {% for candidate in supplier_match.suggestions %}
+                        <div><span><strong>{{ candidate.name }}</strong><small>{{ candidate.nif }}</small></span><button type="button" class="project-btn project-btn-ghost invoice-supplier-select" data-supplier-id="{{ candidate.id }}" data-supplier-nif="{{ candidate.nif }}">{% trans "Seleccionar proveedor" %}</button></div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p>{% blocktrans with nif=supplier_match.original_tax_id %}No se encontró ningún proveedor registrado que coincida con el NIF/CIF “{{ nif }}”. Revisa los datos o selecciona un proveedor manualmente.{% endblocktrans %}</p>
+            {% endif %}
+        </div>
+    {% endif %}
+    {% if amount_warning %}
+        <div class="invoice-import-alert invoice-import-alert-danger" role="alert">
+            {% if amount_warning.message %}{{ amount_warning.message }}{% else %}{% trans "Los importes detectados no cuadran y deben revisarse." %}{% endif %}
+        </div>
+    {% endif %}
+
+    <form id="invoice-form" enctype="multipart/form-data">
+        {% csrf_token %}
         <input type="hidden" name="obj_id" value="{{ obj.id|default:"" }}">
+        {% if pending_import %}<input type="hidden" name="pending_import" value="{{ pending_import.token }}">{% endif %}
         <div class="project-form-grid project-form-grid-project">
             <div class="project-form-field">
                 <label>{% trans "Localizador" %}</label>
@@ -21,60 +57,77 @@
                 <input type="text" class="form-control" name="invoice_code" value="{{ obj.invoice_code|default:"Se generará al guardar" }}" readonly>
             </div>
             <div class="project-form-field">
+                <label for="{{ form.supplier.id_for_label }}">{% trans "Proveedor registrado" %}</label>
+                {{ form.supplier }}
+                {% for error in form.supplier.errors %}<span class="project-field-error">{{ error }}</span>{% endfor %}
+            </div>
+            <div class="project-form-field">
                 <label>{% trans "Número factura" %}</label>
-                <input type="text" class="form-control" name="number" value="{{ obj.number|default:"" }}" required>
+                {{ form.number }}
+                {% for error in form.number.errors %}<span class="project-field-error">{{ error }}</span>{% endfor %}
             </div>
 
             <div class="project-form-field">
                 <label>{% trans "Fecha factura" %}</label>
-                <input type="date" class="form-control" name="issue_date" value="{{ obj.issue_date|date:"Y-m-d" }}" required>
+                {{ form.issue_date }}
+                {% for error in form.issue_date.errors %}<span class="project-field-error">{{ error }}</span>{% endfor %}
             </div>
 
             <div class="project-form-field">
                 <label>{% trans "Fecha pago" %}</label>
-                <input type="date" class="form-control" name="payment_date" value="{{ obj.payment_date|date:"Y-m-d" }}">
+                {{ form.payment_date }}
+                {% for error in form.payment_date.errors %}<span class="project-field-error">{{ error }}</span>{% endfor %}
             </div>
             <div class="project-form-field">
                 <label>{% trans "NIF proveedor" %}</label>
-                <input type="text" class="form-control" name="provider_tax_id" value="{{ obj.provider_tax_id|default:"" }}" required>
+                {{ form.provider_tax_id }}
+                {% for error in form.provider_tax_id.errors %}<span class="project-field-error">{{ error }}</span>{% endfor %}
             </div>
 
             <div class="project-form-field">
                 <label>{% trans "Base" %}</label>
-                <input type="number" step="0.01" min="0" class="form-control invoice-amount" name="taxable_base"
-                    value="{{ obj.taxable_base|decimal_input }}" required>
+                {{ form.taxable_base }}
+                {% for error in form.taxable_base.errors %}<span class="project-field-error">{{ error }}</span>{% endfor %}
             </div>
             <div class="project-form-field">
                 <label>{% trans "IVA" %}</label>
-                <input type="number" step="0.01" min="0" class="form-control invoice-amount" name="iva_amount"
-                    value="{{ obj.display_iva_amount|decimal_input }}" required>
+                {{ form.iva_amount }}
+                {% for error in form.iva_amount.errors %}<span class="project-field-error">{{ error }}</span>{% endfor %}
             </div>
             <div class="project-form-field">
                 <label>{% trans "IGIC" %}</label>
-                <input type="number" step="0.01" min="0" class="form-control invoice-amount" name="igic_amount"
-                    value="{{ obj.igic_amount|decimal_input }}" required>
+                {{ form.igic_amount }}
+                {% for error in form.igic_amount.errors %}<span class="project-field-error">{{ error }}</span>{% endfor %}
             </div>
             <div class="project-form-field">
                 <label>{% trans "IRPF" %}</label>
-                <input type="number" step="0.01" min="0" class="form-control invoice-amount" name="irpf_amount"
-                    value="{{ obj.irpf_amount|decimal_input }}" required>
+                {{ form.irpf_amount }}
+                {% for error in form.irpf_amount.errors %}<span class="project-field-error">{{ error }}</span>{% endfor %}
             </div>
             <div class="project-form-field">
                 <label>{% trans "Total" %}</label>
-                <input type="number" step="0.01" min="0" class="form-control invoice-total" name="total_amount"
-                    value="{{ obj.total_amount|decimal_input }}" readonly>
+                {{ form.total_amount }}
+                {% for error in form.total_amount.errors %}<span class="project-field-error">{{ error }}</span>{% endfor %}
             </div>
 
             <div class="project-form-field project-form-field-wide">
                 <label>{% trans "Concepto" %}</label>
-                <textarea class="form-control" name="concept" required>{{ obj.concept|default:"" }}</textarea>
+                {{ form.concept }}
+                {% for error in form.concept.errors %}<span class="project-field-error">{{ error }}</span>{% endfor %}
             </div>
             <div class="project-form-field project-form-field-wide">
                 <label>{% trans "Documento físico" %}</label>
-                {% if obj %}
+                {% if pending_import %}
+                    <div class="invoice-pending-document">
+                        <a href="{% url 'pending-invoice-document' pending_import.token %}" target="_blank" rel="noopener noreferrer" class="invoice-document-link">
+                            <i class="fas fa-file-alt" aria-hidden="true"></i> {% trans "Abrir documento analizado" %}
+                        </a>
+                        <small>{% trans "El documento se conservará temporalmente durante 24 horas si cancelas la revisión." %}</small>
+                    </div>
+                {% elif obj %}
                     <div class="invoice-document-control">
                         {% if obj.physical_document %}
-                            <a href="{{ obj.physical_document.url }}" target="_blank" class="invoice-document-link">
+                            <a href="{% url 'invoice-physical-document-file' obj.id %}" target="_blank" rel="noopener noreferrer" class="invoice-document-link">
                                 <i class="fas fa-file-alt"></i> {% trans "Documento físico cargado" %}
                             </a>
                         {% else %}
@@ -95,23 +148,115 @@
     </form>
 
     <div class="project-modal-actions">
-        <button type="button" class="project-btn project-btn-primary ajax-form-get" data-form="invoice-form"
-            data-url="{% url "invoice-save" %}" data-target="invoice-list" data-dismiss-modal="common-modal">
-            {% trans "Guardar" %}
+        <button type="button" class="project-btn project-btn-ghost" data-bs-dismiss="modal">{% trans "Cancelar" %}</button>
+        {% if pending_import %}
+            <button type="button" class="project-btn project-btn-ghost" id="invoice-import-reanalyze"
+                data-url="{% url 'invoice-import-reanalyze' pending_import.token %}">
+                <i class="fas fa-redo" aria-hidden="true"></i> {% trans "Reanalizar" %}
+            </button>
+        {% endif %}
+        <button type="button" class="project-btn project-btn-primary ajax-form-file" data-form="invoice-form"
+            data-url="{% url "invoice-save" %}" data-target="invoice-list" data-dismiss-modal="common-modal"
+            data-loading-text="{% trans 'Guardando factura…' %}" data-success-message="{% trans 'Factura guardada correctamente.' %}">
+            {% trans "Guardar factura" %}
         </button>
     </div>
 </div>
 
+{{ supplier_tax_ids|default_if_none:""|json_script:"invoice-supplier-tax-ids" }}
 <script>
     (function(){
-        function updateInvoiceTotal(){
+        var form = $("#invoice-form");
+        var totalWasEdited = false;
+        function calculatedInvoiceTotal(){
             var base = parseFloat($('[name="taxable_base"]').val() || "0");
             var iva = parseFloat($('[name="iva_amount"]').val() || "0");
             var igic = parseFloat($('[name="igic_amount"]').val() || "0");
             var irpf = parseFloat($('[name="irpf_amount"]').val() || "0");
-            $(".invoice-total").val((base + iva + igic - irpf).toFixed(2));
+            return (base + iva + igic - irpf).toFixed(2);
         }
-        $(".invoice-amount").on("input", updateInvoiceTotal);
-        updateInvoiceTotal();
+        $(".invoice-total").on("input", function(){ totalWasEdited = true; });
+        $(".invoice-amount").on("input", function(){
+            if (!totalWasEdited)
+                $(".invoice-total").val(calculatedInvoiceTotal());
+        });
+        if (!$('.invoice-total').val())
+            $(".invoice-total").val(calculatedInvoiceTotal());
+
+        var supplierField = form.find('[name="supplier"]');
+        var providerTaxIdField = form.find('[name="provider_tax_id"]');
+        var supplierMessage = $("#invoice-supplier-match");
+        var supplierTaxIds = {};
+        var supplierTaxIdsElement = document.getElementById("invoice-supplier-tax-ids");
+        if (supplierTaxIdsElement) {
+            try { supplierTaxIds = JSON.parse(supplierTaxIdsElement.textContent); }
+            catch (ignored) { supplierTaxIds = {}; }
+        }
+        supplierField.on("change.invoiceSupplier", function(){
+            var supplierId = $(this).val();
+            if (supplierId && supplierTaxIds[supplierId]) {
+                providerTaxIdField.val(supplierTaxIds[supplierId]);
+                var selectedName = $(this).find("option:selected").text();
+                supplierMessage.html($("<p>").text("{% trans 'Proveedor seleccionado:' %} " + selectedName + ". {% trans 'Revisa que sea correcto antes de guardar.' %}"));
+            }
+        });
+        $(".invoice-supplier-select").on("click.invoiceSupplier", function(){
+            supplierField.val(String($(this).data("supplier-id"))).trigger("change").trigger("focus");
+        });
+
+        $("#invoice-import-reanalyze").off("click.invoiceReanalyze").on("click.invoiceReanalyze", function(){
+            var button = $(this);
+            if (button.data("loading"))
+                return;
+            var originalHtml = button.html();
+            button.data("loading", true).prop("disabled", true)
+                .html('<i class="fas fa-spinner fa-spin" aria-hidden="true"></i> {% trans "Reanalizando…" %}');
+            setWait();
+            $.ajax({
+                url: button.data("url"),
+                type: "POST",
+                data: { csrfmiddlewaretoken: form.find('[name="csrfmiddlewaretoken"]').val() || getCsrfToken() },
+                dataType: "html",
+                success: function(data){
+                    $("#common-modal-body").html(data);
+                    $("#common-modal").modal("show");
+                },
+                error: function(error){
+                    showError(getAjaxErrorMessage(error));
+                },
+                complete: function(){
+                    button.removeData("loading").prop("disabled", false).html(originalHtml);
+                    unsetWait();
+                }
+            });
+        });
+
+        {% if pending_import %}
+        var pendingSaveButton = form.closest(".project-modal").find(".ajax-form-file");
+        var pendingModal = $("#common-modal");
+        pendingModal.off("hide.bs.modal.invoicePending").on("hide.bs.modal.invoicePending", function(event){
+            if (pendingSaveButton.data("loading"))
+                return;
+            event.preventDefault();
+            if (!swalAvailable()) {
+                console.warn("SweetAlert2 no está disponible para confirmar el cierre de la revisión.");
+                return;
+            }
+            Swal.fire({
+                icon: "warning",
+                title: "{% trans '¿Cerrar la revisión?' %}",
+                text: "{% trans 'La factura todavía no se ha guardado. La importación permanecerá disponible hasta que caduque.' %}",
+                showCancelButton: true,
+                confirmButtonText: "{% trans 'Cerrar revisión' %}",
+                cancelButtonText: "{% trans 'Continuar revisando' %}",
+                reverseButtons: true
+            }).then(function(result){
+                if (!result.isConfirmed)
+                    return;
+                pendingModal.off("hide.bs.modal.invoicePending");
+                pendingModal.modal("hide");
+            });
+        });
+        {% endif %}
     })();
 </script>

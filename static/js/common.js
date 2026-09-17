@@ -68,7 +68,66 @@ function runWithOptionalConfirm(obj, callback) {
 }
 
 function getAjaxErrorMessage(e) {
-    return e && e.responseText ? e.responseText : "No se pudo completar la operación.";
+    var defaultMessage = "Ha ocurrido un error inesperado. Por favor, comunícalo al administrador.";
+    if (!e)
+        return defaultMessage;
+
+    if (e.responseJSON && e.responseJSON.message)
+        return e.responseJSON.message;
+
+    var responseText = e.responseText || "";
+    if (!responseText)
+        return e.status >= 500 ? defaultMessage : "No se pudo completar la operación.";
+
+    var trimmedText = responseText.trim();
+    var looksLikeHtml = /^<!doctype html/i.test(trimmedText) || /^<html[\s>]/i.test(trimmedText) || /<(head|body|title|script|style)[\s>]/i.test(trimmedText);
+    if (looksLikeHtml || e.status >= 500) {
+        if (window.console && console.error)
+            console.error("Respuesta de error inesperada:", responseText);
+        return defaultMessage;
+    }
+
+    return trimmedText;
+}
+
+function clearInlineFormErrors(form, modal) {
+    form.find(".payment-form-field").removeClass("has-error");
+    form.find("[aria-invalid='true']").removeAttr("aria-invalid aria-describedby");
+    form.find(".payment-field-error").empty();
+    modal.find(".project-modal-error").attr("hidden", true).text("");
+}
+
+function setInlineFieldError(form, fieldName, messages) {
+    var field = form.find("[name='" + fieldName + "']").first();
+    if (!field.length)
+        return null;
+    var wrapper = field.closest(".payment-form-field");
+    var error = wrapper.find(".payment-field-error").first();
+    var errorId = error.attr("id") || (field.attr("id") + "-error");
+    error.attr("id", errorId).text((messages || []).join(" "));
+    wrapper.addClass("has-error");
+    field.attr({"aria-invalid": "true", "aria-describedby": errorId});
+    return field;
+}
+
+function showInlineFormErrors(form, modal, errors, nonFieldErrors) {
+    clearInlineFormErrors(form, modal);
+    var firstField = null;
+    $.each(errors || {}, function(fieldName, messages) {
+        var field = setInlineFieldError(form, fieldName, messages);
+        if (!firstField && field && field.length)
+            firstField = field;
+    });
+    var globalError = modal.find(".project-modal-error").first();
+    var summary = (nonFieldErrors || []).join(" ");
+    if (!summary && firstField)
+        summary = "Revisa los campos marcados antes de guardar.";
+    if (summary)
+        globalError.removeAttr("hidden").text(summary);
+    if (firstField) {
+        firstField[0].scrollIntoView({behavior: "smooth", block: "center"});
+        window.setTimeout(function() { firstField.trigger("focus"); }, 180);
+    }
 }
 
 function getCookie(name) {
@@ -738,13 +797,40 @@ $(document).ready(()=>{
             return;
         }
         var form = $("#" + obj.data("form"));
-        var datas = {};
         var modal = obj.closest(".project-modal");
-        var modalError = modal.find(".project-contribution-error, .invoice-wizard-error").first();
+        var modalError = modal.find(".project-modal-error, .project-contribution-error, .invoice-wizard-error").first();
+        var inlineErrors = obj.data("inline-errors") === true;
+        var swalErrors = obj.attr("data-swal-errors") === "true";
+        if (inlineErrors)
+            clearInlineFormErrors(form, modal);
+        if (form.length && form[0].checkValidity && !form[0].checkValidity()) {
+            if (inlineErrors) {
+                var clientErrors = {};
+                form.find(":invalid").each(function() {
+                    var field = $(this);
+                    clientErrors[field.attr("name")] = [field.data("required-message") || this.validationMessage];
+                });
+                showInlineFormErrors(form, modal, clientErrors, []);
+            }
+            else if (swalErrors) {
+                var firstInvalidField = form.find(":invalid").first();
+                showError(firstInvalidField.length ? firstInvalidField[0].validationMessage : "Revisa los datos del formulario.");
+                firstInvalidField.trigger("focus");
+            }
+            else {
+                form[0].reportValidity();
+            }
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            return;
+        }
+        var datas = {};
         if (modalError.length)
             modalError.attr("hidden", true).text("");
         form.find("input, select, textarea").each(function(){
             var field = $(this);
+            if (field.prop("disabled"))
+                return;
             if ((field.attr("type") == "radio" || field.attr("type") == "checkbox") && !field.prop("checked"))
                 return;
             if (field.attr("name"))
@@ -752,6 +838,12 @@ $(document).ready(()=>{
         });
         if (form.data("invoice-id") && !datas.invoice_id)
             datas.invoice_id = form.data("invoice-id");
+        var multipart = form.attr("enctype") === "multipart/form-data";
+        if (multipart) {
+            datas = new FormData(form[0]);
+            if (!datas.get("csrfmiddlewaretoken"))
+                datas.append("csrfmiddlewaretoken", getCsrfToken());
+        }
         var originalHtml = obj.html();
         obj.data("loading", true);
         obj.prop("disabled", true);
@@ -759,8 +851,10 @@ $(document).ready(()=>{
         setWait();
         $.ajax({
             url: obj.data("url"),
-            type: "GET",
+            type: multipart ? "POST" : "GET",
             data: datas,
+            processData: !multipart,
+            contentType: multipart ? false : "application/x-www-form-urlencoded; charset=UTF-8",
             cache: false,
             dataType: "html",
             success: function(data){
@@ -773,12 +867,23 @@ $(document).ready(()=>{
                 }
                 if (obj.data("dismiss-modal"))
                     $("#" + obj.data("dismiss-modal")).modal("hide");
+                if (obj.data("success-message"))
+                    showInfo(obj.data("success-message"));
                 refreshProjectTabCounts();
                 refreshHtmlTarget(obj.data("refresh-url"), obj.data("refresh-target"));
             },
             error: function(e){
+                if (inlineErrors && !e.responseJSON) {
+                    try { e.responseJSON = JSON.parse(e.responseText); } catch (ignored) {}
+                }
+                if (inlineErrors && e.status === 400 && e.responseJSON && (e.responseJSON.errors || e.responseJSON.non_field_errors)) {
+                    showInlineFormErrors(form, modal, e.responseJSON.errors, e.responseJSON.non_field_errors);
+                    return;
+                }
                 var message = getAjaxErrorMessage(e);
-                if (modalError.length)
+                if (swalErrors)
+                    showError(message);
+                else if (modalError.length)
                     modalError.removeAttr("hidden").text(message);
                 else
                     showError(message);

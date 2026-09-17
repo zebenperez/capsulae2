@@ -1,12 +1,16 @@
-from datetime import date
+from datetime import date, timedelta
 from decimal import Decimal
+from io import BytesIO
 from unittest.mock import patch
 
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import TestCase
+from django.core.management import call_command
+from django.test import TestCase, override_settings
 from django.urls import reverse
+from django.utils import timezone
+from PIL import Image
 
 from .models import (
     Activity,
@@ -21,16 +25,34 @@ from .models import (
     InvoiceAllocation,
     InvoiceStatus,
     InvoiceStatusChange,
+    PendingInvoiceImport,
+    PendingInvoiceImportStatus,
     Objective,
     ObjectiveType,
+    CashOutflow,
+    PaymentFinancialState,
+    PaymentObligation,
+    PaymentObligationStatus,
+    PaymentObligationType,
     Project,
     ProjectFinancier,
     ProgressStatus,
     Supplier,
     Text,
 )
-from .services.invoice_ai import InvoiceExtractionError, InvoiceExtractionResult
+from .services.invoice_ai import (
+    InvoiceExtractionError,
+    InvoiceExtractionResult,
+    build_invoice_openai_content,
+    parse_invoice_extraction_payload,
+)
 from .services.invoice_import import validate_invoice_amounts
+from .services.supplier_matching import (
+    damerau_levenshtein_distance,
+    jaro_winkler_similarity,
+    match_suppliers,
+    normalize_tax_id,
+)
 from .templatetags.project_tags import money_es
 
 
@@ -996,7 +1018,7 @@ class ProjectInvoiceDashboardTests(TestCase):
 
         response = self.client.post(reverse("invoice-physical-document-upload"), {
             "obj_id": invoice.id,
-            "file": SimpleUploadedFile("documento-fisico.pdf", b"pdf", content_type="application/pdf"),
+            "file": self._pdf_upload("documento-fisico.pdf"),
         })
 
         self.assertEqual(response.status_code, 200)
@@ -1183,11 +1205,11 @@ class ProjectInvoiceDashboardTests(TestCase):
         response = self.client.get(reverse("invoice-form"), {"obj_id": invoice.id})
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'name="taxable_base"\n                    value="200.00"', html=False)
-        self.assertContains(response, 'name="iva_amount"\n                    value="42.00"', html=False)
-        self.assertContains(response, 'name="igic_amount"\n                    value="0.00"', html=False)
-        self.assertContains(response, 'name="irpf_amount"\n                    value="0.00"', html=False)
-        self.assertContains(response, 'name="total_amount"\n                    value="242.00"', html=False)
+        self.assertContains(response, 'name="taxable_base" value="200.00"', html=False)
+        self.assertContains(response, 'name="iva_amount" value="42.00"', html=False)
+        self.assertContains(response, 'name="igic_amount" value="0.00"', html=False)
+        self.assertContains(response, 'name="irpf_amount" value="0.00"', html=False)
+        self.assertContains(response, 'name="total_amount" value="242.00"', html=False)
 
     def test_invoice_form_shows_physical_document_field(self):
         invoice = Invoice.objects.create(
@@ -1313,6 +1335,99 @@ class ProjectInvoiceDashboardTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "No hay cambios de estado registrados para esta factura.")
+
+    def test_invoice_traceability_offers_attachment_when_document_is_missing(self):
+        invoice = Invoice.objects.create(
+            provider_tax_id="B44444444", number="F-NO-DOC", issue_date=date(2026, 6, 1),
+            concept="Factura sin documento", taxable_base=Decimal("100.00"), taxes=Decimal("21.00"), total_amount=Decimal("121.00"),
+        )
+
+        response = self.client.get(reverse("invoice-traceability"), {"invoice_id": invoice.id})
+
+        self.assertContains(response, "Adjuntar documento")
+        self.assertContains(response, "Sin documento físico")
+        self.assertContains(response, reverse("invoice-physical-document-form"))
+
+    def test_invoice_traceability_shows_document_format_and_size(self):
+        invoice = Invoice.objects.create(
+            provider_tax_id="B44444444", number="F-WITH-DOC", issue_date=date(2026, 6, 1),
+            concept="Factura con documento", taxable_base=Decimal("100.00"), taxes=Decimal("21.00"), total_amount=Decimal("121.00"),
+        )
+        invoice.physical_document.save("traceability.pdf", self._pdf_upload("traceability.pdf"), save=True)
+
+        response = self.client.get(reverse("invoice-traceability"), {"invoice_id": invoice.id})
+
+        self.assertContains(response, "Ver documento")
+        self.assertContains(response, "PDF · 1 KB")
+        self.assertContains(response, reverse("invoice-physical-document-viewer"))
+
+    def test_invoice_document_form_reuses_import_picker_without_openai(self):
+        invoice = Invoice.objects.create(
+            provider_tax_id="B44444444", number="F-ATTACH", issue_date=date(2026, 6, 1),
+            concept="Factura a adjuntar", taxable_base=Decimal("100.00"), taxes=Decimal("21.00"), total_amount=Decimal("121.00"),
+        )
+
+        response = self.client.get(reverse("invoice-physical-document-form"), {"invoice_id": invoice.id})
+
+        self.assertContains(response, "Seleccionar archivo")
+        self.assertContains(response, "Tomar foto")
+        self.assertContains(response, reverse("invoice-physical-document-upload"))
+        self.assertNotContains(response, "Analizar factura")
+
+    @patch("projects.views.extract_invoice_data")
+    def test_attaching_document_does_not_extract_or_modify_invoice(self, extract_invoice_data):
+        invoice = Invoice.objects.create(
+            provider_tax_id="B44444444", number="F-NO-AI", issue_date=date(2026, 6, 1),
+            concept="Datos intactos", taxable_base=Decimal("100.00"), taxes=Decimal("21.00"), total_amount=Decimal("121.00"),
+        )
+        invoice_count = Invoice.objects.count()
+
+        response = self.client.post(reverse("invoice-physical-document-upload"), {
+            "obj_id": invoice.id,
+            "invoice_document": self._png_upload("documento.png"),
+        })
+
+        self.assertEqual(response.status_code, 200)
+        extract_invoice_data.assert_not_called()
+        self.assertEqual(Invoice.objects.count(), invoice_count)
+        invoice.refresh_from_db()
+        self.assertEqual(invoice.concept, "Datos intactos")
+        self.assertContains(response, "Ver documento")
+
+    def test_invalid_replacement_keeps_previous_document(self):
+        invoice = Invoice.objects.create(
+            provider_tax_id="B44444444", number="F-KEEP-DOC", issue_date=date(2026, 6, 1),
+            concept="Conservar documento", taxable_base=Decimal("100.00"), taxes=Decimal("21.00"), total_amount=Decimal("121.00"),
+        )
+        invoice.physical_document.save("original.pdf", self._pdf_upload("original.pdf"), save=True)
+        original_name = invoice.physical_document.name
+
+        response = self.client.post(reverse("invoice-physical-document-upload"), {
+            "obj_id": invoice.id,
+            "invoice_document": SimpleUploadedFile("falso.pdf", b"contenido invalido", content_type="application/pdf"),
+        })
+
+        self.assertEqual(response.status_code, 400)
+        invoice.refresh_from_db()
+        self.assertEqual(invoice.physical_document.name, original_name)
+        self.assertTrue(invoice.physical_document.storage.exists(original_name))
+
+    def test_invoice_document_view_and_download_have_safe_headers(self):
+        invoice = Invoice.objects.create(
+            provider_tax_id="B44444444", number="F-PRIVATE-DOC", issue_date=date(2026, 6, 1),
+            concept="Documento privado", taxable_base=Decimal("100.00"), taxes=Decimal("21.00"), total_amount=Decimal("121.00"),
+        )
+        invoice.physical_document.save("private.pdf", self._pdf_upload("private.pdf"), save=True)
+        url = reverse("invoice-physical-document-file", args=[invoice.id])
+
+        inline_response = self.client.get(url)
+        download_response = self.client.get(url, {"download": "1"})
+
+        self.assertEqual(inline_response.status_code, 200)
+        self.assertEqual(inline_response["X-Content-Type-Options"], "nosniff")
+        self.assertEqual(inline_response["Cache-Control"], "private, no-store")
+        self.assertTrue(inline_response["Content-Disposition"].startswith("inline;"))
+        self.assertTrue(download_response["Content-Disposition"].startswith("attachment;"))
 
     def test_invoice_allocation_wizard_saves_allocation_without_activity(self):
         invoice = Invoice.objects.create(
@@ -1474,8 +1589,19 @@ class ProjectInvoiceDashboardTests(TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(InvoiceAllocation.objects.filter(invoice=invoice).count(), 1)
 
-    def _pdf_upload(self, name="factura.pdf"):
-        return SimpleUploadedFile(name, b"%PDF-1.4\n% factura de prueba\n", content_type="application/pdf")
+    def _pdf_upload(self, name="factura.pdf", content_type="application/pdf"):
+        return SimpleUploadedFile(name, b"%PDF-1.4\n% factura de prueba\n%%EOF\n", content_type=content_type)
+
+    def _image_bytes(self, image_format):
+        buffer = BytesIO()
+        Image.new("RGB", (1, 1), color=(255, 255, 255)).save(buffer, format=image_format)
+        return buffer.getvalue()
+
+    def _png_upload(self, name="factura.png", content_type="image/png"):
+        return SimpleUploadedFile(name, self._image_bytes("PNG"), content_type=content_type)
+
+    def _jpg_upload(self, name="ticket.jpg", content_type="image/jpeg"):
+        return SimpleUploadedFile(name, self._image_bytes("JPEG"), content_type=content_type)
 
     def _extraction(self, **overrides):
         data = {
@@ -1493,14 +1619,263 @@ class ProjectInvoiceDashboardTests(TestCase):
         data.update(overrides)
         return InvoiceExtractionResult(**data)
 
-    def test_invoice_import_rejects_invalid_pdf(self):
+    def _invoice_form_data(self, pending_import=None, **overrides):
+        data = {
+            "provider_tax_id": "B12345678",
+            "number": "F-IMP",
+            "issue_date": "2026-06-08",
+            "payment_date": "",
+            "concept": "Servicios importados corregidos",
+            "taxable_base": "100.00",
+            "iva_amount": "21.00",
+            "igic_amount": "0.00",
+            "irpf_amount": "0.00",
+            "total_amount": "121.00",
+        }
+        if pending_import:
+            data["pending_import"] = str(pending_import.token)
+        data.update(overrides)
+        return data
+
+    def test_tax_id_normalization_preserves_characters_and_handles_spanish_prefix(self):
+        self.assertEqual(normalize_tax_id(" es b-123.456 78 "), "B12345678")
+        self.assertEqual(normalize_tax_id("ES12345678Z"), "12345678Z")
+        self.assertEqual(normalize_tax_id("ES-FOREIGN-12"), "ESFOREIGN12")
+        self.assertEqual(normalize_tax_id("OIL-S5B8"), "OILS5B8")
+
+    def test_supplier_similarity_supports_substitution_insertion_deletion_and_transposition(self):
+        registered = "B12345678"
+        variants = ("B12345679", "B123456789", "B1234567", "B12345768")
+        for variant in variants:
+            self.assertEqual(damerau_levenshtein_distance(variant, registered), 1)
+            self.assertGreaterEqual(jaro_winkler_similarity(variant, registered), 0.90)
+
+    def test_supplier_matching_requires_both_thresholds_and_rejects_distance_over_one(self):
+        Supplier.objects.create(name="Proveedor candidato", nif="B12345678")
+
+        accepted = match_suppliers("B12345679", Supplier.objects.all())
+        rejected = match_suppliers("B12345990", Supplier.objects.all())
+
+        self.assertEqual([item.name for item in accepted.suggestions], ["Proveedor candidato"])
+        self.assertEqual(rejected.suggestions, ())
+
+    @override_settings(INVOICE_SUPPLIER_SUGGESTION_LIMIT=2)
+    def test_supplier_suggestions_are_stable_and_limited(self):
+        Supplier.objects.bulk_create([
+            Supplier(name="Zulu", nif="B12345670"),
+            Supplier(name="Alfa", nif="B12345671"),
+            Supplier(name="Beta", nif="B12345672"),
+        ])
+
+        result = match_suppliers("B12345679", Supplier.objects.all())
+
+        self.assertEqual(len(result.suggestions), 2)
+        self.assertEqual([item.name for item in result.suggestions], ["Alfa", "Beta"])
+
+    def test_multiple_normalized_exact_suppliers_are_not_auto_selected(self):
+        Supplier.objects.bulk_create([
+            Supplier(name="Proveedor A", nif="B12345678"),
+            Supplier(name="Proveedor B", nif="B-12345678"),
+        ])
+
+        result = match_suppliers("ES B12345678", Supplier.objects.all())
+
+        self.assertIsNone(result.unique_exact)
+        self.assertEqual(len(result.exact_matches), 2)
+        self.assertEqual(result.suggestions, ())
+
+    @patch("projects.views.extract_invoice_data")
+    def test_unique_exact_supplier_is_preselected_with_canonical_tax_id(self, extract_invoice_data):
+        supplier = Supplier.objects.create(name="Proveedor exacto", nif="B12345678")
+        extract_invoice_data.return_value = self._extraction(nif_proveedor="B12345678")
+
+        response = self.client.post(reverse("invoice-import"), {"invoice_document": self._pdf_upload()})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(Invoice.objects.count(), 0)
+        self.assertContains(response, "Se ha identificado el proveedor Proveedor exacto")
+        self.assertContains(response, 'id="invoice-supplier-match" role="status"', html=False)
+        self.assertContains(response, '<option value="{}" selected>'.format(supplier.pk), html=False)
+        self.assertContains(response, 'name="provider_tax_id" value="B12345678"', html=False)
+
+    @patch("projects.views.extract_invoice_data")
+    def test_approximate_supplier_requires_user_selection_and_backend_uses_canonical_value(self, extract_invoice_data):
+        supplier = Supplier.objects.create(name="Proveedor similar", nif="B12345678")
+        extract_invoice_data.return_value = self._extraction(nif_proveedor="B12345679")
+        analysis_response = self.client.post(reverse("invoice-import"), {"invoice_document": self._pdf_upload()})
+        pending_import = PendingInvoiceImport.objects.get()
+
+        self.assertEqual(Invoice.objects.count(), 0)
+        self.assertContains(analysis_response, 'id="invoice-supplier-match" role="alert"', html=False)
+        response = self.client.post(reverse("invoice-save"), self._invoice_form_data(
+            pending_import,
+            supplier=str(supplier.pk),
+            provider_tax_id="NIF-MANIPULADO",
+        ))
+
+        self.assertEqual(response.status_code, 200)
+        invoice = Invoice.objects.get()
+        self.assertEqual(invoice.supplier, supplier)
+        self.assertEqual(invoice.provider_tax_id, "B12345678")
+
+    @patch("projects.views.extract_invoice_data")
+    def test_reanalyze_uses_pending_document_and_refreshes_review_without_creating_invoice(self, extract_invoice_data):
+        extract_invoice_data.side_effect = [
+            self._extraction(numero_factura="F-ORIGINAL", nif_proveedor="B38007495"),
+            self._extraction(numero_factura="F-REANALIZADA", nif_proveedor="B12345678"),
+        ]
+        supplier = Supplier.objects.create(name="Proveedor reanalizado", nif="B12345678")
+        self.client.post(reverse("invoice-import"), {"invoice_document": self._pdf_upload()})
+        pending_import = PendingInvoiceImport.objects.get()
+
+        response = self.client.post(reverse("invoice-import-reanalyze", args=[pending_import.token]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(extract_invoice_data.call_count, 2)
+        self.assertEqual(Invoice.objects.count(), 0)
+        self.assertContains(response, 'value="F-REANALIZADA"')
+        self.assertContains(response, "Proveedor reanalizado")
+        self.assertContains(response, '<option value="{}" selected>'.format(supplier.pk), html=False)
+        pending_import.refresh_from_db()
+        self.assertEqual(pending_import.status, PendingInvoiceImportStatus.PENDING_REVIEW)
+        self.assertEqual(pending_import.extracted_data["numero_factura"], "F-REANALIZADA")
+
+    @patch("projects.views.extract_invoice_data")
+    def test_failed_reanalysis_restores_pending_review_state(self, extract_invoice_data):
+        extract_invoice_data.return_value = self._extraction()
+        self.client.post(reverse("invoice-import"), {"invoice_document": self._pdf_upload()})
+        pending_import = PendingInvoiceImport.objects.get()
+        extract_invoice_data.side_effect = InvoiceExtractionError("OpenAI no respondió.")
+
+        response = self.client.post(reverse("invoice-import-reanalyze", args=[pending_import.token]))
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(Invoice.objects.count(), 0)
+        pending_import.refresh_from_db()
+        self.assertEqual(pending_import.status, PendingInvoiceImportStatus.PENDING_REVIEW)
+
+    def test_empty_tax_id_does_not_run_approximate_matching(self):
+        Supplier.objects.create(name="Proveedor", nif="B12345678")
+        result = match_suppliers(None, Supplier.objects.all())
+        self.assertEqual(result.exact_matches, ())
+        self.assertEqual(result.suggestions, ())
+
+    def test_invoice_import_camera_controls_are_progressively_enhanced(self):
+        response = self.client.get(reverse("invoice-import"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'id="invoice-camera-open" hidden')
+        self.assertContains(response, "Tomar foto")
+        self.assertContains(response, 'id="invoice-camera-video" autoplay playsinline muted')
+        self.assertContains(response, "Usar esta foto")
+        self.assertContains(response, "Repetir foto")
+        self.assertContains(response, 'name="invoice_document"')
+        self.assertContains(response, 'typeof navigator.mediaDevices.getUserMedia === "function"')
+        self.assertContains(response, 'cameraOpen.prop("hidden", false)')
+
+    def test_invoice_import_redesign_uses_accessible_action_cards_and_disabled_submit(self):
+        response = self.client.get(reverse("invoice-import"))
+        html = response.content.decode()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'id="invoice-file-open"')
+        self.assertContains(response, "Seleccionar archivo")
+        self.assertContains(response, "PDF, PNG, JPG o JPEG")
+        self.assertContains(response, "Usa la cámara del dispositivo")
+        self.assertContains(response, "El documento se analizará de forma segura")
+        self.assertContains(response, 'class="project-btn project-btn-primary ajax-form-file invoice-import-submit"', html=False)
+        self.assertIn('disabled aria-disabled="true"', html)
+        self.assertIn('fileChoice.off("click.invoiceImport").on("click.invoiceImport", function(){ input.trigger("click"); })', html)
+        self.assertIn('setSubmitEnabled(true)', html)
+        self.assertIn('input.val("")', html)
+        self.assertIn('setSelectedMethod("camera")', html)
+        self.assertIn('setSelectedMethod("file")', html)
+
+    def test_invoice_import_camera_requests_environment_camera_only_on_click(self):
+        response = self.client.get(reverse("invoice-import"))
+        html = response.content.decode()
+
+        open_function = html.index("function openCamera()")
+        media_request = html.index("navigator.mediaDevices.getUserMedia({")
+        click_binding = html.index('cameraOpen.off("click.invoiceCamera").on("click.invoiceCamera", openCamera)')
+        self.assertGreater(media_request, open_function)
+        self.assertGreater(click_binding, media_request)
+        self.assertIn('facingMode: { ideal: "environment" }', html)
+        self.assertIn("audio: false", html)
+
+    def test_invoice_import_camera_creates_jpeg_in_existing_field_and_cleans_up(self):
+        response = self.client.get(reverse("invoice-import"))
+        html = response.content.decode()
+
+        self.assertIn('canvas.width = width', html)
+        self.assertIn('canvas.height = height', html)
+        self.assertIn('}, "image/jpeg", 0.92)', html)
+        self.assertIn('new File([capturedBlob], filename, { type: "image/jpeg"', html)
+        self.assertIn("transfer.items.add(capturedFile)", html)
+        self.assertIn("input[0].files = transfer.files", html)
+        self.assertIn("validateClientFile(capturedFile)", html)
+        self.assertIn("cameraStream.getTracks().forEach(function(track){ track.stop(); })", html)
+        self.assertIn('hidden.bs.modal.invoiceCamera', html)
+        self.assertIn('pagehide.invoiceCamera beforeunload.invoiceCamera', html)
+        self.assertIn('error.name === "NotAllowedError"', html)
+        self.assertIn('error.name === "NotFoundError"', html)
+        self.assertIn('error.name === "NotReadableError"', html)
+        self.assertIn('error.name === "OverconstrainedError"', html)
+
+    def test_invoice_import_rejects_invalid_extension(self):
         response = self.client.post(reverse("invoice-import"), {
-            "invoice_pdf": SimpleUploadedFile("factura.txt", b"texto", content_type="text/plain"),
+            "invoice_document": SimpleUploadedFile("factura.txt", b"texto", content_type="text/plain"),
         })
 
         self.assertEqual(response.status_code, 400)
         self.assertEqual(Invoice.objects.filter(number="F-IMP").count(), 0)
-        self.assertContains(response, "El archivo debe tener extensión PDF", status_code=400)
+        self.assertContains(response, "El archivo debe tener extensión PDF, PNG, JPG o JPEG", status_code=400)
+
+    def test_invoice_import_rejects_browser_mime_not_allowed(self):
+        response = self.client.post(reverse("invoice-import"), {
+            "invoice_document": self._pdf_upload(content_type="text/plain"),
+        })
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(Invoice.objects.filter(number="F-IMP").count(), 0)
+        self.assertContains(response, "El tipo MIME del archivo no está permitido.", status_code=400)
+
+    def test_invoice_import_rejects_mismatched_real_content(self):
+        response = self.client.post(reverse("invoice-import"), {
+            "invoice_document": SimpleUploadedFile("factura.png", b"%PDF-1.4\n%%EOF\n", content_type="image/png"),
+        })
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(Invoice.objects.filter(number="F-IMP").count(), 0)
+        self.assertContains(response, "La extensión del archivo no coincide con su contenido real.", status_code=400)
+
+    def test_invoice_import_rejects_empty_file(self):
+        response = self.client.post(reverse("invoice-import"), {
+            "invoice_document": SimpleUploadedFile("factura.pdf", b"", content_type="application/pdf"),
+        })
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(Invoice.objects.filter(number="F-IMP").count(), 0)
+        self.assertContains(response, "El archivo está vacío.", status_code=400)
+
+    def test_invoice_import_rejects_damaged_file(self):
+        response = self.client.post(reverse("invoice-import"), {
+            "invoice_document": SimpleUploadedFile("ticket.jpg", b"\xff\xd8\xff datos rotos", content_type="image/jpeg"),
+        })
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(Invoice.objects.filter(number="F-IMP").count(), 0)
+        self.assertContains(response, "La imagen no se puede leer o está dañada.", status_code=400)
+
+    @override_settings(INVOICE_IMPORT_MAX_DOCUMENT_SIZE=8)
+    def test_invoice_import_rejects_too_large_file(self):
+        response = self.client.post(reverse("invoice-import"), {
+            "invoice_document": self._pdf_upload(),
+        })
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(Invoice.objects.filter(number="F-IMP").count(), 0)
+        self.assertContains(response, "El archivo supera el tamaño máximo permitido", status_code=400)
 
     def test_validate_invoice_amounts_accepts_iva_invoice(self):
         validation = validate_invoice_amounts(self._extraction())
@@ -1528,81 +1903,352 @@ class ProjectInvoiceDashboardTests(TestCase):
         self.assertEqual(validation["difference"], Decimal("-0.01"))
 
     @patch("projects.views.extract_invoice_data")
-    def test_invoice_import_creates_invoice_and_physical_document(self, extract_invoice_data):
-        Supplier.objects.create(name="Proveedor Importado", nif="B12345678")
+    def test_invoice_analysis_opens_prefilled_form_without_creating_invoice(self, extract_invoice_data):
         extract_invoice_data.return_value = self._extraction()
 
-        response = self.client.post(reverse("invoice-import"), {
-            "invoice_pdf": self._pdf_upload(),
-        })
+        response = self.client.post(reverse("invoice-import"), {"invoice_document": self._pdf_upload()})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(Invoice.objects.count(), 0)
+        pending_import = PendingInvoiceImport.objects.get()
+        self.assertEqual(pending_import.owner, self.user)
+        self.assertEqual(pending_import.status, PendingInvoiceImportStatus.PENDING_REVIEW)
+        self.assertContains(response, "Hemos completado el formulario")
+        self.assertContains(response, 'name="pending_import" value="{}"'.format(pending_import.token))
+        self.assertContains(response, 'value="F-IMP"')
+        self.assertContains(response, 'value="2026-06-08"')
+        self.assertContains(response, 'value="100.00"')
+
+    @patch("projects.views.extract_invoice_data")
+    def test_invoice_analysis_leaves_unidentified_fields_empty(self, extract_invoice_data):
+        extract_invoice_data.return_value = self._extraction(
+            fecha_pago=None, igic=None, iva=None, irpf=None, concepto=None
+        )
+
+        response = self.client.post(reverse("invoice-import"), {"invoice_document": self._png_upload()})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(Invoice.objects.count(), 0)
+        self.assertContains(response, 'name="iva_amount"', html=False)
+        self.assertNotContains(response, 'name="iva_amount" value="0.00"', html=False)
+        self.assertContains(response, "Los importes detectados no cuadran")
+
+    @patch("projects.views.extract_invoice_data")
+    def test_invoice_review_can_be_corrected_and_saves_original_document(self, extract_invoice_data):
+        extract_invoice_data.return_value = self._extraction(concepto="Texto automático")
+        self.client.post(reverse("invoice-import"), {"invoice_document": self._jpg_upload(name="ticket.jpeg")})
+        pending_import = PendingInvoiceImport.objects.get()
+
+        response = self.client.post(reverse("invoice-save"), self._invoice_form_data(
+            pending_import,
+            concept="Texto revisado por el usuario",
+        ))
 
         self.assertEqual(response.status_code, 200)
         invoice = Invoice.objects.get(number="F-IMP")
-        self.assertEqual(invoice.provider_tax_id, "B12345678")
-        self.assertEqual(invoice.taxable_base, Decimal("100.00"))
-        self.assertEqual(invoice.iva_amount, Decimal("21.00"))
-        self.assertEqual(invoice.igic_amount, Decimal("0.00"))
-        self.assertEqual(invoice.irpf_amount, Decimal("0.00"))
-        self.assertEqual(invoice.total_amount, Decimal("121.00"))
-        self.assertTrue(invoice.physical_document.name.endswith(".pdf"))
-        self.assertContains(response, "Proveedor Importado")
-        self.assertNotContains(response, "Falta documento físico")
+        self.assertEqual(invoice.concept, "Texto revisado por el usuario")
+        self.assertTrue(invoice.physical_document.name.endswith(".jpeg"))
+        pending_import.refresh_from_db()
+        self.assertEqual(pending_import.status, PendingInvoiceImportStatus.COMPLETED)
+        self.assertEqual(pending_import.invoice, invoice)
 
     @patch("projects.views.extract_invoice_data")
-    def test_invoice_import_preserves_unregistered_supplier_behavior(self, extract_invoice_data):
-        extract_invoice_data.return_value = self._extraction(nif_proveedor="B87654321", numero_factura="F-UNREGISTERED")
+    def test_incongruent_analysis_opens_review_but_cannot_be_saved_until_corrected(self, extract_invoice_data):
+        extract_invoice_data.return_value = self._extraction(total=Decimal("150.00"))
+        response = self.client.post(reverse("invoice-import"), {"invoice_document": self._pdf_upload()})
+        pending_import = PendingInvoiceImport.objects.get()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "no son congruentes")
+        invalid = self.client.post(reverse("invoice-save"), self._invoice_form_data(
+            pending_import, total_amount="150.00"
+        ))
+        self.assertEqual(invalid.status_code, 400)
+        self.assertEqual(Invoice.objects.count(), 0)
+        self.assertContains(invalid, "El total no coincide", status_code=400)
+
+        corrected = self.client.post(reverse("invoice-save"), self._invoice_form_data(pending_import))
+        self.assertEqual(corrected.status_code, 200)
+        self.assertEqual(Invoice.objects.count(), 1)
+
+    @patch("projects.views.extract_invoice_data")
+    def test_pending_import_is_private_and_cannot_be_reused(self, extract_invoice_data):
+        extract_invoice_data.return_value = self._extraction()
+        self.client.post(reverse("invoice-import"), {"invoice_document": self._pdf_upload()})
+        pending_import = PendingInvoiceImport.objects.get()
+        other_user = User.objects.create_superuser("other-invoice-user", "other@example.com", "test")
+        self.client.force_login(other_user)
+
+        preview = self.client.get(reverse("pending-invoice-document", args=[pending_import.token]))
+        confirm = self.client.post(reverse("invoice-save"), self._invoice_form_data(pending_import))
+        self.assertEqual(preview.status_code, 404)
+        self.assertEqual(confirm.status_code, 409)
+        self.assertEqual(Invoice.objects.count(), 0)
+
+        self.client.force_login(self.user)
+        first = self.client.post(reverse("invoice-save"), self._invoice_form_data(pending_import))
+        second = self.client.post(reverse("invoice-save"), self._invoice_form_data(pending_import))
+        self.assertEqual(first.status_code, 200)
+        self.assertEqual(second.status_code, 400)
+        self.assertEqual(Invoice.objects.count(), 1)
+
+    @patch("projects.views.extract_invoice_data")
+    def test_expired_pending_import_is_rejected_and_cleanup_removes_it(self, extract_invoice_data):
+        extract_invoice_data.return_value = self._extraction()
+        self.client.post(reverse("invoice-import"), {"invoice_document": self._pdf_upload()})
+        pending_import = PendingInvoiceImport.objects.get()
+        PendingInvoiceImport.objects.filter(pk=pending_import.pk).update(expires_at=timezone.now() - timedelta(minutes=1))
+
+        preview = self.client.get(reverse("pending-invoice-document", args=[pending_import.token]))
+        save = self.client.post(reverse("invoice-save"), self._invoice_form_data(pending_import))
+        self.assertEqual(preview.status_code, 404)
+        self.assertEqual(save.status_code, 409)
+
+        call_command("cleanup_pending_invoice_imports")
+        self.assertFalse(PendingInvoiceImport.objects.filter(pk=pending_import.pk).exists())
+
+    def test_invoice_extraction_parses_optional_payment_date_absent(self):
+        result = parse_invoice_extraction_payload({
+            "numero_factura": "T-001",
+            "fecha_factura": "2026-06-08",
+            "fecha_pago": None,
+            "nif_proveedor": " b12345678 ",
+            "base": 10,
+            "igic": 0,
+            "iva": 0,
+            "irpf": 0,
+            "total": 10,
+            "concepto": "Ticket",
+        })
+
+        self.assertIsNone(result.fecha_pago)
+        self.assertEqual(result.nif_proveedor, "B12345678")
+        self.assertEqual(result.total, Decimal("10.00"))
+
+    @patch("projects.views.extract_invoice_data")
+    def test_invoice_import_opens_empty_review_for_unidentified_document(self, extract_invoice_data):
+        extract_invoice_data.return_value = self._extraction(
+            numero_factura=None,
+            fecha_factura=None,
+            nif_proveedor=None,
+            concepto=None,
+            base=None,
+            total=None,
+        )
 
         response = self.client.post(reverse("invoice-import"), {
-            "invoice_pdf": self._pdf_upload(),
+            "invoice_document": self._png_upload(),
         })
 
         self.assertEqual(response.status_code, 200)
-        invoice = Invoice.objects.get(number="F-UNREGISTERED")
-        self.assertEqual(invoice.provider_tax_id, "B87654321")
-        self.assertContains(response, "Proveedor no registrado")
-
-    @patch("projects.views.extract_invoice_data")
-    def test_invoice_import_rejects_incongruent_amounts(self, extract_invoice_data):
-        extract_invoice_data.return_value = self._extraction(total=Decimal("150.00"))
-
-        response = self.client.post(reverse("invoice-import"), {
-            "invoice_pdf": self._pdf_upload(),
-        })
-
-        self.assertEqual(response.status_code, 400)
         self.assertEqual(Invoice.objects.filter(number="F-IMP").count(), 0)
-        self.assertContains(response, "No se ha podido importar la factura porque los importes extraídos no son congruentes.", status_code=400)
-        self.assertContains(response, "Total calculado", status_code=400)
-
-    @patch("projects.views.extract_invoice_data")
-    def test_invoice_import_rejects_duplicate_invoice(self, extract_invoice_data):
-        Invoice.objects.create(
-            provider_tax_id="B12345678",
-            number="F-IMP",
-            issue_date=date(2026, 6, 8),
-            concept="Factura existente",
-            taxable_base=Decimal("100.00"),
-            taxes=Decimal("21.00"),
-            total_amount=Decimal("121.00"),
-        )
-        extract_invoice_data.return_value = self._extraction()
-
-        response = self.client.post(reverse("invoice-import"), {
-            "invoice_pdf": self._pdf_upload(),
-        })
-
-        self.assertEqual(response.status_code, 409)
-        self.assertEqual(Invoice.objects.filter(number="F-IMP", provider_tax_id="B12345678").count(), 1)
-        self.assertContains(response, "Parece que esta factura ya está registrada.", status_code=409)
+        self.assertContains(response, "Nueva factura")
+        self.assertContains(response, "Los importes detectados no cuadran")
 
     @patch("projects.views.extract_invoice_data")
     def test_invoice_import_handles_openai_error(self, extract_invoice_data):
         extract_invoice_data.side_effect = InvoiceExtractionError("No se ha podido analizar la factura.")
 
         response = self.client.post(reverse("invoice-import"), {
-            "invoice_pdf": self._pdf_upload(),
+            "invoice_document": self._pdf_upload(),
         })
 
         self.assertEqual(response.status_code, 400)
         self.assertEqual(Invoice.objects.filter(number="F-IMP").count(), 0)
         self.assertContains(response, "No se ha podido analizar la factura.", status_code=400)
+        self.assertEqual(PendingInvoiceImport.objects.get().status, PendingInvoiceImportStatus.FAILED)
+
+    def test_invoice_openai_content_uses_input_file_for_pdf(self):
+        content = build_invoice_openai_content(self._pdf_upload(), "application/pdf")
+
+        self.assertEqual(content[1]["type"], "input_file")
+        self.assertTrue(content[1]["file_data"].startswith("data:application/pdf;base64,"))
+        self.assertIn("filename", content[1])
+
+    def test_invoice_openai_content_uses_input_image_for_png_and_jpeg(self):
+        png_content = build_invoice_openai_content(self._png_upload(), "image/png")
+        jpeg_content = build_invoice_openai_content(self._jpg_upload(), "image/jpeg")
+
+        self.assertEqual(png_content[1]["type"], "input_image")
+        self.assertTrue(png_content[1]["image_url"].startswith("data:image/png;base64,"))
+        self.assertEqual(jpeg_content[1]["type"], "input_image")
+        self.assertTrue(jpeg_content[1]["image_url"].startswith("data:image/jpeg;base64,"))
+
+
+class ProjectPaymentTreasuryTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_superuser(username="payments-admin", email="payments@example.com", password="test")
+        self.project = Project.objects.create(
+            code="PAY",
+            name="Proyecto pagos",
+            manager=self.user,
+            status="active",
+            approved_budget=Decimal("10000.00"),
+        )
+        self.budget_line = BudgetLine.objects.create(
+            project=self.project,
+            code="1",
+            name="Tesorería",
+            approved_budget=Decimal("10000.00"),
+        )
+        self.financier = Financier.objects.create(name="Financiador pagos")
+        self.client.force_login(self.user)
+
+    def create_obligation(self, **overrides):
+        data = {
+            "concept": "Obligación de prueba",
+            "payment_type": PaymentObligationType.SUPPLIER,
+            "creditor": "Acreedor de prueba",
+            "expected_payment_date": timezone.localdate() + timedelta(days=10),
+            "amount": Decimal("100.00"),
+            "status": PaymentObligationStatus.PENDING,
+            "project": self.project,
+            "financier": self.financier,
+            "budget_line": self.budget_line,
+        }
+        data.update(overrides)
+        return PaymentObligation.objects.create(**data)
+
+    def test_payment_obligation_initial_amounts_are_derived(self):
+        obligation = self.create_obligation()
+
+        self.assertEqual(obligation.amount_paid, Decimal("0.00"))
+        self.assertEqual(obligation.amount_pending, Decimal("100.00"))
+        self.assertEqual(obligation.financial_state, PaymentFinancialState.UNPAID)
+
+    def test_cash_outflow_partial_and_remaining_payment_update_derived_balances(self):
+        obligation = self.create_obligation()
+        CashOutflow.objects.create(
+            payment_obligation=obligation,
+            payment_date=timezone.localdate(),
+            amount=Decimal("40.00"),
+            payment_method="transfer",
+        )
+
+        self.assertEqual(obligation.amount_paid, Decimal("40.00"))
+        self.assertEqual(obligation.amount_pending, Decimal("60.00"))
+        self.assertEqual(obligation.financial_state, PaymentFinancialState.PARTIALLY_PAID)
+
+        CashOutflow.objects.create(
+            payment_obligation=obligation,
+            payment_date=timezone.localdate(),
+            amount=Decimal("60.00"),
+            payment_method="transfer",
+        )
+
+        self.assertEqual(obligation.amount_paid, Decimal("100.00"))
+        self.assertEqual(obligation.amount_pending, Decimal("0.00"))
+        self.assertEqual(obligation.financial_state, PaymentFinancialState.PAID)
+        self.assertEqual(obligation.display_state["code"], "paid")
+
+    def test_cash_outflow_rejects_amount_over_remaining_balance(self):
+        obligation = self.create_obligation()
+        CashOutflow.objects.create(
+            payment_obligation=obligation,
+            payment_date=timezone.localdate(),
+            amount=Decimal("80.00"),
+            payment_method="transfer",
+        )
+        outflow = CashOutflow(
+            payment_obligation=obligation,
+            payment_date=timezone.localdate(),
+            amount=Decimal("30.00"),
+            payment_method="transfer",
+        )
+
+        with self.assertRaises(ValidationError):
+            outflow.full_clean()
+
+    def test_cash_outflow_rejects_cancelled_obligation(self):
+        obligation = self.create_obligation(status=PaymentObligationStatus.CANCELLED)
+        outflow = CashOutflow(
+            payment_obligation=obligation,
+            payment_date=timezone.localdate(),
+            amount=Decimal("10.00"),
+            payment_method="transfer",
+        )
+
+        with self.assertRaises(ValidationError):
+            outflow.full_clean()
+
+    def test_obligation_cannot_be_reduced_below_paid_amount(self):
+        obligation = self.create_obligation(amount=Decimal("100.00"))
+        CashOutflow.objects.create(
+            payment_obligation=obligation,
+            payment_date=timezone.localdate(),
+            amount=Decimal("70.00"),
+            payment_method="transfer",
+        )
+        obligation.amount = Decimal("60.00")
+
+        with self.assertRaises(ValidationError):
+            obligation.full_clean()
+
+    def test_obligation_with_payments_cannot_be_cancelled(self):
+        obligation = self.create_obligation()
+        CashOutflow.objects.create(
+            payment_obligation=obligation,
+            payment_date=timezone.localdate(),
+            amount=Decimal("10.00"),
+            payment_method="transfer",
+        )
+        obligation.status = PaymentObligationStatus.CANCELLED
+
+        with self.assertRaises(ValidationError):
+            obligation.full_clean()
+
+    def test_cash_outflow_cannot_be_deleted_normally(self):
+        obligation = self.create_obligation()
+        outflow = CashOutflow.objects.create(
+            payment_obligation=obligation,
+            payment_date=timezone.localdate(),
+            amount=Decimal("10.00"),
+            payment_method="transfer",
+        )
+
+        with self.assertRaises(ValidationError):
+            outflow.delete()
+
+    def test_overdue_is_derived_dynamically(self):
+        obligation = self.create_obligation(expected_payment_date=timezone.localdate() - timedelta(days=1))
+
+        self.assertTrue(obligation.is_overdue)
+        self.assertEqual(obligation.display_state["code"], "overdue")
+
+    def test_payment_list_and_detail_are_accessible(self):
+        obligation = self.create_obligation()
+
+        response = self.client.get(reverse("payment-list"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Pagos y Tesorería")
+        self.assertContains(response, "Obligación de prueba")
+
+        response = self.client.get(reverse("payment-detail"), {"obj_id": obligation.id})
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Estado financiero")
+
+    def test_cash_outflow_save_uses_remaining_balance(self):
+        obligation = self.create_obligation(amount=Decimal("100.00"))
+
+        response = self.client.get(reverse("cash-outflow-save"), {
+            "payment_obligation_id": obligation.id,
+            "payment_date": timezone.localdate().isoformat(),
+            "amount": "40.00",
+            "payment_method": "transfer",
+            "bank_account": "ES00",
+            "reference": "TR-1",
+        })
+
+        self.assertEqual(response.status_code, 200)
+        obligation.refresh_from_db()
+        self.assertEqual(obligation.amount_paid, Decimal("40.00"))
+
+        response = self.client.get(reverse("cash-outflow-save"), {
+            "payment_obligation_id": obligation.id,
+            "payment_date": timezone.localdate().isoformat(),
+            "amount": "70.00",
+            "payment_method": "transfer",
+        })
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(obligation.cash_outflows.count(), 1)

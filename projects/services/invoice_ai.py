@@ -9,6 +9,9 @@ from django.conf import settings
 
 from openai import OpenAI
 
+from projects.services.invoice_documents import detect_invoice_document_mime
+from projects.services.supplier_matching import normalize_tax_id
+
 
 logger = logging.getLogger(__name__)
 
@@ -25,10 +28,11 @@ class InvoiceExtractionResult:
     fecha_factura: str = None
     fecha_pago: str = None
     nif_proveedor: str = None
+    nif_proveedor_original: str = None
     base: Decimal = None
-    igic: Decimal = Decimal("0.00")
-    iva: Decimal = Decimal("0.00")
-    irpf: Decimal = Decimal("0.00")
+    igic: Decimal = None
+    iva: Decimal = None
+    irpf: Decimal = None
     total: Decimal = None
     concepto: str = None
 
@@ -42,9 +46,9 @@ INVOICE_EXTRACTION_SCHEMA = {
         "fecha_pago": {"type": ["string", "null"]},
         "nif_proveedor": {"type": ["string", "null"]},
         "base": {"type": ["number", "null"]},
-        "igic": {"type": "number"},
-        "iva": {"type": "number"},
-        "irpf": {"type": "number"},
+        "igic": {"type": ["number", "null"]},
+        "iva": {"type": ["number", "null"]},
+        "irpf": {"type": ["number", "null"]},
         "total": {"type": ["number", "null"]},
         "concepto": {"type": ["string", "null"]},
     },
@@ -63,12 +67,12 @@ INVOICE_EXTRACTION_SCHEMA = {
 }
 
 
-INVOICE_EXTRACTION_PROMPT = """Eres un sistema de extracción de datos de facturas.
+INVOICE_EXTRACTION_PROMPT = """Eres un sistema de extracción de datos de facturas y tickets.
 
-Analiza exclusivamente el documento PDF proporcionado.
+Analiza exclusivamente el documento proporcionado.
 
 Extrae:
-- número de factura
+- número de factura o ticket
 - fecha de factura
 - fecha efectiva de pago, si existe
 - NIF/CIF del proveedor/emisor
@@ -76,19 +80,20 @@ Extrae:
 - importe total de IGIC
 - importe total de IVA
 - importe total de IRPF/retención
-- total final de la factura
+- total final de la factura o ticket
 - concepto/resumen descriptivo
 
 Reglas:
 - No inventes datos.
 - Si un dato no aparece, devuelve null cuando el schema lo permita.
 - IVA, IGIC e IRPF son importes monetarios, no porcentajes.
-- Si IVA, IGIC o IRPF no aparecen, devuelve 0.
+- Si IVA, IGIC o IRPF no aparecen o no pueden verificarse, devuelve null.
 - Si existen varias líneas del mismo impuesto, suma sus importes.
 - La fecha de vencimiento no es fecha de pago.
 - Para fecha_pago devuelve únicamente una fecha que represente un pago efectuado.
 - El NIF solicitado es el del proveedor/emisor, no el del cliente/receptor.
 - El concepto debe ser breve pero descriptivo.
+- Si el documento es ilegible, está incompleto o no parece una factura/ticket, devuelve null en los campos no verificables.
 - Devuelve exclusivamente la estructura definida por el schema.
 """
 
@@ -122,13 +127,6 @@ def normalize_text(value):
     return value or None
 
 
-def normalize_tax_id(value):
-    value = normalize_text(value)
-    if value is None:
-        return None
-    return "".join(value.split()).upper()
-
-
 def parse_invoice_extraction_payload(payload):
     required_fields = set(INVOICE_EXTRACTION_SCHEMA["required"])
     if not isinstance(payload, dict):
@@ -137,29 +135,51 @@ def parse_invoice_extraction_payload(payload):
     if missing_fields:
         raise InvoiceExtractionError("Faltan campos en la extracción: {}.".format(", ".join(sorted(missing_fields))))
 
+    original_tax_id = normalize_text(payload.get("nif_proveedor"))
     result = InvoiceExtractionResult(
         numero_factura=normalize_text(payload.get("numero_factura")),
         fecha_factura=normalize_text(payload.get("fecha_factura")),
         fecha_pago=normalize_text(payload.get("fecha_pago")),
-        nif_proveedor=normalize_tax_id(payload.get("nif_proveedor")),
+        nif_proveedor=normalize_tax_id(original_tax_id) or None,
+        nif_proveedor_original=original_tax_id,
         base=decimal_or_none(payload.get("base"), "base"),
-        igic=decimal_or_zero(payload.get("igic"), "igic"),
-        iva=decimal_or_zero(payload.get("iva"), "iva"),
-        irpf=decimal_or_zero(payload.get("irpf"), "irpf"),
+        igic=decimal_or_none(payload.get("igic"), "igic"),
+        iva=decimal_or_none(payload.get("iva"), "iva"),
+        irpf=decimal_or_none(payload.get("irpf"), "irpf"),
         total=decimal_or_none(payload.get("total"), "total"),
         concepto=normalize_text(payload.get("concepto")),
     )
     return result
 
 
-def extract_invoice_data(pdf_file):
+def build_invoice_openai_content(invoice_document, mime_type=None):
+    mime_type = mime_type or getattr(invoice_document, "invoice_document_mime", None) or detect_invoice_document_mime(invoice_document)
+    if mime_type not in ("application/pdf", "image/png", "image/jpeg"):
+        raise InvoiceExtractionError("El documento no tiene un formato admitido para el análisis.")
+
+    invoice_document.seek(0)
+    document_base64 = base64.b64encode(invoice_document.read()).decode("ascii")
+    invoice_document.seek(0)
+
+    content = [{"type": "input_text", "text": INVOICE_EXTRACTION_PROMPT}]
+    if mime_type == "application/pdf":
+        content.append({
+            "type": "input_file",
+            "filename": getattr(invoice_document, "name", "factura.pdf"),
+            "file_data": "data:application/pdf;base64,{}".format(document_base64),
+        })
+    else:
+        content.append({
+            "type": "input_image",
+            "image_url": "data:{};base64,{}".format(mime_type, document_base64),
+        })
+    return content
+
+
+def extract_invoice_data(invoice_document):
     api_key = getattr(settings, "OPENAI_API_KEY", None) or os.getenv("OPENAI_API_KEY")
     if not api_key:
         raise InvoiceExtractionError("OPENAI_API_KEY no está configurada.")
-
-    pdf_file.seek(0)
-    pdf_base64 = base64.b64encode(pdf_file.read()).decode("ascii")
-    pdf_file.seek(0)
 
     client = OpenAI(api_key=api_key, timeout=get_invoice_timeout())
     try:
@@ -168,14 +188,7 @@ def extract_invoice_data(pdf_file):
             input=[
                 {
                     "role": "user",
-                    "content": [
-                        {"type": "input_text", "text": INVOICE_EXTRACTION_PROMPT},
-                        {
-                            "type": "input_file",
-                            "filename": getattr(pdf_file, "name", "factura.pdf"),
-                            "file_data": "data:application/pdf;base64,{}".format(pdf_base64),
-                        },
-                    ],
+                    "content": build_invoice_openai_content(invoice_document),
                 }
             ],
             text={

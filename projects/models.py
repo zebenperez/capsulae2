@@ -1,14 +1,18 @@
 import datetime
 import random
 import string
+import uuid
 from decimal import Decimal
 
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.core.validators import RegexValidator
-from django.db import models
+from django.db import models, transaction
 from django.db.models import Q, Sum
+from django.utils import timezone
+
+from projects.services.supplier_matching import normalize_tax_id
 
 
 MONEY_MAX_DIGITS = 14
@@ -117,7 +121,7 @@ class Project(models.Model):
 
     @property
     def executed_budget(self):
-        return money_sum(self.invoice_allocations.all(), "allocated_amount")
+        return money_sum(self.invoice_allocations.all(), "allocated_amount") + money_sum(self.payment_allocations.all(), "allocated_amount")
 
     @property
     def execution_percentage(self):
@@ -409,7 +413,7 @@ class BudgetLine(models.Model):
 
     @property
     def direct_executed_amount(self):
-        return money_sum(self.invoice_allocations.all(), "allocated_amount")
+        return money_sum(self.invoice_allocations.all(), "allocated_amount") + money_sum(self.payment_allocations.all(), "allocated_amount")
 
     def descendants(self):
         items = []
@@ -424,7 +428,8 @@ class BudgetLine(models.Model):
             InvoiceAllocation.objects.filter(budget_line__in=self.descendants()),
             "allocated_amount",
         )
-        return self.direct_executed_amount + descendant_total
+        payment_total = money_sum(PaymentObligationAllocation.objects.filter(budget_line__in=self.descendants()), "allocated_amount")
+        return self.direct_executed_amount + descendant_total + payment_total
 
     @property
     def child_assigned_budget(self):
@@ -532,11 +537,11 @@ class Supplier(models.Model):
     def clean(self):
         super().clean()
         if self.nif:
-            self.nif = self.nif.strip().upper()
+            self.nif = normalize_tax_id(self.nif)
 
     def save(self, *args, **kwargs):
         if self.nif:
-            self.nif = self.nif.strip().upper()
+            self.nif = normalize_tax_id(self.nif)
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -690,6 +695,14 @@ class Invoice(models.Model):
     )
     invoice_code = models.CharField("Código de factura", max_length=32, unique=True, blank=True, null=True, editable=False)
     provider_tax_id = models.CharField("NIF del proveedor", max_length=32)
+    supplier = models.ForeignKey(
+        Supplier,
+        verbose_name="Proveedor",
+        on_delete=models.PROTECT,
+        related_name="invoices",
+        blank=True,
+        null=True,
+    )
     number = models.CharField("Número", max_length=120)
     issue_date = models.DateField("Fecha emisión")
     payment_date = models.DateField("Fecha pago", blank=True, null=True)
@@ -823,7 +836,7 @@ class Invoice(models.Model):
         if self.locator:
             self.locator = self.locator.strip().upper()
         if self.provider_tax_id:
-            self.provider_tax_id = self.provider_tax_id.strip().upper()
+            self.provider_tax_id = normalize_tax_id(self.provider_tax_id)
         if not self.has_tax_breakdown and self.taxes:
             self.iva_amount = self.taxes
         if self.taxable_base is not None and self.taxes is not None:
@@ -836,7 +849,7 @@ class Invoice(models.Model):
         else:
             self.locator = self.generate_unique_locator()
         if self.provider_tax_id:
-            self.provider_tax_id = self.provider_tax_id.strip().upper()
+            self.provider_tax_id = normalize_tax_id(self.provider_tax_id)
         if not self.has_tax_breakdown and self.taxes:
             self.iva_amount = self.taxes
         if self.taxable_base is not None and self.taxes is not None:
@@ -866,6 +879,49 @@ class Invoice(models.Model):
             models.CheckConstraint(check=Q(irpf_amount__gte=0), name="invoice_irpf_amount_gte_0"),
             models.CheckConstraint(check=Q(total_amount__gte=0), name="invoice_total_amount_gte_0"),
         ]
+
+
+class PendingInvoiceImportStatus(models.TextChoices):
+    PROCESSING = "processing", "Procesando"
+    PENDING_REVIEW = "pending_review", "Pendiente de revisión"
+    COMPLETED = "completed", "Completada"
+    FAILED = "failed", "Fallida"
+    EXPIRED = "expired", "Caducada"
+
+
+class PendingInvoiceImport(models.Model):
+    token = models.UUIDField(default=uuid.uuid4, unique=True, editable=False, db_index=True)
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="pending_invoice_imports")
+    temporary_document = models.FileField(upload_to="projects/invoices/pending/%Y/%m/%d/")
+    original_name = models.CharField(max_length=255)
+    detected_mime = models.CharField(max_length=64)
+    file_size = models.PositiveBigIntegerField(default=0)
+    extracted_data = models.JSONField(default=dict, blank=True)
+    status = models.CharField(
+        max_length=32,
+        choices=PendingInvoiceImportStatus.choices,
+        default=PendingInvoiceImportStatus.PROCESSING,
+        db_index=True,
+    )
+    error_code = models.CharField(max_length=64, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+    expires_at = models.DateTimeField(db_index=True)
+    completed_at = models.DateTimeField(blank=True, null=True)
+    invoice = models.OneToOneField(
+        Invoice,
+        on_delete=models.SET_NULL,
+        related_name="source_import",
+        blank=True,
+        null=True,
+    )
+
+    def __str__(self):
+        return "{} ({})".format(self.token, self.status)
+
+    class Meta:
+        verbose_name = "Importación pendiente de factura"
+        verbose_name_plural = "Importaciones pendientes de facturas"
+        indexes = [models.Index(fields=["owner", "status", "expires_at"])]
 
 
 class InvoiceDocument(models.Model):
@@ -952,15 +1008,20 @@ class InvoiceAllocation(models.Model):
                 errors["allocated_amount"] = "La suma de imputaciones no puede superar el importe total de la factura."
         if self.budget_line_id and self.allocated_amount:
             current_budget_total = money_sum(self.budget_line.invoice_allocations.exclude(pk=self.pk), "allocated_amount")
+            current_budget_total += money_sum(self.budget_line.payment_allocations.all(), "allocated_amount")
             if current_budget_total + self.allocated_amount + self.budget_line.child_assigned_budget > self.budget_line.effective_budget:
                 errors["allocated_amount"] = "No puede imputarse más dinero del disponible en la partida o subpartida."
         if errors:
             raise ValidationError(errors)
 
     def save(self, *args, **kwargs):
-        if self.invoice_id and self.allocated_amount and self.invoice.total_amount:
-            self.allocated_percentage = (self.allocated_amount * Decimal("100")) / self.invoice.total_amount
-        super().save(*args, **kwargs)
+        with transaction.atomic():
+            self.invoice = Invoice.objects.select_for_update().get(pk=self.invoice_id)
+            self.budget_line = BudgetLine.objects.select_for_update().get(pk=self.budget_line_id)
+            if self.allocated_amount and self.invoice.total_amount:
+                self.allocated_percentage = ((self.allocated_amount * Decimal("100")) / self.invoice.total_amount).quantize(Decimal("0.01"))
+            self.full_clean()
+            super().save(*args, **kwargs)
 
     def __str__(self):
         return "%s - %s" % (self.invoice, self.allocated_amount)
@@ -979,6 +1040,284 @@ class InvoiceAllocation(models.Model):
                 name="invoice_allocation_pct_between_0_100",
             ),
         ]
+
+
+class PaymentObligationStatus(models.TextChoices):
+    PENDING = "pending", "Pendiente"
+    APPROVED = "approved", "Aprobado"
+    SCHEDULED = "scheduled", "Programado"
+    CANCELLED = "cancelled", "Cancelado"
+
+
+class PaymentObligationType(models.TextChoices):
+    PAYROLL = "payroll", "Nómina"
+    SOCIAL_SECURITY = "social_security", "Seguridad Social"
+    TAX = "tax", "Impuestos / Retenciones"
+    SUPPLIER = "supplier", "Proveedor"
+    RENT = "rent", "Alquiler"
+    INSURANCE = "insurance", "Seguro"
+    SERVICE = "service", "Suministro / Servicio"
+    ALLOWANCE = "allowance", "Dieta"
+    ADVANCE = "advance", "Anticipo"
+    GRANT = "grant", "Ayuda / Subvención entregada"
+    OTHER = "other", "Otro"
+
+
+class PaymentFinancialState(models.TextChoices):
+    UNPAID = "unpaid", "Sin pagar"
+    PARTIALLY_PAID = "partially_paid", "Parcialmente pagado"
+    PAID = "paid", "Pagado"
+
+
+class CashOutflowMethod(models.TextChoices):
+    TRANSFER = "transfer", "Transferencia"
+    DIRECT_DEBIT = "direct_debit", "Domiciliación"
+    CASH = "cash", "Efectivo"
+    CARD = "card", "Tarjeta"
+    CHECK = "check", "Cheque"
+    OTHER = "other", "Otro"
+
+
+class PaymentObligation(models.Model):
+    concept = models.CharField("Concepto", max_length=255)
+    payment_type = models.CharField("Tipo", max_length=32, choices=PaymentObligationType.choices, default=PaymentObligationType.OTHER)
+    creditor = models.CharField("Beneficiario / Acreedor", max_length=255, db_index=True)
+    accrual_date = models.DateField("Fecha de devengo", blank=True, null=True)
+    expected_payment_date = models.DateField("Fecha prevista de pago", db_index=True)
+    amount = models.DecimalField("Importe", max_digits=MONEY_MAX_DIGITS, decimal_places=MONEY_DECIMAL_PLACES)
+    status = models.CharField(
+        "Estado administrativo",
+        max_length=32,
+        choices=PaymentObligationStatus.choices,
+        default=PaymentObligationStatus.PENDING,
+        db_index=True,
+    )
+    project = models.ForeignKey(Project, verbose_name="Proyecto", on_delete=models.SET_NULL, blank=True, null=True, related_name="payment_obligations")
+    financier = models.ForeignKey(Financier, verbose_name="Financiador", on_delete=models.SET_NULL, blank=True, null=True, related_name="payment_obligations")
+    budget_line = models.ForeignKey(BudgetLine, verbose_name="Partida presupuestaria", on_delete=models.SET_NULL, blank=True, null=True, related_name="payment_obligations")
+    invoice = models.ForeignKey(Invoice, verbose_name="Factura asociada", on_delete=models.SET_NULL, blank=True, null=True, related_name="payment_obligations")
+    notes = models.TextField("Notas", blank=True)
+    created_at = models.DateTimeField("Fecha de creación", auto_now_add=True)
+    updated_at = models.DateTimeField("Fecha de actualización", auto_now=True)
+
+    @property
+    def allocated_amount(self):
+        return money_sum(self.allocations.all(), "allocated_amount") if self.pk else Decimal("0.00")
+
+    @property
+    def unallocated_amount(self):
+        return self.amount - self.allocated_amount
+
+    @property
+    def amount_paid(self):
+        return money_sum(self.cash_outflows.all(), "amount")
+
+    @property
+    def amount_pending(self):
+        return self.amount - self.amount_paid
+
+    @property
+    def financial_state(self):
+        if self.amount_paid <= 0:
+            return PaymentFinancialState.UNPAID
+        if self.amount_paid < self.amount:
+            return PaymentFinancialState.PARTIALLY_PAID
+        return PaymentFinancialState.PAID
+
+    @property
+    def financial_state_label(self):
+        return PaymentFinancialState(self.financial_state).label
+
+    @property
+    def is_paid(self):
+        return self.amount_paid >= self.amount
+
+    @property
+    def is_overdue(self):
+        return (
+            self.status != PaymentObligationStatus.CANCELLED
+            and self.expected_payment_date
+            and self.expected_payment_date < timezone.localdate()
+            and self.amount_pending > 0
+        )
+
+    @property
+    def display_state(self):
+        if self.status == PaymentObligationStatus.CANCELLED:
+            return {"code": "cancelled", "label": "Cancelado"}
+        if self.is_paid:
+            return {"code": "paid", "label": "Pagado"}
+        if self.is_overdue:
+            return {"code": "overdue", "label": "Vencido"}
+        if self.financial_state == PaymentFinancialState.PARTIALLY_PAID:
+            return {"code": "partially_paid", "label": "Parcialmente pagado"}
+        return {"code": self.status, "label": self.get_status_display()}
+
+    @property
+    def payment_progress_percentage(self):
+        if not self.amount:
+            return Decimal("0.00")
+        return min((self.amount_paid * Decimal("100")) / self.amount, Decimal("100.00"))
+
+    def clean(self):
+        super().clean()
+        errors = {}
+        if self.amount is not None and self.amount <= 0:
+            errors["amount"] = "El importe de la obligación debe ser mayor que cero."
+        if self.budget_line_id and self.project_id and self.budget_line.project_id != self.project_id:
+            errors["budget_line"] = "La partida debe pertenecer al proyecto seleccionado."
+        if self.pk and self.amount is not None:
+            allocated = self.allocated_amount
+            if allocated > self.amount:
+                errors["amount"] = "El importe no puede ser inferior al importe ya imputado."
+            if allocated and self.invoice_id:
+                errors["invoice"] = "Una obligación con imputaciones propias no puede asociarse a una factura."
+            if allocated and self.status == PaymentObligationStatus.CANCELLED:
+                errors["status"] = "No se puede cancelar una obligación con imputaciones."
+            amount_paid = self.amount_paid
+            if self.amount < amount_paid:
+                errors["amount"] = "El importe de la obligación no puede ser inferior al importe ya pagado."
+            if self.status == PaymentObligationStatus.CANCELLED and amount_paid > 0:
+                errors["status"] = "No se puede cancelar una obligación con pagos registrados."
+        if errors:
+            raise ValidationError(errors)
+
+    def save(self, *args, **kwargs):
+        with transaction.atomic():
+            if self.pk:
+                type(self).objects.select_for_update().get(pk=self.pk)
+            self.full_clean()
+            super().save(*args, **kwargs)
+
+    def __str__(self):
+        return "{} - {}".format(self.creditor, self.concept)
+
+    class Meta:
+        verbose_name = "Obligación de pago"
+        verbose_name_plural = "Obligaciones de pago"
+        indexes = [
+            models.Index(fields=["status", "expected_payment_date"]),
+            models.Index(fields=["payment_type"]),
+            models.Index(fields=["creditor"]),
+        ]
+        constraints = [
+            models.CheckConstraint(check=Q(amount__gt=0), name="payment_obligation_amount_gt_0"),
+        ]
+
+
+class CashOutflow(models.Model):
+    payment_obligation = models.ForeignKey(PaymentObligation, verbose_name="Obligación de pago", on_delete=models.PROTECT, related_name="cash_outflows")
+    payment_date = models.DateField("Fecha del pago")
+    amount = models.DecimalField("Importe", max_digits=MONEY_MAX_DIGITS, decimal_places=MONEY_DECIMAL_PLACES)
+    bank_account = models.CharField("Cuenta bancaria", max_length=255, blank=True)
+    payment_method = models.CharField("Medio de pago", max_length=32, choices=CashOutflowMethod.choices, default=CashOutflowMethod.TRANSFER)
+    reference = models.CharField("Referencia", max_length=255, blank=True, db_index=True)
+    notes = models.TextField("Notas", blank=True)
+    created_at = models.DateTimeField("Fecha de creación", auto_now_add=True)
+    updated_at = models.DateTimeField("Fecha de actualización", auto_now=True)
+
+    def clean(self):
+        super().clean()
+        errors = {}
+        if self.amount is not None and self.amount <= 0:
+            errors["amount"] = "El importe del pago debe ser mayor que cero."
+        if self.payment_obligation_id:
+            if self.payment_obligation.status == PaymentObligationStatus.CANCELLED:
+                errors["payment_obligation"] = "No se pueden registrar pagos sobre obligaciones canceladas."
+            current_paid = money_sum(self.payment_obligation.cash_outflows.exclude(pk=self.pk), "amount")
+            if self.amount is not None and current_paid + self.amount > self.payment_obligation.amount:
+                errors["amount"] = "El pago no puede superar el saldo pendiente de la obligación."
+        if errors:
+            raise ValidationError(errors)
+
+    def delete(self, *args, **kwargs):
+        raise ValidationError("No se permite eliminar salidas reales de caja. Utiliza un flujo de reversión.")
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return "{} - {}".format(self.payment_date, self.amount)
+
+    class Meta:
+        verbose_name = "Salida de caja"
+        verbose_name_plural = "Salidas de caja"
+        ordering = ("-payment_date", "-id")
+        indexes = [
+            models.Index(fields=["payment_date"]),
+            models.Index(fields=["payment_method"]),
+            models.Index(fields=["reference"]),
+        ]
+        constraints = [
+            models.CheckConstraint(check=Q(amount__gt=0), name="cash_outflow_amount_gt_0"),
+        ]
+
+
+class PaymentObligationAllocation(models.Model):
+    payment_obligation = models.ForeignKey(PaymentObligation, on_delete=models.PROTECT, related_name="allocations")
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="payment_allocations")
+    activity = models.ForeignKey(Activity, on_delete=models.PROTECT, related_name="payment_allocations", blank=True, null=True)
+    budget_line = models.ForeignKey(BudgetLine, on_delete=models.PROTECT, related_name="payment_allocations")
+    allocated_amount = models.DecimalField(max_digits=MONEY_MAX_DIGITS, decimal_places=MONEY_DECIMAL_PLACES)
+    allocation_date = models.DateField(default=timezone.localdate)
+    notes = models.TextField(blank=True)
+
+    @property
+    def allocated_percentage(self):
+        return self.allocated_amount * Decimal("100") / self.payment_obligation.amount
+
+    def clean(self):
+        super().clean()
+        errors = {}
+        if self.payment_obligation_id:
+            obligation = self.payment_obligation
+            if obligation.invoice_id:
+                errors["payment_obligation"] = "Las obligaciones con factura se imputan desde la factura."
+            if obligation.status == PaymentObligationStatus.CANCELLED:
+                errors["payment_obligation"] = "No se puede imputar una obligación cancelada."
+            if self.allocated_amount is not None:
+                allocated = money_sum(obligation.allocations.exclude(pk=self.pk), "allocated_amount")
+                if allocated + self.allocated_amount > obligation.amount:
+                    errors["allocated_amount"] = "El importe supera el saldo pendiente de imputar."
+        if self.allocated_amount is None or self.allocated_amount <= 0:
+            errors["allocated_amount"] = "El importe debe ser mayor que cero."
+        if self.activity_id and self.activity.project_id != self.project_id:
+            errors["activity"] = "La actividad debe pertenecer al proyecto."
+        if self.budget_line_id:
+            line = self.budget_line
+            if line.project_id != self.project_id or line.child_lines.exists():
+                errors["budget_line"] = "Selecciona una partida sin subpartidas del proyecto."
+            used = money_sum(line.invoice_allocations.all(), "allocated_amount") + money_sum(line.payment_allocations.exclude(pk=self.pk), "allocated_amount")
+            if self.allocated_amount is not None and used + self.allocated_amount + line.child_assigned_budget > line.effective_budget:
+                errors["allocated_amount"] = "El importe supera el presupuesto disponible de la partida."
+        if errors:
+            raise ValidationError(errors)
+
+    def save(self, *args, **kwargs):
+        with transaction.atomic():
+            self.payment_obligation = PaymentObligation.objects.select_for_update().get(pk=self.payment_obligation_id)
+            self.budget_line = BudgetLine.objects.select_for_update().get(pk=self.budget_line_id)
+            self.full_clean()
+            super().save(*args, **kwargs)
+
+    class Meta:
+        constraints = [models.CheckConstraint(check=Q(allocated_amount__gt=0), name="payment_allocation_amount_gt_0")]
+
+
+class PaymentObligationDocument(models.Model):
+    payment_obligation = models.ForeignKey(PaymentObligation, verbose_name="Obligación de pago", on_delete=models.CASCADE, related_name="documents")
+    name = models.CharField("Nombre", max_length=255)
+    document = models.FileField("Documento", upload_to="projects/payment-obligations/")
+    notes = models.TextField("Notas", blank=True)
+    created_at = models.DateTimeField("Fecha de creación", auto_now_add=True)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = "Documento de obligación de pago"
+        verbose_name_plural = "Documentos de obligaciones de pago"
 
 
 class Text(models.Model):

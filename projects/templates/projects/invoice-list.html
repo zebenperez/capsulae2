@@ -1,5 +1,14 @@
 {% load i18n project_tags %}
 
+<form class="invoice-filters project-inputs" method="get" action="{% url 'projects' %}">
+    <input type="hidden" name="section" value="invoices">
+    {% for field in invoice_filter_form %}
+    <div class="invoice-filter-field"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{{ field.errors }}</div>
+    {% endfor %}
+    <button type="submit" class="project-btn project-btn-primary"><i class="fas fa-search" aria-hidden="true"></i> {% trans "Buscar" %}</button>
+    {% if invoice_filter_form.non_field_errors %}<div class="invoice-filter-errors" role="alert">{{ invoice_filter_form.non_field_errors }}</div>{% endif %}
+</form>
+
 <div class="project-list-card invoice-list-card">
     <div class="invoice-list-head">
         <span>{% trans "Factura" %}</span>
@@ -21,7 +30,8 @@
                             <i class="fas fa-upload"></i> {% trans "Falta documento físico" %}
                         </label>
                         <input type="file" class="upload d-none" id="invoice-physical-document-{{ invoice.id }}" data-url="{% url "invoice-physical-document-upload" %}"
-                            data-target="invoice-list" data-obj-id="{{ invoice.id }}" data-field="physical_document" data-csrf-token="{{ csrf_token }}">
+                            data-target="invoice-list" data-obj-id="{{ invoice.id }}" data-field="physical_document" data-csrf-token="{{ csrf_token }}"
+                            accept="application/pdf,image/png,image/jpeg,.pdf,.png,.jpg,.jpeg">
                     {% else %}
                         <span class="invoice-badge invoice-badge--document">
                             <i class="fas fa-check"></i> {% trans "Documento físico" %}

@@ -7,24 +7,62 @@
         </button>
     </div>
 
-    <h2>{% trans "Importar factura" %}</h2>
+    <h2>{% if attachment_mode %}{% if replacing_document %}{% trans "Sustituir documento" %}{% else %}{% trans "Adjuntar documento" %}{% endif %}{% else %}{% trans "Importar factura" %}{% endif %}</h2>
     <p class="project-muted">
-        {% trans "Selecciona una factura en PDF. El sistema analizará el documento y extraerá automáticamente sus datos." %}
+        {% if attachment_mode %}{% trans "Selecciona el documento físico que se asociará a esta factura." %}{% else %}{% trans "Selecciona una factura o ticket. El sistema analizará el documento y extraerá automáticamente sus datos." %}{% endif %}
     </p>
 
     <form id="invoice-import-form" enctype="multipart/form-data">
         {% csrf_token %}
-        <div class="project-form-grid">
-            <div class="project-form-field project-form-field-wide invoice-import-dropzone">
-                <label for="invoice-import-pdf">{% trans "Factura PDF" %}</label>
-                <input type="file" class="form-control" id="invoice-import-pdf" name="invoice_pdf" accept="application/pdf,.pdf" required>
-                <small>{% trans "Solo se aceptan archivos PDF." %}</small>
-                {% if form.invoice_pdf.errors %}
+        {% if attachment_mode %}<input type="hidden" name="obj_id" value="{{ invoice.id }}">{% endif %}
+        <div class="invoice-import-panel">
+            <input type="file" class="invoice-import-file-input" id="invoice-import-document" name="invoice_document"
+                accept="application/pdf,image/png,image/jpeg,.pdf,.png,.jpg,.jpeg" aria-label="{% trans 'Seleccionar factura o ticket' %}" required>
+            <div class="invoice-import-choice-grid" id="invoice-import-choice-grid">
+                <button type="button" class="invoice-import-choice" id="invoice-file-open" aria-controls="invoice-import-document" aria-pressed="false">
+                    <span class="invoice-import-choice-icon"><i class="far fa-file-alt" aria-hidden="true"></i><i class="fas fa-arrow-up" aria-hidden="true"></i></span>
+                    <span class="invoice-import-choice-copy"><strong>{% trans "Seleccionar archivo" %}</strong><small>{% trans "PDF, PNG, JPG o JPEG" %}</small></span>
+                </button>
+                <div class="invoice-import-choice-separator" id="invoice-import-choice-separator" aria-hidden="true"><span>{% trans "o" %}</span></div>
+                <button type="button" class="invoice-import-choice invoice-camera-open" id="invoice-camera-open" aria-pressed="false" hidden>
+                    <span class="invoice-import-choice-icon"><i class="fas fa-camera" aria-hidden="true"></i></span>
+                    <span class="invoice-import-choice-copy"><strong>{% trans "Tomar foto" %}</strong><small>{% trans "Usa la cámara del dispositivo" %}</small></span>
+                </button>
+            </div>
+            <div class="invoice-import-security-note">
+                <i class="fas fa-shield-alt" aria-hidden="true"></i>
+                <span>{% if attachment_mode %}{% trans "El archivo se validará y se asociará sin modificar los datos de la factura." %}{% else %}{% trans "El documento se analizará de forma segura antes de guardar la factura." %}{% endif %}</span>
+            </div>
+                <section class="invoice-camera" id="invoice-camera" aria-labelledby="invoice-camera-title" hidden>
+                    <h3 id="invoice-camera-title">{% trans "Fotografiar factura o ticket" %}</h3>
+                    <p class="invoice-camera-status" id="invoice-camera-status" role="status" aria-live="polite"></p>
+                    <div class="invoice-camera-live" id="invoice-camera-live" hidden>
+                        <video id="invoice-camera-video" autoplay playsinline muted
+                            aria-label="{% trans 'Previsualización en vivo de la cámara' %}"></video>
+                        <div class="invoice-camera-controls">
+                            <button type="button" class="project-btn project-btn-primary" id="invoice-camera-capture">
+                                <i class="fas fa-camera" aria-hidden="true"></i> {% trans "Capturar" %}
+                            </button>
+                            <button type="button" class="project-btn project-btn-ghost invoice-camera-cancel">{% trans "Cancelar" %}</button>
+                        </div>
+                    </div>
+                    <div class="invoice-camera-review" id="invoice-camera-review" hidden>
+                        <img id="invoice-camera-photo" alt="{% trans 'Fotografía capturada de la factura o ticket' %}">
+                        <div class="invoice-camera-controls">
+                            <button type="button" class="project-btn project-btn-primary" id="invoice-camera-use">{% trans "Usar esta foto" %}</button>
+                            <button type="button" class="project-btn project-btn-ghost" id="invoice-camera-repeat">{% trans "Repetir foto" %}</button>
+                            <button type="button" class="project-btn project-btn-ghost invoice-camera-cancel">{% trans "Cancelar" %}</button>
+                        </div>
+                    </div>
+                </section>
+                <div class="invoice-import-file-summary" id="invoice-import-file-summary" role="status" aria-live="polite" hidden></div>
+                <div class="invoice-import-preview" id="invoice-import-preview" hidden></div>
+                <div class="invoice-import-error-message" id="invoice-import-client-error" role="alert" hidden></div>
+                {% if form.invoice_document.errors %}
                     <div class="invoice-import-error-message" role="alert">
-                        {% for error in form.invoice_pdf.errors %}{{ error }}{% if not forloop.last %}<br>{% endif %}{% endfor %}
+                        {% for error in form.invoice_document.errors %}{{ error }}{% if not forloop.last %}<br>{% endif %}{% endfor %}
                     </div>
                 {% endif %}
-            </div>
         </div>
     </form>
 
@@ -33,15 +71,326 @@
             {% trans "Cancelar" %}
         </button>
         <button type="button" class="project-btn project-btn-primary ajax-form-file invoice-import-submit" data-form="invoice-import-form"
-            data-url="{% url "invoice-import" %}" data-target="invoice-list" data-dismiss-modal="common-modal"
-            data-loading-text="{% trans 'Analizando factura…' %}" data-success-message="{% trans 'Factura importada correctamente.' %}">
-            <i class="fas fa-search"></i> {% trans "Analizar factura" %}
+            data-url="{% if attachment_mode %}{% url 'invoice-physical-document-upload' %}{% else %}{% url 'invoice-import' %}{% endif %}"
+            data-loading-text="{% if replacing_document %}{% trans 'Sustituyendo…' %}{% elif attachment_mode %}{% trans 'Adjuntando…' %}{% else %}{% trans 'Analizando…' %}{% endif %}" disabled aria-disabled="true">
+            <i class="fas {% if attachment_mode %}fa-upload{% else %}fa-search{% endif %}"></i>
+            {% if replacing_document %}{% trans "Sustituir documento" %}{% elif attachment_mode %}{% trans "Adjuntar documento" %}{% else %}{% trans "Analizar factura" %}{% endif %}
         </button>
     </div>
 </div>
 
 <script>
     (function(){
+        var allowedExtensions = [".pdf", ".png", ".jpg", ".jpeg"];
+        var allowedMimeTypes = ["application/pdf", "image/png", "image/jpeg"];
+        var input = $("#invoice-import-document");
+        var summary = $("#invoice-import-file-summary");
+        var preview = $("#invoice-import-preview");
+        var clientError = $("#invoice-import-client-error");
+        var submitButton = $(".invoice-import-submit");
+        var fileChoice = $("#invoice-file-open");
+        var cameraOpen = $("#invoice-camera-open");
+        var choiceGrid = $("#invoice-import-choice-grid");
+        var cameraPanel = $("#invoice-camera");
+        var cameraLive = $("#invoice-camera-live");
+        var cameraReview = $("#invoice-camera-review");
+        var cameraStatus = $("#invoice-camera-status");
+        var cameraVideo = $("#invoice-camera-video")[0];
+        var cameraPhoto = $("#invoice-camera-photo")[0];
+        var cameraStream = null;
+        var capturedBlob = null;
+        var capturedPhotoUrl = null;
+        var selectedMethod = null;
+
+        function setSubmitEnabled(enabled) {
+            submitButton.prop("disabled", !enabled).attr("aria-disabled", enabled ? "false" : "true");
+        }
+
+        function setSelectedMethod(method) {
+            selectedMethod = method;
+            fileChoice.toggleClass("is-selected", method === "file").attr("aria-pressed", method === "file" ? "true" : "false");
+            cameraOpen.toggleClass("is-selected", method === "camera").attr("aria-pressed", method === "camera" ? "true" : "false");
+        }
+
+        function stopCamera() {
+            if (cameraStream) {
+                cameraStream.getTracks().forEach(function(track){ track.stop(); });
+                cameraStream = null;
+            }
+            if (cameraVideo) {
+                cameraVideo.pause();
+                cameraVideo.srcObject = null;
+            }
+        }
+
+        function releaseCapturedPhoto() {
+            if (capturedPhotoUrl) {
+                URL.revokeObjectURL(capturedPhotoUrl);
+                capturedPhotoUrl = null;
+            }
+            capturedBlob = null;
+            if (cameraPhoto)
+                cameraPhoto.removeAttribute("src");
+        }
+
+        function closeCamera(moveFocus) {
+            stopCamera();
+            releaseCapturedPhoto();
+            cameraPanel.prop("hidden", true);
+            cameraLive.prop("hidden", true);
+            cameraReview.prop("hidden", true);
+            cameraStatus.text("");
+            if (moveFocus)
+                cameraOpen.trigger("focus");
+        }
+
+        function cameraErrorMessage(error) {
+            var fallback = "{% trans 'No se ha podido abrir la cámara. Puedes seleccionar una imagen o PDF.' %}";
+            if (!window.isSecureContext)
+                return "{% trans 'La cámara requiere una conexión segura HTTPS. Puedes seleccionar una imagen o PDF.' %}";
+            if (!error || !error.name)
+                return fallback;
+            if (error.name === "NotAllowedError" || error.name === "SecurityError")
+                return "{% trans 'No se ha permitido el acceso a la cámara. Puedes seleccionar una imagen o PDF.' %}";
+            if (error.name === "NotFoundError" || error.name === "DevicesNotFoundError")
+                return "{% trans 'No se ha encontrado ninguna cámara. Puedes seleccionar una imagen o PDF.' %}";
+            if (error.name === "NotReadableError" || error.name === "TrackStartError")
+                return "{% trans 'La cámara está ocupada o no puede abrirse. Puedes seleccionar una imagen o PDF.' %}";
+            if (error.name === "OverconstrainedError" || error.name === "ConstraintNotSatisfiedError")
+                return "{% trans 'La cámara no admite la configuración solicitada. Puedes seleccionar una imagen o PDF.' %}";
+            return fallback;
+        }
+
+        function openCamera() {
+            closeCamera(false);
+            cameraPanel.prop("hidden", false);
+            cameraStatus.text("{% trans 'Solicitando acceso a la cámara…' %}");
+            if (!window.isSecureContext) {
+                cameraStatus.text(cameraErrorMessage());
+                cameraPanel.trigger("focus");
+                return;
+            }
+            navigator.mediaDevices.getUserMedia({
+                video: { facingMode: { ideal: "environment" } },
+                audio: false
+            }).then(function(stream){
+                cameraStream = stream;
+                cameraVideo.srcObject = stream;
+                cameraStatus.text("{% trans 'Cámara activa' %}");
+                cameraLive.prop("hidden", false);
+                cameraVideo.play().catch(function(){});
+                $("#invoice-camera-capture").trigger("focus");
+            }).catch(function(error){
+                stopCamera();
+                cameraStatus.text(cameraErrorMessage(error));
+                cameraLive.prop("hidden", true);
+                cameraOpen.trigger("focus");
+            });
+        }
+
+        if (navigator.mediaDevices && typeof navigator.mediaDevices.getUserMedia === "function") {
+            cameraOpen.prop("hidden", false);
+            choiceGrid.addClass("has-camera");
+        }
+        else {
+            $("#invoice-import-choice-separator").prop("hidden", true);
+        }
+
+        fileChoice.off("click.invoiceImport").on("click.invoiceImport", function(){ input.trigger("click"); });
+
+        cameraOpen.off("click.invoiceCamera").on("click.invoiceCamera", openCamera);
+
+        $("#invoice-camera-capture").off("click.invoiceCamera").on("click.invoiceCamera", function(){
+            var width = cameraVideo.videoWidth;
+            var height = cameraVideo.videoHeight;
+            if (!width || !height) {
+                cameraStatus.text("{% trans 'La cámara todavía no está lista. Espera un momento e inténtalo de nuevo.' %}");
+                return;
+            }
+            var canvas = document.createElement("canvas");
+            canvas.width = width;
+            canvas.height = height;
+            canvas.getContext("2d").drawImage(cameraVideo, 0, 0, width, height);
+            canvas.toBlob(function(blob){
+                if (!blob || !blob.size) {
+                    cameraStatus.text("{% trans 'No se ha podido capturar la fotografía. Inténtalo de nuevo o selecciona un archivo.' %}");
+                    return;
+                }
+                stopCamera();
+                releaseCapturedPhoto();
+                capturedBlob = blob;
+                capturedPhotoUrl = URL.createObjectURL(blob);
+                cameraPhoto.src = capturedPhotoUrl;
+                cameraLive.prop("hidden", true);
+                cameraReview.prop("hidden", false);
+                cameraStatus.text("{% trans 'Revisa la fotografía antes de usarla.' %}");
+                $("#invoice-camera-use").trigger("focus");
+            }, "image/jpeg", 0.92);
+        });
+
+        $("#invoice-camera-use").off("click.invoiceCamera").on("click.invoiceCamera", function(){
+            if (!capturedBlob || !capturedBlob.size) {
+                cameraStatus.text("{% trans 'No hay una fotografía válida para usar.' %}");
+                return;
+            }
+            var filename = "factura-capturada-" + Date.now() + ".jpg";
+            var capturedFile = new File([capturedBlob], filename, { type: "image/jpeg", lastModified: Date.now() });
+            var transfer = new DataTransfer();
+            transfer.items.add(capturedFile);
+            input[0].files = transfer.files;
+            closeCamera(false);
+            setSelectedMethod("camera");
+            validateClientFile(capturedFile);
+            input.trigger("focus");
+        });
+
+        $("#invoice-camera-repeat").off("click.invoiceCamera").on("click.invoiceCamera", openCamera);
+        $(".invoice-camera-cancel").off("click.invoiceCamera").on("click.invoiceCamera", function(){ closeCamera(true); });
+
+        $("#common-modal").off("hidden.bs.modal.invoiceCamera").on("hidden.bs.modal.invoiceCamera", function(){ closeCamera(false); });
+        $(window).off("pagehide.invoiceCamera beforeunload.invoiceCamera")
+            .on("pagehide.invoiceCamera beforeunload.invoiceCamera", function(){ closeCamera(false); });
+
+        function formatSize(bytes) {
+            if (!bytes && bytes !== 0)
+                return "";
+            if (bytes >= 1024 * 1024)
+                return (bytes / (1024 * 1024)).toFixed(1) + " MB";
+            return Math.max(1, Math.round(bytes / 1024)) + " KB";
+        }
+
+        function extensionFor(file) {
+            var name = (file && file.name ? file.name : "").toLowerCase();
+            var dotIndex = name.lastIndexOf(".");
+            return dotIndex >= 0 ? name.substring(dotIndex) : "";
+        }
+
+        function detectedMimeFromSignature(bytes) {
+            if (bytes.length >= 5 && bytes[0] === 0x25 && bytes[1] === 0x50 && bytes[2] === 0x44 && bytes[3] === 0x46 && bytes[4] === 0x2d)
+                return "application/pdf";
+            if (bytes.length >= 8 && bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47 && bytes[4] === 0x0d && bytes[5] === 0x0a && bytes[6] === 0x1a && bytes[7] === 0x0a)
+                return "image/png";
+            if (bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff)
+                return "image/jpeg";
+            return "";
+        }
+
+        function setClientError(message) {
+            if (message) {
+                clientError.text(message).prop("hidden", false);
+                input.attr("aria-invalid", "true");
+                input.data("invoiceImportValid", false);
+                setSubmitEnabled(false);
+            }
+            else {
+                clientError.text("").prop("hidden", true);
+                input.removeAttr("aria-invalid");
+            }
+        }
+
+        function resetPreview() {
+            summary.empty().prop("hidden", true);
+            preview.empty().prop("hidden", true);
+            setClientError("");
+            input.data("invoiceImportValid", false);
+            input.removeData("invoiceImportValidating");
+            setSelectedMethod(null);
+            setSubmitEnabled(false);
+        }
+
+        function renderSelectedFile(file, detectedMime) {
+            var extension = extensionFor(file).replace(".", "").toUpperCase();
+            var iconClass = detectedMime === "application/pdf" ? "fas fa-file-pdf" : "far fa-file-image";
+            summary.empty()
+                .append($("<span>", { "class": "invoice-import-summary-icon" }).append($("<i>", { "class": iconClass, "aria-hidden": "true" })))
+                .append($("<span>", { "class": "invoice-import-summary-copy" })
+                    .append($("<strong>").text(file.name))
+                    .append($("<small>").text(extension + " · " + (detectedMime || file.type || "{% trans 'Formato desconocido' %}") + " · " + formatSize(file.size))))
+                .append($("<span>", { "class": "invoice-import-summary-actions" })
+                    .append($("<button>", { type: "button", "class": "project-icon-btn invoice-import-change", title: "{% trans 'Cambiar documento' %}", "aria-label": "{% trans 'Cambiar documento' %}" }).append($("<i>", { "class": "fas fa-sync-alt", "aria-hidden": "true" })))
+                    .append($("<button>", { type: "button", "class": "project-icon-btn invoice-import-remove", title: "{% trans 'Eliminar documento' %}", "aria-label": "{% trans 'Eliminar documento' %}" }).append($("<i>", { "class": "fas fa-trash-alt", "aria-hidden": "true" }))))
+                .prop("hidden", false);
+
+            preview.empty().prop("hidden", true);
+            if (detectedMime === "image/png" || detectedMime === "image/jpeg") {
+                var imageUrl = URL.createObjectURL(file);
+                $("<img>", {
+                    src: imageUrl,
+                    alt: "{% trans 'Previsualización del documento seleccionado' %}"
+                }).one("load error", function(){
+                    URL.revokeObjectURL(imageUrl);
+                }).appendTo(preview);
+                preview.prop("hidden", false);
+            }
+            input.data("invoiceImportValid", true);
+            setSubmitEnabled(true);
+        }
+
+        function validateClientFile(file) {
+            if (!file) {
+                resetPreview();
+                return;
+            }
+            input.data("invoiceImportValidating", true);
+            input.data("invoiceImportValid", false);
+
+            var extension = extensionFor(file);
+            if (allowedExtensions.indexOf(extension) < 0) {
+                resetPreview();
+                setClientError("{% trans 'El archivo debe ser PDF, PNG, JPG o JPEG.' %}");
+                input.removeData("invoiceImportValidating");
+                return;
+            }
+            if (file.type && allowedMimeTypes.indexOf(file.type) < 0) {
+                resetPreview();
+                setClientError("{% trans 'El tipo MIME del archivo no está permitido.' %}");
+                input.removeData("invoiceImportValidating");
+                return;
+            }
+
+            var reader = new FileReader();
+            reader.onload = function(event) {
+                var bytes = new Uint8Array(event.target.result || []);
+                var detectedMime = detectedMimeFromSignature(bytes);
+                var expectedMime = extension === ".pdf" ? "application/pdf" : (extension === ".png" ? "image/png" : "image/jpeg");
+                if (!detectedMime) {
+                    resetPreview();
+                    setClientError("{% trans 'El contenido del archivo no corresponde a un PDF, PNG o JPEG válido.' %}");
+                }
+                else if (detectedMime !== expectedMime) {
+                    resetPreview();
+                    setClientError("{% trans 'La extensión del archivo no coincide con su contenido real.' %}");
+                }
+                else {
+                    setClientError("");
+                    renderSelectedFile(file, detectedMime);
+                }
+                input.removeData("invoiceImportValidating");
+            };
+            reader.onerror = function() {
+                resetPreview();
+                setClientError("{% trans 'No se ha podido leer el archivo seleccionado.' %}");
+                input.removeData("invoiceImportValidating");
+            };
+            reader.readAsArrayBuffer(file.slice(0, 16));
+        }
+
+        input.off("change.invoiceImport").on("change.invoiceImport", function(){
+            closeCamera(false);
+            setSelectedMethod("file");
+            validateClientFile(this.files && this.files.length ? this.files[0] : null);
+        });
+
+        summary.off("click.invoiceImportChange").on("click.invoiceImportChange", ".invoice-import-change", function(){ input.trigger("click"); });
+        summary.off("click.invoiceImportRemove").on("click.invoiceImportRemove", ".invoice-import-remove", function(){
+            input.val("");
+            closeCamera(false);
+            resetPreview();
+            fileChoice.trigger("focus");
+        });
+
+        setSubmitEnabled(false);
+
         $(".invoice-import-submit").off("click.invoiceImport").on("click.invoiceImport", function(e){
             var obj = $(this);
             var form = $("#" + obj.data("form"));
@@ -53,6 +402,13 @@
                 e.stopImmediatePropagation();
                 return;
             }
+            if (input.data("invoiceImportValidating") || input.data("invoiceImportValid") === false) {
+                if (input.data("invoiceImportValidating"))
+                    setClientError("{% trans 'Espera a que termine la comprobación del archivo seleccionado.' %}");
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                return;
+            }
             if (obj.data("loading")) {
                 e.preventDefault();
                 e.stopImmediatePropagation();
@@ -60,6 +416,7 @@
             }
 
             var data = new FormData(form[0]);
+            stopCamera();
             if (!data.get("csrfmiddlewaretoken"))
                 data.append("csrfmiddlewaretoken", getCsrfToken());
 
@@ -78,12 +435,9 @@
                 processData: false,
                 dataType: "html",
                 success: function(data, textStatus, xhr){
-                    if (obj.data("target"))
-                        $("#" + obj.data("target")).html(data);
-                    if (obj.data("dismiss-modal"))
-                        $("#" + obj.data("dismiss-modal")).modal("hide");
-                    showInfo(xhr.getResponseHeader("X-Capsulae-Message") || obj.data("success-message") || "Completado.");
-                    refreshProjectTabCounts();
+                    $("#common-modal-body").html(data);
+                    $("#common-modal").modal("show");
+                    {% if attachment_mode %}showInfo(xhr.getResponseHeader("X-Capsulae-Message") || "{% trans 'Documento físico guardado correctamente.' %}");{% endif %}
                 },
                 error: function(error){
                     var html = error && error.responseText ? error.responseText : "";
@@ -97,8 +451,8 @@
                 },
                 complete: function(){
                     obj.removeData("loading");
-                    obj.prop("disabled", false);
                     obj.html(originalHtml);
+                    setSubmitEnabled(input.data("invoiceImportValid") === true);
                     unsetWait();
                 }
             });

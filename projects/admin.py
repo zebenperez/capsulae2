@@ -4,6 +4,7 @@ from .models import (
     Activity,
     ActivityUser,
     BudgetLine,
+    CashOutflow,
     Expense,
     File,
     Financier,
@@ -15,7 +16,10 @@ from .models import (
     InvoiceAllocation,
     InvoiceDocument,
     InvoiceStatusChange,
+    PendingInvoiceImport,
     Objective,
+    PaymentObligation,
+    PaymentObligationDocument,
     Project,
     ProjectFinancier,
     Result,
@@ -170,10 +174,11 @@ class InvoiceStatusChangeInline(admin.TabularInline):
 
 @admin.register(Invoice)
 class InvoiceAdmin(admin.ModelAdmin):
-    list_display = ("locator", "invoice_code", "number", "provider_tax_id", "issue_date", "total_amount", "iva_amount", "igic_amount", "irpf_amount", "allocated_amount", "status", "physical_document")
+    list_display = ("locator", "invoice_code", "number", "supplier", "provider_tax_id", "issue_date", "total_amount", "iva_amount", "igic_amount", "irpf_amount", "allocated_amount", "status", "physical_document")
     list_filter = ("status", "currency", "issue_date", "payment_date")
     search_fields = ("locator", "invoice_code", "number", "provider_tax_id", "concept")
     readonly_fields = ("invoice_code", "allocated_amount", "pending_amount")
+    autocomplete_fields = ("supplier",)
     inlines = (InvoiceDocumentInline, InvoiceAllocationInline, InvoiceStatusChangeInline)
 
 
@@ -192,6 +197,75 @@ class InvoiceAllocationAdmin(admin.ModelAdmin):
     list_filter = ("project", "allocation_date")
     search_fields = ("invoice__number", "invoice__provider_tax_id", "activity__name", "budget_line__name")
     autocomplete_fields = ("invoice", "project", "activity", "budget_line")
+
+
+@admin.register(PendingInvoiceImport)
+class PendingInvoiceImportAdmin(admin.ModelAdmin):
+    list_display = ("token", "owner", "status", "original_name", "created_at", "expires_at", "invoice")
+    list_filter = ("status", "created_at", "expires_at")
+    search_fields = ("token", "owner__username", "original_name", "invoice__number")
+    readonly_fields = (
+        "token", "owner", "temporary_document", "original_name", "detected_mime", "file_size",
+        "extracted_data", "status", "error_code", "created_at", "expires_at", "completed_at", "invoice",
+    )
+
+
+class CashOutflowInline(admin.TabularInline):
+    model = CashOutflow
+    extra = 0
+    fields = ("payment_date", "amount", "bank_account", "payment_method", "reference")
+    readonly_fields = ("payment_date", "amount", "bank_account", "payment_method", "reference")
+    can_delete = False
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+
+class PaymentObligationDocumentInline(admin.TabularInline):
+    model = PaymentObligationDocument
+    extra = 0
+
+
+@admin.register(PaymentObligation)
+class PaymentObligationAdmin(admin.ModelAdmin):
+    list_display = ("concept", "creditor", "payment_type", "expected_payment_date", "amount", "amount_paid", "amount_pending", "status", "display_state_label")
+    list_filter = ("status", "payment_type", "expected_payment_date", "project", "financier")
+    search_fields = ("concept", "creditor", "invoice__number", "cash_outflows__reference")
+    date_hierarchy = "expected_payment_date"
+    autocomplete_fields = ("project", "financier", "budget_line", "invoice")
+    readonly_fields = ("amount_paid", "amount_pending", "financial_state_label", "is_overdue")
+    inlines = (CashOutflowInline, PaymentObligationDocumentInline)
+
+    def display_state_label(self, obj):
+        return obj.display_state["label"]
+
+    display_state_label.short_description = "Estado financiero"
+
+
+@admin.register(CashOutflow)
+class CashOutflowAdmin(admin.ModelAdmin):
+    list_display = ("payment_obligation", "payment_date", "amount", "payment_method", "bank_account", "reference")
+    list_filter = ("payment_method", "payment_date")
+    search_fields = ("payment_obligation__concept", "payment_obligation__creditor", "reference", "bank_account")
+    date_hierarchy = "payment_date"
+    autocomplete_fields = ("payment_obligation",)
+    readonly_fields = ("payment_obligation", "payment_date", "amount", "bank_account", "payment_method", "reference", "notes", "created_at", "updated_at")
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(PaymentObligationDocument)
+class PaymentObligationDocumentAdmin(admin.ModelAdmin):
+    list_display = ("name", "payment_obligation", "created_at")
+    search_fields = ("name", "payment_obligation__concept", "payment_obligation__creditor")
+    autocomplete_fields = ("payment_obligation",)
 
 
 admin.site.register(InvoiceDocument)

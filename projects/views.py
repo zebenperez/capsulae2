@@ -1,20 +1,25 @@
 from datetime import timedelta
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 import logging
+import os
+import uuid
+from urllib.parse import urlencode
 
 from django.contrib.auth.models import User
+from django.core.paginator import Paginator
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models.deletion import ProtectedError
 from django.db.models import Count, DecimalField, F, Q, Sum, Value
 from django.db.models.functions import Coalesce
-from django.http import HttpResponse, JsonResponse
+from django.http import FileResponse, HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, reverse
 from django.utils import timezone
+from django.views.decorators.clickjacking import xframe_options_exempt
 
 from capsulae2.decorators import group_required
 from capsulae2.commons import get_or_none, get_param, show_exc, validate_captcha
-from .forms import InvoiceImportForm
+from .forms import InvoiceForm, InvoiceImportForm
 from .models import (
     Activity,
     ActivityUser,
@@ -27,10 +32,12 @@ from .models import (
     Income,
     Invoice,
     InvoiceAllocation,
+    PaymentObligationAllocation,
     InvoiceStatus,
     InvoiceStatusChange,
     File,
     Folder,
+    money_sum,
     Project,
     ProjectFinancier,
     ProjectStatus,
@@ -39,11 +46,25 @@ from .models import (
     Text,
 )
 from .services.invoice_ai import InvoiceExtractionError, extract_invoice_data
+from .services.invoice_documents import (
+    ALLOWED_INVOICE_DOCUMENT_TYPES,
+    detect_invoice_document_mime,
+    validate_invoice_document,
+)
+from .services.supplier_matching import match_suppliers, normalize_tax_id
 from .services.invoice_import import (
-    DuplicateInvoiceError,
-    InvoiceAmountValidationError,
     InvoiceImportError,
-    import_invoice,
+    PendingInvoiceImportUnavailable,
+    begin_pending_reanalysis,
+    complete_pending_import,
+    create_pending_import,
+    deserialize_extracted_data,
+    extracted_data_to_initial,
+    get_reviewable_pending_import,
+    mark_pending_import_failed,
+    mark_pending_import_ready,
+    restore_pending_review_after_error,
+    validate_invoice_amounts,
 )
 
 import csv
@@ -84,10 +105,6 @@ def get_financier_context(search_value=""):
     return {"items": get_financiers(search_value)}
 
 
-def normalize_tax_id(value):
-    return (value or "").strip().upper()
-
-
 def get_suppliers(search_value=""):
     full_query = Q()
     if search_value != "":
@@ -103,6 +120,10 @@ def get_supplier_context(search_value=""):
     return {"items": get_suppliers(search_value)}
 
 
+def get_supplier_tax_ids():
+    return {str(item["id"]): item["nif"] for item in Supplier.objects.values("id", "nif")}
+
+
 def get_recent_invoice_start_date():
     return timezone.localdate() - timedelta(days=365)
 
@@ -111,9 +132,10 @@ def get_project_ids_for_user(user):
     return list(get_projects(user).values_list("id", flat=True))
 
 
-def get_recent_invoices(user):
+def get_recent_invoices(user, all_dates=False):
     return (
-        Invoice.objects.filter(issue_date__gte=get_recent_invoice_start_date())
+        Invoice.objects.filter(**({} if all_dates else {"issue_date__gte": get_recent_invoice_start_date()}))
+        .select_related("supplier")
         .annotate(
             allocated_amount_total=Coalesce(
                 Sum("allocations__allocated_amount"),
@@ -128,19 +150,42 @@ def get_recent_invoices(user):
 
 def attach_invoice_suppliers(invoices):
     invoice_items = list(invoices)
-    supplier_nifs = {normalize_tax_id(invoice.provider_tax_id) for invoice in invoice_items if normalize_tax_id(invoice.provider_tax_id)}
+    unresolved = [invoice for invoice in invoice_items if invoice.supplier_id is None]
+    supplier_nifs = {normalize_tax_id(invoice.provider_tax_id) for invoice in unresolved if normalize_tax_id(invoice.provider_tax_id)}
     suppliers = {
         normalize_tax_id(supplier.nif): supplier
-        for supplier in Supplier.objects.filter(nif__in=supplier_nifs)
+        for supplier in Supplier.objects.only("id", "name", "nif")
+        if normalize_tax_id(supplier.nif) in supplier_nifs
     }
-    for invoice in invoice_items:
-        invoice.supplier = suppliers.get(normalize_tax_id(invoice.provider_tax_id))
+    for invoice in unresolved:
+        fallback_supplier = suppliers.get(normalize_tax_id(invoice.provider_tax_id))
+        if fallback_supplier is not None:
+            invoice.supplier = fallback_supplier
     return invoice_items
 
 
-def get_invoice_context(user):
+def get_invoice_context(user, params=None):
+    from .forms import InvoiceFilterForm
+    form = InvoiceFilterForm(params)
+    invoices = get_recent_invoices(user, all_dates=True)
+    if form.is_valid():
+        filters = form.cleaned_data
+        if filters["invoice_from"]:
+            invoices = invoices.filter(issue_date__gte=filters["invoice_from"])
+        if filters["invoice_to"]:
+            invoices = invoices.filter(issue_date__lte=filters["invoice_to"])
+        if filters["invoice_status"]:
+            invoices = invoices.filter(status=filters["invoice_status"])
+        invoices = invoices.filter(total_amount__gte=filters["invoice_min"] or Decimal("0"))
+        query = filters["invoice_q"]
+        if query:
+            supplier_ids = Supplier.objects.filter(name__icontains=query).values_list("nif", flat=True)
+            invoices = invoices.filter(Q(number__icontains=query) | Q(locator__icontains=query) | Q(invoice_code__icontains=query) | Q(provider_tax_id__icontains=query) | Q(provider_tax_id__in=supplier_ids))
+    else:
+        invoices = invoices.none()
     return {
-        "invoices": attach_invoice_suppliers(get_recent_invoices(user)),
+        "invoices": attach_invoice_suppliers(invoices),
+        "invoice_filter_form": form,
         "invoice_start_date": get_recent_invoice_start_date(),
     }
 
@@ -160,6 +205,7 @@ def get_invoice_allocation_wizard_context(user, invoice):
     activities = Activity.objects.filter(project_id__in=project_ids).select_related("project").order_by("project__name", "name")
     remaining_amount = invoice.pending_amount if invoice else Decimal("0.00")
     allocated_amount = invoice.allocated_amount if invoice else Decimal("0.00")
+    total_amount = invoice.total_amount if invoice else Decimal("0.00")
     return {
         "invoice": invoice,
         "projects": projects_qs,
@@ -167,6 +213,7 @@ def get_invoice_allocation_wizard_context(user, invoice):
         "activities": activities,
         "allocated_amount": allocated_amount,
         "allocated_amount_display": format_decimal(allocated_amount),
+        "total_amount_display": format_decimal(total_amount),
         "remaining_amount": remaining_amount,
         "remaining_amount_display": format_decimal(remaining_amount),
     }
@@ -194,13 +241,231 @@ def format_decimal(value):
     return "{:,.2f}".format(value).replace(",", "X").replace(".", ",").replace("X", ".")
 
 
-def get_projects_dashboard_context(user):
+def form_errors_text(form):
+    messages = []
+    for field_name, field_errors in form.errors.items():
+        label = form.fields[field_name].label if field_name in form.fields else "Error"
+        messages.extend("{}: {}".format(label, error) for error in field_errors)
+    return " ".join(messages)
+
+
+def form_errors_payload(form):
+    error_data = form.errors.get_json_data(escape_html=True)
+    return {
+        "success": False,
+        "errors": {
+            field_name: [error["message"] for error in field_errors]
+            for field_name, field_errors in error_data.items()
+            if field_name != "__all__"
+        },
+        "non_field_errors": [
+            error["message"] for error in error_data.get("__all__", [])
+        ],
+    }
+
+
+def validation_error_payload(error):
+    if hasattr(error, "message_dict"):
+        errors = {
+            field_name: list(field_errors)
+            for field_name, field_errors in error.message_dict.items()
+            if field_name != "__all__"
+        }
+        non_field_errors = list(error.message_dict.get("__all__", []))
+    else:
+        errors = {}
+        non_field_errors = list(error.messages)
+    return {"success": False, "errors": errors, "non_field_errors": non_field_errors}
+
+
+def get_payment_obligations(params=None):
+    from .models import PaymentObligation
+
+    params = params or {}
+    ordering = params.get("ordering") or "due_asc"
+    ordering_map = {
+        "due_asc": ("expected_payment_date", "id"),
+        "due_desc": ("-expected_payment_date", "-id"),
+        "amount_desc": ("-amount", "expected_payment_date", "id"),
+        "amount_asc": ("amount", "expected_payment_date", "id"),
+        "creditor": ("creditor", "expected_payment_date", "id"),
+    }
+    obligations = PaymentObligation.objects.select_related("project", "financier", "budget_line", "invoice").order_by(
+        *ordering_map.get(ordering, ordering_map["due_asc"])
+    )
+    query = (params.get("q") or "").strip()
+    if query:
+        obligations = obligations.filter(
+            Q(concept__icontains=query)
+            | Q(creditor__icontains=query)
+            | Q(cash_outflows__reference__icontains=query)
+        ).distinct()
+    status = params.get("status") or ""
+    if status:
+        obligations = obligations.filter(status=status)
+    payment_type = params.get("payment_type") or ""
+    if payment_type:
+        obligations = obligations.filter(payment_type=payment_type)
+    project_id = params.get("project") or ""
+    if project_id:
+        obligations = obligations.filter(Q(project_id=project_id) | Q(allocations__project_id=project_id)).distinct()
+    financier_id = params.get("financier") or ""
+    if financier_id:
+        obligations = obligations.filter(financier_id=financier_id)
+    creditor = (params.get("creditor") or "").strip()
+    if creditor:
+        obligations = obligations.filter(creditor__icontains=creditor)
+    date_from = params.get("date_from") or ""
+    if date_from:
+        obligations = obligations.filter(expected_payment_date__gte=date_from)
+    date_to = params.get("date_to") or ""
+    if date_to:
+        obligations = obligations.filter(expected_payment_date__lte=date_to)
+    return obligations
+
+
+def get_payment_summary():
+    from .models import CashOutflow, PaymentObligation, PaymentObligationStatus
+
+    today = timezone.localdate()
+    month_start = today.replace(day=1)
+    next_month = (month_start + timedelta(days=32)).replace(day=1)
+    obligations = list(PaymentObligation.objects.exclude(status=PaymentObligationStatus.CANCELLED))
+    month_outflows = CashOutflow.objects.filter(payment_date__gte=month_start, payment_date__lt=next_month)
+    pending_total = sum((obligation.amount_pending for obligation in obligations), Decimal("0.00"))
+    pending_count = sum(1 for obligation in obligations if obligation.amount_pending > 0)
+    overdue_items = [obligation for obligation in obligations if obligation.is_overdue]
+    next_30_items = [
+        obligation
+        for obligation in obligations
+        if obligation.expected_payment_date
+        and today <= obligation.expected_payment_date <= today + timedelta(days=30)
+        and obligation.amount_pending > 0
+    ]
+    overdue_total = sum((obligation.amount_pending for obligation in overdue_items), Decimal("0.00"))
+    next_30_total = sum(
+        (
+            obligation.amount_pending
+            for obligation in next_30_items
+        ),
+        Decimal("0.00"),
+    )
+    paid_this_month = decimal_sum(
+        month_outflows,
+        "amount",
+    )
+    return {
+        "pending_total": pending_total,
+        "pending_count": pending_count,
+        "paid_this_month": paid_this_month,
+        "paid_this_month_count": month_outflows.count(),
+        "overdue_total": overdue_total,
+        "overdue_count": len(overdue_items),
+        "next_30_total": next_30_total,
+        "next_30_count": len(next_30_items),
+    }
+
+
+def get_payment_treasury_context(params=None):
+    from .models import PaymentObligationStatus, PaymentObligationType
+
+    today = timezone.localdate()
+    params = params or {}
+    obligations = get_payment_obligations(params)
+    paginator = Paginator(obligations, 5)
+    payment_page = paginator.get_page(params.get("page") or 1)
+    payment_tab = "treasury" if params.get("tab") == "treasury" else "obligations"
+    tab_params = {key: params.get(key) for key in ("q", "status", "payment_type", "project", "financier", "creditor", "date_from", "date_to", "ordering", "page") if params.get(key)}
+    tab_params["section"] = "payments"
+    obligations_url = reverse("projects") + "?" + urlencode(dict(tab_params, tab="obligations"))
+    treasury_url = reverse("projects") + "?" + urlencode(dict(tab_params, tab="treasury"))
+    page_items = list(payment_page.object_list)
+    tax_ids = {normalize_tax_id(item.creditor) for item in page_items}
+    tax_ids.update(normalize_tax_id(item.invoice.provider_tax_id) for item in page_items if item.invoice_id)
+    suppliers = {normalize_tax_id(supplier.nif): supplier for supplier in Supplier.objects.filter(nif__in=tax_ids)}
+    for item in page_items:
+        supplier = suppliers.get(normalize_tax_id(item.creditor))
+        if supplier is None and item.invoice_id:
+            supplier = suppliers.get(normalize_tax_id(item.invoice.provider_tax_id))
+        item.creditor_name = supplier.name if supplier else item.creditor
+        item.creditor_tax_id = supplier.nif if supplier else ""
+        allocations = list(item.invoice.allocations.select_related("project")) if item.invoice_id else list(item.allocations.select_related("project"))
+        item.budget_allocation_amount = sum((allocation.allocated_amount for allocation in allocations), Decimal("0.00"))
+        names = list(dict.fromkeys(allocation.project.name for allocation in allocations))
+        item.project_names = ", ".join(names) or (item.project.name if item.project_id else "—")
+        item.can_delete = not item.cash_outflows.exists() and not item.allocations.exists()
+    groups = get_treasury_forecast_groups(today)
+    upcoming = sorted((item for group in groups if group["code"] != "overdue" for item in group["items"]), key=lambda item: (item.expected_payment_date, item.pk))[:5]
+    return {
+        "payment_obligations": page_items,
+        "payment_tab": payment_tab,
+        "payment_obligations_url": obligations_url,
+        "payment_treasury_url": treasury_url,
+        "payment_upcoming": upcoming,
+        "payment_upcoming_url": reverse("projects") + "?" + urlencode({"section": "payments", "tab": "obligations", "ordering": "due_asc", "date_from": today.isoformat()}),
+        "payment_page": payment_page,
+        "payment_total_count": paginator.count,
+        "payment_page_range": paginator.page_range,
+        "payment_summary": get_payment_summary(),
+        "payment_statuses": PaymentObligationStatus.choices,
+        "payment_types": PaymentObligationType.choices,
+        "payment_ordering_options": (
+            ("due_asc", "Fecha prevista (más próxima)"),
+            ("due_desc", "Fecha prevista (más lejana)"),
+            ("amount_desc", "Importe (mayor primero)"),
+            ("amount_asc", "Importe (menor primero)"),
+            ("creditor", "Acreedor"),
+        ),
+        "payment_projects": Project.objects.order_by("name"),
+        "payment_financiers": Financier.objects.order_by("name"),
+        "payment_filters": params,
+        "treasury_groups": groups,
+    }
+
+
+def get_treasury_forecast_groups(today=None):
+    from .models import PaymentObligation, PaymentObligationStatus
+
+    today = today or timezone.localdate()
+    groups = [
+        ("overdue", "Vencidas", None, today - timedelta(days=1)),
+        ("next_7", "Próximos 7 días", today, today + timedelta(days=7)),
+        ("next_30", "8 - 30 días", today + timedelta(days=8), today + timedelta(days=30)),
+        ("next_60", "31 - 60 días", today + timedelta(days=31), today + timedelta(days=60)),
+        ("later", "Más adelante", today + timedelta(days=61), None),
+    ]
+    obligations = [
+        obligation
+        for obligation in PaymentObligation.objects.exclude(status=PaymentObligationStatus.CANCELLED).order_by("expected_payment_date")
+        if obligation.amount_pending > 0
+    ]
+    rows = []
+    for code, label, start_date, end_date in groups:
+        if start_date and end_date:
+            items = [item for item in obligations if start_date <= item.expected_payment_date <= end_date]
+        elif end_date:
+            items = [item for item in obligations if item.expected_payment_date <= end_date]
+        else:
+            items = [item for item in obligations if item.expected_payment_date >= start_date]
+        rows.append({
+            "code": code,
+            "label": label,
+            "count": len(items),
+            "amount": sum((item.amount_pending for item in items), Decimal("0.00")),
+            "items": items,
+            "next_date": items[0].expected_payment_date if items else None,
+        })
+    return rows
+
+
+def get_projects_dashboard_context(user, payment_params=None):
     projects_qs = get_projects(user)
     project_ids = list(projects_qs.values_list("id", flat=True))
     projects_total = len(project_ids)
     active_projects = projects_qs.filter(status=ProjectStatus.ACTIVE).count()
     approved_budget = decimal_sum(projects_qs, "approved_budget")
     executed_budget = decimal_sum(InvoiceAllocation.objects.filter(project_id__in=project_ids), "allocated_amount")
+    executed_budget += decimal_sum(PaymentObligationAllocation.objects.filter(project_id__in=project_ids), "allocated_amount")
     pending_budget = max(approved_budget - executed_budget, Decimal("0.00"))
     execution_percentage = percent_value(executed_budget, approved_budget)
     execution_angle = int((execution_percentage * Decimal("3.6")).quantize(Decimal("1")))
@@ -287,7 +552,7 @@ def get_projects_dashboard_context(user):
     delayed_activities = activities_qs.filter(status=ProgressStatus.DELAYED).count()
     stale_indicators = indicators_qs.filter(last_update__isnull=True).count() if indicators_total else 0
 
-    return {
+    context = {
         "items": projects_qs.order_by("name"),
         "financiers": get_financiers(),
         "suppliers": get_suppliers(),
@@ -315,10 +580,13 @@ def get_projects_dashboard_context(user):
         "executed_budget_display": format_decimal(executed_budget),
         "pending_budget_display": format_decimal(pending_budget),
     }
+    context.update(get_payment_treasury_context(payment_params))
+    context.update(get_invoice_context(user, payment_params))
+    return context
 
 @group_required("admins","managers", "employee")
 def projects(request):
-    return render(request, "projects/projects.html", get_projects_dashboard_context(request.user))
+    return render(request, "projects/projects.html", get_projects_dashboard_context(request.user, request.GET))
 
 @group_required("admins","managers", "employee")
 def project_list(request):
@@ -428,15 +696,40 @@ def supplier_remove(request):
 
 @group_required("admins","managers", "employee")
 def invoice_list(request):
-    return render(request, "projects/invoice-list.html", get_invoice_context(request.user))
+    return render(request, "projects/invoice-list.html", get_invoice_context(request.user, request.GET))
 
 
 @group_required("admins","managers", "employee")
 def invoice_form(request):
     obj = get_or_none(Invoice, get_param(request.GET, "obj_id")) if get_param(request.GET, "obj_id") else None
+    form = InvoiceForm(instance=obj, user=request.user)
     return render(request, "projects/invoice-form.html", {
         "obj": obj,
+        "form": form,
+        "supplier_tax_ids": get_supplier_tax_ids(),
     })
+
+
+def get_invoice_review_context(user, pending_import, extracted_data):
+    invoice_data = extracted_data_to_initial(extracted_data)
+    supplier_match = match_suppliers(
+        extracted_data.nif_proveedor_original or extracted_data.nif_proveedor,
+        Supplier.objects.all(),
+    )
+    if supplier_match.unique_exact:
+        invoice_data["supplier"] = supplier_match.unique_exact.id
+        invoice_data["provider_tax_id"] = supplier_match.unique_exact.nif
+    elif len(supplier_match.exact_matches) > 1:
+        logger.warning("Multiple suppliers share a normalized tax identifier. matches=%s", len(supplier_match.exact_matches))
+    amount_validation = validate_invoice_amounts(extracted_data)
+    return {
+        "form": InvoiceForm(initial=invoice_data, user=user),
+        "pending_import": pending_import,
+        "amount_warning": None if amount_validation["valid"] else amount_validation,
+        "automatic_review": True,
+        "supplier_match": supplier_match,
+        "supplier_tax_ids": get_supplier_tax_ids(),
+    }
 
 
 @group_required("admins","managers", "employee")
@@ -452,46 +745,74 @@ def invoice_import(request):
             "form": form,
         }, status=400)
 
-    pdf_file = form.cleaned_data["invoice_pdf"]
+    invoice_document = form.cleaned_data["invoice_document"]
+    pending_import = create_pending_import(request.user, invoice_document)
     try:
-        extracted_data = extract_invoice_data(pdf_file)
-        import_result = import_invoice(extracted_data, pdf_file)
-        response = render(request, "projects/invoice-list.html", get_invoice_context(request.user))
-        response["X-Capsulae-Message"] = "Factura importada correctamente."
-        response["X-Capsulae-Invoice-Id"] = str(import_result.invoice.id)
-        return response
-    except InvoiceAmountValidationError as exc:
-        return render(request, "projects/invoice-import-error.html", {
-            "validation": exc.validation,
-            "form_url": reverse("invoice-import"),
-        }, status=400)
-    except DuplicateInvoiceError as exc:
-        return render(request, "projects/invoice-import-duplicate.html", {
-            "invoice": exc.invoice,
-        }, status=409)
+        pending_import.temporary_document.open("rb")
+        pending_import.temporary_document.content_type = pending_import.detected_mime
+        pending_import.temporary_document.invoice_document_mime = pending_import.detected_mime
+        extracted_data = extract_invoice_data(pending_import.temporary_document)
+        mark_pending_import_ready(pending_import, extracted_data)
+        return render(request, "projects/invoice-form.html", get_invoice_review_context(
+            request.user, pending_import, extracted_data
+        ))
     except (InvoiceExtractionError, InvoiceImportError) as exc:
-        logger.warning("Invoice import rejected: %s", exc)
-        form.add_error("invoice_pdf", str(exc))
+        mark_pending_import_failed(pending_import)
+        logger.warning("Invoice import analysis failed")
+        form.add_error("invoice_document", str(exc))
         return render(request, "projects/invoice-import-form.html", {
             "form": form,
         }, status=400)
     except Exception:
+        mark_pending_import_failed(pending_import, "unexpected_analysis_error")
         logger.exception("Unexpected invoice import error")
-        form.add_error("invoice_pdf", "No se ha podido analizar la factura. Puedes intentarlo de nuevo o introducirla manualmente.")
+        form.add_error("invoice_document", "No se ha podido analizar la factura. Puedes intentarlo de nuevo o introducirla manualmente.")
         return render(request, "projects/invoice-import-form.html", {
             "form": form,
         }, status=400)
 
 
 @group_required("admins","managers", "employee")
+def invoice_import_reanalyze(request, token):
+    if request.method != "POST":
+        return HttpResponse("Método no permitido.", status=405)
+    try:
+        pending_import = begin_pending_reanalysis(request.user, token)
+        pending_import.temporary_document.open("rb")
+        pending_import.temporary_document.content_type = pending_import.detected_mime
+        pending_import.temporary_document.invoice_document_mime = pending_import.detected_mime
+        validate_invoice_document(pending_import.temporary_document)
+        extracted_data = extract_invoice_data(pending_import.temporary_document)
+        mark_pending_import_ready(pending_import, extracted_data)
+        pending_import.refresh_from_db()
+        return render(request, "projects/invoice-form.html", get_invoice_review_context(
+            request.user, pending_import, extracted_data
+        ))
+    except PendingInvoiceImportUnavailable as exc:
+        return HttpResponse(str(exc), status=409)
+    except (InvoiceExtractionError, InvoiceImportError, ValidationError) as exc:
+        if "pending_import" in locals():
+            restore_pending_review_after_error(pending_import)
+        logger.warning("Invoice reanalysis failed")
+        return HttpResponse(str(exc), status=400)
+    except Exception:
+        if "pending_import" in locals():
+            restore_pending_review_after_error(pending_import, "unexpected_reanalysis_error")
+        logger.exception("Unexpected invoice reanalysis error")
+        return HttpResponse("No se ha podido reanalizar el documento. Inténtalo de nuevo.", status=500)
+@group_required("admins","managers", "employee")
 def invoice_status_form(request):
-    invoice = get_or_none(Invoice, get_param(request.GET, "invoice_id"))
-    if invoice == None:
-        return HttpResponse("Factura no encontrada.", status=404)
-    return render(request, "projects/invoice-status-form.html", {
-        "invoice": invoice,
-        "invoice_statuses": InvoiceStatus.choices,
-    })
+    try:
+        invoice = get_or_none(Invoice, get_param(request.GET, "invoice_id"))
+        if invoice == None:
+            return HttpResponse("Factura no encontrada.", status=404)
+        return render(request, "projects/invoice-status-form.html", {
+            "invoice": invoice,
+            "invoice_statuses": InvoiceStatus.choices,
+        })
+    except Exception:
+        logger.exception("Invoice status form failed")
+        return HttpResponse("Ha ocurrido un error inesperado. Por favor, comunícalo al administrador.", status=500)
 
 
 @group_required("admins","managers", "employee")
@@ -503,42 +824,152 @@ def invoice_traceability(request):
         "invoice": invoice,
         "status_changes": invoice.status_changes.select_related("changed_by"),
         "allocations": invoice.allocations.select_related("project", "budget_line"),
+        "physical_document": get_invoice_physical_document_context(invoice),
     })
+
+
+def format_file_size(size):
+    if size >= 1024 * 1024:
+        return "{:.1f} MB".format(size / (1024 * 1024)).replace(".", ",")
+    return "{} KB".format(max(1, round(size / 1024)))
+
+
+def get_invoice_physical_document_context(invoice):
+    if not invoice.physical_document:
+        return None
+    extension = os.path.splitext(invoice.physical_document.name)[1].lower()
+    try:
+        size = invoice.physical_document.size
+        document = invoice.physical_document.open("rb")
+        try:
+            detected_mime = detect_invoice_document_mime(document)
+        finally:
+            document.close()
+    except Exception:
+        return {"unavailable": True}
+    if detected_mime != ALLOWED_INVOICE_DOCUMENT_TYPES.get(extension):
+        return {"unavailable": True}
+    return {
+        "format": extension.lstrip(".").upper() or "ARCHIVO",
+        "size": format_file_size(size),
+        "mime": detected_mime,
+    }
+
+
+@group_required("admins", "managers", "employee")
+def invoice_physical_document_form(request):
+    invoice = get_or_none(Invoice, get_param(request.GET, "invoice_id"))
+    if invoice is None:
+        return HttpResponse("Factura no encontrada.", status=404)
+    return render(request, "projects/invoice-import-form.html", {
+        "attachment_mode": True,
+        "replacing_document": bool(invoice.physical_document),
+        "invoice": invoice,
+        "form": InvoiceImportForm(),
+    })
+
+
+@group_required("admins", "managers", "employee")
+def invoice_physical_document_viewer(request):
+    invoice = get_or_none(Invoice, get_param(request.GET, "invoice_id"))
+    if invoice is None or not invoice.physical_document:
+        return HttpResponse("Documento no encontrado.", status=404)
+    document_context = get_invoice_physical_document_context(invoice)
+    if not document_context or document_context.get("unavailable") or not document_context.get("mime"):
+        return HttpResponse("El documento no está disponible o no se puede leer.", status=404)
+    return render(request, "projects/invoice-document-viewer.html", {
+        "invoice": invoice,
+        "physical_document": document_context,
+    })
+
+
+@group_required("admins", "managers", "employee")
+@xframe_options_exempt
+def invoice_physical_document_file(request, invoice_id):
+    invoice = get_or_none(Invoice, invoice_id)
+    if invoice is None or not invoice.physical_document:
+        return HttpResponse("Documento no encontrado.", status=404)
+    try:
+        document = invoice.physical_document.open("rb")
+        detected_mime = detect_invoice_document_mime(document)
+        if detected_mime not in ALLOWED_INVOICE_DOCUMENT_TYPES.values():
+            document.close()
+            return HttpResponse("El documento no está disponible o no se puede leer.", status=404)
+        document.seek(0)
+        disposition = "attachment" if request.GET.get("download") == "1" else "inline"
+        extension = next(ext for ext, mime in ALLOWED_INVOICE_DOCUMENT_TYPES.items() if mime == detected_mime)
+        response = FileResponse(document, content_type=detected_mime)
+        response["Content-Disposition"] = '{}; filename="factura-{}{}"'.format(disposition, invoice.id, extension)
+        response["X-Content-Type-Options"] = "nosniff"
+        response["Cache-Control"] = "private, no-store"
+        response["Content-Security-Policy"] = "frame-ancestors 'self'"
+        return response
+    except (FileNotFoundError, OSError, ValueError):
+        return HttpResponse("El documento no está disponible o no se puede leer.", status=404)
 
 
 @group_required("admins","managers", "employee")
 def invoice_save(request):
+    request_data = (request.POST if request.method == "POST" else request.GET).copy()
+    if not request_data.get("total_amount"):
+        request_data["total_amount"] = str(
+            parse_decimal(request_data.get("taxable_base"))
+            + parse_decimal(request_data.get("iva_amount"))
+            + parse_decimal(request_data.get("igic_amount"))
+            - parse_decimal(request_data.get("irpf_amount"))
+        )
+    pending_token = request_data.get("pending_import", "").strip()
+    obj_id = request_data.get("obj_id", "").strip()
     try:
-        obj = get_or_none(Invoice, get_param(request.GET, "obj_id")) if get_param(request.GET, "obj_id") else Invoice()
+        obj = get_or_none(Invoice, obj_id) if obj_id else Invoice()
         if obj == None:
             return HttpResponse("Factura no encontrada.", status=404)
+        form = InvoiceForm(request_data, instance=obj, user=request.user)
+        if not form.is_valid():
+            pending_import = None
+            if pending_token:
+                try:
+                    pending_import = get_reviewable_pending_import(request.user, pending_token)
+                except PendingInvoiceImportUnavailable:
+                    pass
+            return render(request, "projects/invoice-form.html", {
+                "obj": obj if obj.pk else None,
+                "form": form,
+                "pending_import": pending_import,
+                "automatic_review": bool(pending_import),
+                "amount_warning": {"message": "Los importes detectados no cuadran y deben revisarse."} if form.errors.get("total_amount") else None,
+                "supplier_tax_ids": get_supplier_tax_ids(),
+            }, status=400)
 
-        obj.provider_tax_id = get_param(request.GET, "provider_tax_id").strip().upper()
-        obj.number = get_param(request.GET, "number").strip()
-        obj.issue_date = get_param(request.GET, "issue_date") or None
-        obj.payment_date = get_param(request.GET, "payment_date") or None
-        obj.concept = get_param(request.GET, "concept").strip()
-        obj.taxable_base = parse_decimal(get_param(request.GET, "taxable_base"))
-        obj.iva_amount = parse_decimal(get_param(request.GET, "iva_amount"))
-        obj.igic_amount = parse_decimal(get_param(request.GET, "igic_amount"))
-        obj.irpf_amount = parse_decimal(get_param(request.GET, "irpf_amount"))
-        obj.taxes = obj.calculated_taxes
-        obj.currency = "EUR"
-        if not obj.pk:
-            obj.status = InvoiceStatus.DRAFT
-        obj.total_amount = obj.taxable_base + obj.taxes
-        obj.full_clean()
-        obj.save()
-        return render(request, "projects/invoice-list.html", get_invoice_context(request.user))
-    except ValidationError as e:
-        if hasattr(e, "message_dict"):
-            messages = []
-            for field_errors in e.message_dict.values():
-                messages.extend(field_errors)
-            return HttpResponse(" ".join(messages), status=400)
-        return HttpResponse(" ".join(e.messages), status=400)
-    except Exception as e:
-        return HttpResponse(show_exc(e), status=400)
+        if pending_token:
+            invoice = complete_pending_import(request.user, pending_token, form)
+        else:
+            invoice = form.save()
+        response = render(request, "projects/invoice-list.html", get_invoice_context(request.user))
+        response["X-Capsulae-Message"] = "Factura guardada correctamente."
+        response["X-Capsulae-Invoice-Id"] = str(invoice.id)
+        return response
+    except PendingInvoiceImportUnavailable as exc:
+        return HttpResponse(str(exc), status=409)
+    except ValidationError as exc:
+        return HttpResponse(" ".join(exc.messages), status=400)
+    except Exception:
+        logger.exception("Invoice save failed")
+        return HttpResponse("Ha ocurrido un error inesperado. Por favor, comunícalo al administrador.", status=500)
+
+
+@group_required("admins","managers", "employee")
+def pending_invoice_document(request, token):
+    try:
+        pending_import = get_reviewable_pending_import(request.user, token)
+        document = pending_import.temporary_document.open("rb")
+        response = FileResponse(document, content_type=pending_import.detected_mime)
+        response["Content-Disposition"] = 'inline; filename="{}"'.format(pending_import.original_name.replace('"', ""))
+        response["X-Content-Type-Options"] = "nosniff"
+        response["Cache-Control"] = "private, no-store"
+        return response
+    except PendingInvoiceImportUnavailable:
+        return HttpResponse("Documento no encontrado.", status=404)
 
 
 @group_required("admins","managers", "employee")
@@ -561,18 +992,294 @@ def invoice_remove(request):
 
 @group_required("admins","managers", "employee")
 def invoice_physical_document_upload(request):
+    new_document_name = None
     try:
         invoice = get_or_none(Invoice, request.POST.get("obj_id"))
         if invoice == None:
             return HttpResponse("Factura no encontrada.", status=404)
-        uploaded_file = request.FILES.get("file")
+        traceability_upload = "invoice_document" in request.FILES
+        uploaded_file = request.FILES.get("invoice_document") or request.FILES.get("file")
         if uploaded_file == None:
             return HttpResponse("Debes seleccionar un documento físico.", status=400)
 
-        invoice.physical_document = uploaded_file
-        invoice.save(update_fields=["physical_document"])
-        return render(request, "projects/invoice-list.html", get_invoice_context(request.user))
+        validate_invoice_document(uploaded_file)
+
+        old_document_name = invoice.physical_document.name if invoice.physical_document else ""
+        extension = os.path.splitext(uploaded_file.name)[1].lower()
+        field = Invoice._meta.get_field("physical_document")
+        generated_name = field.generate_filename(invoice, "invoice-{}-{}{}".format(invoice.id, uuid.uuid4().hex, extension))
+        new_document_name = field.storage.save(generated_name, uploaded_file)
+        try:
+            with transaction.atomic():
+                invoice.physical_document.name = new_document_name
+                invoice.save(update_fields=["physical_document"])
+        except Exception:
+            field.storage.delete(new_document_name)
+            new_document_name = None
+            raise
+        new_document_name = None
+        if old_document_name and old_document_name != new_document_name:
+            try:
+                field.storage.delete(old_document_name)
+            except Exception:
+                logger.warning("Could not delete replaced invoice document %s", old_document_name)
+        if traceability_upload:
+            response = render(request, "projects/invoice-traceability.html", {
+                "invoice": invoice,
+                "status_changes": invoice.status_changes.select_related("changed_by"),
+                "allocations": invoice.allocations.select_related("project", "budget_line"),
+                "physical_document": get_invoice_physical_document_context(invoice),
+            })
+        else:
+            response = render(request, "projects/invoice-list.html", get_invoice_context(request.user))
+        response["X-Capsulae-Message"] = "Documento físico guardado correctamente."
+        return response
+    except ValidationError as exc:
+        return HttpResponse(" ".join(exc.messages), status=400)
+    except Exception:
+        if new_document_name:
+            Invoice._meta.get_field("physical_document").storage.delete(new_document_name)
+        logger.exception("Invoice physical document upload failed")
+        return HttpResponse("Ha ocurrido un error inesperado. Por favor, comunícalo al administrador.", status=500)
+
+
+@group_required("admins","managers", "employee")
+def payment_list(request):
+    return render(request, "projects/payment-list.html", get_payment_treasury_context(request.GET))
+
+
+@group_required("admins","managers", "employee")
+def payment_form(request):
+    from .models import PaymentObligation, PaymentObligationStatus, PaymentObligationType
+    from .payment_forms import PaymentObligationForm
+
+    obj = get_or_none(PaymentObligation, get_param(request.GET, "obj_id")) if get_param(request.GET, "obj_id") else PaymentObligation(
+        payment_type=PaymentObligationType.OTHER,
+        status=PaymentObligationStatus.PENDING,
+    )
+    return render(request, "projects/payment-form.html", {
+        "obj": obj,
+        "form": PaymentObligationForm(instance=obj),
+    })
+
+
+@group_required("admins","managers", "employee")
+def payment_save(request):
+    from .models import PaymentObligation, PaymentObligationDocument
+    from .payment_forms import PaymentObligationForm
+
+    try:
+        params = request.POST if request.method == "POST" else request.GET
+        obj = get_or_none(PaymentObligation, get_param(params, "obj_id")) if get_param(params, "obj_id") else PaymentObligation()
+        if obj == None:
+            return JsonResponse({"message": "Obligación de pago no encontrada."}, status=404)
+        form = PaymentObligationForm(params, request.FILES, instance=obj)
+        if not form.is_valid():
+            return JsonResponse(form_errors_payload(form), status=400)
+        obligation = form.save(commit=False)
+        obligation.full_clean()
+        with transaction.atomic():
+            obligation.save()
+            document = form.cleaned_data.get("document")
+            if document:
+                PaymentObligationDocument.objects.create(
+                    payment_obligation=obligation, name=document.name[:255], document=document,
+                )
+        return render(request, "projects/payment-list.html", get_payment_treasury_context({}))
+    except ValidationError as e:
+        return JsonResponse(validation_error_payload(e), status=400)
+    except Exception:
+        logger.exception("Payment obligation save failed")
+        return JsonResponse({"message": "Ha ocurrido un error inesperado. Por favor, comunícalo al administrador."}, status=500)
+
+
+@group_required("admins","managers", "employee")
+def payment_detail(request):
+    from .models import PaymentObligation
+
+    obj = get_or_none(PaymentObligation, get_param(request.GET, "obj_id"))
+    if obj == None:
+        return HttpResponse("Obligación de pago no encontrada.", status=404)
+    return render(request, "projects/payment-detail.html", {
+        "obj": obj,
+        "cash_outflows": obj.cash_outflows.all(),
+    })
+
+
+@group_required("admins", "managers", "employee")
+def payment_allocation_manage(request):
+    from .models import PaymentObligation
+    from .payment_forms import PaymentAllocationEditForm
+
+    if request.method not in ("GET", "POST"):
+        return HttpResponse(status=405)
+    params = request.POST if request.method == "POST" else request.GET
+    action = params.get("action", "edit")
+    if action not in ("edit", "delete"):
+        return HttpResponse("Acción no válida.", status=400, content_type="text/plain")
+    try:
+        with transaction.atomic():
+            allocation = PaymentObligationAllocation.objects.get(pk=params.get("allocation_id"))
+            obligation = PaymentObligation.objects.select_for_update().get(pk=allocation.payment_obligation_id)
+            project = get_projects(request.user).select_for_update().get(pk=allocation.project_id)
+            allocation = PaymentObligationAllocation.objects.select_for_update().get(pk=allocation.pk)
+            if project.status != ProjectStatus.ACTIVE:
+                raise ValidationError("Solo se pueden modificar o eliminar imputaciones de proyectos activos.")
+            form = PaymentAllocationEditForm(request.POST if request.method == "POST" and action == "edit" else None, instance=allocation)
+            if request.method == "POST":
+                # Serialize balance changes with other operations on this budget line.
+                BudgetLine.objects.select_for_update().get(pk=allocation.budget_line_id)
+                if action == "delete":
+                    allocation.delete()
+                else:
+                    if not form.is_valid():
+                        return HttpResponse(form_errors_text(form), status=400, content_type="text/plain")
+                    form.save()
+                return render(request, "projects/payment-detail.html", {"obj": obligation, "cash_outflows": obligation.cash_outflows.all()})
+            return render(request, "projects/payment-allocation-manage.html", {"allocation": allocation, "form": form, "action": action})
+    except ValidationError as error:
+        return HttpResponse(" ".join(error.messages), status=400, content_type="text/plain")
+    except (ValueError, TypeError, PaymentObligationAllocation.DoesNotExist, PaymentObligation.DoesNotExist, Project.DoesNotExist):
+        return HttpResponse("Imputación no encontrada o sin permiso de acceso.", status=404, content_type="text/plain")
+    except Exception:
+        logger.exception("Payment allocation update failed")
+        return HttpResponse("No se pudo modificar la imputación. Comunícalo al administrador.", status=500, content_type="text/plain")
+
+
+@group_required("admins", "managers", "employee")
+def payment_allocation_wizard(request):
+    from .models import PaymentObligation
+
+    obligation = get_or_none(PaymentObligation, request.GET.get("obj_id"))
+    if obligation is None:
+        return HttpResponse("Obligación no encontrada.", status=404, content_type="text/plain")
+    if obligation.invoice_id or obligation.status == "cancelled":
+        return HttpResponse("Solo se pueden imputar obligaciones sin factura y no canceladas.", status=400, content_type="text/plain")
+    context = get_invoice_allocation_wizard_context(request.user, None)
+    context.update({
+        "payment_obligation": obligation,
+        "invoice": {"total_amount": obligation.amount},
+        "allocated_amount": obligation.allocated_amount,
+        "allocated_amount_display": format_decimal(obligation.allocated_amount),
+        "total_amount_display": format_decimal(obligation.amount),
+        "remaining_amount": obligation.unallocated_amount,
+        "remaining_amount_display": format_decimal(obligation.unallocated_amount),
+    })
+    return render(request, "projects/invoice-allocation-wizard.html", context)
+
+
+@group_required("admins", "managers", "employee")
+def payment_allocation_save(request):
+    from .models import PaymentObligation
+
+    if request.method != "POST":
+        return HttpResponse(status=405)
+    try:
+        with transaction.atomic():
+            obligation = PaymentObligation.objects.select_for_update().get(pk=request.POST.get("payment_obligation_id"))
+            project = get_projects(request.user).get(pk=request.POST.get("project"))
+            line = BudgetLine.objects.select_for_update().get(pk=request.POST.get("budget_line"), project=project)
+            activity = None
+            if request.POST.get("activity"):
+                activity = Activity.objects.get(pk=request.POST["activity"], project=project)
+            mode = request.POST.get("allocation_mode", "amount")
+            if mode not in ("amount", "percentage"):
+                raise ValidationError("Modo de imputación no válido.")
+            amount = Decimal(request.POST.get("allocated_percentage" if mode == "percentage" else "allocated_amount", "0").replace(",", "."))
+            if not amount.is_finite() or amount <= 0:
+                raise ValidationError("Introduce un importe o porcentaje mayor que cero.")
+            if mode == "percentage":
+                if amount > 100:
+                    raise ValidationError("El porcentaje no puede superar el 100%.")
+                amount = (obligation.amount * amount / Decimal("100")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+            PaymentObligationAllocation.objects.create(payment_obligation=obligation, project=project, budget_line=line, activity=activity, allocated_amount=amount)
+        return render(request, "projects/payment-list.html", get_payment_treasury_context({}))
+    except ValidationError as error:
+        return HttpResponse(" ".join(error.messages), status=400, content_type="text/plain")
+    except (ValueError, InvalidOperation, PaymentObligation.DoesNotExist, Project.DoesNotExist, BudgetLine.DoesNotExist, Activity.DoesNotExist):
+        return HttpResponse("Revisa el proyecto, la partida y el importe de la imputación.", status=400, content_type="text/plain")
+    except Exception:
+        logger.exception("Payment obligation allocation failed")
+        return HttpResponse("No se pudo guardar la imputación. Comunícalo al administrador.", status=500, content_type="text/plain")
+
+
+@group_required("admins","managers", "employee")
+def payment_remove(request):
+    from .models import PaymentObligation
+
+    try:
+        obj = get_or_none(PaymentObligation, get_param(request.GET, "obj_id"))
+        if obj == None:
+            return HttpResponse("Obligación de pago no encontrada.", status=404)
+        if obj.allocations.exists():
+            return HttpResponse("No se puede eliminar una obligación con imputaciones.", status=400, content_type="text/plain")
+        if obj.cash_outflows.exists():
+            return HttpResponse("No se puede eliminar una obligación con pagos registrados.", status=400)
+        obj.delete()
+        return render(request, "projects/payment-list.html", get_payment_treasury_context({}))
     except Exception as e:
+        logger.exception("Payment obligation remove failed")
+        return HttpResponse(show_exc(e), status=400)
+
+
+@group_required("admins","managers", "employee")
+def cash_outflow_form(request):
+    from .models import PaymentObligation
+    from .payment_forms import CashOutflowForm
+
+    obligation = get_or_none(PaymentObligation, get_param(request.GET, "payment_obligation_id"))
+    if obligation == None:
+        return HttpResponse("Obligación de pago no encontrada.", status=404)
+    initial = {
+        "payment_date": timezone.localdate(),
+        "amount": max(obligation.amount_pending, Decimal("0.00")),
+    }
+    return render(request, "projects/cash-outflow-form.html", {
+        "obligation": obligation,
+        "form": CashOutflowForm(initial=initial),
+    })
+
+
+@group_required("admins","managers", "employee")
+def cash_outflow_save(request):
+    from .models import PaymentObligation, PaymentObligationStatus
+    from .payment_forms import CashOutflowForm
+
+    try:
+        obligation_id = get_param(request.GET, "payment_obligation_id")
+        with transaction.atomic():
+            obligation = PaymentObligation.objects.select_for_update().filter(pk=obligation_id).first()
+            if obligation == None:
+                return HttpResponse("Obligación de pago no encontrada.", status=404)
+            if obligation.status == PaymentObligationStatus.CANCELLED:
+                return HttpResponse("No se pueden registrar pagos sobre obligaciones canceladas.", status=400)
+
+            form = CashOutflowForm(request.GET)
+            if not form.is_valid():
+                return HttpResponse(form_errors_text(form), status=400)
+            cash_outflow = form.save(commit=False)
+            cash_outflow.payment_obligation = obligation
+            current_paid = money_sum(obligation.cash_outflows.all(), "amount")
+            remaining_amount = obligation.amount - current_paid
+            if cash_outflow.amount > remaining_amount:
+                return HttpResponse("El pago no puede superar el saldo pendiente de la obligación.", status=400)
+            cash_outflow.full_clean()
+            cash_outflow.save()
+
+        obligation.refresh_from_db()
+        return render(request, "projects/payment-detail.html", {
+            "obj": obligation,
+            "cash_outflows": obligation.cash_outflows.all(),
+        })
+    except ValidationError as e:
+        if hasattr(e, "message_dict"):
+            messages = []
+            for field_errors in e.message_dict.values():
+                messages.extend(field_errors)
+            return HttpResponse(" ".join(messages), status=400)
+        return HttpResponse(" ".join(e.messages), status=400)
+    except Exception as e:
+        logger.exception("Cash outflow save failed")
         return HttpResponse(show_exc(e), status=400)
 
 
@@ -896,6 +1603,9 @@ def get_budget_lines_context(project):
         row["budget_line_id"]: row["amount"] or Decimal("0.00")
         for row in project.invoice_allocations.values("budget_line_id").annotate(amount=Sum("allocated_amount"))
     }
+    for row in project.payment_allocations.values("budget_line_id").annotate(amount=Sum("allocated_amount")):
+        key = row["budget_line_id"]
+        allocation_totals[key] = allocation_totals.get(key, Decimal("0.00")) + row["amount"]
     contribution_totals = {}
     for row in project.financier_contributions.values("budget_line_id", "financier_id").annotate(amount=Sum("amount")):
         budget_line_id = row["budget_line_id"]
@@ -1326,7 +2036,7 @@ def get_next_sub_budget_line_code(parent):
 
 def move_parent_financing_and_allocations_to_child(parent, child):
     contributions = list(parent.financier_contributions.all())
-    allocations = list(parent.invoice_allocations.all())
+    allocations = list(parent.invoice_allocations.all()) + list(parent.payment_allocations.all())
     if not contributions and not allocations:
         return
     total_amount = sum((contribution.amount for contribution in contributions), Decimal("0.00"))
@@ -1359,8 +2069,9 @@ def get_or_create_root_budget_line_draft(project):
             child_count=Count("child_lines"),
             contribution_count=Count("financier_contributions"),
             allocation_count=Count("invoice_allocations"),
+            payment_allocation_count=Count("payment_allocations"),
         )
-        .filter(child_count=0, contribution_count=0, allocation_count=0)
+        .filter(child_count=0, contribution_count=0, allocation_count=0, payment_allocation_count=0)
         .order_by("-id")
         .first()
     )

@@ -1,0 +1,36 @@
+{% load i18n %}
+
+<div class="project-modal invoice-document-viewer-modal">
+    <header class="invoice-document-viewer-header">
+        <div>
+            <h2>{% trans "DOCUMENTO DE FACTURA" %}</h2>
+            <p>{{ invoice.locator|default:"-----" }} · {{ invoice.number }} · {{ physical_document.format }} · {{ physical_document.size }}</p>
+        </div>
+        <button type="button" class="invoice-traceability-close" data-bs-dismiss="modal" aria-label="{% trans 'Cerrar' %}">
+            <i class="fas fa-times" aria-hidden="true"></i>
+        </button>
+    </header>
+    <main class="invoice-document-viewer-body">
+        {% if physical_document.mime == "application/pdf" %}
+            <iframe src="{% url 'invoice-physical-document-file' invoice.id %}" title="{% trans 'Documento PDF de la factura' %}"></iframe>
+        {% else %}
+            <img src="{% url 'invoice-physical-document-file' invoice.id %}" alt="{% trans 'Documento de la factura' %}">
+        {% endif %}
+    </main>
+    <footer class="project-modal-actions invoice-document-viewer-actions">
+        <button type="button" class="project-btn project-btn-ghost ark" data-url="{% url 'invoice-traceability' %}"
+            data-target-modal="common-modal" data-invoice_id="{{ invoice.id }}">
+            <i class="fas fa-arrow-left" aria-hidden="true"></i> {% trans "Volver" %}
+        </button>
+        <div>
+            <button type="button" class="project-btn project-btn-ghost ark" data-url="{% url 'invoice-physical-document-form' %}"
+                data-target-modal="common-modal" data-invoice_id="{{ invoice.id }}"
+                data-confirm="{% trans 'Esta acción sustituirá el documento actualmente asociado a la factura.' %}">
+                <i class="fas fa-sync-alt" aria-hidden="true"></i> {% trans "Sustituir documento" %}
+            </button>
+            <a class="project-btn project-btn-primary" href="{% url 'invoice-physical-document-file' invoice.id %}?download=1">
+                <i class="fas fa-download" aria-hidden="true"></i> {% trans "Descargar" %}
+            </a>
+        </div>
+    </footer>
+</div>

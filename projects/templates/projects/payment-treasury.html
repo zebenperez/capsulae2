@@ -1,0 +1,34 @@
+{% load i18n project_tags %}
+<section class="payments-treasury" aria-labelledby="treasury-title">
+    <header class="treasury-forecast-header"><div><h3 id="treasury-title">{% trans "Tesorería prevista" %}</h3><p>{% trans "Importes pendientes agrupados por horizonte temporal." %}</p></div></header>
+    <div class="treasury-forecast-grid">
+        {% for group in treasury_groups %}
+        <div class="treasury-forecast-card treasury-forecast-card--{{ group.code }}">
+            <span class="treasury-forecast-icon"><i class="{% if group.code == 'overdue' %}fas fa-exclamation-triangle{% elif group.code == 'next_60' %}far fa-clock{% else %}far fa-calendar-alt{% endif %}" aria-hidden="true"></i></span>
+            <div><span>{{ group.label }}</span><strong>{{ group.amount|money_es }}</strong><small>{% blocktrans count count=group.count %}{{ count }} obligación{% plural %}{{ count }} obligaciones{% endblocktrans %}</small></div>
+        </div>
+        {% endfor %}
+    </div>
+    <div class="treasury-detail-grid">
+        <section class="treasury-horizons" aria-labelledby="treasury-horizons-title">
+            <h3 id="treasury-horizons-title">{% trans "Detalle por horizonte" %}</h3>
+            <div class="treasury-table-wrap">
+                <div class="treasury-horizon-head"><span>{% trans "Horizonte" %}</span><span>{% trans "Obligaciones" %}</span><span>{% trans "Importe pendiente" %}</span><span>{% trans "Próxima fecha" %}</span><span>{% trans "Acciones" %}</span></div>
+                {% for group in treasury_groups %}
+                <details class="treasury-horizon treasury-horizon--{{ group.code }}" {% if not group.count %}data-empty="true"{% endif %}>
+                    <summary><span><i class="fas fa-chevron-right" aria-hidden="true"></i><span class="treasury-dot"></span>{{ group.label }}</span><span>{{ group.count }}</span><span class="payment-money">{{ group.amount|money_es }}</span><span class="payment-date">{{ group.next_date|date:'d/m/Y'|default:'—' }}</span><span>{% if group.count %}<i class="fas fa-eye" title="{% trans 'Ver obligaciones' %}" aria-label="{% trans 'Ver obligaciones' %}"></i>{% else %}—{% endif %}</span></summary>
+                    <div class="treasury-horizon-items">
+                        {% for item in group.items %}<div><span>{{ item.expected_payment_date|date:'d/m/Y' }}</span><span>{{ item.concept }}</span><strong class="payment-money">{{ item.amount_pending|money_es }}</strong><button type="button" class="project-icon-btn ark" title="{% trans 'Ver detalle' %}" aria-label="{% trans 'Ver detalle' %}" data-url="{% url 'payment-detail' %}" data-target-modal="common-modal" data-obj_id="{{ item.id }}"><i class="fas fa-eye"></i></button></div>{% empty %}<p class="project-muted">{% trans "Sin obligaciones pendientes en este periodo." %}</p>{% endfor %}
+                    </div>
+                </details>
+                {% endfor %}
+            </div>
+        </section>
+        <section class="treasury-upcoming" aria-labelledby="treasury-upcoming-title">
+            <header><div><h3 id="treasury-upcoming-title">{% trans "Próximos vencimientos" %}</h3><p>{% trans "Las próximas obligaciones a pagar." %}</p></div><a href="{{ payment_upcoming_url }}">{% trans "Ver todas" %} <i class="fas fa-arrow-right"></i></a></header>
+            <div class="treasury-table-wrap"><table class="treasury-upcoming-table"><thead><tr><th>{% trans "Fecha" %}</th><th>{% trans "Concepto" %}</th><th class="payment-money">{% trans "Importe" %}</th><th><span class="sr-only">{% trans "Acción" %}</span></th></tr></thead><tbody>
+                {% for item in payment_upcoming %}<tr><td class="payment-date">{{ item.expected_payment_date|date:'d/m/Y' }}</td><td>{{ item.concept }}</td><td class="payment-money">{{ item.amount_pending|money_es }}</td><td><button type="button" class="project-icon-btn ark" title="{% trans 'Ver detalle' %}" aria-label="{% trans 'Ver detalle' %}" data-url="{% url 'payment-detail' %}" data-target-modal="common-modal" data-obj_id="{{ item.id }}"><i class="fas fa-eye"></i></button></td></tr>{% empty %}<tr><td colspan="4">{% trans "No hay próximos vencimientos pendientes." %}</td></tr>{% endfor %}
+            </tbody></table></div>
+        </section>
+    </div>
+</section>
