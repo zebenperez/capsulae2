@@ -34,11 +34,21 @@
                 <span>{% if attachment_mode %}{% trans "El archivo se validará y se asociará sin modificar los datos de la factura." %}{% else %}{% trans "El documento se analizará de forma segura antes de guardar la factura." %}{% endif %}</span>
             </div>
                 <section class="invoice-camera" id="invoice-camera" aria-labelledby="invoice-camera-title" hidden>
-                    <h3 id="invoice-camera-title">{% trans "Fotografiar factura o ticket" %}</h3>
+                    <h3 id="invoice-camera-title">{% trans "Cámara activa" %}</h3>
+                    <p class="invoice-camera-instruction">{% trans "Coloca la factura dentro del marco y evita reflejos." %}</p>
                     <p class="invoice-camera-status" id="invoice-camera-status" role="status" aria-live="polite"></p>
                     <div class="invoice-camera-live" id="invoice-camera-live" hidden>
-                        <video id="invoice-camera-video" autoplay playsinline muted
-                            aria-label="{% trans 'Previsualización en vivo de la cámara' %}"></video>
+                        <div class="invoice-camera-viewport">
+                            <video id="invoice-camera-video" autoplay playsinline muted
+                                aria-label="{% trans 'Previsualización en vivo de la cámara' %}"></video>
+                            <div class="invoice-camera-frame" aria-hidden="true">
+                                <span class="invoice-camera-corner invoice-camera-corner-top-left"></span>
+                                <span class="invoice-camera-corner invoice-camera-corner-top-right"></span>
+                                <span class="invoice-camera-corner invoice-camera-corner-bottom-left"></span>
+                                <span class="invoice-camera-corner invoice-camera-corner-bottom-right"></span>
+                                <span class="invoice-camera-guide-text">{% trans "Alinea la factura dentro del marco" %}</span>
+                            </div>
+                        </div>
                         <div class="invoice-camera-controls">
                             <button type="button" class="project-btn project-btn-primary" id="invoice-camera-capture">
                                 <i class="fas fa-camera" aria-hidden="true"></i> {% trans "Capturar" %}
@@ -47,11 +57,13 @@
                         </div>
                     </div>
                     <div class="invoice-camera-review" id="invoice-camera-review" hidden>
-                        <img id="invoice-camera-photo" alt="{% trans 'Fotografía capturada de la factura o ticket' %}">
+                        <div class="invoice-camera-viewport">
+                            <img id="invoice-camera-photo" alt="{% trans 'Fotografía capturada de la factura o ticket' %}">
+                        </div>
                         <div class="invoice-camera-controls">
-                            <button type="button" class="project-btn project-btn-primary" id="invoice-camera-use">{% trans "Usar esta foto" %}</button>
-                            <button type="button" class="project-btn project-btn-ghost" id="invoice-camera-repeat">{% trans "Repetir foto" %}</button>
-                            <button type="button" class="project-btn project-btn-ghost invoice-camera-cancel">{% trans "Cancelar" %}</button>
+                            <button type="button" class="project-btn project-btn-primary" id="invoice-camera-use"><i class="fas fa-check" aria-hidden="true"></i> {% trans "Usar esta foto" %}</button>
+                            <button type="button" class="project-btn project-btn-ghost" id="invoice-camera-repeat"><i class="fas fa-redo" aria-hidden="true"></i> {% trans "Repetir foto" %}</button>
+                            <button type="button" class="project-btn project-btn-ghost" id="invoice-camera-delete"><i class="fas fa-trash-alt" aria-hidden="true"></i> {% trans "Eliminar" %}</button>
                         </div>
                     </div>
                 </section>
@@ -95,8 +107,11 @@
         var cameraLive = $("#invoice-camera-live");
         var cameraReview = $("#invoice-camera-review");
         var cameraStatus = $("#invoice-camera-status");
+        var cameraTitle = $("#invoice-camera-title");
         var cameraVideo = $("#invoice-camera-video")[0];
         var cameraPhoto = $("#invoice-camera-photo")[0];
+        var cameraCapture = $("#invoice-camera-capture");
+        var importModal = $(".invoice-import-modal").last();
         var cameraStream = null;
         var capturedBlob = null;
         var capturedPhotoUrl = null;
@@ -136,6 +151,9 @@
         function closeCamera(moveFocus) {
             stopCamera();
             releaseCapturedPhoto();
+            importModal.removeClass("is-camera-flow");
+            cameraPanel.removeClass("is-reviewing");
+            cameraTitle.text("{% trans 'Cámara activa' %}");
             cameraPanel.prop("hidden", true);
             cameraLive.prop("hidden", true);
             cameraReview.prop("hidden", true);
@@ -163,6 +181,9 @@
 
         function openCamera() {
             closeCamera(false);
+            importModal.addClass("is-camera-flow");
+            cameraTitle.text("{% trans 'Cámara activa' %}");
+            cameraCapture.prop("disabled", false);
             cameraPanel.prop("hidden", false);
             cameraStatus.text("{% trans 'Solicitando acceso a la cámara…' %}");
             if (!window.isSecureContext) {
@@ -176,7 +197,7 @@
             }).then(function(stream){
                 cameraStream = stream;
                 cameraVideo.srcObject = stream;
-                cameraStatus.text("{% trans 'Cámara activa' %}");
+                cameraStatus.text("{% trans 'Cámara preparada. Alinea la factura y pulsa Capturar.' %}");
                 cameraLive.prop("hidden", false);
                 cameraVideo.play().catch(function(){});
                 $("#invoice-camera-capture").trigger("focus");
@@ -201,10 +222,12 @@
         cameraOpen.off("click.invoiceCamera").on("click.invoiceCamera", openCamera);
 
         $("#invoice-camera-capture").off("click.invoiceCamera").on("click.invoiceCamera", function(){
+            cameraCapture.prop("disabled", true);
             var width = cameraVideo.videoWidth;
             var height = cameraVideo.videoHeight;
             if (!width || !height) {
                 cameraStatus.text("{% trans 'La cámara todavía no está lista. Espera un momento e inténtalo de nuevo.' %}");
+                cameraCapture.prop("disabled", false);
                 return;
             }
             var canvas = document.createElement("canvas");
@@ -214,6 +237,7 @@
             canvas.toBlob(function(blob){
                 if (!blob || !blob.size) {
                     cameraStatus.text("{% trans 'No se ha podido capturar la fotografía. Inténtalo de nuevo o selecciona un archivo.' %}");
+                    cameraCapture.prop("disabled", false);
                     return;
                 }
                 stopCamera();
@@ -221,9 +245,11 @@
                 capturedBlob = blob;
                 capturedPhotoUrl = URL.createObjectURL(blob);
                 cameraPhoto.src = capturedPhotoUrl;
+                cameraPanel.addClass("is-reviewing");
+                cameraTitle.text("{% trans 'Revisa la fotografía' %}");
                 cameraLive.prop("hidden", true);
                 cameraReview.prop("hidden", false);
-                cameraStatus.text("{% trans 'Revisa la fotografía antes de usarla.' %}");
+                cameraStatus.text("{% trans 'Fotografía capturada. Revísala antes de usarla.' %}");
                 $("#invoice-camera-use").trigger("focus");
             }, "image/jpeg", 0.92);
         });
@@ -238,6 +264,7 @@
             var transfer = new DataTransfer();
             transfer.items.add(capturedFile);
             input[0].files = transfer.files;
+            setSubmitEnabled(false);
             closeCamera(false);
             setSelectedMethod("camera");
             validateClientFile(capturedFile);
@@ -245,6 +272,12 @@
         });
 
         $("#invoice-camera-repeat").off("click.invoiceCamera").on("click.invoiceCamera", openCamera);
+        $("#invoice-camera-delete").off("click.invoiceCamera").on("click.invoiceCamera", function(){
+            input.val("");
+            closeCamera(false);
+            resetPreview();
+            cameraOpen.trigger("focus");
+        });
         $(".invoice-camera-cancel").off("click.invoiceCamera").on("click.invoiceCamera", function(){ closeCamera(true); });
 
         $("#common-modal").off("hidden.bs.modal.invoiceCamera").on("hidden.bs.modal.invoiceCamera", function(){ closeCamera(false); });

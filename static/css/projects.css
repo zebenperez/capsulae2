@@ -3539,8 +3539,27 @@
     padding: 14px;
 }
 
+.invoice-import-modal.is-camera-flow > .project-modal-close,
+.invoice-import-modal.is-camera-flow > h2,
+.invoice-import-modal.is-camera-flow > .project-muted,
+.invoice-import-modal.is-camera-flow > .invoice-import-actions,
+.invoice-import-modal.is-camera-flow .invoice-import-choice-grid,
+.invoice-import-modal.is-camera-flow .invoice-import-security-note,
+.invoice-import-modal.is-camera-flow .invoice-import-file-summary,
+.invoice-import-modal.is-camera-flow .invoice-import-preview,
+.invoice-import-modal.is-camera-flow .invoice-import-error-message {
+    display: none !important;
+}
+
 .invoice-camera h3 {
-    font-size: 1rem;
+    color: var(--project-primary-dark);
+    font-size: 1.25rem;
+    margin: 0 0 6px;
+}
+
+.invoice-camera-instruction {
+    color: var(--project-text);
+    font-size: 0.95rem;
     margin: 0 0 8px;
 }
 
@@ -3550,6 +3569,24 @@
     margin: 0 0 10px;
 }
 
+.invoice-camera-live,
+.invoice-camera-review {
+    min-width: 0;
+}
+
+.invoice-camera-live[hidden],
+.invoice-camera-review[hidden] {
+    display: none !important;
+}
+
+.invoice-camera-viewport {
+    background: #17141b;
+    border-radius: 8px;
+    min-height: 0;
+    overflow: hidden;
+    position: relative;
+}
+
 .invoice-camera video,
 .invoice-camera-review img {
     background: #17141b;
@@ -3557,7 +3594,62 @@
     display: block;
     max-height: min(55vh, 520px);
     object-fit: contain;
+    height: 100%;
     width: 100%;
+}
+
+.invoice-camera-frame {
+    inset: 0;
+    pointer-events: none;
+    position: absolute;
+}
+
+.invoice-camera-corner {
+    border-color: #fff;
+    border-style: solid;
+    filter: drop-shadow(0 0 2px var(--project-primary));
+    height: 46px;
+    position: absolute;
+    width: 46px;
+}
+
+.invoice-camera-corner-top-left {
+    border-width: 4px 0 0 4px;
+    left: 18px;
+    top: 18px;
+}
+
+.invoice-camera-corner-top-right {
+    border-width: 4px 4px 0 0;
+    right: 18px;
+    top: 18px;
+}
+
+.invoice-camera-corner-bottom-left {
+    border-width: 0 0 4px 4px;
+    bottom: 18px;
+    left: 18px;
+}
+
+.invoice-camera-corner-bottom-right {
+    border-width: 0 4px 4px 0;
+    bottom: 18px;
+    right: 18px;
+}
+
+.invoice-camera-guide-text {
+    background: rgba(25, 18, 32, 0.7);
+    border-radius: 999px;
+    bottom: 18px;
+    color: #fff;
+    font-size: 0.82rem;
+    left: 50%;
+    max-width: calc(100% - 140px);
+    padding: 7px 14px;
+    position: absolute;
+    text-align: center;
+    transform: translateX(-50%);
+    white-space: nowrap;
 }
 
 .invoice-camera-controls {
@@ -3567,11 +3659,23 @@
     margin-top: 12px;
 }
 
-@media (max-width: 600px) {
-    .invoice-camera-controls .project-btn {
-        flex: 1 1 100%;
-        justify-content: center;
-    }
+.invoice-camera-controls .project-btn {
+    min-height: 44px;
+}
+
+.invoice-camera-controls .project-btn:focus-visible {
+    box-shadow: 0 0 0 4px rgba(132, 71, 156, 0.28);
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+}
+
+.invoice-camera-controls .project-btn:active {
+    transform: translateY(1px);
+}
+
+.invoice-camera-controls .project-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
 }
 
 .invoice-import-file-summary {
@@ -3708,6 +3812,109 @@
 }
 
 @media (max-width: 760px) {
+    #common-modal:has(.invoice-import-modal.is-camera-flow) .modal-dialog {
+        height: calc(100vh - 16px);
+        height: calc(100dvh - 16px);
+        margin: 8px;
+        max-width: none;
+        width: calc(100% - 16px);
+    }
+    #common-modal:has(.invoice-import-modal.is-camera-flow) .modal-content,
+    #common-modal:has(.invoice-import-modal.is-camera-flow) .modal-body {
+        height: 100%;
+        max-height: 100%;
+        overflow: hidden;
+        padding: 0;
+    }
+    .invoice-import-modal.is-camera-flow {
+        display: block;
+        height: 100%;
+        max-height: 100%;
+        overflow: hidden;
+        padding: 10px;
+    }
+    .invoice-import-modal.is-camera-flow #invoice-import-form,
+    .invoice-import-modal.is-camera-flow .invoice-import-panel {
+        height: 100%;
+        min-height: 0;
+    }
+    .invoice-import-modal.is-camera-flow .invoice-import-panel {
+        background: transparent;
+        border: 0;
+        padding: 0;
+    }
+    .invoice-import-modal.is-camera-flow .invoice-camera {
+        display: grid;
+        grid-template-rows: auto auto auto minmax(0, 1fr);
+        height: 100%;
+        margin: 0;
+        min-height: 0;
+        overflow: hidden;
+        padding: 12px;
+    }
+    .invoice-import-modal.is-camera-flow .invoice-camera h3 {
+        font-size: 1.45rem;
+        margin-bottom: 6px;
+    }
+    .invoice-import-modal.is-camera-flow .invoice-camera-instruction {
+        font-size: 0.95rem;
+        line-height: 1.35;
+        margin-bottom: 6px;
+    }
+    .invoice-import-modal.is-camera-flow .invoice-camera-status {
+        font-size: 0.78rem;
+        margin-bottom: 6px;
+        min-height: 1.1em;
+    }
+    .invoice-import-modal.is-camera-flow .invoice-camera-live,
+    .invoice-import-modal.is-camera-flow .invoice-camera-review {
+        display: grid;
+        grid-template-rows: minmax(0, 1fr) auto;
+        min-height: 0;
+        overflow: hidden;
+    }
+    .invoice-import-modal.is-camera-flow .invoice-camera-viewport {
+        height: 100%;
+        min-height: 0;
+    }
+    .invoice-import-modal.is-camera-flow .invoice-camera video,
+    .invoice-import-modal.is-camera-flow .invoice-camera-review img {
+        height: 100%;
+        max-height: none;
+        object-fit: contain;
+        width: 100%;
+    }
+    .invoice-import-modal.is-camera-flow .invoice-camera-controls {
+        background: #f8f6fb;
+        display: grid;
+        flex-wrap: nowrap;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        margin-top: 10px;
+        padding: 0;
+    }
+    .invoice-import-modal.is-camera-flow .invoice-camera-controls .project-btn {
+        justify-content: center;
+        min-height: 52px;
+        min-width: 0;
+        width: 100%;
+    }
+    .invoice-import-modal.is-camera-flow .invoice-camera-review .invoice-camera-controls {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .invoice-import-modal.is-camera-flow .invoice-camera-review #invoice-camera-use {
+        grid-column: 1 / -1;
+    }
+    .invoice-import-modal.is-camera-flow .invoice-camera-corner {
+        height: 34px;
+        width: 34px;
+    }
+    .invoice-import-modal.is-camera-flow .invoice-camera-guide-text {
+        bottom: 14px;
+        font-size: 0.74rem;
+        max-width: calc(100% - 96px);
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
     .invoice-import-panel {
         padding: 14px;
     }
@@ -3751,7 +3958,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .invoice-import-choice {
+    .invoice-import-choice,
+    .invoice-camera-controls .project-btn {
         transition: none;
     }
 }

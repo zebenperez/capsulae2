@@ -1803,6 +1803,10 @@ class ProjectInvoiceDashboardTests(TestCase):
         self.assertContains(response, 'id="invoice-camera-video" autoplay playsinline muted')
         self.assertContains(response, "Usar esta foto")
         self.assertContains(response, "Repetir foto")
+        self.assertContains(response, "Eliminar")
+        self.assertContains(response, "Coloca la factura dentro del marco y evita reflejos.")
+        self.assertContains(response, "Alinea la factura dentro del marco")
+        self.assertContains(response, 'class="invoice-camera-frame" aria-hidden="true"', html=False)
         self.assertContains(response, 'name="invoice_document"')
         self.assertContains(response, 'typeof navigator.mediaDevices.getUserMedia === "function"')
         self.assertContains(response, 'cameraOpen.prop("hidden", false)')
@@ -1824,6 +1828,9 @@ class ProjectInvoiceDashboardTests(TestCase):
         self.assertIn('input.val("")', html)
         self.assertIn('setSelectedMethod("camera")', html)
         self.assertIn('setSelectedMethod("file")', html)
+        self.assertIn('importModal.addClass("is-camera-flow")', html)
+        self.assertIn('importModal.removeClass("is-camera-flow")', html)
+        self.assertIn('id="invoice-camera-delete"', html)
 
     def test_invoice_import_camera_requests_environment_camera_only_on_click(self):
         response = self.client.get(reverse("invoice-import"))
@@ -1836,6 +1843,7 @@ class ProjectInvoiceDashboardTests(TestCase):
         self.assertGreater(click_binding, media_request)
         self.assertIn('facingMode: { ideal: "environment" }', html)
         self.assertIn("audio: false", html)
+        self.assertNotIn("getUserMedia", html[:open_function])
 
     def test_invoice_import_camera_creates_jpeg_in_existing_field_and_cleans_up(self):
         response = self.client.get(reverse("invoice-import"))
@@ -1855,6 +1863,10 @@ class ProjectInvoiceDashboardTests(TestCase):
         self.assertIn('error.name === "NotFoundError"', html)
         self.assertIn('error.name === "NotReadableError"', html)
         self.assertIn('error.name === "OverconstrainedError"', html)
+        self.assertIn('cameraPanel.addClass("is-reviewing")', html)
+        self.assertIn('$("#invoice-camera-repeat").off("click.invoiceCamera").on("click.invoiceCamera", openCamera)', html)
+        self.assertIn('$("#invoice-camera-delete").off("click.invoiceCamera")', html)
+        self.assertIn('setSubmitEnabled(true)', html)
 
     def test_invoice_import_rejects_invalid_extension(self):
         response = self.client.post(reverse("invoice-import"), {
