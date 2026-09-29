@@ -1,120 +1,97 @@
-{#{% load i18n app_tags generictags static %}#}
 {% load i18n common_tags %}
 
-<div class="row" style="padding-bottom: 8rem;">
-    <!-- COLUMNA IZQUIERDA -->
-    <div class="col-lg-7">
-        <table class="table table-hover w-100 table-striped" id="table-products">
-            <thead>
-                <tr class="bg-dark- text-white">
-                    <th width="2%">#</th>
-                    <th width="34%">Producto</th>
-                    <th class="text-center" width="20%">Precio</th>
-                    <th class="text-center" width="5%">Cant.</th>
-                    <th class="text-center" width="10%">Tax (%)</th>
-                    <th class="text-center" width="13%">Desc. (&euro;)</th>
-                    <th class="text-right" width="13%">Subtotal</th>
-                    <th class="text-right" width="3%"></th>
-                </tr>
-            </thead>
-            <tbody>
-                {% if invoice.lines.all.count > 0 %}
-                {% for line in invoice.lines.all %}
-                <form>
-                    <tr>
-                        <td>{{forloop.counter}}</td>
-                        <td>{{line.product.name|default:'UNKNOWN'}}</td>
-                        <td class="text-center">{{line.unit_price|floatformat:2}} </td>
-                        <td> 
-                            <input type="number" class="number w-100 text-center ark_change" name="units" id="id-units" min="1" 
-                                step="1" value="{{line.units|jsfloat}}" placeholder="1" data-url="{% url "change-units-tpv-line" %}" 
-                                data-target="div-calc-tpv" data-obj_id="{{line.pk}}" data-field="units"/> 
-                        </td>
-                        <td> 
-                            <input type="number" class="number w-100 text-center ark_change" name="tax" id="id-tax" min="0" step="0.01"
-                                value="{{line.tax|jsfloat}}" placeholder="0" data-field="tax" 
-                                data-url="{%url "change-units-tpv-line"%}" data-target="div-calc-tpv" data-obj_id="{{line.pk}}" /> 
-                        </td>
-                        <td> 
-                            <input type="number" class="number w-100 text-center ark_change" name="discount" id="id-discount" min="0" 
-                                step="0.01" value="{{line.discount|jsfloat}}" placeholder="0" 
-                                data-url="{%url "change-units-tpv-line"%}" data-target="div-calc-tpv" data-obj_id="{{line.pk}}" 
-                                data-field="discount"/> 
-                        </td>
-                        <td class="text-right">{{line.total|floatformat:2}} &euro;</td>
-                        <td class="text-right">
-                            <a class="ark" data-url="{% url "tpv-remove-line" %}" data-target="div-calc-tpv" data-id_line="{{line.pk}}"
-                                data-confirm="Vas a eliminar un producto. ¿Es correcto?"><i class="far fa-trash-alt"></i></a></td>
-                    </tr>
-                </form>
-                {%endfor%}
-                {% else %}
-                <tr><td colspan="8">No hay art&iacute;culos</td></tr>
-                {%endif%}
-            </tbody>
-        </table>
-    </div>
-
-    <!-- COLUMNA DERECHA -->
-    <div class="col-lg-5">
-        <aside class="cart-section">
-            <h1 class="cart-header"><i class="fa fa-shopping-cart"></i> Carrito de Compra</h1>
-            <div class="cart-items cart-summary" id="cartItems">
-                <div class="sh-thead-calc row summary-row">
-                    <div class="col-3 text-left" tyle="border:1px solid red">Total arts.</div>
-                    <div class="col-3 text-left" tyle="border:1px solid red" title="Unidades">
-                        {{invoice.lines.all.count}} arts., {{invoice.get_quantity}} uds.</div>
-                    <div class="col-4 text-right" tyle="border:1px solid red">Base</div>
-                    <div class="col-2 text-right" tyle="border:1px solid red" title="Base">{{invoice.get_base|floatformat:2}} &euro;</div>
-                </div>
-                <div class="sh-thead-calc row summary-row">
-                    <div class="col-3 text-left" tyle="border:1px solid red">Descuento</div>
-                    <div class="col-3 text-left" tyle="border:1px solid red">{{invoice.get_discount|floatformat:2}} &euro;</div>
-                    <div class="col-4 text-right" tyle="border:1px solid red"><a href="#" style="color:#2f8eeb;">IGIC del pedido</a></div>
-                    <div class="col-2 text-right" tyle="border:1px solid red">{{invoice.get_taxes|floatformat:2}} &euro;</div>
-                </div>
-                <div class="sh-tr-calc row summary-row total">
-                    <div class="col-9 text-left" tyle="border:1px solid red">Total a pagar</div>
-                    <div class="col-3 text-right" tyle="border:1px solid red">
-                    <strong><span id="total_a_pagar">{{invoice.total|floatformat:2}}</span> &euro;</strong></div>
-                </div>
-            </div>
-
-            {%include "tpv/tpv-payment.html" with invoice=invoice%}
-
-            <div class="row mt-3">
-                <div class="col-lg-6 col-6 btnfinish-center text-center confirm-btn">
-                    <a href="{%url "confirm-sale" hashinv=invoice.hashinv%}" class="" onclick="return confirmSale();">Finalizar Compra</a>
-                </div>
-                <div class="col-lg-6 col-6 btncancel text-center cancel-btn">
-                    <a href="{%url "cancel-sale" hashinv=invoice.hashinv%}" class="" onclick="return cancelSale();" >Cancelar Compra</a>
-                </div>
-            </div>
-        </aside>
-
-        <!--
-        <div class="sh-calculate mt-2">
-            <div class="sh-thead-calc row">
-                <div class="col-3 text-left p-2">Total Art&iacute;culos</div>
-                <div class="col-3 text-left p-2" title="Unidades">{{invoice.lines.all.count}} arts., {{invoice.get_quantity}} uds.</div>
-                <div class="col-3 text-left p-2">Base</div>
-                <div class="col-3 text-right p-2" title="Base">{{invoice.get_base|floatformat:2}} &euro;</div>
-            </div>
-            <div class="sh-thead-calc row">
-                <div class="col-3 text-left p-2">Descuento</div>
-                <div class="col-3 text-left p-2">{{invoice.get_discount|floatformat:2}} &euro;</div>
-                <div class="col-3 text-left p-2"><a href="#">IGIC del pedido</a></div>
-                <div class="col-3 text-right p-2">{{invoice.get_taxes|floatformat:2}} &euro;</div>
-            </div>
-            <div class="sh-tr-calc row">
-                <div class="col-3 text-left p-1">Total a pagar</div>
-                <div class="col-3 text-right p-1"></div>
-                <div class="col-3 text-left p-1"></div>
-                <div class="col-3 text-right p-1 fs-2">
-                    <strong><span id="total_a_pagar">{{invoice.total|floatformat:2}}</span> &euro;</strong></div>
+<div class="tpv-sale-layout">
+    <section class="tpv-ticket-panel">
+        <div class="tpv-panel-heading">
+            <div>
+                <h2><i class="fas fa-receipt"></i> {% trans "Ticket actual" %}</h2>
+                <p>{{invoice.lines.all.count}} {% trans "artículos" %} · {{invoice.get_quantity}} {% trans "unidades" %}</p>
             </div>
         </div>
-        -->
+        <div class="tpv-lines-wrap">
+            <table class="table tpv-lines-table" id="table-products">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>{% trans "Producto" %}</th>
+                        <th class="text-end">{% trans "Precio" %}</th>
+                        <th>{% trans "Cant." %}</th>
+                        <th class="tpv-line-extra">{% trans "Impuestos" %}</th>
+                        <th class="tpv-line-extra">{% trans "Desc." %}</th>
+                        <th class="text-end">{% trans "Subtotal" %}</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if invoice.lines.all.count > 0 %}
+                        {% for line in invoice.lines.all %}
+                            <tr>
+                                <td data-label="#">{{forloop.counter}}</td>
+                                <td data-label="{% trans 'Producto' %}" class="tpv-line-name">{{line.product.name|default:'UNKNOWN'}}</td>
+                                <td data-label="{% trans 'Precio' %}" class="text-end">{{line.unit_price|floatformat:2}} €</td>
+                                <td data-label="{% trans 'Cantidad' %}">
+                                    <input type="number" class="number ark_change" name="units" id="id-units" min="1"
+                                        step="1" value="{{line.units|jsfloat}}" placeholder="1" data-url="{% url "change-units-tpv-line" %}"
+                                        data-target="div-calc-tpv" data-obj_id="{{line.pk}}" data-field="units">
+                                </td>
+                                <td data-label="{% trans 'Impuestos' %}" class="tpv-line-extra">
+                                    <select class="form-select ark_change" name="tax" id="id-tax-{{line.pk}}" data-field="tax"
+                                        data-url="{%url "change-units-tpv-line"%}" data-target="div-calc-tpv" data-obj_id="{{line.pk}}">
+                                        {% for tax in taxes %}
+                                            <option value="{{tax.percent|jsfloat}}" {% if line.tax == tax.percent %}selected{% endif %}>
+                                                {{tax.name}} ({{tax.percent|floatformat:2}}%)
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </td>
+                                <td data-label="{% trans 'Descuento' %}" class="tpv-line-extra">
+                                    <input type="number" class="number ark_change" name="discount" id="id-discount" min="0"
+                                        step="0.01" value="{{line.discount|jsfloat}}" placeholder="0"
+                                        data-url="{%url "change-units-tpv-line"%}" data-target="div-calc-tpv" data-obj_id="{{line.pk}}"
+                                        data-field="discount">
+                                </td>
+                                <td data-label="{% trans 'Subtotal' %}" class="text-end tpv-line-total">{{line.total|floatformat:2}} €</td>
+                                <td class="text-end">
+                                    <button type="button" class="btn btn-sm ark tpv-remove-line" data-url="{% url "tpv-remove-line" %}"
+                                        data-target="div-calc-tpv" data-id_line="{{line.pk}}"
+                                        data-confirm="{% trans 'Vas a eliminar un producto. ¿Es correcto?' %}" title="{% trans 'Eliminar línea' %}">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr class="tpv-empty-ticket"><td colspan="8"><i class="fas fa-barcode"></i> {% trans "Añade un producto mediante su código para empezar." %}</td></tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </section>
 
-    </div>
+    <aside class="tpv-checkout-panel">
+        <div class="tpv-panel-heading checkout-heading">
+            <div>
+                <h2><i class="fa fa-shopping-cart"></i> {% trans "Cobro" %}</h2>
+                <p>{% trans "Revisa el importe y finaliza la venta." %}</p>
+            </div>
+        </div>
+        <div class="tpv-summary">
+            <div><span>{% trans "Artículos" %}</span><strong>{{invoice.lines.all.count}} · {{invoice.get_quantity}} {% trans "uds." %}</strong></div>
+            <div><span>{% trans "Base" %}</span><strong>{{invoice.get_base|floatformat:2}} €</strong></div>
+            <div><span>{% trans "Descuento" %}</span><strong>{{invoice.get_discount|floatformat:2}} €</strong></div>
+            <div><span>{% trans "Impuestos" %}</span><strong>{{invoice.get_taxes|floatformat:2}} €</strong></div>
+            <div class="tpv-grand-total"><span>{% trans "Total a pagar" %}</span><strong><span id="total_a_pagar">{{invoice.total|floatformat:2}}</span> €</strong></div>
+        </div>
+
+        {% include "tpv/tpv-payment.html" with invoice=invoice %}
+
+        <div class="tpv-checkout-actions">
+            <a href="{%url "confirm-sale" hashinv=invoice.hashinv%}" class="tpv-confirm-sale" onclick="return confirmSale();">
+                <i class="fas fa-check"></i> {% trans "Finalizar compra" %}
+            </a>
+            <a href="{%url "cancel-sale" hashinv=invoice.hashinv%}" class="tpv-cancel-sale" onclick="return cancelSale();">
+                {% trans "Cancelar compra" %}
+            </a>
+        </div>
+    </aside>
 </div>

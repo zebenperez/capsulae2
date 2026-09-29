@@ -16,8 +16,16 @@
             <tr> <td  align="left"> DNI/CIF:08875218R </td><td align="right"> Fecha: {{idate|date:'d/m/Y H:i'}}</td></tr>
             <tr> <td > Tfno: 922391217 </td><td align="right"> Factura simple.:0-{{invoice.number}}</td></tr>
             <tr> 
-                <td > Cliente: {{invoice.client.code|default:'CONTADO'}}</td>
-                <td align="right"> {{invoice.client.name|default:''}}</td>
+                <td colspan="2">Cliente: {% if invoice.client %}{{invoice.client.code}}{% else %}CONTADO{% endif %}</td>
+            </tr>
+            <tr>
+                <td colspan="2">{{invoice.client_name}}</td>
+            </tr>
+            <tr>
+                <td colspan="2">{{invoice.client_dni}}</td>
+            </tr>
+            <tr>
+                <td colspan="2">{{invoice.client_addr}}</td>
             </tr>
         </table>
         <br><br><br>
@@ -76,4 +84,3 @@
     </script>
     </body>
 </html>
-

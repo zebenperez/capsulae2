@@ -1,0 +1,12 @@
+{% load i18n %}
+
+<div class="tpv-selected-client">
+    <i class="fas fa-user-check"></i>
+    <div>
+        <strong>{% if patient or client.code|slice:':9' == 'PACIENTE-' %}{% trans "Paciente" %} · {% endif %}{{ client.name }}</strong>
+        <span>{% if patient %}{% trans "Historial" %}: {{ patient.n_historial }} · {% endif %}{% if client.code %}{{ client.code }} · {% endif %}{{ client.dni|default:client.phone }}</span>
+    </div>
+    <button type="button" class="btn btn-sm tpv-clear-client" title="{% trans 'Quitar cliente seleccionado' %}">
+        <i class="fas fa-times"></i>
+    </button>
+</div>

@@ -4,7 +4,7 @@ from django.core.paginator import Paginator
 #from django.contrib.auth import logout
 from django.db.models import Q
 from django.db.models.functions import Lower
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import render, redirect, reverse
 from django.template.loader import render_to_string
 
@@ -29,6 +29,7 @@ from django.contrib.auth.models import User
 from medication.medication_lib import get_medication
 from medication.models import PresentationsPrescriptionsAempsCache as AempsCache
 from dispensations.models import Dispensation
+from store.models import Invoice
 from .models import Pacientes, Paises, Etnia, PatientOrigin, PatientShared
 from .spd_models import Pillbox
 from .treatment_models import Tratamiento, MedicamentoTratamiento, ComplementoTratamiento
@@ -453,8 +454,32 @@ def patient_import_documents(request):
 def patient_view(request, patient_id):
     patient = get_or_none(Pacientes, patient_id)
     po, created = PatientOrigin.objects.get_or_create(patient=patient)
-    context = {'obj': patient, 'country_list': Paises.objects.all(), 'etnia_list': Etnia.objects.all()}
+    purchases = Invoice.objects.filter(
+        company=request.user.company,
+        typeinv="TPV",
+        client__code="PACIENTE-{}".format(patient.id),
+    )
+    context = {
+        'obj': patient,
+        'country_list': Paises.objects.all(),
+        'etnia_list': Etnia.objects.all(),
+        'tpv_purchases_count': purchases.count(),
+    }
     return render(request, "patient/patient-view.html", context)
+
+
+@group_required("admins", "managers", "employee")
+def patient_purchases(request):
+    patient = get_or_none(Pacientes, get_param(request.GET, "obj_id"))
+    if patient is None:
+        return HttpResponseBadRequest("Paciente no encontrado.")
+
+    purchases = Invoice.objects.filter(
+        company=request.user.company,
+        typeinv="TPV",
+        client__code="PACIENTE-{}".format(patient.id),
+    ).select_related("client").prefetch_related("lines__product").order_by("-date")
+    return render(request, "patient/purchases/purchases-list.html", {"obj": patient, "purchases": purchases})
 
 @group_required("admins","managers","employee")
 def patient_form(request):

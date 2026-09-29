@@ -106,12 +106,12 @@ class Product(models.Model):
     @property
     def last_pvp(self):
         pvp = self.prices.filter(sale=True).order_by('-date').first()
-        return pvp.amount if pvp != None else -1
+        return pvp.amount if pvp != None else 0
 
     @property
     def last_cost(self):
         pvp = self.prices.filter(sale=False).order_by('-date').first()
-        return pvp.amount if pvp != None else -1
+        return pvp.amount if pvp != None else 0
 
     @property
     def get_tax(self):
@@ -278,6 +278,7 @@ class StoreInflow(models.Model):
     comments = models.CharField(max_length=200, verbose_name="Comentarios", default="") #DEPRECATED
 
     product = models.ForeignKey(Product,on_delete=models.SET_NULL,verbose_name="Producto",blank=True,null=True,related_name="inflows")
+    purchase_delivery_note = models.ForeignKey('PurchaseDeliveryNote', on_delete=models.SET_NULL, verbose_name="Albarán de compra", blank=True, null=True, related_name="inflows", db_constraint=False)
     #store = models.ForeignKey(Store, on_delete=models.SET_NULL, verbose_name="Almacén", blank=True, null=True)
     #purchase = models.ForeignKey(Purchase, on_delete=models.CASCADE, verbose_name="Purchase", blank=True, null=True, related_name="inflows")
 
@@ -288,6 +289,42 @@ class StoreInflow(models.Model):
         verbose_name = 'Store Inflow'
         verbose_name_plural = 'Store Inflows'
         ordering = ['-id']
+
+
+class PurchaseDeliveryNote(models.Model):
+    STATUS_IMPORTED = 'imported'
+    STATUS_CANCELLED = 'cancelled'
+    STATUS_CHOICES = (
+        (STATUS_IMPORTED, 'Importado'),
+        (STATUS_CANCELLED, 'Anulado'),
+    )
+
+    document_type = models.CharField(max_length=100, verbose_name='Tipo de documento')
+    document_number = models.CharField(max_length=100, verbose_name='Número de documento')
+    document_date = models.DateField(verbose_name='Fecha del albarán')
+    imported_at = models.DateTimeField(default=timezone.now, verbose_name='Fecha de importación')
+    source_file = models.FileField(upload_to='uploads/albaranes', verbose_name='CSV original')
+    file_hash = models.CharField(max_length=64, verbose_name='Huella del archivo')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_IMPORTED, verbose_name='Estado')
+    lines_count = models.PositiveIntegerField(default=0, verbose_name='Líneas importadas')
+    units_count = models.PositiveIntegerField(default=0, verbose_name='Unidades recibidas')
+    total_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0, verbose_name='Importe total')
+    created_products = models.PositiveIntegerField(default=0, verbose_name='Productos creados')
+    updated_products = models.PositiveIntegerField(default=0, verbose_name='Productos actualizados')
+    skipped_lines = models.PositiveIntegerField(default=0, verbose_name='Líneas omitidas')
+
+    provider = models.ForeignKey(Provider, on_delete=models.SET_NULL, blank=True, null=True, related_name='purchase_delivery_notes', verbose_name='Proveedor', db_constraint=False)
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='purchase_delivery_notes', verbose_name='Empresa', db_constraint=False)
+    imported_by = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, null=True, related_name='imported_purchase_delivery_notes', verbose_name='Importado por', db_constraint=False)
+
+    def __str__(self):
+        return '{} {}'.format(self.document_type, self.document_number)
+
+    class Meta:
+        verbose_name = 'Albarán de compra'
+        verbose_name_plural = 'Albaranes de compra'
+        ordering = ['-document_date', '-id']
+        unique_together = ('company', 'document_type', 'document_number')
 
 class StoreOutflow(models.Model):
     quantity = models.IntegerField(verbose_name="Quantity", default=0)
@@ -517,4 +554,3 @@ class InvoiceLine(models.Model):
         verbose_name = 'Invoice line'
         verbose_name_plural = 'Invoice lines'
         ordering = ['product__code','pk']
-

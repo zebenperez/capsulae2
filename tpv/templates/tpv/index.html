@@ -2,35 +2,56 @@
 {% load i18n %}
 
 {% block central_content %}
-    {% include "store-menu.html" %}
-
-    <div class="row">
-        <div class="col-lg-6"> <h1 class="store-name"><strong>{{company}}</strong></h1> </div>
-
-        {% include "tpv/menu.html" %}
-
-        <div class="col-lg-6">
-            <div class="header-info">
-                <input type="text" class="form-control ark_keyup" autocomplete="off" name="code" id="code" value="" 
-                    placeholder="{%trans "Codigo de producto"%}" data-url="{% url "tpv-product-by-code" %}" 
-                    data-target="div-result-query" data-hashinv="{{invoice.hashinv}}" />
-
-                <input type="text" class="form-control ark_change" id="invoiceClient" aria-describedby="clientHelp" 
-                    placeholder="C&oacute;digo Cliente" value="{{invoice.client.code|default:''}}" 
-                    data-target="div-result-client" data-hashinv="{{invoice.hashinv}}" 
-                    data-url="{% url "tpv-client-by-code" %}"> 
+    <div class="tpv-page">
+        <header class="tpv-topbar">
+            <div class="tpv-brand">
+                <span>{% trans "Punto de venta" %}</span>
+                {#<h1>{{company}}</h1>#}
             </div>
-            <span id="div-result-query"></span>
-            <span id="div-result-client"></span>
+            {% include "tpv/menu.html" %}
+        </header>
+        <div class="tpv-workspace">
+        <div class="tpv-search-row">
+            <section class="tpv-product-search">
+                <label for="code"><i class="fas fa-barcode"></i> {% trans "Añadir producto" %}</label>
+                <div class="header-info">
+                    <input type="text" class="form-control ark_keyup" autocomplete="off" name="code" id="code" value=""
+                        placeholder="{%trans "Código de producto"%}" data-url="{% url "tpv-product-by-code" %}"
+                        data-target="div-result-query" data-hashinv="{{invoice.hashinv}}" />
+
+                    {%comment%}
+                    <input type="text" class="form-control ark_change" id="invoiceClient" aria-describedby="clientHelp"
+                        placeholder="C&oacute;digo Cliente" value="{{invoice.client.code|default:''}}"
+                        data-target="div-result-client" data-hashinv="{{invoice.hashinv}}"
+                        data-url="{% url "tpv-client-by-code" %}">
+                    {%endcomment%}
+                </div>
+                <span id="div-result-query"></span>
+            </section>
+
+            <section class="tpv-client-search">
+                <div class="tpv-client-search-heading">
+                    <label for="tpv-client-query"><i class="fas fa-user"></i> {% trans "Cliente o paciente" %}</label>
+                    <button type="button" class="btn btn-sm ark" data-url="{% url 'tpv-client-form' %}"
+                        data-target-modal="common-modal" data-hashinv="{{ invoice.hashinv }}">
+                        <i class="fas fa-user-plus"></i> {% trans "Nuevo cliente" %}
+                    </button>
+                </div>
+                <input type="search" id="tpv-client-query" class="form-control" autocomplete="off"
+                    placeholder="{% trans 'Buscar cliente o paciente por nombre, DNI, teléfono, historial o CIP' %}"
+                    data-url="{% url 'tpv-client-search' %}" data-hashinv="{{ invoice.hashinv }}">
+                <div id="tpv-client-selection">{% if invoice.client %}{% include 'tpv/client-selection.html' with client=invoice.client %}{% endif %}</div>
+                <div id="tpv-client-results"></div>
+            </section>
+        </div>
+
+        <div id="div-calc-tpv">{%include "tpv/tpv-main.html" with invoice=invoice%}</div>
         </div>
     </div>
-   
-    <div id="div-calc-tpv">{%include "tpv/tpv-main.html" with invoice=invoice%}</div> 
 
     <script> 
         function confirmSale() {
-            const content = $('#table-products').text();
-            if (content.includes("No hay art"))
+            if ($('#table-products tbody tr').not('.tpv-empty-ticket').length === 0)
             {
                 alert("No hay artículos seleccionados!")
                 return false;
@@ -39,8 +60,7 @@
         }
 
         function cancelSale() {
-            const content = $('#table-products').text();
-            if (content.includes("No hay art"))
+            if ($('#table-products tbody tr').not('.tpv-empty-ticket').length === 0)
             {
                 alert("No hay artículos seleccionados!")
                 return false;
@@ -75,6 +95,54 @@
 
         $(document).ready(function(){ if ($(window).width() < 1200){ $('#sidebar').removeClass('expanded').addClass('closed'); }}); 
 
+        var tpvClientSearchTimer;
+        $("body").on("input", "#tpv-client-query", function(){
+            var field = $(this);
+            clearTimeout(tpvClientSearchTimer);
+            if (field.val().trim().length < 2) {
+                $('#tpv-client-results').empty();
+                return;
+            }
+            tpvClientSearchTimer = setTimeout(function(){
+                ajaxGet(field.data('url'), {value: field.val(), hashinv: field.data('hashinv')}, 'tpv-client-results', '');
+            }, 250);
+        });
+
+        $("body").on("click", ".tpv-client-select", function(){
+            var button = $(this);
+            var params = {hashinv: button.data('hashinv')};
+            if (button.data('patient-id')) {
+                params.patient_id = button.data('patient-id');
+            } else {
+                params.client_id = button.data('client-id');
+            }
+            ajaxGet(button.data('url'), params, 'tpv-client-selection', '');
+            $('#tpv-client-query').val('').focus();
+            $('#tpv-client-results').empty();
+        });
+
+        $("body").on("click", ".tpv-clear-client", function(){
+            ajaxGet('{% url "tpv-client-clear" %}', {hashinv: '{{ invoice.hashinv }}'}, 'tpv-client-selection', '');
+            $('#tpv-client-query').focus();
+        });
+
+        $("body").on("submit", ".tpv-client-create-form", function(event){
+            event.preventDefault();
+            var form = $(this);
+            $.ajax({
+                url: form.attr('action'), type: 'POST', data: form.serialize(), dataType: 'html',
+                success: function(data){
+                    $('#tpv-client-selection').html(data);
+                    $('#common-modal').modal('hide');
+                    $('#tpv-client-query').val('').focus();
+                    $('#tpv-client-results').empty();
+                },
+                error: function(xhr){
+                    form.closest('.tpv-client-create-modal').find('.tpv-client-create-error').text(xhr.responseText || '{% trans "No se pudo crear el cliente." %}');
+                }
+            });
+        });
+
         $(window).resize(function(){ 
             if ($(window).width() < 1200){ 
                 $('#sidebar').removeClass('expanded').addClass('closed'); 
@@ -83,10 +151,13 @@
             }
         }); 
 
-        $(".card-cash").click(function(){
+        $("body").on("click", ".card-cash", function(){
             $(".card-cash").removeClass("option-on");
             $(this).addClass("option-on");
-            $("input", this).prop("checked", true);
+        });
+        $("body").on("click", ".tpv-regulated-option", function(){
+            $(".tpv-regulated-option").removeClass("option-on");
+            $(this).addClass("option-on");
         });
     </script>
 {% endblock central_content %}

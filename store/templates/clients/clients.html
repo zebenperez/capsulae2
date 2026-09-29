@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block central_content %}
+    {% include "store-menu.html" %}
+
+    <div class="row toolbar-search pt-2 pb-2 m-0">
+        <div class="col-1"><i class="fas fa-search"></i></div>
+        <div class="col-11">
+            <input type="text" class="autosearch form-control form-control-dark w-100" name="s-name" id="s-name"
+                placeholder="{% trans 'Nombre, código, DNI, teléfono o correo electrónico' %}"
+                data-url="{% url 'clients-search' %}" data-target="clients-list" data-related="s-name">
+        </div>
+    </div>
+    <div class="content mt-4 provider-page">
+        <div class="toolbar-content provider-toolbar">
+            <h2 class="pathway b-right">{% trans 'Clientes' %} <span id="items-counter" class="badge badge-secondary">
+                {{items|length}}</span></h2>
+            <button type="button" class="btn btn-sm ark new" data-url="{% url 'clients-form' %}" data-target-modal="common-modal">
+                <i class="fas fa-plus"></i> {% trans 'Crear cliente' %}
+            </button>
+        </div>
+        <div id="clients-list">{% include "clients/clients-list.html" %}</div>
+    </div>
+    {% include "common-modal.html" %}
+{% endblock central_content %}

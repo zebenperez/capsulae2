@@ -64,7 +64,11 @@
         {% endif %}
         {% if user|have_menu:"STO_PRO"%}
             <li class="nav-item"><a class="nav-link" href="{%url "products"%}">
-                <i class="fa fa-store"></i> {%trans "Almacén"%}</a></li><hr/>
+                <i class="fas fa-box"></i> {%trans "Productos"%}</a></li><hr/>
+        {% endif %}
+        {% if user|have_menu:"STO_TPV"%}
+            <li class="nav-item"><a class="nav-link" href="{%url "tpv-index"%}">
+                <i class="fas fa-calculator"></i> {%trans "TPV"%}</a></li><hr/>
         {% endif %}
 
         {%comment%}
@@ -77,4 +81,3 @@
     </ul>
 {% else %}
 {% endif %}
-

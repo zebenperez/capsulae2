@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block central_content %}
+    {% include "store-menu.html" with hide_tpv_menu=True %}
+
+    <div class="content mt-4">
+        <div class="toolbar-content">
+            <h2 class="pathway b-right">{{ note.document_type }} {{ note.document_number }}</h2>
+            <div class="d-flex gap-2">
+                <a class="btn btn-sm" href="{{ note.source_file.url }}"><i class="fas fa-download"></i> {% trans 'Descargar CSV' %}</a>
+                <form method="post" action="{% url 'purchase-delivery-note-remove' note.pk %}" onsubmit="return confirm('{% trans "¿Seguro que deseas eliminar este albarán? Se retirarán sus entradas de stock." %}');">
+                    {% csrf_token %}
+                    <button class="btn btn-sm ark" type="submit"><i class="fas fa-trash"></i> {% trans 'Eliminar albarán' %}</button>
+                </form>
+                <a class="btn btn-sm" href="{% url 'purchase-delivery-notes' %}">{% trans 'Volver a albaranes' %}</a>
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-body row">
+                <div class="col-md-3"><strong>{% trans 'Fecha' %}</strong><br>{{ note.document_date|date:'d/m/Y' }}</div>
+                <div class="col-md-3"><strong>{% trans 'Proveedor' %}</strong><br>{{ note.provider|default:'—' }}</div>
+                <div class="col-md-2"><strong>{% trans 'Unidades' %}</strong><br>{{ note.units_count }}</div>
+                <div class="col-md-2"><strong>{% trans 'Importe' %}</strong><br>{{ note.total_amount|floatformat:2 }} €</div>
+                <div class="col-md-2"><strong>{% trans 'Importado por' %}</strong><br>{{ note.imported_by|default:'—' }}</div>
+            </div>
+        </div>
+
+        <div class="table-responsive mt-3">
+            <table class="table">
+                <thead><tr><th>{% trans 'Producto' %}</th><th class="text-end">{% trans 'Unidades' %}</th><th class="text-end">{% trans 'Coste unitario' %}</th><th class="text-end">{% trans 'IVA' %}</th><th class="text-end">{% trans 'Descuento' %}</th></tr></thead>
+                <tbody>
+                    {% for inflow in inflows %}
+                        <tr>
+                            <td>{{ inflow.product }}</td>
+                            <td class="text-end">{{ inflow.quantity }}</td>
+                            <td class="text-end">{{ inflow.unit_price|floatformat:2 }} €</td>
+                            <td class="text-end">{{ inflow.tax|floatformat:2 }}%</td>
+                            <td class="text-end">{{ inflow.discount|floatformat:2 }} €</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock central_content %}

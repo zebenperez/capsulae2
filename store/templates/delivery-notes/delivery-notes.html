@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block central_content %}
+    {% include "store-menu.html" with hide_tpv_menu=True %}
+
+    <div class="content mt-4">
+        <div class="toolbar-content">
+            <h2 class="pathway b-right"><i class="fas fa-file-invoice"></i> {% trans 'Albaranes' %}</h2>
+            <a class="btn btn-sm new" href="{% url 'product-albaran-import' %}">
+                <i class="fas fa-file-import"></i> {% trans 'Importar albarán' %}
+            </a>
+        </div>
+
+        <div class="table-responsive mt-3">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>{% trans 'Fecha' %}</th>
+                        <th>{% trans 'Documento' %}</th>
+                        <th>{% trans 'Proveedor' %}</th>
+                        <th class="text-end">{% trans 'Líneas' %}</th>
+                        <th class="text-end">{% trans 'Unidades' %}</th>
+                        <th class="text-end">{% trans 'Importe' %}</th>
+                        <th>{% trans 'Importado por' %}</th>
+                        <th class="text-end">{% trans 'Acciones' %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                        <tr class="pointer" role="link" tabindex="0"
+                            onclick="window.location.href='{% url 'purchase-delivery-note-detail' item.pk %}';"
+                            onkeydown="if (event.key === 'Enter') window.location.href='{% url 'purchase-delivery-note-detail' item.pk %}';">
+                            <td>{{ item.document_date|date:'d/m/Y' }}</td>
+                            <td>{{ item.document_type|default:'—' }} {{ item.document_number|default:'' }}</td>
+                            <td>{{ item.provider|default:'—' }}</td>
+                            <td class="text-end">{{ item.lines_count }}</td>
+                            <td class="text-end">{{ item.units_count }}</td>
+                            <td class="text-end">{{ item.total_amount|floatformat:2 }} €</td>
+                            <td>{{ item.imported_by|default:'—' }}</td>
+                            <td class="text-end">
+                                <form class="d-inline" method="post" action="{% url 'purchase-delivery-note-remove' item.pk %}"
+                                      onclick="event.stopPropagation();"
+                                      onsubmit="return confirm('{% trans "¿Seguro que deseas eliminar este albarán? Se retirarán sus entradas de stock." %}');">
+                                    {% csrf_token %}
+                                    <button class="btn btn-xs ark" type="submit" title="{% trans 'Eliminar albarán' %}">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="8" class="text-center text-muted py-4">{% trans 'Todavía no hay albaranes importados.' %}</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock central_content %}

@@ -1,0 +1,40 @@
+{% load i18n %}
+
+<div class="provider-list-card">
+    <table class="table table-hover">
+        <thead>
+            <tr class="small">
+                <th class="row main-th">
+                    <div class="col-2">{% trans 'Código' %}</div>
+                    <div class="col-3">{% trans 'Nombre' %}</div>
+                    <div class="col-2">{% trans 'DNI' %}</div>
+                    <div class="col-2">{% trans 'Teléfono' %}</div>
+                    <div class="col-2">{% trans 'Correo electrónico' %}</div>
+                    <div class="col-1 text-end">{% trans 'Acciones' %}</div>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+                <tr class="small" id="row_{{item.id}}">
+                    <td class="row">
+                        <div class="col-2">{{item.code}}</div>
+                        <div class="col-3">{{item.name}}</div>
+                        <div class="col-2">{{item.dni}}</div>
+                        <div class="col-2">{{item.phone}}</div>
+                        <div class="col-2">{{item.email}}</div>
+                        <div class="col-1 d-flex justify-content-end align-items-center">
+                            <a class="btn btn-xs ark p-2" data-url="{% url 'clients-form' %}" data-target-modal="common-modal"
+                                data-obj_id="{{item.id}}" title="{% trans 'Editar' %}"><i class="fas fa-edit"></i></a>
+                            <a class="btn btn-xs ark" data-url="{% url 'clients-remove' %}" data-target="clients-list"
+                                data-obj_id="{{item.id}}" title="{% trans 'Remove' %}"
+                                data-confirm="{% trans 'Are you sure to remove this element?' %}"><i class="fas fa-trash"></i></a>
+                        </div>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr><td class="text-center text-muted py-4" colspan="6">{% trans 'No hay clientes registrados.' %}</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

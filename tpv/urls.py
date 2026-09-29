@@ -5,6 +5,12 @@ urlpatterns = [
     path('', views.index, name='tpv-index'),
     path('product-by-code/', views.product_by_code, name='tpv-product-by-code'),
     path('client-by-code/', views.client_by_code, name='tpv-client-by-code'),
+    path('client-search/', views.client_search, name='tpv-client-search'),
+    path('client-select/', views.client_select, name='tpv-client-select'),
+    path('patient-select/', views.patient_select, name='tpv-patient-select'),
+    path('client-clear/', views.client_clear, name='tpv-client-clear'),
+    path('client-form/', views.client_form, name='tpv-client-form'),
+    path('client-create/', views.client_create, name='tpv-client-create'),
 
     path('add-tpv-line/', views.tpv_add_product, name='tpv-add-product'),
     #path('add-tpv-line/<int:product_id>/<slug:hashinv>/', views.tpv_add_product, name='tpv-add-product'),
@@ -41,4 +47,3 @@ urlpatterns = [
     path('zeta/', views.zeta, name='zeta'),
 
 ]
-

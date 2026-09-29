@@ -2,7 +2,13 @@ from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.contrib.auth.models  import User
 from django.contrib import auth
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseForbidden
+from django.conf import settings
+from django.views.decorators.http import require_GET
+from cryptography.exceptions import InvalidSignature
+from cryptography.hazmat.primitives import hashes, serialization
+from cryptography.hazmat.primitives.asymmetric import padding
+import base64, binascii, os, time
 import random, string, datetime
 from django.views.decorators.csrf import csrf_exempt
 from .models import *
@@ -17,6 +23,69 @@ def show_exc(e):
     import sys
     exc_type, exc_obj, exc_tb = sys.exc_info()
     return ("ERROR ===:> [%s in %s:%d]: %s" % (exc_type, exc_tb.tb_frame.f_code.co_filename, exc_tb.tb_lineno, str(e)))
+
+def _wordpress_sso_b64decode(value):
+    if not isinstance(value, str) or not value:
+        raise ValueError('invalid token encoding')
+    return base64.urlsafe_b64decode(value + '=' * (-len(value) % 4))
+
+def _wordpress_sso_issuers():
+    registry_path = getattr(settings, 'WORDPRESS_SSO_ISSUERS_PATH', os.path.join(settings.BASE_DIR, 'mylogin', 'wordpress_sso_issuers.json'))
+    with open(registry_path, encoding='utf-8') as registry_file:
+        issuers = json.load(registry_file)
+    if not isinstance(issuers, dict):
+        raise ValueError('invalid issuer registry')
+    return issuers
+
+def _wordpress_sso_claims(token):
+    if not isinstance(token, str) or len(token) > 4096:
+        raise ValueError('invalid token')
+    parts = token.split('.')
+    if len(parts) != 3:
+        raise ValueError('invalid token')
+    signed = (parts[0] + '.' + parts[1]).encode('ascii')
+    header = json.loads(_wordpress_sso_b64decode(parts[0]).decode('utf-8'))
+    claims = json.loads(_wordpress_sso_b64decode(parts[1]).decode('utf-8'))
+    signature = _wordpress_sso_b64decode(parts[2])
+    if not isinstance(header, dict) or header.get('alg') != 'RS256' or not isinstance(claims, dict) or not isinstance(claims.get('iss'), str):
+        raise ValueError('invalid token')
+    issuer_config = _wordpress_sso_issuers().get(claims['iss'])
+    if not isinstance(issuer_config, dict) or header.get('kid') != issuer_config.get('kid'):
+        raise ValueError('unknown issuer')
+    key_name = issuer_config.get('public_key')
+    if not isinstance(key_name, str) or os.path.basename(key_name) != key_name:
+        raise ValueError('invalid issuer key')
+    key_path = os.path.join(settings.BASE_DIR, 'mylogin', key_name)
+    with open(key_path, 'rb') as key_file:
+        public_key = serialization.load_pem_public_key(key_file.read())
+    public_key.verify(signature, signed, padding.PKCS1v15(), hashes.SHA256())
+    now = int(time.time())
+    for claim in ('iat', 'nbf', 'exp'):
+        if not isinstance(claims.get(claim), int) or isinstance(claims.get(claim), bool):
+            raise ValueError('invalid token')
+    if (claims.get('aud') != 'capsulae2' or
+            not isinstance(claims.get('sub'), str) or not claims['sub'].startswith('wordpress:') or
+            not isinstance(claims.get('email'), str) or not claims['email'] or
+            claims['iat'] < now - 70 or claims['iat'] > now + 10 or
+            claims['nbf'] > now + 10 or claims['exp'] < now or claims['exp'] - claims['iat'] > 70):
+        raise ValueError('invalid token')
+    return claims
+
+@require_GET
+def wordpress_sso(request):
+    """Create a Django session from a short-lived JWT emitted by WordPress."""
+    try:
+        claims = _wordpress_sso_claims(request.GET.get('token', ''))
+        users = User.objects.filter(email__iexact=claims['email'], is_active=True)
+        if users.count() != 1:
+            raise ValueError('unmapped user')
+        user = users.first()
+        if not (user.is_superuser or user.groups.filter(name__in=['admins', 'managers', 'employee', 'donor']).exists()):
+            raise ValueError('unauthorized user')
+        auth.login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+        return redirect('pharma-index')
+    except (ValueError, TypeError, OSError, UnicodeDecodeError, binascii.Error, json.JSONDecodeError, InvalidSignature):
+        return HttpResponseForbidden('Acceso no autorizado.')
 
 def tokensignin(request):
     if (request.method == 'POST'):

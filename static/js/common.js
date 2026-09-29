@@ -346,7 +346,7 @@ function hideClosestModal(obj) {
 }
 
 
-function ajaxGetRemove(url, datas, target)
+function ajaxGetRemove(url, datas, target, refresh_url, refresh_target)
 {
     $.ajax({
         url : url,
@@ -360,6 +360,7 @@ function ajaxGetRemove(url, datas, target)
                 $('#'+target).html(data);
             else
                 $('#'+target).remove();
+            refreshHtmlTarget(refresh_url, refresh_target);
         },
         error : function(e){showError(getAjaxErrorMessage(e));},
         complete : function(){}
@@ -1042,6 +1043,7 @@ $(document).ready(()=>{
                     if (i != "url")
                         datas[i] = args[i]
                 ajaxGet(url, datas, target, target_modal);
+                refreshHtmlTarget(obj.data("refresh-url"), obj.data("refresh-target"));
                 if (obj.data("show"))
                     $("#" + obj.data("show")).show();
                 if (obj.data("hide"))
@@ -1172,7 +1174,7 @@ $(document).ready(()=>{
             url = obj.data("url");
             target = obj.data("target");
             datas = {'model_name': model_name, 'obj_id': obj_id};
-            ajaxGetRemove(url, datas, target);
+            ajaxGetRemove(url, datas, target, obj.data("refresh-url"), obj.data("refresh-target"));
             if (obj.data("hide"))
                 $("#" + obj.data("hide")).hide();
             e.preventDefault();

@@ -1,4 +1,7 @@
-from django.http import HttpResponse
+from django.db.models import CharField, Q
+from django.db.models.functions import Cast
+from django.db.models.functions import Trim
+from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseNotAllowed
 from django.shortcuts import render, redirect
 #from django.template.loader import render_to_string
 from django.urls import reverse
@@ -14,7 +17,15 @@ import pytz
 from capsulae2.commons import show_exc, get_param, get_or_none
 from capsulae2.decorators import group_required
 from account.models import Profile, Company#, Settings
-from store.models import Product, Invoice, InvoiceLine, Client, StoreOutflow
+from pharma.models import Pacientes
+from store.models import Product, Invoice, InvoiceLine, Client, StoreOutflow, Tax
+
+
+def tpv_main_context(invoice, company):
+    return {
+        'invoice': invoice,
+        'taxes': Tax.objects.filter(company=company),
+    }
 
 
 @group_required("managers")
@@ -27,7 +38,11 @@ def index(request):
             number  = Invoice.next_number(comp, "PRETPV")
             invoice = Invoice(number=number, hashinv=hashinv, typeinv="PRETPV", company=comp)
             invoice.save()
-        context = {'invoice':invoice, 'orders':Invoice.objects.filter(company=comp, typeinv="ORDERWEB").count(), 'company':comp}
+        context = {
+            **tpv_main_context(invoice, comp),
+            'orders': Invoice.objects.filter(company=comp, typeinv="ORDERWEB").count(),
+            'company': comp,
+        }
         return render(request, "tpv/index.html", context)
     except Exception as e:
         print (show_exc(e))
@@ -50,7 +65,7 @@ def tpv_add_product(request):
         inv_line.save()
     except Exception as e:
         print (show_exc(e))
-    return render(request, "tpv/tpv-main.html", {'invoice':invoice})
+    return render(request, "tpv/tpv-main.html", tpv_main_context(invoice, request.user.company))
 
 @group_required("managers")
 def change_units_tpv_line(request):
@@ -69,7 +84,7 @@ def change_units_tpv_line(request):
         inv_line.save()
     except Exception as e:
         print (show_exc(e))
-    return render(request, "tpv/tpv-main.html", {'invoice':invoice})
+    return render(request, "tpv/tpv-main.html", tpv_main_context(invoice, request.user.company))
 
 @group_required("managers")
 #def remove_tpv_line(request, id_line):
@@ -83,7 +98,7 @@ def remove_tpv_line(request):
         inv_line.delete()
     except Exception as e:
         print (show_exc(e))
-    return render(request, "tpv/tpv-main.html", {'invoice':invoice})
+    return render(request, "tpv/tpv-main.html", tpv_main_context(invoice, request.user.company))
 
 @group_required("managers")
 def client_by_code(request):
@@ -101,6 +116,156 @@ def client_by_code(request):
     except Exception as e:
         print (show_exc(e))
         return HttpResponse ("No hemos encontrado el cliente")
+
+
+def assign_client_to_invoice(invoice, client):
+    """Associate a client and preserve its billing details on the invoice."""
+    invoice.client = client
+    invoice.client_name = client.name
+    invoice.client_dni = client.dni
+    invoice.client_addr = client.address
+    invoice.save(update_fields=["client", "client_name", "client_dni", "client_addr"])
+
+
+@group_required("managers")
+def client_search(request):
+    value = get_param(request.GET, "value").strip()
+    if len(value) < 2:
+        return HttpResponse("")
+
+    clients = Client.objects.filter(company=request.user.company).filter(
+        Q(code__icontains=value)
+        | Q(name__icontains=value)
+        | Q(dni__icontains=value)
+        | Q(phone__icontains=value)
+    )[:8]
+
+    # A patient belongs to a company through its owner (or through one of the
+    # companies shared with that owner).  Do not expose patients from another
+    # company merely because their name happens to match the search.
+    company = request.user.company
+    patients = Pacientes.objects.annotate(phone_text=Cast("telefono1", CharField())).filter(
+        Q(id_user__company=company) | Q(id_user__user_companies__in=[company]),
+        borrado=False,
+    ).filter(
+        Q(n_historial__icontains=value)
+        | Q(nombre__icontains=value)
+        | Q(apellido__icontains=value)
+        | Q(nif__icontains=value)
+        | Q(cip__icontains=value)
+        | Q(telefono1__icontains=value)
+    ).distinct()[:8]
+    return render(request, "tpv/client-search-results.html", {
+        "clients": clients,
+        "patients": patients,
+        "hashinv": get_param(request.GET, "hashinv"),
+    })
+
+
+@group_required("managers")
+def client_select(request):
+    invoice = get_or_none(Invoice, get_param(request.GET, "hashinv"), "hashinv")
+    client = get_or_none(Client, get_param(request.GET, "client_id"))
+    if invoice is None or client is None:
+        return HttpResponseBadRequest("Cliente o compra no encontrados.")
+    if invoice.company_id != request.user.company.id or client.company_id != request.user.company.id:
+        return HttpResponseBadRequest("Cliente o compra no válidos.")
+
+    assign_client_to_invoice(invoice, client)
+    return render(request, "tpv/client-selection.html", {"client": client})
+
+
+def patient_client(patient, company):
+    """Return the billing client used for a patient in one company.
+
+    Invoices currently point to ``Client``.  A stable, namespaced code lets a
+    patient be selected in the TPV without changing that invoice contract or
+    duplicating a new client for every purchase.
+    """
+    code = "PACIENTE-{}".format(patient.pk)
+    client = Client.objects.filter(company=company, code=code).first()
+    values = {
+        "name": patient.full_name or patient.nombre or "Paciente",
+        "dni": patient.nif or "",
+        "phone": str(patient.telefono1 or ""),
+        "email": patient.email or "",
+        "address": patient.domicilio or "",
+    }
+    if client is None:
+        return Client.objects.create(company=company, code=code, **values)
+
+    for field, value in values.items():
+        setattr(client, field, value)
+    client.save(update_fields=list(values))
+    return client
+
+
+@group_required("managers")
+def patient_select(request):
+    invoice = get_or_none(Invoice, get_param(request.GET, "hashinv"), "hashinv")
+    patient = get_or_none(Pacientes, get_param(request.GET, "patient_id"))
+    company = request.user.company
+    if invoice is None or patient is None or invoice.company_id != company.id:
+        return HttpResponseBadRequest("Paciente o compra no encontrados.")
+
+    is_allowed = Pacientes.objects.filter(
+        pk=patient.pk,
+        borrado=False,
+    ).filter(Q(id_user__company=company) | Q(id_user__user_companies__in=[company])).exists()
+    if not is_allowed:
+        return HttpResponseBadRequest("Paciente o compra no válidos.")
+
+    client = patient_client(patient, company)
+    assign_client_to_invoice(invoice, client)
+    return render(request, "tpv/client-selection.html", {"client": client, "patient": patient})
+
+
+@group_required("managers")
+def client_clear(request):
+    invoice = get_or_none(Invoice, get_param(request.GET, "hashinv"), "hashinv")
+    if invoice is None or invoice.company_id != request.user.company.id:
+        return HttpResponseBadRequest("Compra no encontrada.")
+
+    invoice.client = None
+    invoice.client_name = ""
+    invoice.client_dni = ""
+    invoice.client_addr = ""
+    invoice.save(update_fields=["client", "client_name", "client_dni", "client_addr"])
+    return HttpResponse("")
+
+
+@group_required("managers")
+def client_form(request):
+    invoice = get_or_none(Invoice, get_param(request.GET, "hashinv"), "hashinv")
+    if invoice is None or invoice.company_id != request.user.company.id:
+        return HttpResponseBadRequest("Compra no encontrada.")
+    return render(request, "tpv/client-create-form.html", {"invoice": invoice})
+
+
+@group_required("managers")
+def client_create(request):
+    if request.method != "POST":
+        return HttpResponseNotAllowed(["POST"])
+
+    invoice = get_or_none(Invoice, request.POST.get("hashinv", ""), "hashinv")
+    if invoice is None or invoice.company_id != request.user.company.id:
+        return HttpResponseBadRequest("Compra no encontrada.")
+
+    name = request.POST.get("name", "").strip()
+    if not name:
+        return HttpResponseBadRequest("El nombre del cliente es obligatorio.")
+
+    client = Client.objects.create(
+        company=request.user.company,
+        code=request.POST.get("code", "").strip(),
+        name=name,
+        dni=request.POST.get("dni", "").strip(),
+        phone=request.POST.get("phone", "").strip(),
+        email=request.POST.get("email", "").strip(),
+        address=request.POST.get("address", "").strip(),
+    )
+    assign_client_to_invoice(invoice, client)
+    return render(request, "tpv/client-selection.html", {"client": client})
 
 @group_required("managers")
 def change_regulated(request):
@@ -391,7 +556,12 @@ def product_by_code(request):
     except Exception as e:
         return render(request, "error_exception.html", {'exc':show_exc(e)})
 
-    product = Product.objects.filter(code = request.GET['value'].strip(), company=comp).first()
+    # Product searches accept partial matches, but the TPV must select one
+    # unambiguous code.  Trim the stored value too: legacy codes can contain
+    # accidental leading/trailing whitespace while still appearing in Store.
+    product = Product.objects.filter(company=comp).annotate(
+        normalized_code=Trim("code")
+    ).filter(normalized_code__iexact=request.GET['value'].strip()).first()
     if product == None:
         return render(request, "simple-error-plane.html", {'msg': "Producto no encontrado!"})
 

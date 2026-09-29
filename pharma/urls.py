@@ -34,6 +34,7 @@ urlpatterns = [
     path('patients/view/<int:patient_id>', views.patient_view, name='patient-view'),
 
     path('patients/form/', views.patient_form, name='patient-form'),
+    path('patients/purchases/', views.patient_purchases, name='patient-purchases'),
     path('patients/qr-generate/', views.patient_qr_generate, name='patient-qr-generate'),
 
     path('patients/lopd/', views.patient_lopd, name='patient-lopd'),

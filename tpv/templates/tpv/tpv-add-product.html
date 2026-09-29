@@ -1,12 +1,17 @@
 {#{% load i18n app_tags generictags %}#}
 {% load i18n %}
 
-<span id="msg">Producto encontrado!!!</span>
+<div id="tpv-add-product-message" class="tpv-add-product-message" role="status">
+    <i class="fas fa-check-circle"></i>
+    {% blocktrans with product_name=product.name %}Se ha añadido {{ product_name }} correctamente.{% endblocktrans %}
+</div>
 <button id="btn-add-product" class="hide ark" data-url="{% url "tpv-add-product" %}" data-target="div-calc-tpv" 
     data-product_id="{{product.pk}}" data-hashinv="{{invoice.hashinv}}"></button>
 <script>
     $("#btn-add-product").click();
     $('#code').val(''); 
     $('#code').focus();
-    $('#msg').fadeOut();
+    setTimeout(function(){
+        $('#tpv-add-product-message').fadeOut(250, function(){ $(this).remove(); });
+    }, 2500);
 </script>

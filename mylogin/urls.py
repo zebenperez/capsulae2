@@ -5,6 +5,7 @@ from django.contrib.auth import views as auth_views
 from . import views
 
 urlpatterns = [
+    path('wordpress-sso/', views.wordpress_sso, name='mylogin-wordpress-sso'),
     path('tokensignin/', views.tokensignin, name='tokensign'),
     path('check_remote_user/', views.check_remote_user, name='check_remote_user'),
     path('get_remote_user/', views.get_remote_user, name='get_remote_user'),

@@ -1,0 +1,22 @@
+{% load i18n %}
+
+{% if clients or patients %}
+    <div class="tpv-client-results" role="listbox">
+        {% for client in clients %}
+            <button type="button" class="tpv-client-result tpv-client-select" data-url="{% url 'tpv-client-select' %}"
+                data-client-id="{{ client.id }}" data-hashinv="{{ hashinv }}">
+                <strong>{{ client.name }}</strong>
+                <span>{% if client.code %}{{ client.code }}{% endif %}{% if client.dni %} · {{ client.dni }}{% endif %}{% if client.phone %} · {{ client.phone }}{% endif %}</span>
+            </button>
+        {% endfor %}
+        {% for patient in patients %}
+            <button type="button" class="tpv-client-result tpv-client-select" data-url="{% url 'tpv-patient-select' %}"
+                data-patient-id="{{ patient.id }}" data-hashinv="{{ hashinv }}">
+                <strong><i class="fas fa-notes-medical"></i> {% trans "Paciente" %} · {{ patient.full_name }}</strong>
+                <span>{% if patient.n_historial %}{% trans "Historial" %}: {{ patient.n_historial }}{% endif %}{% if patient.cip %} · CIP: {{ patient.cip }}{% endif %}{% if patient.nif %} · {{ patient.nif }}{% endif %}</span>
+            </button>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="tpv-client-results tpv-client-empty">{% trans "No se han encontrado clientes ni pacientes." %}</div>
+{% endif %}

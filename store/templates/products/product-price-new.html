@@ -1,0 +1,46 @@
+{% load i18n %}
+
+<div class="row align-items-center mb-3">
+    <div class="col">
+        <h2 class="mb-0">{% trans "Añadir precio" %}</h2>
+    </div>
+    <div class="col-auto">
+        <button type="button" class="btn" data-bs-dismiss="modal" title="{% trans 'Cerrar' %}">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+</div>
+
+<div class="row align-items-end">
+    <div class="col-md-6 price-form-field">
+        <label class="label" for="amount">{% trans "Precio" %}</label>
+        <div class="price-input-wrap">
+            <input type="text" class="form-control autosave" id="amount" name="amount" value="" maxlength="8"
+                data-model-name="store.price" data-obj-id="{{obj.id}}" data-url="{% url 'autosave_field' %}"
+                data-target="" placeholder="0,00" autofocus>
+            <span>€</span>
+        </div>
+        <span id="amount__msg"></span>
+    </div>
+    <div class="col-md-6 price-form-field price-sale-option">
+        <input type="checkbox" class="form-checkbox autosave" id="sale" name="sale" title=""
+            data-model-name="store.price" data-obj-id="{{obj.id}}" data-url="{% url 'autosave_field' %}"
+            data-target="null" data-bool="True">
+        <label class="price-sale-switch" for="sale">
+            <span class="price-switch-track"><span></span></span>
+            <span>{% trans "Es un precio de venta" %}</span>
+        </label>
+        <span id="sale__msg"></span>
+    </div>
+</div>
+<input type="hidden" name="product" id="product" value="{{obj.id}}">
+<div class="d-flex justify-content-end mt-4" style="gap: .5rem;">
+    <button type="button" class="btn btn-sm" data-bs-dismiss="modal">{% trans "Cancelar" %}</button>
+    <button type="button" class="btn btn-sm new ark_new_obj" data-bs-dismiss="modal"
+        data-url="{% url 'product-prices' %}" data-target="div-container" data-obj_id="{{obj.id}}"
+        data-url-save="{% url 'autosave_fields' %}" data-args-save="amount,sale,product"
+        data-refresh-url="{% url 'product-price-summary' obj.id %}" data-refresh-target="product-price-summary"
+        data-model-name="store.price">
+        <i class="fas fa-save"></i> {% trans "Guardar" %}
+    </button>
+</div>

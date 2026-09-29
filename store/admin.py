@@ -19,6 +19,11 @@ class StoreInflowAdmin(admin.ModelAdmin):
 class StoreOutflowAdmin(admin.ModelAdmin):
     list_display = ('quantity', 'product')
 
+class PurchaseDeliveryNoteAdmin(admin.ModelAdmin):
+    list_display = ('document_type', 'document_number', 'document_date', 'provider', 'company', 'lines_count', 'total_amount')
+    list_filter = ('company', 'status', 'document_type')
+    search_fields = ('document_number', 'provider__name')
+
 class TaxAdmin(admin.ModelAdmin):
     list_display = ('name', 'percent', 'company')
     list_filter = ('company',)
@@ -29,5 +34,5 @@ admin.site.register(ProductType, ProductTypeAdmin)
 admin.site.register(Provider, ProviderAdmin)
 admin.site.register(StoreInflow, StoreInflowAdmin)
 admin.site.register(StoreOutflow, StoreOutflowAdmin)
+admin.site.register(PurchaseDeliveryNote, PurchaseDeliveryNoteAdmin)
 admin.site.register(Tax, TaxAdmin)
-

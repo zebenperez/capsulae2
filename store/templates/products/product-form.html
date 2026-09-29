@@ -1,96 +1,42 @@
 {% load i18n common_tags %}
 
-<div class="row" style="margin:0;">
-    <div class="col-6 mt-3">
-        <label class="label">{% trans "Descatalogado" %}:</label>
-        <input type="checkbox" class="form-checkbox autosave input view" id="deprecated" name="deprecated" 
-            data-model-name="store.product" data-obj-id="{{obj.id}}" data-url="{% url "autosave_field" %}" 
-            data-target="div-notification" data-bool="True" disabled/> <span id="deprecated__msg"></span>
+<div class="row product-form" style="margin:0;">
+    <div class="col-12 product-form-section-title">
+        <h3><i class="fas fa-box"></i> {% trans "Información general" %}</h3>
     </div>
-    <div class="col-6 mt-3">
-        <label class="label">{% trans "Online" %}:</label>
-        <input type="checkbox" class="form-checkbox autosave input view" id="online" name="online" 
-            data-model-name="store.product" data-obj-id="{{obj.id}}" data-url="{% url "autosave_field" %}" 
-            data-target="div-notification" data-bool="True" disabled/> <span id="online__msg"></span>
-    </div>
-    <div class="col-4 mt-3">
-        <label class="label">{% trans "Mínimo para comprar" %}:</label>
-        <input type="text" class="form-control autosave input view" id="min_to_purchase" 
-            name="min_to_purchase" data-model-name="store.product" data-obj-id="{{obj.id}}" 
-            data-url="{% url "autosave_field" %}" data-target="div-notification" disabled/> 
-        <span id="min_to_purchase__msg"></span>
-    </div>
-    <div class="col-4 mt-3">
-        <label class="label">{% trans "Cantidad a comprar" %}:</label>
-        <input type="text" class="form-control autosave input view" id="quantity" 
-            name="quantity" data-model-name="store.product" data-obj-id="{{obj.id}}" 
-            data-url="{% url "autosave_field" %}" data-target="div-notification" disabled/> 
-        <span id="quantity__msg"></span>
-    </div>
-    <div class="col-4 mt-3">
-        <label class="label">{% trans "Unidades en caja" %}:</label>
-        <input type="text" class="form-control autosave input view" id="units_in_box" 
-            name="units_in_box" data-model-name="store.product" data-obj-id="{{obj.id}}" 
-            data-url="{% url "autosave_field" %}" data-target="div-notification" disabled/> 
-        <span id="units_in_box__msg"></span>
-    </div>
-    <div class="col-4 mt-3">
-        <label class="label">{% trans "Fecha de alta" %}:</label>
-        <input type="date" class="form-control autosave input view" id="alta_date" name="alta_date" 
-            value="{{obj.alta_date|date:"Y-m-d"}}" data-model-name="store.product" data-obj-id="{{obj.id}}" 
-            data-url="{% url "autosave_field" %}" data-target="div-notification"  
-            title="{{obj.alta_date|date:"Y-m-d"}}" disabled/> 
-        <span id="alta_date__msg"></span>
-    </div>
-    <div class="col-4 mt-3">
-        <label class="label">{% trans "Fecha de baja" %}:</label>
-        <input type="date" class="form-control autosave input view" id="baja_date" name="baja_date" 
-            value="{{obj.baja_date|date:"Y-m-d"}}" data-model-name="store.product" data-obj-id="{{obj.id}}" 
-            data-url="{% url "autosave_field" %}" data-target="div-notification"  
-            title="{{obj.baja_date|date:"Y-m-d"}}" disabled/> 
-        <span id="baja_date__msg"></span>
-    </div>
-    <div class="col-4 mt-3">
-        <label class="label">{% trans "Fecha de caducidad" %}:</label>
-        <input type="date" class="form-control autosave input view" id="expiry_date" name="expiry_date" 
-            value="{{obj.expiry_date|date:"Y-m-d"}}" data-model-name="store.product" data-obj-id="{{obj.id}}" 
-            data-url="{% url "autosave_field" %}" data-target="div-notification"  
-            title="{{obj.expiry_date|date:"Y-m-d"}}" disabled/> 
-        <span id="expiry_date__msg"></span>
-    </div>
-    <div class="col-4 mt-3">
-        <label class="label">{% trans "Código" %}:</label>
+    <div class="col-3 mt-3">
+        <label class="label" for="code">{% trans "Código" %}</label>
         <input type="text" class="form-control autosave input view" id="code" name="code" value="{{obj.code}}"
-            title="{{obj.code}}" data-model-name="store.product" data-obj-id="{{obj.id}}" 
-            data-url="{% url "autosave_field" %}" data-target="div-notification" disabled/> 
+            title="{{obj.code}}" data-model-name="store.product" data-obj-id="{{obj.id}}"
+            data-url="{% url "autosave_field" %}" data-target="div-notification" disabled>
         <span id="code__msg"></span>
     </div>
-    <div class="col-8 mt-3">
-        <label class="label">{% trans "Nombre" %}:</label>
+    <div class="col-5 mt-3">
+        <label class="label" for="name">{% trans "Nombre" %}</label>
         <input type="text" class="form-control autosave input view" id="name" name="name" value="{{obj.name}}"
-            title="{{obj.name}}" data-model-name="store.product" data-obj-id="{{obj.id}}" 
-            data-url="{% url "autosave_field" %}" data-target="div-notification" disabled/> 
+            title="{{obj.name}}" data-model-name="store.product" data-obj-id="{{obj.id}}"
+            data-url="{% url "autosave_field" %}" data-target="div-notification" disabled>
         <span id="name__msg"></span>
     </div>
-    <div class="col-6 mt-3">
-        <label class="label">{% trans "Extra 1" %}:</label>
-        <input type="text" class="form-control autosave input view" id="extra1" name="extra1" value="{{obj.extra1}}"
-            title="{{obj.extra1}}" data-model-name="store.product" data-obj-id="{{obj.id}}" 
-            data-url="{% url "autosave_field" %}" data-target="div-notification" disabled/> 
-        <span id="extra1__msg"></span>
+    <div class="col-2 mt-3 product-form-option">
+        <input type="checkbox" class="form-checkbox autosave input view" id="online" name="online"
+            data-model-name="store.product" data-obj-id="{{obj.id}}" data-url="{% url "autosave_field" %}"
+            data-target="div-notification" data-bool="True" disabled>
+        <label class="label" for="online">{% trans "Online" %}</label>
+        <span id="online__msg"></span>
     </div>
-    <div class="col-6 mt-3">
-        <label class="label">{% trans "Extra 2" %}:</label>
-        <input type="text" class="form-control autosave input view" id="extra2" name="extra2" value="{{obj.extra2}}"
-            title="{{obj.extra2}}" data-model-name="store.product" data-obj-id="{{obj.id}}" 
-            data-url="{% url "autosave_field" %}" data-target="div-notification" disabled/> 
-        <span id="extra2__msg"></span>
+    <div class="col-2 mt-3 product-form-option">
+        <input type="checkbox" class="form-checkbox autosave input view" id="deprecated" name="deprecated"
+            data-model-name="store.product" data-obj-id="{{obj.id}}" data-url="{% url "autosave_field" %}"
+            data-target="div-notification" data-bool="True" disabled>
+        <label class="label" for="deprecated">{% trans "Descatalogado" %}</label>
+        <span id="deprecated__msg"></span>
     </div>
-    <div class="col-6 mt-3">
-        <label class="label">{% trans "Tipo" %}:</label>
-        <select class="form-control autosave input view" id="product_type" name="product_type" title="{{obj.product_type}}" 
-            data-model-name="store.product" data-obj-id="{{obj.id}}" data-url="{% url "autosave_field" %}" 
-            data-target="div-notification" disabled> 
+    <div class="col-3 mt-3">
+        <label class="label" for="product_type">{% trans "Tipo" %}</label>
+        <select class="form-control autosave input view" id="product_type" name="product_type" title="{{obj.product_type}}"
+            data-model-name="store.product" data-obj-id="{{obj.id}}" data-url="{% url "autosave_field" %}"
+            data-target="div-notification" disabled>
             <option value="">{% trans "-- Seleccione un tipo de producto --" %}</option>
             {% for pt in product_type_list %}
                 <option value="{{pt.id}}" {%if pt.id == obj.product_type.id%}selected{%endif%}>{{pt.name}}</option>
@@ -98,11 +44,11 @@
         </select>
         <span id="product_type__msg"></span>
     </div>
-    <div class="col-6 mt-3">
-        <label class="label">{% trans "Proveedor" %}:</label>
-        <select class="form-control autosave input view" id="provider" name="provider" title="{{obj.provider}}" 
-            data-model-name="store.product" data-obj-id="{{obj.id}}" data-url="{% url "autosave_field" %}" 
-            data-target="div-notification" disabled> 
+    <div class="col-5 mt-3">
+        <label class="label" for="provider">{% trans "Proveedor" %}</label>
+        <select class="form-control autosave input view" id="provider" name="provider" title="{{obj.provider}}"
+            data-model-name="store.product" data-obj-id="{{obj.id}}" data-url="{% url "autosave_field" %}"
+            data-target="div-notification" disabled>
             <option value="">{% trans "-- Seleccione un proveedor --" %}</option>
             {% for prov in provider_list %}
                 <option value="{{prov.id}}" {%if prov.id == obj.provider.id%}selected{%endif%}>{{prov.name}}</option>
@@ -110,6 +56,68 @@
         </select>
         <span id="provider__msg"></span>
     </div>
+    <div class="col-2 mt-3">
+        <label class="label" for="extra1">{% trans "Extra 1" %}</label>
+        <input type="text" class="form-control autosave input view" id="extra1" name="extra1" value="{{obj.extra1}}"
+            title="{{obj.extra1}}" data-model-name="store.product" data-obj-id="{{obj.id}}"
+            data-url="{% url "autosave_field" %}" data-target="div-notification" disabled>
+        <span id="extra1__msg"></span>
+    </div>
+    <div class="col-2 mt-3">
+        <label class="label" for="extra2">{% trans "Extra 2" %}</label>
+        <input type="text" class="form-control autosave input view" id="extra2" name="extra2" value="{{obj.extra2}}"
+            title="{{obj.extra2}}" data-model-name="store.product" data-obj-id="{{obj.id}}"
+            data-url="{% url "autosave_field" %}" data-target="div-notification" disabled>
+        <span id="extra2__msg"></span>
+    </div>
+
+    <div class="col-12 product-form-section-title product-form-section-divider">
+        <h3><i class="fa fa-shopping-cart"></i> {% trans "Compra y existencias" %}</h3>
+    </div>
+    <div class="col-md-4 mt-3">
+        <label class="label" for="min_to_purchase">{% trans "Mínimo para comprar" %}</label>
+        <input type="text" class="form-control autosave input view" id="min_to_purchase" name="min_to_purchase"
+            data-model-name="store.product" data-obj-id="{{obj.id}}" data-url="{% url "autosave_field" %}"
+            data-target="div-notification" disabled>
+        <span id="min_to_purchase__msg"></span>
+    </div>
+    <div class="col-md-4 mt-3">
+        <label class="label" for="quantity">{% trans "Cantidad a comprar" %}</label>
+        <input type="text" class="form-control autosave input view" id="quantity" name="quantity"
+            data-model-name="store.product" data-obj-id="{{obj.id}}" data-url="{% url "autosave_field" %}"
+            data-target="div-notification" disabled>
+        <span id="quantity__msg"></span>
+    </div>
+    <div class="col-md-4 mt-3">
+        <label class="label" for="units_in_box">{% trans "Unidades en caja" %}</label>
+        <input type="text" class="form-control autosave input view" id="units_in_box" name="units_in_box"
+            data-model-name="store.product" data-obj-id="{{obj.id}}" data-url="{% url "autosave_field" %}"
+            data-target="div-notification" disabled>
+        <span id="units_in_box__msg"></span>
+    </div>
+
+    <div class="col-12 product-form-section-title product-form-section-divider">
+        <h3><i class="far fa-calendar-alt"></i> {% trans "Fechas" %}</h3>
+    </div>
+    <div class="col-md-4 mt-3">
+        <label class="label" for="alta_date">{% trans "Fecha de alta" %}</label>
+        <input type="date" class="form-control autosave input view" id="alta_date" name="alta_date"
+            value="{{obj.alta_date|date:"Y-m-d"}}" data-model-name="store.product" data-obj-id="{{obj.id}}"
+            data-url="{% url "autosave_field" %}" data-target="div-notification" title="{{obj.alta_date|date:"Y-m-d"}}" disabled>
+        <span id="alta_date__msg"></span>
+    </div>
+    <div class="col-md-4 mt-3">
+        <label class="label" for="baja_date">{% trans "Fecha de baja" %}</label>
+        <input type="date" class="form-control autosave input view" id="baja_date" name="baja_date"
+            value="{{obj.baja_date|date:"Y-m-d"}}" data-model-name="store.product" data-obj-id="{{obj.id}}"
+            data-url="{% url "autosave_field" %}" data-target="div-notification" title="{{obj.baja_date|date:"Y-m-d"}}" disabled>
+        <span id="baja_date__msg"></span>
+    </div>
+    <div class="col-md-4 mt-3">
+        <label class="label" for="expiry_date">{% trans "Fecha de caducidad" %}</label>
+        <input type="date" class="form-control autosave input view" id="expiry_date" name="expiry_date"
+            value="{{obj.expiry_date|date:"Y-m-d"}}" data-model-name="store.product" data-obj-id="{{obj.id}}"
+            data-url="{% url "autosave_field" %}" data-target="div-notification" title="{{obj.expiry_date|date:"Y-m-d"}}" disabled>
+        <span id="expiry_date__msg"></span>
+    </div>
 </div>
-
-

@@ -73,6 +73,9 @@
                 data-obj_id="{{obj.id}}"> <i class="fas fa-book"></i><span class="hide-mobile"><br />{% trans "Bibliomecum" %}
                 </span></div>
         {% endif %}
+        <div class="tab-item ark text-center" data-url="{% url "patient-purchases" %}" data-target="div-container"
+            data-obj_id="{{obj.id}}"> <i class="fas fa-shopping-cart"></i><span class="hide-mobile"><br />
+            {% trans "Compras" %} ({{tpv_purchases_count}})</span></div>
     </div>
 
     <div id="div-container">{% include "patient/patient-personal.html" %}</div>

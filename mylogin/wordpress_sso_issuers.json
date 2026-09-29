@@ -1,0 +1,6 @@
+{
+  "https://lacomu.shidix.es/": {
+    "kid": "de3ba6fc595af221",
+    "public_key": "wordpress_sso_public.pem"
+  }
+}

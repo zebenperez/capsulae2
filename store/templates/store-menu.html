@@ -1,9 +1,21 @@
 {% load i18n common_tags %}
 
 {% if user.is_authenticated %}
+    {% if store_company %}
+        <form method="post" action="{% url 'store-company-select' %}" class="d-flex justify-content-end align-items-center gap-2 mb-2">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+            <label for="store-company" class="small text-secondary mb-0">{% trans 'Gestionando almacén' %}</label>
+            <select id="store-company" name="company_id" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
+                {% for company in store_companies %}
+                    <option value="{{ company.pk }}"{% if company.pk == store_company.pk %} selected{% endif %}>{{ company.name }}</option>
+                {% endfor %}
+            </select>
+        </form>
+    {% endif %}
     <div class="row left-submenu hadow-sm m-0 mb-2">
         <div class="col-lg-2 col-6 nav-item text-center">
-            {% if user|have_menu:"STO_TPV"%}
+            {% if user|have_menu:"STO_TPV" and not hide_tpv_menu %}
                 <div class="nav-item"><a class="nav-link active px-0" href="{%url "tpv-index"%}">
                     <i class="fas fa-calculator"></i><br />{%trans "TPV"%}</a></div>
             {% endif %}
@@ -15,13 +27,24 @@
             {% endif %}
         </div>
         <div class="col-lg-2 col-6 nav-item text-center">
+            {% if user|have_menu:"STO_PRO"%}
+                <div class="nav-item"><a class="nav-link active px-0" href="{%url "purchase-delivery-notes"%}">
+                    <i class="fas fa-file-invoice"></i><br />{%trans "Albaranes"%}</a></div>
+            {% endif %}
+        </div>
+        <div class="col-lg-2 col-6 nav-item text-center">
             {% if user|have_menu:"STO_PROV"%}
                 <div class="nav-item"><a class="nav-link px-0" href="{%url "providers"%}">
                     <i class="fa fa-warehouse"></i><br />{%trans "Provedores"%}</a></div>
+            {% endif %}
+        </div>
+        <div class="col-lg-2 col-6 nav-item text-center">
+            {% if user|have_menu:"STO_PROV"%}
+                <div class="nav-item"><a class="nav-link px-0" href="{%url "clients"%}">
+                    <i class="fas fa-users"></i><br />{%trans "Clientes"%}</a></div>
             {% endif %}
         </div>
     </div>
 
 {% else %}
 {% endif %}
-

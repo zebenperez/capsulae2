@@ -1,0 +1,25 @@
+{% load i18n %}
+
+<div class="tpv-client-create-modal">
+    <div class="provider-form-header">
+        <div>
+            <h2>{% trans "Nuevo cliente" %}</h2>
+            <p>{% trans "Se añadirá y se asignará a la compra actual." %}</p>
+        </div>
+        <button type="button" class="btn" data-bs-dismiss="modal" title="{% trans 'Close' %}"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="tpv-client-create-error"></div>
+    <form class="tpv-client-create-form" method="post" action="{% url 'tpv-client-create' %}">
+        {% csrf_token %}
+        <input type="hidden" name="hashinv" value="{{ invoice.hashinv }}">
+        <div class="row g-3">
+            <div class="col-md-4"><label class="label" for="tpv-client-code">{% trans "Código" %}</label><input id="tpv-client-code" name="code" class="form-control"></div>
+            <div class="col-md-8"><label class="label" for="tpv-client-name">{% trans "Nombre" %}</label><input id="tpv-client-name" name="name" class="form-control" required autofocus></div>
+            <div class="col-md-4"><label class="label" for="tpv-client-dni">{% trans "DNI/CIF" %}</label><input id="tpv-client-dni" name="dni" class="form-control"></div>
+            <div class="col-md-4"><label class="label" for="tpv-client-phone">{% trans "Teléfono" %}</label><input id="tpv-client-phone" name="phone" class="form-control"></div>
+            <div class="col-md-4"><label class="label" for="tpv-client-email">{% trans "Correo electrónico" %}</label><input id="tpv-client-email" name="email" type="email" class="form-control"></div>
+            <div class="col-12"><label class="label" for="tpv-client-address">{% trans "Dirección" %}</label><input id="tpv-client-address" name="address" class="form-control"></div>
+        </div>
+        <div class="provider-form-actions mt-4"><button class="btn btn-sm ark" type="submit"><i class="fas fa-plus"></i> {% trans "Crear y seleccionar" %}</button></div>
+    </form>
+</div>
