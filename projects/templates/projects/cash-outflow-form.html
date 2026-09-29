@@ -1,0 +1,62 @@
+{% load i18n project_tags %}
+
+<div class="project-modal cash-outflow-modal">
+    <div class="project-modal-close">
+        <button type="button" class="project-icon-btn" data-bs-dismiss="modal" aria-label="{% trans 'Cerrar' %}">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+
+    <h2>{% trans "Registrar pago" %}</h2>
+    <p class="project-muted">{{ obligation.creditor }} · {{ obligation.concept }}</p>
+
+    <div class="invoice-wizard-error" role="alert" hidden></div>
+
+    <div class="payment-financial-kpis cash-outflow-context">
+        <div><span>{% trans "Importe total" %}</span><strong>{{ obligation.amount|money_es }}</strong></div>
+        <div><span>{% trans "Ya pagado" %}</span><strong>{{ obligation.amount_paid|money_es }}</strong></div>
+        <div><span>{% trans "Pendiente" %}</span><strong>{{ obligation.amount_pending|money_es }}</strong></div>
+    </div>
+
+    <form id="cash-outflow-form">
+        <input type="hidden" name="payment_obligation_id" value="{{ obligation.id }}">
+        <div class="project-form-grid project-form-grid-two">
+            <div class="project-form-field">
+                <label>{% trans "Fecha del pago" %}</label>
+                <input type="date" class="form-control" name="payment_date" value="{{ form.initial.payment_date|date:"Y-m-d" }}" required>
+            </div>
+            <div class="project-form-field">
+                <label>{% trans "Importe" %}</label>
+                <input type="number" step="0.01" min="0.01" max="{{ obligation.amount_pending|decimal_input }}" class="form-control"
+                    name="amount" value="{{ form.initial.amount|decimal_input }}" required>
+            </div>
+            <div class="project-form-field">
+                <label>{% trans "Cuenta bancaria" %}</label>
+                <input type="text" class="form-control" name="bank_account">
+            </div>
+            <div class="project-form-field">
+                <label>{% trans "Medio de pago" %}</label>
+                <select class="form-control" name="payment_method" required>
+                    {% for value, label in form.fields.payment_method.choices %}
+                        <option value="{{ value }}">{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="project-form-field project-form-field-wide">
+                <label>{% trans "Referencia" %}</label>
+                <input type="text" class="form-control" name="reference">
+            </div>
+            <div class="project-form-field project-form-field-wide">
+                <label>{% trans "Notas" %}</label>
+                <textarea class="form-control" name="notes"></textarea>
+            </div>
+        </div>
+    </form>
+
+    <div class="project-modal-actions">
+        <button type="button" class="project-btn project-btn-primary ajax-form-get" data-form="cash-outflow-form"
+            data-url="{% url "cash-outflow-save" %}" data-target-modal="common-modal">
+            {% trans "Guardar pago" %}
+        </button>
+    </div>
+</div>

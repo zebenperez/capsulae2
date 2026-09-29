@@ -1,0 +1,20 @@
+{% load i18n project_tags %}
+<div class="project-modal">
+    <h2>{% if action == 'delete' %}{% trans "Eliminar imputación" %}{% else %}{% trans "Editar imputación" %}{% endif %}</h2>
+    <p>{{ allocation.project.name }} · {{ allocation.payment_obligation.concept }}</p>
+    <div class="project-modal-error" role="alert" hidden></div>
+    <form id="payment-allocation-manage-form" class="project-inputs" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="hidden" name="allocation_id" value="{{ allocation.pk }}">
+        <input type="hidden" name="action" value="{{ action }}">
+        {% if action == 'delete' %}
+        <p>{% trans "¿Confirmas que quieres eliminar esta imputación?" %} {{ allocation.allocated_amount|money_es }} · {{ allocation.budget_line.full_code }}</p>
+        {% else %}
+        {% for field in form %}<div class="mb-3"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}</div>{% endfor %}
+        {% endif %}
+    </form>
+    <div class="project-modal-actions">
+        <button type="button" class="project-btn project-btn-ghost ark" data-url="{% url 'payment-detail' %}" data-obj_id="{{ allocation.payment_obligation_id }}" data-target-modal="common-modal">{% trans "Cancelar" %}</button>
+        <button type="button" class="project-btn project-btn-primary ajax-form-get" data-form="payment-allocation-manage-form" data-url="{% url 'payment-allocation-manage' %}" data-target="common-modal-body" data-refresh-url="{% url 'payment-list' %}" data-refresh-target="payment-list">{% if action == 'delete' %}{% trans "Confirmar eliminación" %}{% else %}{% trans "Guardar cambios" %}{% endif %}</button>
+    </div>
+</div>

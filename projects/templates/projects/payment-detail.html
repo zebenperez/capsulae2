@@ -1,0 +1,114 @@
+{% load i18n project_tags l10n %}
+
+<div class="project-modal payment-detail-modal">
+    <header class="obligation-detail-header">
+    <div class="project-modal-close">
+        <button type="button" class="project-icon-btn" data-bs-dismiss="modal" aria-label="{% trans 'Cerrar' %}">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+
+    <h2>{% trans "Detalle de obligación" %}</h2>
+    <p class="project-muted">{{ obj.creditor }} · {{ obj.concept }}</p>
+    <button type="button" class="obligation-detail-edit ark" data-url="{% url 'payment-form' %}" data-target-modal="common-modal" data-obj_id="{{ obj.id }}"><i class="fas fa-edit" aria-hidden="true"></i> {% trans "Editar obligación" %}</button>
+    </header>
+    <div class="obligation-detail-content">
+
+    <div class="payment-detail-grid">
+        <section class="payment-detail-section">
+            <h3>{% trans "Información general" %}</h3>
+            <dl class="payment-detail-list">
+                <div><dt>{% trans "Tipo" %}</dt><dd>{{ obj.get_payment_type_display }}</dd></div>
+                <div><dt>{% trans "Proyecto" %}</dt><dd>{{ obj.project.name|default:_("Sin proyecto") }}</dd></div>
+                <div><dt>{% trans "Financiador" %}</dt><dd>{{ obj.financier.name|default:_("Sin financiador") }}</dd></div>
+                <div><dt>{% trans "Partida" %}</dt><dd>{% if obj.budget_line %}{{ obj.budget_line.full_code }} - {{ obj.budget_line.name }}{% else %}{% trans "Sin partida" %}{% endif %}</dd></div>
+                <div><dt>{% trans "Factura" %}</dt><dd>{% if obj.invoice %}{{ obj.invoice.number }}{% else %}{% trans "Sin factura" %}{% endif %}</dd></div>
+                <div><dt>{% trans "Devengo" %}</dt><dd>{{ obj.accrual_date|date:"d/m/Y"|default:_("Sin fecha") }}</dd></div>
+                <div><dt>{% trans "Fecha prevista" %}</dt><dd>{{ obj.expected_payment_date|date:"d/m/Y" }}</dd></div>
+                <div><dt>{% trans "Estado administrativo" %}</dt><dd>{{ obj.get_status_display }}</dd></div>
+            </dl>
+            {% if obj.notes %}<p class="payment-detail-notes">{{ obj.notes }}</p>{% endif %}
+        </section>
+
+        <section class="payment-detail-section payment-financial-section">
+            <h3>{% trans "Estado financiero" %}</h3>
+            <div class="payment-financial-kpis">
+                <div><span>{% trans "Importe total" %}</span><strong>{{ obj.amount|money_es }}</strong></div>
+                <div><span>{% trans "Pagado" %}</span><strong>{{ obj.amount_paid|money_es }}</strong></div>
+                <div><span>{% trans "Pendiente" %}</span><strong>{{ obj.amount_pending|money_es }}</strong></div>
+            </div>
+            <p class="obligation-progress-label">{% if obj.amount_paid > 0 %}{{ obj.amount_paid|money_es }} {% trans "de" %} {{ obj.amount|money_es }} {% trans "pagados" %} · {% endif %}{{ obj.payment_progress_percentage|floatformat:0 }} % {% trans "pagado" %}</p>
+            <progress class="obligation-progress" max="100" value="{{ obj.payment_progress_percentage|unlocalize }}" aria-label="{% trans 'Progreso de pago' %}"></progress>
+            {% if obj.is_overdue %}<mark class="payment-state payment-state--overdue">{% trans "Vencido" %}</mark>{% else %}<mark class="payment-state payment-state--{{ obj.financial_state }}">{% if obj.financial_state == 'unpaid' %}{% trans "Pendiente" %}{% else %}{{ obj.financial_state_label }}{% endif %}</mark>{% endif %}
+        </section>
+    </div>
+
+    <div class="obligation-detail-secondary{% if obj.invoice_id %} obligation-detail-secondary--documents{% endif %}">
+    {% if not obj.invoice_id %}
+    <section class="payment-detail-section">
+        <div class="payment-detail-section-header">
+            <h3>{% trans "Imputaciones a proyectos" %}</h3>
+            {% if obj.unallocated_amount > 0 and obj.status != 'cancelled' %}
+            <button type="button" class="project-btn project-btn-ghost ark" data-url="{% url 'payment-allocation-wizard' %}" data-target-modal="common-modal" data-obj_id="{{ obj.id }}"><i class="fas fa-plus" aria-hidden="true"></i> {% trans "Añadir imputación" %}</button>
+            {% endif %}
+        </div>
+        <dl class="obligation-allocation-summary"><div><dt>{% trans "Imputado" %}</dt><dd>{{ obj.allocated_amount|money_es }}</dd></div><div><dt>{% trans "Pendiente de imputar" %}</dt><dd>{{ obj.unallocated_amount|money_es }}</dd></div></dl>
+        <div class="obligation-allocation-list">
+        {% for allocation in obj.allocations.all %}
+        <article class="obligation-allocation"><h4><i class="fas fa-folder" aria-hidden="true"></i> {{ allocation.project.name }}</h4><dl><div><dt>{% trans "Partida" %}</dt><dd>{{ allocation.budget_line.full_code|default:_("Sin partida") }}</dd></div><div><dt>{% trans "Porcentaje" %}</dt><dd>{{ allocation.allocated_percentage|floatformat:2 }} %</dd></div><div><dt>{% trans "Importe" %}</dt><dd class="payment-money">{{ allocation.allocated_amount|money_es }}</dd></div></dl>
+        {% if allocation.project.status == 'active' %}
+        <div class="obligation-allocation-actions">
+            <button type="button" class="project-icon-btn ark" title="{% trans 'Editar imputación' %}" aria-label="{% trans 'Editar imputación' %}" data-url="{% url 'payment-allocation-manage' %}" data-allocation_id="{{ allocation.pk }}" data-action="edit" data-target-modal="common-modal"><i class="fas fa-edit" aria-hidden="true"></i></button>
+            <button type="button" class="project-icon-btn ark" title="{% trans 'Eliminar imputación' %}" aria-label="{% trans 'Eliminar imputación' %}" data-url="{% url 'payment-allocation-manage' %}" data-allocation_id="{{ allocation.pk }}" data-action="delete" data-target-modal="common-modal"><i class="fas fa-trash" aria-hidden="true"></i></button>
+        </div>
+        {% endif %}
+        </article>
+        {% empty %}<p class="project-muted">{% trans "No hay imputaciones registradas." %}</p>{% endfor %}
+        </div>
+    </section>
+    {% endif %}
+    <section class="payment-detail-section">
+        <div class="payment-detail-section-header"><h3>{% trans "Documentos" %}</h3></div>
+        <ul class="obligation-document-list">
+        {% for attachment in obj.documents.all %}
+            <li><i class="fas {% if '.pdf' in attachment.document.name|lower %}fa-file-pdf{% elif '.xls' in attachment.document.name|lower or '.ods' in attachment.document.name|lower or '.csv' in attachment.document.name|lower or '.tsv' in attachment.document.name|lower %}fa-file-excel{% else %}fa-file-image{% endif %}" aria-hidden="true"></i><div><a href="{{ attachment.document.url }}" target="_blank" rel="noopener noreferrer" title="{{ attachment.name }}">{{ attachment.name }}</a><small>{{ attachment.created_at|date:"d/m/Y" }}</small></div><a class="project-icon-btn" href="{{ attachment.document.url }}" download title="{% trans 'Descargar documento' %}" aria-label="{% trans 'Descargar documento' %}: {{ attachment.name }}"><i class="fas fa-download" aria-hidden="true"></i></a></li>
+        {% empty %}
+            <li class="project-muted">{% trans "No hay documentos adjuntos." %}</li>
+        {% endfor %}
+        </ul>
+        <button type="button" class="project-btn project-btn-ghost ark" data-url="{% url 'payment-form' %}" data-target-modal="common-modal" data-obj_id="{{ obj.id }}"><i class="fas fa-paperclip"></i> {% trans "Adjuntar documento" %}</button>
+    </section>
+    </div>
+    <section class="payment-detail-section">
+        <div class="payment-detail-section-header">
+            <h3>{% trans "Pagos realizados" %}</h3>
+            {% if obj.amount_pending > 0 and obj.status != "cancelled" %}
+                <button type="button" class="project-btn project-btn-primary ark" data-url="{% url "cash-outflow-form" %}"
+                    data-target-modal="common-modal" data-payment_obligation_id="{{ obj.id }}">
+                    <i class="fas fa-plus"></i> {% trans "Registrar pago" %}
+                </button>
+            {% endif %}
+        </div>
+        <div class="cash-outflow-table">
+            <div class="cash-outflow-table-head">
+                <span>{% trans "Fecha" %}</span>
+                <span>{% trans "Importe" %}</span>
+                <span>{% trans "Cuenta" %}</span>
+                <span>{% trans "Método" %}</span>
+                <span>{% trans "Referencia" %}</span>
+            </div>
+            {% for outflow in cash_outflows %}
+                <div class="cash-outflow-table-row">
+                    <span>{{ outflow.payment_date|date:"d/m/Y" }}</span>
+                    <span class="payment-money">{{ outflow.amount|money_es }}</span>
+                    <span>{{ outflow.bank_account|default:_("Sin cuenta") }}</span>
+                    <span>{{ outflow.get_payment_method_display }}</span>
+                    <span>{{ outflow.reference|default:_("Sin referencia") }}</span>
+                </div>
+            {% empty %}
+                <div class="obligation-payments-empty"><i class="far fa-file-alt" aria-hidden="true"></i><p>{% trans "Todavía no hay salidas de caja registradas." %}</p></div>
+            {% endfor %}
+        </div>
+    </section>
+    </div>
+</div>

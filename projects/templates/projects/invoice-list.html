@@ -1,5 +1,14 @@
 {% load i18n project_tags %}
 
+<form class="invoice-filters project-inputs" method="get" action="{% url 'projects' %}">
+    <input type="hidden" name="section" value="invoices">
+    {% for field in invoice_filter_form %}
+    <div class="invoice-filter-field"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{{ field.errors }}</div>
+    {% endfor %}
+    <button type="submit" class="project-btn project-btn-primary"><i class="fas fa-search" aria-hidden="true"></i> {% trans "Buscar" %}</button>
+    {% if invoice_filter_form.non_field_errors %}<div class="invoice-filter-errors" role="alert">{{ invoice_filter_form.non_field_errors }}</div>{% endif %}
+</form>
+
 <div class="project-list-card invoice-list-card">
     <div class="invoice-list-head">
         <span>{% trans "Factura" %}</span>
@@ -21,7 +30,8 @@
                             <i class="fas fa-upload"></i> {% trans "Falta documento físico" %}
                         </label>
                         <input type="file" class="upload d-none" id="invoice-physical-document-{{ invoice.id }}" data-url="{% url "invoice-physical-document-upload" %}"
-                            data-target="invoice-list" data-obj-id="{{ invoice.id }}" data-field="physical_document" data-csrf-token="{{ csrf_token }}">
+                            data-target="invoice-list" data-obj-id="{{ invoice.id }}" data-field="physical_document" data-csrf-token="{{ csrf_token }}"
+                            accept="application/pdf,image/png,image/jpeg,.pdf,.png,.jpg,.jpeg">
                     {% else %}
                         <span class="invoice-badge invoice-badge--document">
                             <i class="fas fa-check"></i> {% trans "Documento físico" %}
@@ -41,7 +51,9 @@
             </div>
             <div class="invoice-amounts">
                 <span class="invoice-amounts__secondary">{% trans "Base" %}: {{ invoice.taxable_base|money_es }}</span>
-                <span class="invoice-amounts__secondary">{% trans "Impuestos" %}: {{ invoice.taxes|money_es }}</span>
+                <span class="invoice-amounts__secondary">{% trans "IVA" %}: {{ invoice.display_iva_amount|money_es }}</span>
+                <span class="invoice-amounts__secondary">{% trans "IGIC" %}: {{ invoice.igic_amount|money_es }}</span>
+                <span class="invoice-amounts__secondary">{% trans "IRPF" %}: {% if invoice.irpf_amount %}-{{ invoice.irpf_amount|money_es }}{% else %}{{ invoice.irpf_amount|money_es }}{% endif %}</span>
                 <span class="invoice-amounts__total">{% trans "Total" %}: {{ invoice.total_amount|money_es }}</span>
             </div>
             <div class="invoice-status">
@@ -78,6 +90,13 @@
                         data-url="{% url "invoice-form" %}" data-target-modal="common-modal" data-obj_id="{{ invoice.id }}">
                         <i class="fas fa-edit"></i>
                     </a>
+                    {% if invoice.allocation_count == 0 %}
+                        <a class="project-icon-btn danger ark" title="{% trans 'Eliminar factura' %}" aria-label="{% trans 'Eliminar factura' %}"
+                            data-url="{% url "invoice-remove" %}" data-target="invoice-list" data-obj_id="{{ invoice.id }}"
+                            data-confirm="{% trans "¿Seguro que quieres eliminar esta factura? También se eliminará su documento físico asociado." %}">
+                            <i class="fas fa-trash"></i>
+                        </a>
+                    {% endif %}
                 </div>
             </details>
         </div>

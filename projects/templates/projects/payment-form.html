@@ -1,0 +1,76 @@
+{% load i18n project_tags %}
+
+<div class="project-modal payment-modal">
+    <div class="payment-modal-header">
+        <h2>{% if obj.pk %}{% trans "Editar obligación" %}{% else %}{% trans "Nueva obligación" %}{% endif %}</h2>
+        <button type="button" class="project-icon-btn" data-bs-dismiss="modal" aria-label="{% trans 'Cerrar' %}"><i class="fas fa-times"></i></button>
+    </div>
+
+    <div class="project-modal-error" role="alert" hidden></div>
+
+    <form id="payment-form" class="payment-form project-inputs" enctype="multipart/form-data" novalidate>
+        {% csrf_token %}
+        <input type="hidden" name="obj_id" value="{{ obj.id|default:"" }}">
+        <div class="payment-form-grid">
+            <div class="payment-form-field payment-form-field-wide">
+                <label for="payment-concept">{% trans "Concepto" %} <span aria-hidden="true">*</span></label>
+                <div class="payment-field-control"><input id="payment-concept" type="text" class="form-control" name="concept" value="{{ obj.concept|default:"" }}" required data-required-message="{% trans 'Introduce un concepto para la obligación.' %}"><i class="fas fa-exclamation-circle payment-field-error-icon"></i></div>
+                <div id="payment-concept-error" class="payment-field-error" aria-live="polite"></div>
+            </div>
+            <div class="payment-form-field">
+                <label for="payment-type">{% trans "Tipo" %} <span aria-hidden="true">*</span></label>
+                <select id="payment-type" class="form-control" name="payment_type" required>{% for value, label in form.fields.payment_type.choices %}<option value="{{ value }}"{% if obj.payment_type == value %} selected{% endif %}>{{ label }}</option>{% endfor %}</select>
+                <div id="payment-type-error" class="payment-field-error" aria-live="polite"></div>
+            </div>
+            <div class="payment-form-field">
+                <label for="payment-creditor">{% trans "Acreedor" %} <span aria-hidden="true">*</span></label>
+                <div class="payment-field-control"><input id="payment-creditor" type="text" class="form-control" name="creditor" value="{{ obj.creditor|default:"" }}" required data-required-message="{% trans 'Introduce el beneficiario o acreedor.' %}"><i class="fas fa-exclamation-circle payment-field-error-icon"></i></div>
+                <div id="payment-creditor-error" class="payment-field-error" aria-live="polite"></div>
+            </div>
+            <div class="payment-form-field">
+                <label for="payment-amount">{% trans "Importe" %} <span aria-hidden="true">*</span></label>
+                <div class="payment-amount-control"><span>€</span><div class="payment-field-control"><input id="payment-amount" type="number" step="0.01" min="0.01" class="form-control" name="amount" value="{{ obj.amount|decimal_input }}" required data-required-message="{% trans 'Introduce el importe de la obligación.' %}"><i class="fas fa-exclamation-circle payment-field-error-icon"></i></div></div>
+                <div id="payment-amount-error" class="payment-field-error" aria-live="polite"></div>
+            </div>
+            <div class="payment-form-field">
+                <label for="payment-accrual-date">{% trans "Fecha devengo" %}</label>
+                <input id="payment-accrual-date" type="date" class="form-control" name="accrual_date" value="{{ obj.accrual_date|date:"Y-m-d" }}">
+                <div id="payment-accrual-date-error" class="payment-field-error" aria-live="polite"></div>
+            </div>
+            <div class="payment-form-field">
+                <label for="payment-expected-date">{% trans "Fecha prevista" %} <span aria-hidden="true">*</span></label>
+                <div class="payment-field-control"><input id="payment-expected-date" type="date" class="form-control" name="expected_payment_date" value="{{ obj.expected_payment_date|date:"Y-m-d" }}" required data-required-message="{% trans 'Selecciona la fecha prevista de pago.' %}"><i class="fas fa-exclamation-circle payment-field-error-icon"></i></div>
+                <div id="payment-expected-date-error" class="payment-field-error" aria-live="polite"></div>
+            </div>
+            <div class="payment-form-field">
+                <label for="payment-status">{% trans "Estado administrativo" %} <span aria-hidden="true">*</span></label>
+                <select id="payment-status" class="form-control" name="status" required>{% for value, label in form.fields.status.choices %}<option value="{{ value }}"{% if obj.status == value %} selected{% endif %}>{{ label }}</option>{% endfor %}</select>
+                <div id="payment-status-error" class="payment-field-error" aria-live="polite"></div>
+            </div>
+            <div class="payment-form-field payment-form-field-half">
+                <label for="payment-invoice">{% trans "Factura asociada" %}</label>
+                <select id="payment-invoice" class="form-control" name="invoice"><option value="">{% trans "Sin factura" %}</option>{% for invoice in form.fields.invoice.queryset %}<option value="{{ invoice.id }}"{% if obj.invoice_id == invoice.id %} selected{% endif %}>{{ invoice.number }} - {{ invoice.provider_tax_id }}</option>{% endfor %}</select>
+                <div id="payment-invoice-error" class="payment-field-error" aria-live="polite"></div>
+            </div>
+            <div class="payment-form-field payment-form-field-wide">
+                <label for="payment-document">{% trans "Documento" %}</label>
+                <input id="payment-document" class="form-control" type="file" name="document" accept=".pdf,.jpg,.jpeg,.png,.gif,.webp,.bmp,.tif,.tiff,.xls,.xlsx,.ods,.csv,.tsv">
+                <small>{% trans "PDF, imágenes u hojas de cálculo. Máximo 20 MB." %}</small>
+                <div id="payment-document-error" class="payment-field-error" aria-live="polite"></div>
+                {% for attachment in obj.documents.all %}
+                    <div><a href="{{ attachment.document.url }}" target="_blank" rel="noopener noreferrer">{{ attachment.name }}</a></div>
+                {% endfor %}
+            </div>
+            <div class="payment-form-field payment-form-field-wide">
+                <label for="payment-notes">{% trans "Notas" %}</label>
+                <textarea id="payment-notes" class="form-control" name="notes" placeholder="{% trans 'Añade cualquier información adicional...' %}">{{ obj.notes|default:"" }}</textarea>
+                <div id="payment-notes-error" class="payment-field-error" aria-live="polite"></div>
+            </div>
+        </div>
+    </form>
+
+    <div class="project-modal-actions payment-modal-actions">
+        <button type="button" class="project-btn project-btn-ghost" data-bs-dismiss="modal">{% trans "Cancelar" %}</button>
+        <button type="button" class="project-btn project-btn-primary ajax-form-get" data-form="payment-form" data-url="{% url "payment-save" %}" data-target="payment-list" data-dismiss-modal="common-modal" data-inline-errors="true" data-loading-text="{% trans 'Guardando...' %}" data-success-message="{% trans 'Obligación guardada correctamente.' %}"><i class="far fa-save"></i> {% trans "Guardar" %}</button>
+    </div>
+</div>

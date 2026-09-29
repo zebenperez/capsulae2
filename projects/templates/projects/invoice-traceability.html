@@ -5,6 +5,21 @@
         <div class="invoice-traceability-title">
             <h2>{% trans "TRAZABILIDAD DE FACTURA" %}</h2>
             <p>{{ invoice.locator|default:"-----" }} · {{ invoice.number }} · {% trans "Estado actual" %}: {{ invoice.get_status_display }}</p>
+            <div class="invoice-traceability-document">
+                {% if invoice.physical_document and not physical_document.unavailable %}
+                    <button type="button" class="invoice-document-action ark" data-url="{% url 'invoice-physical-document-viewer' %}"
+                        data-target-modal="common-modal" data-invoice_id="{{ invoice.id }}">
+                        <i class="far fa-file-alt" aria-hidden="true"></i> {% trans "Ver documento" %}
+                    </button>
+                    <span>{{ physical_document.format }} · {{ physical_document.size }}</span>
+                {% else %}
+                    <button type="button" class="invoice-document-action ark" data-url="{% url 'invoice-physical-document-form' %}"
+                        data-target-modal="common-modal" data-invoice_id="{{ invoice.id }}">
+                        <i class="fas fa-upload" aria-hidden="true"></i> {% trans "Adjuntar documento" %}
+                    </button>
+                    <span>{% if physical_document.unavailable %}{% trans "Documento no disponible" %}{% else %}{% trans "Sin documento físico" %}{% endif %}</span>
+                {% endif %}
+            </div>
         </div>
         <div class="invoice-traceability-kpis" aria-label="{% trans 'Resumen de factura' %}">
             <div class="invoice-traceability-kpi">

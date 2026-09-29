@@ -3,10 +3,15 @@
 <div class="project-modal invoice-allocation-wizard">
     <header class="invoice-wizard-header">
         <div class="invoice-wizard-title">
-            <h2>{% trans "IMPUTAR FACTURA" %}</h2>
-            <p>{% trans "Factura" %} {{ invoice.locator }} · {{ invoice.number }}</p>
+            <h2>{% if payment_obligation %}{% trans "IMPUTAR OBLIGACIÓN" %}{% else %}{% trans "IMPUTAR FACTURA" %}{% endif %}</h2>
+            <p>{% if payment_obligation %}{{ payment_obligation.concept }}{% else %}{% trans "Factura" %} {{ invoice.locator }} · {{ invoice.number }}{% endif %}</p>
         </div>
         <div class="invoice-wizard-kpis" aria-label="{% trans 'Resumen de imputación de factura' %}">
+            <div class="invoice-wizard-kpi invoice-wizard-kpi-total">
+                <span class="invoice-wizard-kpi-icon" aria-hidden="true"><i class="fas fa-file-invoice-dollar"></i></span>
+                <span>{% trans "Total" %}</span>
+                <strong>{{ total_amount_display }} €</strong>
+            </div>
             <div class="invoice-wizard-kpi invoice-wizard-kpi-allocated">
                 <span class="invoice-wizard-kpi-icon" aria-hidden="true"><i class="fas fa-coins"></i></span>
                 <span>{% trans "Imputado" %}</span>
@@ -23,7 +28,8 @@
         </button>
     </header>
 
-    <form id="invoice-allocation-form" class="invoice-wizard-form" data-invoice-id="{{ invoice.id }}">
+    <form id="invoice-allocation-form" class="invoice-wizard-form" {% if payment_obligation %}enctype="multipart/form-data"{% else %}data-invoice-id="{{ invoice.id }}"{% endif %}>
+        {% if payment_obligation %}{% csrf_token %}<input type="hidden" name="payment_obligation_id" value="{{ payment_obligation.id }}">{% endif %}
         <nav class="invoice-wizard-steps" aria-label="{% trans 'Pasos de imputación' %}">
             <span class="active" data-step-indicator="1" aria-current="step">
                 <strong><span class="invoice-step-number">1</span><i class="fas fa-check" aria-hidden="true"></i></strong>
@@ -48,7 +54,7 @@
                         <span class="invoice-wizard-card-icon" aria-hidden="true"><i class="far fa-folder-open"></i></span>
                         <div>
                             <h3>{% trans "PROYECTO" %}</h3>
-                            <p>{% trans "Selecciona el proyecto al que se imputará esta factura." %}</p>
+                            <p>{% trans "Selecciona el proyecto al que se imputará el gasto." %}</p>
                         </div>
                     </div>
                     <div class="invoice-wizard-field">
@@ -81,7 +87,7 @@
                         <span class="invoice-wizard-card-icon" aria-hidden="true"><i class="fas fa-sitemap"></i></span>
                         <div>
                             <h3>{% trans "PARTIDA PRESUPUESTARIA" %}</h3>
-                            <p>{% trans "Selecciona la partida o subpartida a la que se imputará la factura." %}</p>
+                            <p>{% trans "Selecciona la partida o subpartida a la que se imputará el gasto." %}</p>
                         </div>
                     </div>
                     <div class="invoice-wizard-field">
@@ -122,7 +128,7 @@
                 </div>
             </section>
 
-            <section class="invoice-wizard-step" data-step="3">
+            <section class="invoice-wizard-step invoice-wizard-allocation-step" data-step="3">
                 <div class="invoice-wizard-context invoice-wizard-context-grid" data-context="allocation" hidden>
                     <span class="invoice-wizard-context-item">
                         <span class="invoice-wizard-context-icon" aria-hidden="true"><i class="far fa-folder"></i></span>
@@ -138,7 +144,7 @@
                         <span class="invoice-wizard-card-icon" aria-hidden="true"><i class="fas fa-calculator"></i></span>
                         <div>
                             <h3>{% trans "IMPORTE A IMPUTAR" %}</h3>
-                            <p>{% trans "Indica cuánto de la factura debe imputarse a esta partida." %}</p>
+                            <p>{% trans "Indica el importe que debe imputarse a esta partida." %}</p>
                         </div>
                     </div>
                     <div class="invoice-wizard-allocation-grid">
@@ -206,8 +212,8 @@
                 {% trans "Siguiente" %} <i class="fas fa-arrow-right" aria-hidden="true"></i>
             </button>
             <button type="button" class="project-btn project-btn-primary ajax-form-get invoice-wizard-save" data-form="invoice-allocation-form"
-                data-url="{% url "invoice-allocation-save" %}" data-target="invoice-list" data-dismiss-modal="common-modal"
-                data-loading-text="{% trans 'Imputando…' %}">
+                data-url="{% if payment_obligation %}{% url 'payment-allocation-save' %}{% else %}{% url 'invoice-allocation-save' %}{% endif %}" data-target="{% if payment_obligation %}payment-list{% else %}invoice-list{% endif %}" data-dismiss-modal="common-modal"
+                data-loading-text="{% trans 'Imputando…' %}" data-swal-errors="true" data-success-message="{% trans 'Imputación guardada correctamente.' %}">
                 <i class="fas fa-check" aria-hidden="true"></i> {% trans "Confirmar imputación" %}
             </button>
         </div>
@@ -216,6 +222,12 @@
 
 <script>
     (function(){
+        // Keep wizard fields isolated from the filters behind the modal.
+        var root = jQuery(".invoice-allocation-wizard").last();
+        function $(selector) {
+            return typeof selector === "string" ? root.find(selector) : jQuery(selector);
+        }
+        $.trim = jQuery.trim;
         var currentStep = 1;
         var maxStep = 3;
         var remainingAmount = parseFloat("{{ remaining_amount|stringformat:'f'|default:'0' }}");
@@ -296,15 +308,15 @@
             percentageField.attr("max", maxPercentage.toFixed(2));
             if (mode === "percentage") {
                 amountField.closest(".invoice-wizard-money-input").hide();
-                amountField.prop("required", false);
-                percentageField.show().prop("required", true);
+                amountField.prop("required", false).prop("disabled", true);
+                percentageField.show().prop("disabled", false).prop("required", true);
                 if (parseFloat(percentageField.val() || "0") > maxPercentage) {
                     percentageField.val(maxPercentage.toFixed(2));
                 }
             } else {
-                percentageField.hide().prop("required", false);
+                percentageField.hide().prop("required", false).prop("disabled", true);
                 amountField.closest(".invoice-wizard-money-input").show();
-                amountField.prop("required", true);
+                amountField.prop("disabled", false).prop("required", true);
                 if (parseFloat(amountField.val() || "0") > currentMaxAmount) {
                     amountField.val(currentMaxAmount.toFixed(2));
                 }
@@ -314,7 +326,7 @@
 
         function showStep(step) {
             currentStep = Math.max(1, Math.min(maxStep, step));
-            $(".invoice-allocation-wizard").attr("data-active-step", currentStep);
+            root.attr("data-active-step", currentStep);
             $(".invoice-wizard-step").removeClass("active");
             $('.invoice-wizard-step[data-step="' + currentStep + '"]').addClass("active");
             $("[data-step-indicator]").removeClass("active completed").removeAttr("aria-current");

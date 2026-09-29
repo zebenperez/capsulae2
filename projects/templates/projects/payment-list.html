@@ -1,0 +1,119 @@
+{% load i18n project_tags %}
+
+<div class="dashboard-panel payments-panel">
+    <div class="dashboard-panel-header payments-header">
+        <div><h2>{% trans "Pagos y Tesorería" %}</h2><p>{% trans "Control de obligaciones de pago y salidas reales de caja." %}</p></div>
+        <button type="button" class="project-btn project-btn-primary ark" data-url="{% url "payment-form" %}" data-target-modal="common-modal"><i class="fas fa-plus"></i> {% trans "Nueva obligación" %}</button>
+    </div>
+
+    <div class="payments-summary-grid">
+        <div class="payments-kpi-card payments-kpi-card--pending"><span class="payments-kpi-icon"><i class="fas fa-file-invoice-dollar"></i></span><div><span>{% trans "Pendiente de pago" %}</span><strong>{{ payment_summary.pending_total|money_es }}</strong><small>{% blocktrans count count=payment_summary.pending_count %}{{ count }} obligación{% plural %}{{ count }} obligaciones{% endblocktrans %}</small></div></div>
+        <div class="payments-kpi-card payments-kpi-card--paid"><span class="payments-kpi-icon"><i class="fas fa-coins"></i></span><div><span>{% trans "Pagado este mes" %}</span><strong>{{ payment_summary.paid_this_month|money_es }}</strong><small>{% blocktrans count count=payment_summary.paid_this_month_count %}{{ count }} pago realizado{% plural %}{{ count }} pagos realizados{% endblocktrans %}</small></div></div>
+        <div class="payments-kpi-card payments-kpi-card--overdue"><span class="payments-kpi-icon"><i class="fas fa-exclamation-triangle"></i></span><div><span>{% trans "Vencido" %}</span><strong>{{ payment_summary.overdue_total|money_es }}</strong><small>{% blocktrans count count=payment_summary.overdue_count %}{{ count }} obligación{% plural %}{{ count }} obligaciones{% endblocktrans %}</small></div></div>
+        <div class="payments-kpi-card payments-kpi-card--upcoming"><span class="payments-kpi-icon"><i class="far fa-calendar-alt"></i></span><div><span>{% trans "Próximos 30 días" %}</span><strong>{{ payment_summary.next_30_total|money_es }}</strong><small>{% blocktrans count count=payment_summary.next_30_count %}{{ count }} obligación{% plural %}{{ count }} obligaciones{% endblocktrans %}</small></div></div>
+    </div>
+
+    <nav class="payments-subtabs" aria-label="{% trans 'Vistas de pagos y tesorería' %}">
+        <a {% if payment_tab == 'obligations' %}class="is-active" aria-current="page"{% endif %} href="{{ payment_obligations_url }}"><i class="fas fa-coins"></i> {% trans "Obligaciones de pago" %}</a>
+        <a {% if payment_tab == 'treasury' %}class="is-active" aria-current="page"{% endif %} href="{{ payment_treasury_url }}"><i class="far fa-calendar-alt"></i> {% trans "Previsión de tesorería" %}</a>
+    </nav>
+
+    {% if payment_tab == 'obligations' %}
+    <form id="payment-filter-form" class="payments-filter-form project-inputs">
+        <input type="hidden" name="tab" value="obligations">
+        <section class="payments-filter-card{% if payment_filters.q or payment_filters.status or payment_filters.payment_type or payment_filters.project or payment_filters.financier or payment_filters.creditor or payment_filters.date_from or payment_filters.date_to %} has-active-filters{% endif %}">
+            <div class="payments-filter-header">
+                <button type="button" class="payments-filter-collapse" aria-expanded="true"><i class="fas fa-filter"></i><span>{% trans "Filtros" %}</span><i class="fas fa-chevron-up payments-filter-chevron"></i></button>
+                <div class="payments-filter-header-actions">
+                    <button type="button" class="payments-more-toggle" aria-expanded="{% if payment_filters.creditor or payment_filters.date_from or payment_filters.date_to %}true{% else %}false{% endif %}">{% trans "Más filtros" %} <i class="fas fa-sliders-h"></i></button>
+                    <button id="payment-filter-submit" type="button" class="project-btn project-btn-primary ajax-form-get" data-form="payment-filter-form" data-url="{% url "payment-list" %}" data-target="payment-list"><i class="fas fa-filter"></i> {% trans "Filtrar" %}</button>
+                </div>
+            </div>
+            <div class="payments-filter-body">
+                <div class="payments-filter-grid">
+                    <label class="payments-filter-control payments-filter-search"><span>{% trans "Buscar" %}</span><div class="payments-input-icon"><i class="fas fa-search"></i><input type="text" class="form-control" name="q" value="{{ payment_filters.q|default:"" }}" placeholder="{% trans 'Concepto, acreedor o referencia' %}"></div></label>
+                    <label class="payments-filter-control"><span>{% trans "Estado" %}</span><select class="form-control" name="status"><option value="">{% trans "Todos" %}</option>{% for value, label in payment_statuses %}<option value="{{ value }}"{% if payment_filters.status == value %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>
+                    <label class="payments-filter-control"><span>{% trans "Tipo" %}</span><select class="form-control" name="payment_type"><option value="">{% trans "Todos" %}</option>{% for value, label in payment_types %}<option value="{{ value }}"{% if payment_filters.payment_type == value %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>
+                    <label class="payments-filter-control"><span>{% trans "Proyecto" %}</span><select class="form-control" name="project"><option value="">{% trans "Todos" %}</option>{% for project in payment_projects %}<option value="{{ project.id }}"{% if payment_filters.project == project.id|stringformat:"s" %} selected{% endif %}>{{ project.name }}</option>{% endfor %}</select></label>
+                    <label class="payments-filter-control"><span>{% trans "Financiador" %}</span><select class="form-control" name="financier"><option value="">{% trans "Todos" %}</option>{% for financier in payment_financiers %}<option value="{{ financier.id }}"{% if payment_filters.financier == financier.id|stringformat:"s" %} selected{% endif %}>{{ financier.name }}</option>{% endfor %}</select></label>
+                </div>
+                <div class="payments-more-filters{% if payment_filters.creditor or payment_filters.date_from or payment_filters.date_to %} is-open{% endif %}">
+                    <label class="payments-filter-control"><span>{% trans "Acreedor" %}</span><input type="text" class="form-control" name="creditor" value="{{ payment_filters.creditor|default:"" }}" placeholder="{% trans 'Buscar acreedor' %}"></label>
+                    <label class="payments-filter-control"><span>{% trans "Desde" %}</span><input type="date" class="form-control" name="date_from" value="{{ payment_filters.date_from|default:"" }}"></label>
+                    <label class="payments-filter-control"><span>{% trans "Hasta" %}</span><input type="date" class="form-control" name="date_to" value="{{ payment_filters.date_to|default:"" }}"></label>
+                </div>
+                {% if payment_filters.q or payment_filters.status or payment_filters.payment_type or payment_filters.project or payment_filters.financier or payment_filters.creditor or payment_filters.date_from or payment_filters.date_to %}
+                    <div class="payments-active-filters" aria-label="{% trans 'Filtros activos' %}">
+                        {% if payment_filters.q %}<button type="button" class="payments-filter-chip" data-filter-name="q">{% trans "Buscar" %}: {{ payment_filters.q }} <i class="fas fa-times"></i></button>{% endif %}
+                        {% if payment_filters.status %}{% for value, label in payment_statuses %}{% if payment_filters.status == value %}<button type="button" class="payments-filter-chip" data-filter-name="status">{% trans "Estado" %}: {{ label }} <i class="fas fa-times"></i></button>{% endif %}{% endfor %}{% endif %}
+                        {% if payment_filters.payment_type %}{% for value, label in payment_types %}{% if payment_filters.payment_type == value %}<button type="button" class="payments-filter-chip" data-filter-name="payment_type">{% trans "Tipo" %}: {{ label }} <i class="fas fa-times"></i></button>{% endif %}{% endfor %}{% endif %}
+                        {% if payment_filters.project %}{% for project in payment_projects %}{% if payment_filters.project == project.id|stringformat:"s" %}<button type="button" class="payments-filter-chip" data-filter-name="project">{% trans "Proyecto" %}: {{ project.name }} <i class="fas fa-times"></i></button>{% endif %}{% endfor %}{% endif %}
+                        {% if payment_filters.financier %}{% for financier in payment_financiers %}{% if payment_filters.financier == financier.id|stringformat:"s" %}<button type="button" class="payments-filter-chip" data-filter-name="financier">{% trans "Financiador" %}: {{ financier.name }} <i class="fas fa-times"></i></button>{% endif %}{% endfor %}{% endif %}
+                        {% if payment_filters.creditor %}<button type="button" class="payments-filter-chip" data-filter-name="creditor">{% trans "Acreedor" %}: {{ payment_filters.creditor }} <i class="fas fa-times"></i></button>{% endif %}
+                        {% if payment_filters.date_from %}<button type="button" class="payments-filter-chip" data-filter-name="date_from">{% trans "Desde" %}: {{ payment_filters.date_from }} <i class="fas fa-times"></i></button>{% endif %}
+                        {% if payment_filters.date_to %}<button type="button" class="payments-filter-chip" data-filter-name="date_to">{% trans "Hasta" %}: {{ payment_filters.date_to }} <i class="fas fa-times"></i></button>{% endif %}
+                        <button type="button" class="payments-clear-filters ark" data-url="{% url "payment-list" %}" data-target="payment-list">{% trans "Limpiar todo" %}</button>
+                    </div>
+                {% endif %}
+            </div>
+        </section>
+        <div id="payment-obligations" class="payments-list-toolbar">
+            <h3>{% blocktrans count count=payment_total_count %}{{ count }} obligación de pago{% plural %}{{ count }} obligaciones de pago{% endblocktrans %}</h3>
+            <label class="payments-order-control">{% trans "Ordenar por:" %}<select class="form-control payment-ordering-select" name="ordering">{% for value, label in payment_ordering_options %}<option value="{{ value }}"{% if payment_filters.ordering|default:"due_asc" == value %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>
+        </div>
+    </form>
+
+    {% if payment_obligations %}
+    <div class="payments-table-wrap"><div class="payments-table">
+        <div class="payments-table-head"><span>{% trans "Concepto" %}</span><span>{% trans "Tipo" %}</span><span>{% trans "Acreedor" %}</span><span>{% trans "Proyecto" %}</span><span>{% trans "Fecha prevista" %}</span><span>{% trans "Importe" %}</span><span>{% trans "Pagado" %}</span><span>{% trans "Pendiente" %}</span><span>{% trans "Estado" %}</span><span>{% trans "Acciones" %}</span></div>
+        {% for obligation in payment_obligations %}
+            <div class="payments-table-row">
+                <span class="payments-concept"><strong>{{ obligation.concept }}</strong>{% if obligation.budget_allocation_amount %}<small>{% trans "Imputación presupuestaria" %}: {{ obligation.budget_allocation_amount|money_es }}</small>{% endif %}</span>
+                <span><mark class="payment-type-badge payment-type-badge--{{ obligation.payment_type }}">{{ obligation.get_payment_type_display }}</mark></span><span>{{ obligation.creditor_name }}{% if obligation.creditor_tax_id %}<small>NIF/CIF: {{ obligation.creditor_tax_id }}</small>{% endif %}</span><span>{{ obligation.project_names }}</span><span class="payment-date">{{ obligation.expected_payment_date|date:"d/m/Y" }}</span>
+                <span class="payment-money">{{ obligation.amount|money_es }}</span><span class="payment-money">{{ obligation.amount_paid|money_es }}</span><span class="payment-money">{{ obligation.amount_pending|money_es }}</span><span><mark class="payment-state payment-state--{{ obligation.display_state.code }}">{{ obligation.display_state.label }}</mark></span>
+                <div class="payments-actions">
+                    <button type="button" class="project-icon-btn ark" title="{% trans 'Ver detalle' %}" aria-label="{% trans 'Ver detalle' %}" data-url="{% url 'payment-detail' %}" data-target-modal="common-modal" data-obj_id="{{ obligation.id }}"><i class="fas fa-eye"></i></button>
+                    <button type="button" class="project-icon-btn ark" title="{% trans 'Editar' %}" aria-label="{% trans 'Editar' %}" data-url="{% url 'payment-form' %}" data-target-modal="common-modal" data-obj_id="{{ obligation.id }}"><i class="fas fa-edit"></i></button>
+                    {% if obligation.amount_pending > 0 and obligation.status != 'cancelled' %}<button type="button" class="project-icon-btn ark" title="{% trans 'Registrar pago' %}" aria-label="{% trans 'Registrar pago' %}" data-url="{% url 'cash-outflow-form' %}" data-target-modal="common-modal" data-payment_obligation_id="{{ obligation.id }}"><i class="fas fa-money-bill-wave"></i></button>{% endif %}
+                    <button type="button" class="project-icon-btn ark" title="{% trans 'Documentos' %}" aria-label="{% trans 'Documentos' %}" data-url="{% url 'payment-detail' %}" data-target-modal="common-modal" data-obj_id="{{ obligation.id }}"><i class="fas fa-paperclip"></i></button>
+                    {% if not obligation.invoice_id and obligation.unallocated_amount > 0 and obligation.status != 'cancelled' %}<button type="button" class="project-icon-btn ark" title="{% trans 'Imputar a proyectos' %}" aria-label="{% trans 'Imputar a proyectos' %}" data-url="{% url 'payment-allocation-wizard' %}" data-target-modal="common-modal" data-obj_id="{{ obligation.id }}"><i class="fas fa-random"></i></button>{% endif %}
+                    {% if obligation.can_delete %}<button type="button" class="project-icon-btn ark danger" title="{% trans 'Eliminar' %}" aria-label="{% trans 'Eliminar' %}" data-url="{% url 'payment-remove' %}" data-target="payment-list" data-obj_id="{{ obligation.id }}" data-confirm="{% trans '¿Seguro que quieres eliminar esta obligación de pago?' %}"><i class="fas fa-trash"></i></button>{% endif %}
+                </div>
+            </div>
+        {% empty %}<div class="payments-empty-state"><span><i class="fas fa-file-invoice-dollar"></i></span><strong>{% trans "No hay obligaciones que coincidan con los filtros" %}</strong><p>{% trans "Crea una nueva obligación o ajusta los criterios de búsqueda." %}</p><button type="button" class="project-btn project-btn-primary ark" data-url="{% url "payment-form" %}" data-target-modal="common-modal"><i class="fas fa-plus"></i> {% trans "Crear obligación" %}</button></div>{% endfor %}
+    </div></div>
+    {% else %}
+    <div class="payments-empty-state"><span><i class="fas fa-file-invoice-dollar"></i></span><strong>{% if payment_filters.q or payment_filters.status or payment_filters.project or payment_filters.payment_type or payment_filters.financier or payment_filters.creditor or payment_filters.date_from or payment_filters.date_to %}{% trans "No hay obligaciones que coincidan con los filtros" %}{% else %}{% trans "Todavía no hay obligaciones de pago" %}{% endif %}</strong><p>{% trans "Registra nóminas, impuestos, proveedores y otros pagos previstos para incorporarlos a la previsión de tesorería." %}</p><button type="button" class="project-btn project-btn-primary ark" data-url="{% url 'payment-form' %}" data-target-modal="common-modal"><i class="fas fa-plus"></i> {% trans "Crear primera obligación" %}</button></div>
+    {% endif %}
+
+    {% if payment_page.paginator.count %}<nav class="payments-pagination" aria-label="{% trans 'Paginación de obligaciones' %}">
+        <span>{% blocktrans with first=payment_page.start_index last=payment_page.end_index total=payment_page.paginator.count %}Mostrando {{ first }}–{{ last }} de {{ total }}{% endblocktrans %}</span><div>
+            {% if payment_page.has_previous %}{% include "projects/payment-page-button.html" with page_number=payment_page.previous_page_number icon="fa-chevron-left" label="Página anterior" %}{% endif %}
+            {% for number in payment_page_range %}{% include "projects/payment-page-button.html" with page_number=number label=number active=payment_page.number %}{% endfor %}
+            {% if payment_page.has_next %}{% include "projects/payment-page-button.html" with page_number=payment_page.next_page_number icon="fa-chevron-right" label="Página siguiente" %}{% endif %}
+        </div></nav>{% endif %}
+
+    {% else %}
+        {% include "projects/payment-treasury.html" %}
+    {% endif %}
+</div>
+
+<script>
+$("#payment-list")
+    .off("change.paymentOrdering click.paymentFilters keydown.paymentMenus")
+    .on("change.paymentOrdering", ".payment-ordering-select", function () { $("#payment-filter-submit").trigger("click"); })
+    .on("click.paymentFilters", ".payments-more-toggle", function () {
+        var panel = $(this).closest(".payments-filter-card").find(".payments-more-filters");
+        panel.toggleClass("is-open");
+        $(this).attr("aria-expanded", panel.hasClass("is-open"));
+    })
+    .on("click.paymentFilters", ".payments-filter-collapse", function () {
+        var card = $(this).closest(".payments-filter-card");
+        card.toggleClass("is-collapsed");
+        $(this).attr("aria-expanded", !card.hasClass("is-collapsed"));
+    })
+    .on("click.paymentFilters", ".payments-filter-chip", function () {
+        $("#payment-filter-form").find("[name='" + $(this).data("filter-name") + "']").val("");
+        $("#payment-filter-submit").trigger("click");
+    });
+</script>
