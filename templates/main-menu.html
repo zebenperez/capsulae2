@@ -1,83 +1,44 @@
 {% load i18n pharma_tags common_tags %}
 
-{% if user.is_authenticated %}
+{% if user.is_authenticated and menu == "admins" %}
     <ul class="left-menu">
-    {% if menu == "admins" %}
-        <li class="nav-item"><a class="nav-link " href="{%url "pharma-index"%}">
-            <i class="fa fa-home"></i> {%trans "Home"%} </a></li><hr/>
-        {% if user|have_menu:"PAC"%}
-            <li class="nav-item">
-                <a class="nav-link " href="{%url "patients"%}">
-                    <i class="fa fa-user"></i> {%if user|is_pharma%}{%trans 'Pacientes'%} {%else%} {%trans 'Usuarios'%} {%endif%}
-                </a>
-            </li><hr/>
-            {%comment%}
-            <li class="nav-item">
-                <a class="nav-link " href="{%url "patients2"%}">
-                    <i class="fa fa-user"></i> {%if user|is_pharma%}{%trans 'Pacientes'%} {%else%} {%trans 'Usuarios'%} {%endif%}
-                </a>
-            </li><hr/>
-            {%endcomment%}
-        {% endif %}
-        {% if user|have_menu:"PAC2"%}
-            <li class="nav-item">
-                <a class="nav-link " href="{%url "patients2"%}">
-                    <i class="fa fa-user"></i> {%if user|is_pharma%}{%trans 'Pacientes'%} {%else%} {%trans 'Usuarios'%} {%endif%} 2
-                </a>
-            </li><hr/>
+        <li class="nav-item menu-home"><a class="nav-link" href="{% url 'pharma-index' %}" title="{% trans 'Inicio' %}"><i class="fa fa-home"></i><span class="menu-link-label">{% trans 'Inicio' %}</span></a></li>
+
+        {% if user|have_menu:"PAC2" or user|have_menu:"MED" or user|have_menu:"AGE" %}
+        <li class="menu-section"><details open><summary><i class="fas fa-notes-medical"></i><span class="menu-section-label">{% trans 'Atención' %}</span></summary><ul>
+            {% if user|have_menu:"PAC2" %}<li><a class="nav-link" href="{% url 'patients2' %}" title="{% trans 'Pacientes' %}"><i class="fa fa-user"></i><span class="menu-link-label">{% trans 'Pacientes' %}</span></a></li>{% endif %}
+            {% if user|have_menu:"MED" %}<li><a class="nav-link" href="{% url 'medication' %}" title="{% trans 'Medicamentos' %}"><i class="fa fa-vial"></i><span class="menu-link-label">{% trans 'Medicamentos' %}</span></a></li>{% endif %}
+            {% if user|have_menu:"AGE" %}<li><a class="nav-link" href="{% url 'notes-index' %}" title="{% trans 'Agenda' %}"><i class="fa fa-calendar-alt"></i><span class="menu-link-label">{% trans 'Agenda' %}</span></a></li>{% endif %}
+        </ul></details></li>
         {% endif %}
 
-        {% if user|have_menu:"MED"%}
-            <li class="nav-item"><a class="nav-link " href="{%url "medication"%}">
-                <i class="fa fa-vial"></i> {%trans "Medicamentos"%} </a></li><hr/>
-        {% endif %}
-        {% if user|have_menu:"PRO"%}
-            <li class="nav-item"><a class="nav-link " href="{%url "projects"%}">
-                <i class="fa fa-list"></i> {%trans "Proyectos"%} </a></li> <hr/>
-        {% endif %}
-        {% if user|have_menu:"ORG"%}
-            <li class="nav-item"><a class="nav-link " href="{%url "organizations"%}">
-                <i class="fa fa-sitemap"></i> {%trans "Organizaciones"%}</a></li><hr/>
-        {% endif %}
-        {% if user|have_menu:"TRM"%}
-            <li class="nav-item"><a class="nav-link " href="{%url "procedures"%}">
-                <i class="fa fa-project-diagram"></i> {%trans "Trámites"%}</a></li><hr/>
-        {% endif %}
-        {% if user|have_menu:"EMP"%}
-            <li class="nav-item">
-                <a class="nav-link " href="{%url "employees"%}">
-                    <i class="fa fa-users"></i> 
-                    {%if user|is_pharma%}{%trans 'Farmacéuticos'%} {%else%} {%trans 'Colaboradores'%} {%endif%}
-                </a>
-            </li><hr/>
-        {% endif %}
-        {% if user|have_menu:"TUR"%}
-            <li class="nav-item"><a class="nav-link " href="{%url "shifts-index"%}">
-                <i class="fa fa-calendar"></i> {%trans "Turnos"%}</a></li><hr/>
-        {% endif %}
-        {% if user|have_menu:"AGE"%}
-            <li class="nav-item"><a class="nav-link " href="{%url "notes-index"%}">
-                <i class="fa fa-calendar-alt"></i> {%trans "Agenda"%}</a></li><hr/>
-        {% endif %}
-        {% if user|have_menu:"BOOK"%}
-            <li class="nav-item"><a class="nav-link" href="{%url "books"%}"><i class="fa fa-book"></i> {%trans "Libros"%}</a></li><hr/>
-        {% endif %}
-        {% if user|have_menu:"STO_PRO"%}
-            <li class="nav-item"><a class="nav-link" href="{%url "products"%}">
-                <i class="fas fa-box"></i> {%trans "Productos"%}</a></li><hr/>
-        {% endif %}
-        {% if user|have_menu:"STO_TPV"%}
-            <li class="nav-item"><a class="nav-link" href="{%url "tpv-index"%}">
-                <i class="fas fa-calculator"></i> {%trans "TPV"%}</a></li><hr/>
+        {% if user|have_menu:"PRO" or user|have_menu:"ORG" or user|have_menu:"TRM" %}
+        <li class="menu-section"><details><summary><i class="fas fa-project-diagram"></i><span class="menu-section-label">{% trans 'Comunidad' %}</span></summary><ul>
+            {% if user|have_menu:"PRO" %}<li><a class="nav-link" href="{% url 'projects' %}" title="{% trans 'Proyectos' %}"><i class="fa fa-list"></i><span class="menu-link-label">{% trans 'Proyectos' %}</span></a></li>{% endif %}
+            {% if user|have_menu:"ORG" %}<li><a class="nav-link" href="{% url 'organizations' %}" title="{% trans 'Organizaciones' %}"><i class="fa fa-sitemap"></i><span class="menu-link-label">{% trans 'Organizaciones' %}</span></a></li>{% endif %}
+            {% if user|have_menu:"TRM" %}<li><a class="nav-link" href="{% url 'procedures' %}" title="{% trans 'Trámites' %}"><i class="fas fa-project-diagram"></i><span class="menu-link-label">{% trans 'Trámites' %}</span></a></li>{% endif %}
+        </ul></details></li>
         {% endif %}
 
-        {%comment%}
-        {% if user|have_menu:"DON"%}
-            <li class="nav-item"><a class="nav-link " href="{%url "donation-index"%}">
-                <i class="fa fa-hand-holding-usd"></i> {%trans "Donaciones"%}</a></li><hr/>
+        {% if user|have_menu:"EMP" or user|have_menu:"TUR" %}
+        <li class="menu-section"><details><summary><i class="fa fa-users"></i><span class="menu-section-label">{% trans 'Equipo' %}</span></summary><ul>
+            {% if user|have_menu:"EMP" %}<li><a class="nav-link" href="{% url 'employees' %}" title="{% if user|is_pharma %}{% trans 'Farmacéuticos' %}{% else %}{% trans 'Colaboradores' %}{% endif %}"><i class="fa fa-users"></i><span class="menu-link-label">{% if user|is_pharma %}{% trans 'Farmacéuticos' %}{% else %}{% trans 'Colaboradores' %}{% endif %}</span></a></li>{% endif %}
+            {% if user|have_menu:"TUR" %}<li><a class="nav-link" href="{% url 'shifts-index' %}" title="{% trans 'Turnos' %}"><i class="fa fa-calendar"></i><span class="menu-link-label">{% trans 'Turnos' %}</span></a></li>{% endif %}
+        </ul></details></li>
         {% endif %}
-        {%endcomment%}
-    {% endif %}
+
+        {% if user|have_menu:"BOOK" %}
+        <li class="menu-section"><details><summary><i class="fa fa-book"></i><span class="menu-section-label">{% trans 'Biblioteca' %}</span></summary><ul><li><a class="nav-link" href="{% url 'books' %}" title="{% trans 'Libros' %}"><i class="fa fa-book"></i><span class="menu-link-label">{% trans 'Libros' %}</span></a></li></ul></details></li>
+        {% endif %}
+
+        {% if user|have_menu:"STO_PRO" or user|have_menu:"STO_PROV" or user|have_menu:"STO_TPV" %}
+        <li class="menu-section"><details><summary><i class="fas fa-warehouse"></i><span class="menu-section-label">{% trans 'Almacén y ventas' %}</span></summary><ul>
+            {% if user|have_menu:"STO_PRO" %}<li><a class="nav-link" href="{% url 'products' %}" title="{% trans 'Productos' %}"><i class="fas fa-box"></i><span class="menu-link-label">{% trans 'Productos' %}</span></a></li><li><a class="nav-link" href="{% url 'purchase-delivery-notes' %}" title="{% trans 'Albaranes' %}"><i class="fas fa-file-invoice"></i><span class="menu-link-label">{% trans 'Albaranes' %}</span></a></li>{% endif %}
+            {% if user|have_menu:"STO_PROV" %}<li><a class="nav-link" href="{% url 'providers' %}" title="{% trans 'Proveedores' %}"><i class="fas fa-truck"></i><span class="menu-link-label">{% trans 'Proveedores' %}</span></a></li><li><a class="nav-link" href="{% url 'clients' %}" title="{% trans 'Clientes' %}"><i class="fas fa-user-tag"></i><span class="menu-link-label">{% trans 'Clientes' %}</span></a></li>{% endif %}
+            {% if user|have_menu:"STO_TPV" %}<li><a class="nav-link" href="{% url 'tpv-index' %}" title="{% trans 'TPV' %}"><i class="fas fa-calculator"></i><span class="menu-link-label">{% trans 'TPV' %}</span></a></li>{% endif %}
+        </ul></details></li>
+        {% endif %}
+
+        <li class="nav-item menu-account"><a class="nav-link" href="{% url 'profile-view' %}" title="{% trans 'Mi perfil' %}"><i class="fas fa-user-cog"></i><span class="menu-link-label">{% trans 'Mi perfil' %}</span></a></li>
     </ul>
-{% else %}
 {% endif %}

@@ -8,7 +8,7 @@ from django.views.decorators.http import require_GET
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import padding
-import base64, binascii, os, time
+import base64, binascii, os, re, time
 import random, string, datetime
 from django.views.decorators.csrf import csrf_exempt
 from .models import *
@@ -28,6 +28,8 @@ def _wordpress_sso_b64decode(value):
     if not isinstance(value, str) or not value:
         raise ValueError('invalid token encoding')
     return base64.urlsafe_b64decode(value + '=' * (-len(value) % 4))
+
+WORDPRESS_SSO_PATIENT_PATH_RE = re.compile(r'^/pharma/patients/view/[1-9][0-9]*$')
 
 def _wordpress_sso_issuers():
     registry_path = getattr(settings, 'WORDPRESS_SSO_ISSUERS_PATH', os.path.join(settings.BASE_DIR, 'mylogin', 'wordpress_sso_issuers.json'))
@@ -83,6 +85,9 @@ def wordpress_sso(request):
         if not (user.is_superuser or user.groups.filter(name__in=['admins', 'managers', 'employee', 'donor']).exists()):
             raise ValueError('unauthorized user')
         auth.login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+        next_path = request.GET.get('next', '')
+        if WORDPRESS_SSO_PATIENT_PATH_RE.fullmatch(next_path):
+            return redirect(next_path)
         return redirect('pharma-index')
     except (ValueError, TypeError, OSError, UnicodeDecodeError, binascii.Error, json.JSONDecodeError, InvalidSignature):
         return HttpResponseForbidden('Acceso no autorizado.')
@@ -163,27 +168,6 @@ def remote_auth(request):
 from pharma.models import Pacientes
 from lopd.models import LOPDConsents
 import json
-def check_cip(request):
-    cip = request.GET["cip"] if "cip" in request.GET else ""
-    comp = request.GET["company"] if "company" in request.GET else ""
-    if cip != "" and comp != "":
-        p = Pacientes.objects.filter(cip=cip, id_user=comp).first()
-        if p != None:
-            dic = {"error": "false"}
-            lopd_list = []
-            lopd = LOPDConsents.objects.filter(paciente=p)
-            for l in lopd:
-                lopd_list.append(request.build_absolute_uri(l.document.url))
-            dic["id"] = p.id
-            dic["code"] = p.n_historial
-            dic["name"] = p.nombre
-            dic["surname"] = p.apellido
-            dic["nif"] = p.nif
-            dic["phone"] = p.telefono1
-            dic["lopd"] = lopd_list
-            return HttpResponse(json.dumps(dic))
-    return HttpResponse('{"error": "true", "msg": "User not found"}')
-
 @csrf_exempt
 def create_paciente(request):
     try:

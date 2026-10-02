@@ -163,6 +163,7 @@ class Pacientes(models.Model):
     class Meta:
         db_table = 'pacientes'
         verbose_name = 'paciente'
+        indexes = [models.Index(fields=['id_user', 'cip', 'borrado'], name='pacientes_id_user_e72d96_idx')]
         verbose_name_plural = 'pacientes'
         ordering = ["nombre"]
 
@@ -221,3 +222,7 @@ class PatientShared(models.Model):
         verbose_name_plural ="Pacientes compartidos"
 
 
+# Kept in a separate module so public-integration concerns do not mix with the
+# clinical domain models above.  Importing it here registers the models with
+# Django's application registry.
+from .external_api_models import ExternalApiCredential, ExternalPatientLookupAudit  # noqa: E402,F401

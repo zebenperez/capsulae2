@@ -11,7 +11,7 @@
                 <a class="btn btn-sm" href="{{ note.source_file.url }}"><i class="fas fa-download"></i> {% trans 'Descargar CSV' %}</a>
                 <form method="post" action="{% url 'purchase-delivery-note-remove' note.pk %}" onsubmit="return confirm('{% trans "¿Seguro que deseas eliminar este albarán? Se retirarán sus entradas de stock." %}');">
                     {% csrf_token %}
-                    <button class="btn btn-sm ark" type="submit"><i class="fas fa-trash"></i> {% trans 'Eliminar albarán' %}</button>
+                    <button class="btn btn-sm delivery-note-delete" type="submit"><i class="fas fa-trash"></i> {% trans 'Eliminar albarán' %}</button>
                 </form>
                 <a class="btn btn-sm" href="{% url 'purchase-delivery-notes' %}">{% trans 'Volver a albaranes' %}</a>
             </div>
@@ -27,21 +27,73 @@
             </div>
         </div>
 
-        <div class="table-responsive mt-3">
+        <form method="post" action="{% url 'purchase-delivery-note-lines' note.pk %}" class="mt-3" id="delivery-note-lines-form">
+            {% csrf_token %}
+            <div class="d-flex flex-wrap gap-2 align-items-center justify-content-end mb-2">
+                {% if warehouses %}
+                    <select class="form-select form-select-sm w-auto" name="target_company" aria-label="{% trans 'Almacén de destino' %}">
+                        <option value="">{% trans 'Mover a almacén…' %}</option>
+                        {% for warehouse in warehouses %}<option value="{{ warehouse.pk }}">{{ warehouse.name }}</option>{% endfor %}
+                    </select>
+                    <button class="btn btn-sm" type="submit" name="action" value="move">{% trans 'Mover seleccionadas' %}</button>
+                {% endif %}
+                <button class="btn btn-sm delivery-note-delete" type="submit" name="action" value="remove" onclick="return confirm('{% trans "¿Eliminar las líneas seleccionadas y retirarlas del stock?" %}');"><i class="fas fa-trash"></i> {% trans 'Eliminar seleccionadas' %}</button>
+            </div>
+            <div class="table-responsive">
             <table class="table">
-                <thead><tr><th>{% trans 'Producto' %}</th><th class="text-end">{% trans 'Unidades' %}</th><th class="text-end">{% trans 'Coste unitario' %}</th><th class="text-end">{% trans 'IVA' %}</th><th class="text-end">{% trans 'Descuento' %}</th></tr></thead>
+                <thead><tr><th><input type="checkbox" id="select-all-lines" aria-label="{% trans 'Seleccionar todas' %}"></th><th>{% trans 'Producto' %}</th><th>{% trans 'Autor' %}</th><th>{% trans 'Editorial' %}</th><th class="text-end">{% trans 'PVP' %}</th><th class="text-end">{% trans 'Unidades' %}</th><th class="text-end">{% trans 'Coste unitario' %}</th><th class="text-end">{% trans 'IVA' %}</th><th class="text-end">{% trans 'Descuento (%)' %}</th><th></th></tr></thead>
                 <tbody>
                     {% for inflow in inflows %}
                         <tr>
+                            <td><input type="checkbox" name="inflow_ids" value="{{ inflow.pk }}" class="delivery-note-line"></td>
                             <td>{{ inflow.product }}</td>
+                            <td>{{ inflow.product.extra1|default:'—' }}</td>
+                            <td>{{ inflow.product.provider|default:'—' }}</td>
+                            <td class="text-end">{% if inflow.product_pvp is not None %}{{ inflow.product_pvp|floatformat:2 }} €{% else %}—{% endif %}</td>
                             <td class="text-end">{{ inflow.quantity }}</td>
                             <td class="text-end">{{ inflow.unit_price|floatformat:2 }} €</td>
                             <td class="text-end">{{ inflow.tax|floatformat:2 }}%</td>
-                            <td class="text-end">{{ inflow.discount|floatformat:2 }} €</td>
+                            <td class="text-end">{{ inflow.discount|floatformat:2 }}%</td>
+                            <td class="text-end">
+                                <button class="btn btn-sm delivery-note-save" type="button" data-bs-toggle="modal" data-bs-target="#delivery-note-edit-{{ inflow.pk }}" title="{% trans 'Editar cantidad' %}">
+                                    <i class="fas fa-pencil-alt"></i><span class="visually-hidden">{% trans 'Editar cantidad' %}</span>
+                                </button>
+                                <button class="btn btn-sm delivery-note-delete" type="submit" name="remove_inflow_id" value="{{ inflow.pk }}" onclick="return confirm('{% trans "¿Eliminar esta línea y retirarla del stock?" %}');" title="{% trans 'Eliminar línea' %}">
+                                    <i class="fas fa-trash"></i><span class="visually-hidden">{% trans 'Eliminar línea' %}</span>
+                                </button>
+                            </td>
                         </tr>
                     {% endfor %}
                 </tbody>
             </table>
-        </div>
+            </div>
+        </form>
+        {% for inflow in inflows %}
+            <div class="modal fade" id="delivery-note-edit-{{ inflow.pk }}" tabindex="-1" aria-labelledby="delivery-note-edit-title-{{ inflow.pk }}" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <form class="modal-content" method="post" action="{% url 'purchase-delivery-note-lines' note.pk %}">
+                        {% csrf_token %}
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="delivery-note-edit-title-{{ inflow.pk }}">{% trans 'Editar unidades recibidas' %}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Cerrar' %}"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p class="mb-3">{{ inflow.product }}</p>
+                            <label class="form-label" for="delivery-note-quantity-{{ inflow.pk }}">{% trans 'Unidades' %}</label>
+                            <input class="form-control" id="delivery-note-quantity-{{ inflow.pk }}" type="number" name="quantity_{{ inflow.pk }}" value="{{ inflow.quantity }}" min="1" step="1" required>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-sm" data-bs-dismiss="modal">{% trans 'Cancelar' %}</button>
+                            <button class="btn btn-sm delivery-note-save" type="submit" name="update_inflow_id" value="{{ inflow.pk }}"><i class="fas fa-save"></i> {% trans 'Confirmar cambio' %}</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        {% endfor %}
     </div>
+    <script>
+        document.getElementById('select-all-lines').addEventListener('change', function () {
+            document.querySelectorAll('.delivery-note-line').forEach(function (line) { line.checked = this.checked; }, this);
+        });
+    </script>
 {% endblock central_content %}

@@ -20,6 +20,7 @@ from django.views.generic.base import RedirectView
 
 urlpatterns = [
     path('', RedirectView.as_view(pattern_name='pharma-index')),
+    path('api/v1/', include('pharma.api_urls')),
     path('pharma/', include('pharma.urls')),
     path('account/', include('account.urls')),
     path('medication/', include('medication.urls')),
@@ -48,4 +49,3 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 if settings.DEBUG == True:
     urlpatterns += staticfiles_urlpatterns()
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-

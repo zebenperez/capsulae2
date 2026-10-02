@@ -270,6 +270,37 @@ a.btn.btn-sm:hover, a.btn.btn-sm a:hover {
     font-size: 0.8rem;
 }
 
+/* Keep delivery-note deletion buttons as ordinary form submits.  The generic
+ * .ark class is handled by JavaScript and would prevent that submit. */
+.delivery-note-delete {
+    background-color: #fff !important;
+    border: 1px solid transparent !important;
+    color: #36abfc !important;
+    font-size: 0.8rem;
+}
+
+.delivery-note-delete:hover,
+.delivery-note-delete:focus {
+    background-color: #fff !important;
+    border-color: #36abfc !important;
+    color: #000 !important;
+}
+
+.delivery-note-save {
+    background-color: #fff !important;
+    border: 1px solid transparent !important;
+    color: #36abfc !important;
+    font-size: 0.8rem;
+}
+
+.delivery-note-save:hover,
+.delivery-note-save:focus {
+    background-color: #fff !important;
+    border-color: #36abfc !important;
+    color: #000 !important;
+}
+
+
 /*****************************************************************/
 
 
@@ -868,10 +899,38 @@ ul.left-menu  {
 	padding:0;
 	width:100%;
 }
+.left-menu ul { margin: 0; padding: 0; }
 .left-menu li {
 	list-style:none;
 	line-height: 30px;
 }
+.left-menu .nav-link, .left-menu summary {
+	display: flex;
+	align-items: center;
+	gap: 0.65rem;
+	padding: 0.35rem 0.8rem;
+}
+.left-menu summary {
+	cursor: pointer;
+	color: #4f5f6f;
+	font-size: 0.72rem;
+	font-weight: 700;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	list-style: none;
+}
+.left-menu summary::-webkit-details-marker { display: none; }
+.left-menu summary::after {
+	content: '\f078';
+	font-family: 'Font Awesome 5 Free';
+	font-size: 0.65rem;
+	font-weight: 900;
+	margin-left: auto;
+}
+.left-menu details:not([open]) summary::after { content: '\f054'; }
+.left-menu .menu-section { border-top: 1px solid #edf0f2; padding: 0.3rem 0; }
+.left-menu .menu-section li .nav-link { padding-left: 1.15rem; }
+.left-menu .menu-home, .left-menu .menu-account { padding: 0.3rem 0; }
 .left-menu li a {
 	color: #72777a;
 	font-size: 15px;
@@ -1044,8 +1103,16 @@ i.fas.fa-home:hover, i.far.fa-folder-open:hover, i.fas.fa-users:hover, i.fas.fa-
 }
 
 
+#main-layout-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
 #main-content {
     display: flex;
+    flex: 1 1 auto;
+    min-height: 0;
     background: #fff;
 	border:1px solid white !important;
 	width: 100%;
@@ -1054,16 +1121,17 @@ i.fas.fa-home:hover, i.far.fa-folder-open:hover, i.fas.fa-users:hover, i.fas.fa-
 }
 
 .web-content {
+    flex: 1 1 auto;
+    min-height: 0;
     align-items: stretch;
-    overflow-y: hidden;
-    overflow-y: scroll !important;
-	max-height: 100vh;
+    overflow-y: auto;
+	max-height: none;
 }
 
 .web-footer {
+	flex: 0 0 50px;
 	height: 50px;
-	position: absolute;
-	bottom:0;
+	position: static;
 	width: 100%;
 	background:black;
 }
@@ -1075,7 +1143,8 @@ i.fas.fa-home:hover, i.far.fa-folder-open:hover, i.fas.fa-users:hover, i.fas.fa-
     background-color: #f8f9fa !important;
     padding: 0px 0px 10px 0px;
     min-height: 100%;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
     /*z-index: 400;*/
     -webkit-transition: width 200ms linear;
     -moz-transition: width 200ms linear;
@@ -1090,6 +1159,13 @@ i.fas.fa-home:hover, i.far.fa-folder-open:hover, i.fas.fa-users:hover, i.fas.fa-
 #sidebar.closed {
     width: 50px;
 }
+
+#sidebar.closed .menu-link-label,
+#sidebar.closed .menu-section-label,
+#sidebar.closed .left-menu summary::after { display: none; }
+#sidebar.closed .left-menu .nav-link,
+#sidebar.closed .left-menu summary { justify-content: center; padding-left: 0; padding-right: 0; }
+#sidebar.closed .left-menu .menu-section > details > ul { display: none; }
 
 #content-section {
     flex-basis: 99.5%;

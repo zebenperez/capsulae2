@@ -10,6 +10,7 @@ urlpatterns = [
     path('products/import-albaran/', views.product_albaran_import, name='product-albaran-import'),
     path('delivery-notes/', views.purchase_delivery_notes, name='purchase-delivery-notes'),
     path('delivery-notes/<int:obj_id>/', views.purchase_delivery_note_detail, name='purchase-delivery-note-detail'),
+    path('delivery-notes/<int:obj_id>/lines/', views.purchase_delivery_note_lines, name='purchase-delivery-note-lines'),
     path('delivery-notes/<int:obj_id>/remove/', views.purchase_delivery_note_remove, name='purchase-delivery-note-remove'),
     path('products/remove/<int:obj_id>/', views.product_remove, name='product-remove'),
     path('product/view/<int:obj_id>', views.product_view, name='product-view'),

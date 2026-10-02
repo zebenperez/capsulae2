@@ -1,12 +1,14 @@
 import csv
 import hashlib
+import os
 from datetime import datetime
 from decimal import Decimal, InvalidOperation
 
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.core.files.base import ContentFile
 from django.db import transaction
-from django.db.models import Q
+from django.db.models import OuterRef, Q, Subquery
 from django.http import Http404, HttpResponse, HttpResponseBadRequest, HttpResponseNotAllowed
 from django.shortcuts import get_object_or_404, render, redirect, reverse
 from django.utils.http import url_has_allowed_host_and_scheme
@@ -23,8 +25,13 @@ from .access import STORE_COMPANY_SESSION_KEY, accessible_store_companies, activ
 #import threading
 
 
-@group_required("admins", "managers")
+@login_required
 def store_company_select(request):
+    """Select an accessible warehouse without invoking the group middleware.
+
+    The destination is still checked against the companies assigned to the
+    authenticated user below.
+    """
     if request.method != 'POST':
         return HttpResponseNotAllowed(['POST'])
     company = accessible_store_companies(request.user).filter(pk=request.POST.get('company_id')).first()
@@ -111,8 +118,165 @@ def purchase_delivery_notes(request):
 @group_required("admins",)
 def purchase_delivery_note_detail(request, obj_id):
     note = get_object_or_404(PurchaseDeliveryNote, pk=obj_id, company=store_company(request))
-    inflows = note.inflows.select_related('product').order_by('product__name', 'pk')
-    return render(request, "delivery-notes/delivery-note-detail.html", {'note': note, 'inflows': inflows})
+    latest_pvp = Price.objects.filter(
+        product_id=OuterRef('product_id'), sale=True,
+    ).order_by('-date', '-pk').values('amount')[:1]
+    inflows = note.inflows.select_related('product__provider').annotate(
+        product_pvp=Subquery(latest_pvp),
+    ).order_by('product__name', 'pk')
+    warehouses = accessible_store_companies(request.user).exclude(pk=note.company_id)
+    return render(request, "delivery-notes/delivery-note-detail.html", {
+        'note': note,
+        'inflows': inflows,
+        'warehouses': warehouses,
+        # A note ID belongs to the current warehouse.  After changing it,
+        # return to the list instead of trying to open that foreign note.
+        'store_company_next': reverse('purchase-delivery-notes'),
+    })
+
+
+def update_delivery_note_totals(note):
+    """Keep a delivery note's displayed totals aligned with its real lines."""
+    inflows = note.inflows.all()
+    note.lines_count = inflows.count()
+    note.units_count = sum(inflow.quantity for inflow in inflows)
+    note.total_amount = sum(
+        (inflow.unit_price * inflow.quantity for inflow in inflows),
+        Decimal('0'),
+    )
+    note.save(update_fields=['lines_count', 'units_count', 'total_amount'])
+
+
+def delivery_note_for_company(note, company, user):
+    """Return the matching note in ``company``, creating it when needed."""
+    target_note = PurchaseDeliveryNote.objects.filter(
+        company=company,
+        document_type=note.document_type,
+        document_number=note.document_number,
+    ).first()
+    if target_note is not None:
+        return target_note, False
+
+    source_file = note.source_file
+    source_file.open('rb')
+    try:
+        file_content = source_file.read()
+    finally:
+        source_file.close()
+    target_note = PurchaseDeliveryNote.objects.create(
+        company=company,
+        imported_by=user,
+        document_type=note.document_type,
+        document_number=note.document_number,
+        document_date=note.document_date,
+        source_file=ContentFile(file_content, name=os.path.basename(source_file.name)),
+        file_hash=note.file_hash,
+    )
+    return target_note, True
+
+
+def product_for_company(product, company):
+    """Find the destination product by code, or create its warehouse copy."""
+    target_product = Product.objects.filter(company=company, code=product.code).first()
+    if target_product is not None:
+        return target_product
+    return Product.objects.create(
+        company=company,
+        code=product.code,
+        name=product.name,
+        ext_code=product.ext_code,
+        extra1=product.extra1,
+        extra2=product.extra2,
+        location=product.location,
+        units_in_box=product.units_in_box,
+        min_to_purchase=product.min_to_purchase,
+        quantity=product.quantity,
+        deprecated=product.deprecated,
+        online=product.online,
+        alta_date=product.alta_date,
+        baja_date=product.baja_date,
+        expiry_date=product.expiry_date,
+        picture=product.picture.name if product.picture else None,
+    )
+
+
+@group_required("admins",)
+def purchase_delivery_note_lines(request, obj_id):
+    if request.method != 'POST':
+        return HttpResponseNotAllowed(['POST'])
+
+    note = get_object_or_404(PurchaseDeliveryNote, pk=obj_id, company=store_company(request))
+    individual_inflow_id = request.POST.get('remove_inflow_id')
+    individual_update_id = request.POST.get('update_inflow_id')
+    if individual_inflow_id:
+        # The row action always affects exactly that row, even if other
+        # checkboxes remain selected from a prior batch operation.
+        inflow_ids = [individual_inflow_id]
+    elif individual_update_id:
+        inflow_ids = [individual_update_id]
+    else:
+        inflow_ids = request.POST.getlist('inflow_ids')
+    inflows = note.inflows.filter(pk__in=inflow_ids).select_related('product')
+    if not inflows.exists():
+        messages.error(request, 'Selecciona al menos una línea.')
+        return redirect('purchase-delivery-note-detail', obj_id=note.pk)
+
+    action = 'remove' if individual_inflow_id else ('update' if individual_update_id else request.POST.get('action'))
+    if action == 'remove':
+        count = inflows.count()
+        with transaction.atomic():
+            inflows.delete()
+            update_delivery_note_totals(note)
+        messages.success(request, '{} línea(s) eliminada(s) y retirada(s) del stock.'.format(count))
+    elif action == 'update':
+        quantities = {}
+        try:
+            for inflow in inflows:
+                quantity = int(request.POST['quantity_{}'.format(inflow.pk)])
+                if quantity <= 0:
+                    raise ValueError
+                quantities[inflow.pk] = quantity
+        except (KeyError, TypeError, ValueError):
+            messages.error(request, 'La cantidad debe ser un número entero mayor que cero.')
+            return redirect('purchase-delivery-note-detail', obj_id=note.pk)
+        with transaction.atomic():
+            for inflow in inflows:
+                inflow.quantity = quantities[inflow.pk]
+                inflow.save(update_fields=['quantity'])
+            update_delivery_note_totals(note)
+        messages.success(request, '{} cantidad(es) actualizada(s).'.format(len(quantities)))
+    elif action == 'move':
+        target_company = accessible_store_companies(request.user).filter(
+            pk=request.POST.get('target_company')
+        ).exclude(pk=note.company_id).first()
+        if target_company is None:
+            messages.error(request, 'Selecciona un almacén de destino válido.')
+            return redirect('purchase-delivery-note-detail', obj_id=note.pk)
+        with transaction.atomic():
+            target_note, _ = delivery_note_for_company(note, target_company, request.user)
+            count = 0
+            for inflow in inflows:
+                StoreInflow.objects.create(
+                    purchase_delivery_note=target_note,
+                    product=product_for_company(inflow.product, target_company),
+                    quantity=inflow.quantity,
+                    tax=inflow.tax,
+                    discount=inflow.discount,
+                    unit_price=inflow.unit_price,
+                    delivery_date=inflow.delivery_date,
+                    order_date=inflow.order_date,
+                    reception_date=inflow.reception_date,
+                    ref=inflow.ref,
+                    comments=inflow.comments,
+                )
+                count += 1
+            inflows.delete()
+            update_delivery_note_totals(note)
+            update_delivery_note_totals(target_note)
+        messages.success(request, '{} línea(s) movida(s) al almacén {}.'.format(count, target_company.name))
+    else:
+        messages.error(request, 'Acción no válida.')
+    return redirect('purchase-delivery-note-detail', obj_id=note.pk)
 
 
 @group_required("admins",)
@@ -182,28 +346,29 @@ def product_albaran_import(request):
         document_date = datetime.strptime(rows[0]["FECHA"].strip(), "%d-%m-%Y").date()
         file_hash = hashlib.sha256(content).hexdigest()
 
-        if PurchaseDeliveryNote.objects.filter(
+        delivery_note = PurchaseDeliveryNote.objects.filter(
             company=company,
             document_type=document_type,
             document_number=document_number,
-        ).exists():
-            raise ValueError("Este albarán ya está registrado.")
-        if PurchaseDeliveryNote.objects.filter(company=company, file_hash=file_hash).exists():
+        ).first()
+        if delivery_note is not None and delivery_note.file_hash != file_hash:
+            raise ValueError("Ya existe un albarán con ese tipo y número.")
+        if delivery_note is None and PurchaseDeliveryNote.objects.filter(company=company, file_hash=file_hash).exists():
             raise ValueError("Este archivo ya ha sido importado.")
 
         created_products = updated_products = movements = skipped = 0
-        total_amount = Decimal("0")
         providers = set()
         with transaction.atomic():
-            delivery_note = PurchaseDeliveryNote.objects.create(
-                company=company,
-                imported_by=request.user,
-                document_type=document_type,
-                document_number=document_number,
-                document_date=document_date,
-                source_file=ContentFile(content, name=upload.name),
-                file_hash=file_hash,
-            )
+            if delivery_note is None:
+                delivery_note = PurchaseDeliveryNote.objects.create(
+                    company=company,
+                    imported_by=request.user,
+                    document_type=document_type,
+                    document_number=document_number,
+                    document_date=document_date,
+                    source_file=ContentFile(content, name=upload.name),
+                    file_hash=file_hash,
+                )
             for row_number, row in enumerate(rows, start=2):
                 ean = albaran_ean(row["EAN"])
                 units = int(albaran_decimal(row["UNIDADES"]))
@@ -243,7 +408,13 @@ def product_albaran_import(request):
                     changes = []
                     for field, value in {
                         "ext_code": row.get("ISBN", "").strip()[:200],
+                        # AUTOR is kept in the product's Extra 1 / Autor field.
+                        # As with the publisher, only fill a blank catalogue
+                        # value so manual corrections are preserved.
                         "extra1": row.get("AUTOR", "").strip()[:200],
+                        # EDITORIAL/FABRICANTE is stored in the product's
+                        # provider relation.  Existing catalogue data wins;
+                        # an empty provider is completed from the delivery.
                         "provider": provider,
                     }.items():
                         if value and not getattr(product, field):
@@ -267,20 +438,25 @@ def product_albaran_import(request):
                     ref=document_ref,
                     comments="{} {}".format(row["TIPO_DOCUMENTO"].strip(), row["NUM_DOCUMENTO"].strip()),
                 )
-                Price.objects.create(product=product, amount=albaran_decimal(row["PVP"]), sale=True, date=date)
+                pvp = albaran_decimal(row["PVP"])
+                # The product sheet reads its PVP from sale prices.  Reusing
+                # the price for the same document date keeps an imported
+                # delivery idempotent while updating the visible product PVP.
+                sale_prices = Price.objects.filter(product=product, sale=True, date=date)
+                if sale_prices.exists():
+                    sale_prices.update(amount=pvp)
+                else:
+                    Price.objects.create(product=product, amount=pvp, sale=True, date=date)
                 Price.objects.create(product=product, amount=total / units, sale=False, date=date)
                 movements += 1
-                total_amount += total
 
-            delivery_note.lines_count = movements
-            delivery_note.units_count = sum(inflow.quantity for inflow in delivery_note.inflows.all())
-            delivery_note.total_amount = total_amount
-            delivery_note.created_products = created_products
-            delivery_note.updated_products = updated_products
+            update_delivery_note_totals(delivery_note)
+            delivery_note.created_products += created_products
+            delivery_note.updated_products += updated_products
             delivery_note.skipped_lines = skipped
             if len(providers) == 1:
                 delivery_note.provider = providers.pop()
-            delivery_note.save()
+            delivery_note.save(update_fields=['created_products', 'updated_products', 'skipped_lines', 'provider'])
     except (ValueError, KeyError) as error:
         return HttpResponseBadRequest("No se ha importado el albarán: {}".format(error))
 

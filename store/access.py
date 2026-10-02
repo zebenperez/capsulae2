@@ -14,6 +14,11 @@ def accessible_store_companies(user):
 
 
 def active_store_company(request):
+    # This context is also loaded by public pages (including the login page).
+    # Do not pass AnonymousUser to a relation filter, even when the queryset
+    # would otherwise be empty.
+    if not request.user.is_authenticated:
+        return None
     companies = accessible_store_companies(request.user)
     company = companies.filter(pk=request.session.get(STORE_COMPANY_SESSION_KEY)).first()
     if company is None:

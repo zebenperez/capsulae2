@@ -4,7 +4,7 @@
     {% if store_company %}
         <form method="post" action="{% url 'store-company-select' %}" class="d-flex justify-content-end align-items-center gap-2 mb-2">
             {% csrf_token %}
-            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+            <input type="hidden" name="next" value="{{ store_company_next|default:request.get_full_path }}">
             <label for="store-company" class="small text-secondary mb-0">{% trans 'Gestionando almacén' %}</label>
             <select id="store-company" name="company_id" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
                 {% for company in store_companies %}
