@@ -168,6 +168,27 @@ def remote_auth(request):
 from pharma.models import Pacientes
 from lopd.models import LOPDConsents
 import json
+def check_cip(request):
+    cip = request.GET["cip"] if "cip" in request.GET else ""
+    comp = request.GET["company"] if "company" in request.GET else ""
+    if cip != "" and comp != "":
+        p = Pacientes.objects.filter(cip=cip, id_user=comp).first()
+        if p != None:
+            dic = {"error": "false"}
+            lopd_list = []
+            lopd = LOPDConsents.objects.filter(paciente=p)
+            for l in lopd:
+                lopd_list.append(request.build_absolute_uri(l.document.url))
+            dic["id"] = p.id
+            dic["code"] = p.n_historial
+            dic["name"] = p.nombre
+            dic["surname"] = p.apellido
+            dic["nif"] = p.nif
+            dic["phone"] = p.telefono1
+            dic["lopd"] = lopd_list
+            return HttpResponse(json.dumps(dic))
+    return HttpResponse('{"error": "true", "msg": "User not found"}')
+
 @csrf_exempt
 def create_paciente(request):
     try:

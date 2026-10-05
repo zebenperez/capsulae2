@@ -14,6 +14,7 @@ urlpatterns = [
     path('remote-test/<slug:username>/', views.remote_test, name='mylogin-remote-test'),
     path('remote-test/', views.remote_test, name='mylogin-remote-test'),
 
+    path('check_cip/', views.check_cip, name='check_cip'),
     path('create_paciente/', views.create_paciente, name='create_paciente'),
     path('update_paciente/', views.update_paciente, name='update_paciente'),
 
