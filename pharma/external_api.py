@@ -7,10 +7,14 @@ from django.core.cache import cache
 from django.http import JsonResponse
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_GET, require_POST
 
-from .external_api_models import ExternalApiCredential, ExternalPatientLookupAudit
+from .external_api_models import (
+    ExternalApiCredential,
+    ExternalPatientLookupAudit,
+)
 from .models import Pacientes
+from store.models import Product
 
 
 CIP_RE = re.compile(r"^[A-Z0-9-]{1,25}$")
@@ -105,3 +109,34 @@ def patient_by_cip(request):
             "birth_date": patient.fecha_nacimiento.isoformat() if patient.fecha_nacimiento else None,
         },
     })
+
+
+@require_GET
+def publications(request):
+    """Return public editorial content for the requested external site."""
+    credential = _authenticate(request)
+    if credential is None:
+        return _json_error("invalid_credentials", 401)
+    if _rate_limited(request, "publications:" + credential.key_prefix):
+        return _json_error("rate_limit_exceeded", 429)
+
+    site = (request.GET.get("site") or "").strip().lower()
+    try:
+        limit = min(12, max(1, int(request.GET.get("limit", 6))))
+    except ValueError:
+        return _json_error("invalid_limit", 400)
+    if not site:
+        return _json_error("invalid_site", 400)
+
+    # ``site`` identifies the consumer of this versioned endpoint.  The
+    # catalogue currently has one remote-store flag rather than per-site tags.
+    rows = Product.objects.filter(remote_store=True).order_by("-alta_date")[:limit]
+    return JsonResponse({"results": [{
+        "title": row.name,
+        "slug": row.code,
+        "excerpt": row.extra1 or "",
+        "content": row.extra2 or "",
+        "image_url": request.build_absolute_uri(row.picture.url) if row.picture else "",
+        "published_at": row.alta_date.isoformat() if row.alta_date else None,
+        "url": "",
+    } for row in rows]})

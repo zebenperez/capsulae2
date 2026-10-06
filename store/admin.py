@@ -9,6 +9,11 @@ class ProductTypeAdmin(admin.ModelAdmin):
     list_display = ('name', 'company')
     list_filter = ('company',)
 
+class ProductAdmin(admin.ModelAdmin):
+    list_display = ('code', 'name', 'company', 'remote_store', 'online', 'deprecated')
+    list_filter = ('remote_store', 'online', 'deprecated', 'company')
+    search_fields = ('code', 'name', 'extra1')
+
 class ProviderAdmin(admin.ModelAdmin):
     list_display = ('code', 'name', 'company')
     list_filter = ('company',)
@@ -29,7 +34,7 @@ class TaxAdmin(admin.ModelAdmin):
     list_filter = ('company',)
 
 admin.site.register(Price, PriceAdmin)
-admin.site.register(Product)
+admin.site.register(Product, ProductAdmin)
 admin.site.register(ProductType, ProductTypeAdmin)
 admin.site.register(Provider, ProviderAdmin)
 admin.site.register(StoreInflow, StoreInflowAdmin)

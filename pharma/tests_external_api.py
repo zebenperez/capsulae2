@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime, timedelta, timezone as dt_timezone
 import json
 
 from django.contrib.auth.models import User
@@ -7,6 +7,7 @@ from django.urls import reverse
 
 from .external_api_models import ExternalApiCredential, ExternalPatientLookupAudit
 from .models import Pacientes
+from store.models import Product
 
 
 class ExternalPatientByCipTests(TestCase):
@@ -91,3 +92,70 @@ class ExternalPatientByCipTests(TestCase):
         response = self.request(cip="not valid")
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json(), {"code": "invalid_cip"})
+
+
+class ExternalPublicationsTests(TestCase):
+    def setUp(self):
+        owner = User.objects.create_user(username="mulema")
+        self.credential, self.key = ExternalApiCredential.issue(
+            owner=owner,
+            name="Mulema WordPress publications",
+        )
+        self.base_time = datetime(2026, 10, 6, 10, 0, tzinfo=dt_timezone.utc)
+
+    def product(self, *, code, remote_store=True, offset=0):
+        return Product.objects.create(
+            code=code,
+            name=code.title(),
+            extra1="Autor",
+            extra2="Descripción",
+            alta_date=self.base_time + timedelta(minutes=offset),
+            remote_store=remote_store,
+        )
+
+    def request(self, **params):
+        return self.client.get(
+            reverse("external-publications"),
+            params,
+            HTTP_AUTHORIZATION="Bearer %s" % self.key,
+            REMOTE_ADDR="192.0.2.1",
+        )
+
+    def test_returns_only_products_marked_for_the_remote_store_in_descending_order(self):
+        older = self.product(code="older", offset=-1)
+        newer = self.product(code="newer", offset=1)
+        self.product(code="private", remote_store=False, offset=2)
+
+        response = self.request(site="MULEMA", limit="6")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {"results": [
+            {
+                "title": newer.name,
+                "slug": "newer",
+                "excerpt": "Autor",
+                "content": "Descripción",
+                "image_url": "",
+                "published_at": newer.alta_date.isoformat(),
+                "url": "",
+            },
+            {
+                "title": older.name,
+                "slug": "older",
+                "excerpt": "Autor",
+                "content": "Descripción",
+                "image_url": "",
+                "published_at": older.alta_date.isoformat(),
+                "url": "",
+            },
+        ]})
+
+    def test_validates_credentials_site_and_limit_and_caps_limit_at_twelve(self):
+        for index in range(13):
+            self.product(code="post-%s" % index, offset=index)
+
+        self.assertEqual(self.client.get(reverse("external-publications")).status_code, 401)
+        self.assertEqual(self.request().json(), {"code": "invalid_site"})
+        self.assertEqual(self.request(site="mulema", limit="bad").json(), {"code": "invalid_limit"})
+        self.assertEqual(len(self.request(site="mulema", limit="999").json()["results"]), 12)
+        self.assertEqual(len(self.request(site="mulema", limit="0").json()["results"]), 1)

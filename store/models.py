@@ -79,6 +79,10 @@ class ProductType(models.Model):
 class Product(models.Model):
     deprecated = models.BooleanField(verbose_name = "Deprecated", default=False)
     online = models.BooleanField(verbose_name = "Online", default=False)
+    remote_store = models.BooleanField(
+        verbose_name="Mostrar en tienda remota",
+        default=False,
+    )
     min_to_purchase = models.IntegerField(verbose_name="Mínimo para comprar", default=0)
     quantity = models.IntegerField(verbose_name="Cantidad a comprar", default=0)
     units_in_box = models.IntegerField(verbose_name="Unidades en cada caja", default=0)

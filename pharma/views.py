@@ -83,7 +83,11 @@ def get_patients2(request):
     full_query = Q()
     full_query &= (Q(**{'id_user__company': comp}) | Q(**{'id_user__user_companies__in': [comp]}))
     if name != "":
-        full_query &= (Q(**{'nombre__icontains': name}) | Q(**{'apellido__icontains': name}))
+        # A full-name search normally contains terms from both fields (for
+        # example, "Antonio Villafaina").  Require each entered term to be
+        # present in either field, so terms can be supplied in either order.
+        for term in name.split():
+            full_query &= (Q(nombre__icontains=term) | Q(apellido__icontains=term))
     if nif != "":
         full_query &= Q(**{'nif__icontains': nif})
     if cip != "":
