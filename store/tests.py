@@ -1,6 +1,8 @@
 from datetime import date, timedelta
+from base64 import b64decode
 
 from django.contrib.auth.models import User
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
@@ -101,6 +103,44 @@ class ProductPriceTests(TestCase):
 
         self.assertEqual(product.last_pvp, 12)
         self.assertEqual(product.last_cost, 7)
+
+
+class ProductPictureUploadTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_superuser("picture-admin", "admin@example.test", "password")
+        self.company = Company.objects.create(code="STORE-PICTURE", name="Almacén imágenes", manager=self.user)
+        self.product = Product.objects.create(company=self.company, code="PHOTO-001", name="Producto con foto")
+        self.client.force_login(self.user)
+        session = self.client.session
+        session[STORE_COMPANY_SESSION_KEY] = self.company.pk
+        session.save()
+
+    def test_uploads_a_product_picture(self):
+        image = SimpleUploadedFile(
+            "product.png",
+            b64decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScL8WQAAAABJRU5ErkJggg=="),
+            content_type="image/png",
+        )
+
+        response = self.client.post(
+            reverse("product-picture-upload", args=[self.product.pk]),
+            {"picture": image},
+        )
+
+        self.assertRedirects(response, reverse("product-view", args=[self.product.pk]))
+        self.product.refresh_from_db()
+        self.assertTrue(self.product.picture.name.startswith("uploads/products/"))
+        self.product.picture.delete(save=False)
+
+    def test_rejects_a_non_image_file(self):
+        response = self.client.post(
+            reverse("product-picture-upload", args=[self.product.pk]),
+            {"picture": SimpleUploadedFile("not-image.txt", b"not an image", content_type="text/plain")},
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.product.refresh_from_db()
+        self.assertFalse(self.product.picture)
 
 
 class PurchaseDeliveryNoteLineRemovalTests(TestCase):

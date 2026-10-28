@@ -131,7 +131,8 @@ dmypy.json
 
 collect_static
 media
-migrations
+**/migrations/*
+!pharma/migrations/0018_external_api_catalog_credentials.py
 projects/migrations/*
 *.deprecated
 logs.txt

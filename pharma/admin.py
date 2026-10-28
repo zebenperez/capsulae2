@@ -22,8 +22,8 @@ class PatientSharedAdmin(admin.ModelAdmin):
     list_per_page = 500
 
 class ExternalApiCredentialAdmin(admin.ModelAdmin):
-    list_display = ("name", "owner", "key_prefix", "active", "created_at", "last_used_at")
-    list_filter = ("active",)
+    list_display = ("name", "purpose", "catalog_company_code", "owner", "key_prefix", "active", "created_at", "last_used_at")
+    list_filter = ("purpose", "active")
     search_fields = ("name", "owner__username", "key_prefix")
     readonly_fields = ("key_prefix", "key_hash", "created_at", "last_used_at")
 

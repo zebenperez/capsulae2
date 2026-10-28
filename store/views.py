@@ -15,6 +15,7 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django.template.loader import render_to_string
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _ 
+from PIL import Image, UnidentifiedImageError
 
 from capsulae2.decorators import group_required
 from capsulae2.commons import get_or_none, get_param, show_exc, set_obj_field
@@ -482,6 +483,32 @@ def product_view(request, obj_id):
     provider_list = Provider.objects.filter(company=store_company(request))
     context = {'obj': obj, 'product_type_list': product_type_list, 'provider_list': provider_list}
     return render(request, "products/product-view.html", context)
+
+@group_required("admins",)
+def product_picture_upload(request, obj_id):
+    if request.method != "POST":
+        return HttpResponseNotAllowed(["POST"])
+
+    product = get_company_product(request, obj_id)
+    picture = request.FILES.get("picture")
+    if picture is None:
+        return HttpResponseBadRequest("Selecciona una imagen para el producto.")
+    if picture.size > 10 * 1024 * 1024:
+        return HttpResponseBadRequest("La imagen no puede superar los 10 MB.")
+
+    try:
+        image = Image.open(picture)
+        image.verify()
+        picture.seek(0)
+    except (UnidentifiedImageError, OSError, ValueError):
+        return HttpResponseBadRequest("El archivo seleccionado no es una imagen válida.")
+
+    old_picture = product.picture
+    product.picture = picture
+    product.save(update_fields=["picture"])
+    if old_picture and old_picture.name != product.picture.name:
+        old_picture.delete(save=False)
+    return redirect("product-view", obj_id=product.pk)
 
 @group_required("admins",)
 def product_datas(request):

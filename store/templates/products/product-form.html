@@ -11,7 +11,7 @@
             data-url="{% url "autosave_field" %}" data-target="div-notification" disabled>
         <span id="code__msg"></span>
     </div>
-    <div class="col-5 mt-3">
+    <div class="col-3 mt-3">
         <label class="label" for="name">{% trans "Nombre" %}</label>
         <input type="text" class="form-control autosave input view" id="name" name="name" value="{{obj.name}}"
             title="{{obj.name}}" data-model-name="store.product" data-obj-id="{{obj.id}}"
@@ -21,14 +21,21 @@
     <div class="col-2 mt-3 product-form-option">
         <input type="checkbox" class="form-checkbox autosave input view" id="online" name="online"
             data-model-name="store.product" data-obj-id="{{obj.id}}" data-url="{% url "autosave_field" %}"
-            data-target="div-notification" data-bool="True" disabled>
+            data-target="div-notification" data-bool="True" {% if obj.online %}checked{% endif %} disabled>
         <label class="label" for="online">{% trans "Online" %}</label>
         <span id="online__msg"></span>
     </div>
     <div class="col-2 mt-3 product-form-option">
+        <input type="checkbox" class="form-checkbox autosave input view" id="remote_store" name="remote_store"
+            data-model-name="store.product" data-obj-id="{{obj.id}}" data-url="{% url "autosave_field" %}"
+            data-target="div-notification" data-bool="True" {% if obj.remote_store %}checked{% endif %} disabled>
+        <label class="label" for="remote_store">{% trans "Tienda remota" %}</label>
+        <span id="remote_store__msg"></span>
+    </div>
+    <div class="col-2 mt-3 product-form-option">
         <input type="checkbox" class="form-checkbox autosave input view" id="deprecated" name="deprecated"
             data-model-name="store.product" data-obj-id="{{obj.id}}" data-url="{% url "autosave_field" %}"
-            data-target="div-notification" data-bool="True" disabled>
+            data-target="div-notification" data-bool="True" {% if obj.deprecated %}checked{% endif %} disabled>
         <label class="label" for="deprecated">{% trans "Descatalogado" %}</label>
         <span id="deprecated__msg"></span>
     </div>

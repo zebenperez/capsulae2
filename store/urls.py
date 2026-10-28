@@ -14,6 +14,7 @@ urlpatterns = [
     path('delivery-notes/<int:obj_id>/remove/', views.purchase_delivery_note_remove, name='purchase-delivery-note-remove'),
     path('products/remove/<int:obj_id>/', views.product_remove, name='product-remove'),
     path('product/view/<int:obj_id>', views.product_view, name='product-view'),
+    path('product/view/<int:obj_id>/picture/', views.product_picture_upload, name='product-picture-upload'),
     path('product/datas/', views.product_datas, name='product-datas'),
     path('product/prices/', views.product_prices, name='product-prices'),
     path('product/price/new/', views.product_price_new, name='product-price-new'),

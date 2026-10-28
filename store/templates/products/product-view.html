@@ -10,7 +10,7 @@
         </div>
         <section class="product-hero" aria-label="{% trans 'Resumen del producto' %}">
             <div class="product-image">
-                {% if obj.picture %} 
+                {% if obj.picture %}
                     <img src="{{obj.picture.url}}" alt="{{ obj.name }}">
                 {% else %}
                     <img src="/static/imgs/no-avatar.png" alt="">
@@ -25,6 +25,20 @@
                 <div id="product-price-summary">{% include "products/product-price-summary.html" %}</div>
             </div>
         </section>
+        <div class="product-image-upload-panel">
+            <form class="product-image-upload" method="post" enctype="multipart/form-data" action="{% url 'product-picture-upload' obj.id %}">
+                {% csrf_token %}
+                <div class="product-image-upload-copy">
+                    <i class="fas fa-image"></i>
+                    <span><strong>{% trans "Imagen del producto" %}</strong>{% trans "Actualiza la foto que se muestra en la ficha y en el listado." %}</span>
+                </div>
+                <div class="product-image-upload-controls">
+                    <label class="visually-hidden" for="product-picture">{% trans "Seleccionar imagen" %}</label>
+                    <input id="product-picture" class="form-control form-control-sm" type="file" name="picture" accept="image/jpeg,image/png,image/gif,image/webp" required>
+                    <button class="btn btn-sm new" type="submit"><i class="fas fa-upload"></i> {% trans "Cambiar foto" %}</button>
+                </div>
+            </form>
+        </div>
     </div>
     <div class="tabs product-tabs mt-3">
         <div class="tab-item active ark text-center" data-url="{% url "product-datas" %}" data-target="div-container" 
